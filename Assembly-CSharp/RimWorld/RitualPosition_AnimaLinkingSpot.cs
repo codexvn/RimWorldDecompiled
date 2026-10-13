@@ -1,21 +1,28 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualPosition_AnimaLinkingSpot : RitualPosition
+namespace RimWorld
 {
-	public override PawnStagePosition GetCell(IntVec3 spot, Pawn p, LordJob_Ritual ritual)
+	// Token: 0x0200279D RID: 10141
+	public class RitualPosition_AnimaLinkingSpot : RitualPosition
 	{
-		if (SpectatorCellFinder.TryFindCircleSpectatorCellFor(p, CellRect.CenteredOn(spot, 0), 2f, 3f, p.Map, out var cell))
+		// Token: 0x0600DE21 RID: 56865 RVA: 0x004159A0 File Offset: 0x00413BA0
+		public override PawnStagePosition GetCell(IntVec3 spot, Pawn p, LordJob_Ritual ritual)
 		{
-			return new PawnStagePosition(cell, null, Rot4.FromAngleFlat((spot - cell).AngleFlat), highlight);
+			IntVec3 intVec;
+			if (SpectatorCellFinder.TryFindCircleSpectatorCellFor(p, CellRect.CenteredOn(spot, 0), 2f, 3f, p.Map, out intVec, null, null))
+			{
+				return new PawnStagePosition(intVec, null, Rot4.FromAngleFlat((spot - intVec).AngleFlat), this.highlight);
+			}
+			Thing thing = ritual.selectedTarget.Thing;
+			CompPsylinkable compPsylinkable = (thing != null) ? thing.TryGetComp<CompPsylinkable>() : null;
+			LocalTargetInfo localTargetInfo;
+			if (compPsylinkable != null && compPsylinkable.TryFindLinkSpot(p, out localTargetInfo))
+			{
+				Rot4 orientation = Rot4.FromAngleFlat((spot - localTargetInfo.Cell).AngleFlat);
+				return new PawnStagePosition(localTargetInfo.Cell, null, orientation, this.highlight);
+			}
+			return new PawnStagePosition(IntVec3.Invalid, null, Rot4.Invalid, this.highlight);
 		}
-		CompPsylinkable compPsylinkable = ritual.selectedTarget.Thing?.TryGetComp<CompPsylinkable>();
-		if (compPsylinkable != null && compPsylinkable.TryFindLinkSpot(p, out var spot2))
-		{
-			Rot4 orientation = Rot4.FromAngleFlat((spot - spot2.Cell).AngleFlat);
-			return new PawnStagePosition(spot2.Cell, null, orientation, highlight);
-		}
-		return new PawnStagePosition(IntVec3.Invalid, null, Rot4.Invalid, highlight);
 	}
 }

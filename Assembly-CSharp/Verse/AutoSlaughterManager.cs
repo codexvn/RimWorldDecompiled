@@ -1,269 +1,275 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse.AI.Group;
 
-namespace Verse;
-
-public sealed class AutoSlaughterManager : IExposable
+namespace Verse
 {
-	private static List<Pawn> tmpAnimals = new List<Pawn>();
-
-	private static List<Pawn> tmpAnimalsMale = new List<Pawn>();
-
-	private static List<Pawn> tmpAnimalsMaleYoung = new List<Pawn>();
-
-	private static List<Pawn> tmpAnimalsFemale = new List<Pawn>();
-
-	private static List<Pawn> tmpAnimalsFemaleYoung = new List<Pawn>();
-
-	private static List<Pawn> tmpAnimalsPregnant = new List<Pawn>();
-
-	public Map map;
-
-	public List<AutoSlaughterConfig> configs = new List<AutoSlaughterConfig>();
-
-	private List<Pawn> animalsToSlaughterCached = new List<Pawn>();
-
-	private bool cacheDirty;
-
-	public List<Pawn> AnimalsToSlaughter
+	// Token: 0x020003CE RID: 974
+	public sealed class AutoSlaughterManager : IExposable
 	{
-		get
+		// Token: 0x1700048E RID: 1166
+		// (get) Token: 0x06001904 RID: 6404 RVA: 0x0007E0B8 File Offset: 0x0007C2B8
+		public List<Pawn> AnimalsToSlaughter
 		{
-			if (cacheDirty)
+			get
 			{
-				try
+				if (this.cacheDirty)
 				{
-					animalsToSlaughterCached.Clear();
-					foreach (AutoSlaughterConfig config in configs)
+					try
 					{
-						if (!config.AnyLimit)
+						this.animalsToSlaughterCached.Clear();
+						foreach (AutoSlaughterConfig autoSlaughterConfig in this.configs)
 						{
-							continue;
-						}
-						tmpAnimals.Clear();
-						tmpAnimalsMale.Clear();
-						tmpAnimalsMaleYoung.Clear();
-						tmpAnimalsFemale.Clear();
-						tmpAnimalsFemaleYoung.Clear();
-						tmpAnimalsPregnant.Clear();
-						foreach (Pawn spawnedColonyAnimal in map.mapPawns.SpawnedColonyAnimals)
-						{
-							if (spawnedColonyAnimal.def != config.animal || !CanAutoSlaughterNow(spawnedColonyAnimal) || (!config.allowSlaughterBonded && spawnedColonyAnimal.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond) > 0))
+							if (autoSlaughterConfig.AnyLimit)
 							{
-								continue;
-							}
-							if (spawnedColonyAnimal.gender == Gender.Male)
-							{
-								if (spawnedColonyAnimal.ageTracker.CurLifeStage.reproductive)
+								AutoSlaughterManager.tmpAnimals.Clear();
+								AutoSlaughterManager.tmpAnimalsMale.Clear();
+								AutoSlaughterManager.tmpAnimalsMaleYoung.Clear();
+								AutoSlaughterManager.tmpAnimalsFemale.Clear();
+								AutoSlaughterManager.tmpAnimalsFemaleYoung.Clear();
+								AutoSlaughterManager.tmpAnimalsPregnant.Clear();
+								foreach (Pawn pawn in this.map.mapPawns.SpawnedColonyAnimals)
 								{
-									tmpAnimalsMale.Add(spawnedColonyAnimal);
-								}
-								else
-								{
-									tmpAnimalsMaleYoung.Add(spawnedColonyAnimal);
-								}
-								tmpAnimals.Add(spawnedColonyAnimal);
-							}
-							else if (spawnedColonyAnimal.gender == Gender.Female)
-							{
-								if (spawnedColonyAnimal.ageTracker.CurLifeStage.reproductive)
-								{
-									if (!spawnedColonyAnimal.health.hediffSet.HasHediff(HediffDefOf.Pregnant))
+									if (pawn.def == autoSlaughterConfig.animal && AutoSlaughterManager.CanAutoSlaughterNow(pawn) && (autoSlaughterConfig.allowSlaughterBonded || pawn.relations.GetDirectRelationsCount(PawnRelationDefOf.Bond, null) <= 0))
 									{
-										tmpAnimalsFemale.Add(spawnedColonyAnimal);
-										tmpAnimals.Add(spawnedColonyAnimal);
+										if (pawn.gender == Gender.Male)
+										{
+											if (pawn.ageTracker.CurLifeStage.reproductive)
+											{
+												AutoSlaughterManager.tmpAnimalsMale.Add(pawn);
+											}
+											else
+											{
+												AutoSlaughterManager.tmpAnimalsMaleYoung.Add(pawn);
+											}
+											AutoSlaughterManager.tmpAnimals.Add(pawn);
+										}
+										else if (pawn.gender == Gender.Female)
+										{
+											if (pawn.ageTracker.CurLifeStage.reproductive)
+											{
+												if (!pawn.health.hediffSet.HasHediff(HediffDefOf.Pregnant, false))
+												{
+													AutoSlaughterManager.tmpAnimalsFemale.Add(pawn);
+													AutoSlaughterManager.tmpAnimals.Add(pawn);
+												}
+												else if (autoSlaughterConfig.allowSlaughterPregnant)
+												{
+													AutoSlaughterManager.tmpAnimalsPregnant.Add(pawn);
+												}
+											}
+											else
+											{
+												AutoSlaughterManager.tmpAnimalsFemaleYoung.Add(pawn);
+												AutoSlaughterManager.tmpAnimals.Add(pawn);
+											}
+										}
+										else
+										{
+											AutoSlaughterManager.tmpAnimals.Add(pawn);
+										}
 									}
-									else if (config.allowSlaughterPregnant)
+								}
+								AutoSlaughterManager.tmpAnimals.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
+								AutoSlaughterManager.tmpAnimalsMale.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
+								AutoSlaughterManager.tmpAnimalsMaleYoung.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
+								AutoSlaughterManager.tmpAnimalsFemale.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
+								AutoSlaughterManager.tmpAnimalsFemaleYoung.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
+								if (autoSlaughterConfig.allowSlaughterPregnant)
+								{
+									AutoSlaughterManager.tmpAnimalsPregnant.SortByDescending((Pawn a) => a.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Pregnant, false).Severity);
+									AutoSlaughterManager.tmpAnimalsFemale.AddRange(AutoSlaughterManager.tmpAnimalsPregnant);
+									AutoSlaughterManager.tmpAnimals.AddRange(AutoSlaughterManager.tmpAnimalsPregnant);
+								}
+								if (autoSlaughterConfig.maxFemales != -1)
+								{
+									while (AutoSlaughterManager.tmpAnimalsFemale.Count > autoSlaughterConfig.maxFemales)
 									{
-										tmpAnimalsPregnant.Add(spawnedColonyAnimal);
+										Pawn item = AutoSlaughterManager.tmpAnimalsFemale.PopFront<Pawn>();
+										AutoSlaughterManager.tmpAnimals.Remove(item);
+										this.animalsToSlaughterCached.Add(item);
 									}
 								}
-								else
+								if (autoSlaughterConfig.maxFemalesYoung != -1)
 								{
-									tmpAnimalsFemaleYoung.Add(spawnedColonyAnimal);
-									tmpAnimals.Add(spawnedColonyAnimal);
+									while (AutoSlaughterManager.tmpAnimalsFemaleYoung.Count > autoSlaughterConfig.maxFemalesYoung)
+									{
+										Pawn item2 = AutoSlaughterManager.tmpAnimalsFemaleYoung.PopFront<Pawn>();
+										AutoSlaughterManager.tmpAnimals.Remove(item2);
+										this.animalsToSlaughterCached.Add(item2);
+									}
+								}
+								if (autoSlaughterConfig.maxMales != -1)
+								{
+									while (AutoSlaughterManager.tmpAnimalsMale.Count > autoSlaughterConfig.maxMales)
+									{
+										Pawn item3 = AutoSlaughterManager.tmpAnimalsMale.PopFront<Pawn>();
+										AutoSlaughterManager.tmpAnimals.Remove(item3);
+										this.animalsToSlaughterCached.Add(item3);
+									}
+								}
+								if (autoSlaughterConfig.maxMalesYoung != -1)
+								{
+									while (AutoSlaughterManager.tmpAnimalsMaleYoung.Count > autoSlaughterConfig.maxMalesYoung)
+									{
+										Pawn item4 = AutoSlaughterManager.tmpAnimalsMaleYoung.PopFront<Pawn>();
+										AutoSlaughterManager.tmpAnimals.Remove(item4);
+										this.animalsToSlaughterCached.Add(item4);
+									}
+								}
+								if (autoSlaughterConfig.maxTotal != -1)
+								{
+									while (AutoSlaughterManager.tmpAnimals.Count > autoSlaughterConfig.maxTotal)
+									{
+										Pawn pawn2 = AutoSlaughterManager.tmpAnimals.PopFront<Pawn>();
+										if (pawn2.gender == Gender.Male)
+										{
+											if (pawn2.ageTracker.CurLifeStage.reproductive)
+											{
+												AutoSlaughterManager.tmpAnimalsMale.Remove(pawn2);
+											}
+											else
+											{
+												AutoSlaughterManager.tmpAnimalsMaleYoung.Remove(pawn2);
+											}
+										}
+										else if (pawn2.gender == Gender.Female)
+										{
+											if (pawn2.ageTracker.CurLifeStage.reproductive)
+											{
+												AutoSlaughterManager.tmpAnimalsFemale.Remove(pawn2);
+											}
+											else
+											{
+												AutoSlaughterManager.tmpAnimalsFemaleYoung.Remove(pawn2);
+											}
+										}
+										this.animalsToSlaughterCached.Add(pawn2);
+									}
 								}
 							}
-							else
-							{
-								tmpAnimals.Add(spawnedColonyAnimal);
-							}
 						}
-						tmpAnimals.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
-						tmpAnimalsMale.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
-						tmpAnimalsMaleYoung.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
-						tmpAnimalsFemale.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
-						tmpAnimalsFemaleYoung.SortByDescending((Pawn a) => a.ageTracker.AgeBiologicalTicks);
-						if (config.allowSlaughterPregnant)
-						{
-							tmpAnimalsPregnant.SortByDescending((Pawn a) => a.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Pregnant).Severity);
-							tmpAnimalsFemale.AddRange(tmpAnimalsPregnant);
-							tmpAnimals.AddRange(tmpAnimalsPregnant);
-						}
-						if (config.maxFemales != -1)
-						{
-							while (tmpAnimalsFemale.Count > config.maxFemales)
-							{
-								Pawn item = tmpAnimalsFemale.PopFront();
-								tmpAnimals.Remove(item);
-								animalsToSlaughterCached.Add(item);
-							}
-						}
-						if (config.maxFemalesYoung != -1)
-						{
-							while (tmpAnimalsFemaleYoung.Count > config.maxFemalesYoung)
-							{
-								Pawn item2 = tmpAnimalsFemaleYoung.PopFront();
-								tmpAnimals.Remove(item2);
-								animalsToSlaughterCached.Add(item2);
-							}
-						}
-						if (config.maxMales != -1)
-						{
-							while (tmpAnimalsMale.Count > config.maxMales)
-							{
-								Pawn item3 = tmpAnimalsMale.PopFront();
-								tmpAnimals.Remove(item3);
-								animalsToSlaughterCached.Add(item3);
-							}
-						}
-						if (config.maxMalesYoung != -1)
-						{
-							while (tmpAnimalsMaleYoung.Count > config.maxMalesYoung)
-							{
-								Pawn item4 = tmpAnimalsMaleYoung.PopFront();
-								tmpAnimals.Remove(item4);
-								animalsToSlaughterCached.Add(item4);
-							}
-						}
-						if (config.maxTotal == -1)
-						{
-							continue;
-						}
-						while (tmpAnimals.Count > config.maxTotal)
-						{
-							Pawn pawn = tmpAnimals.PopFront();
-							if (pawn.gender == Gender.Male)
-							{
-								if (pawn.ageTracker.CurLifeStage.reproductive)
-								{
-									tmpAnimalsMale.Remove(pawn);
-								}
-								else
-								{
-									tmpAnimalsMaleYoung.Remove(pawn);
-								}
-							}
-							else if (pawn.gender == Gender.Female)
-							{
-								if (pawn.ageTracker.CurLifeStage.reproductive)
-								{
-									tmpAnimalsFemale.Remove(pawn);
-								}
-								else
-								{
-									tmpAnimalsFemaleYoung.Remove(pawn);
-								}
-							}
-							animalsToSlaughterCached.Add(pawn);
-						}
+						this.cacheDirty = false;
 					}
-					cacheDirty = false;
+					finally
+					{
+						AutoSlaughterManager.tmpAnimals.Clear();
+						AutoSlaughterManager.tmpAnimalsMale.Clear();
+						AutoSlaughterManager.tmpAnimalsFemale.Clear();
+						AutoSlaughterManager.tmpAnimalsMaleYoung.Clear();
+						AutoSlaughterManager.tmpAnimalsFemaleYoung.Clear();
+						AutoSlaughterManager.tmpAnimalsPregnant.Clear();
+					}
 				}
-				finally
+				return this.animalsToSlaughterCached;
+			}
+		}
+
+		// Token: 0x06001905 RID: 6405 RVA: 0x0007E60C File Offset: 0x0007C80C
+		public static bool CanEverAutoSlaughter(Pawn animal)
+		{
+			return animal.HomeFaction == Faction.OfPlayer && !animal.RaceProps.Dryad;
+		}
+
+		// Token: 0x06001906 RID: 6406 RVA: 0x0007E62B File Offset: 0x0007C82B
+		public static bool CanAutoSlaughterNow(Pawn animal)
+		{
+			return AutoSlaughterManager.CanEverAutoSlaughter(animal) && animal.GetLord() == null && (animal.inventory == null || !animal.inventory.UnloadEverything);
+		}
+
+		// Token: 0x06001907 RID: 6407 RVA: 0x0007E659 File Offset: 0x0007C859
+		public AutoSlaughterManager(Map map)
+		{
+			this.map = map;
+			this.TryPopulateMissingAnimals();
+		}
+
+		// Token: 0x06001908 RID: 6408 RVA: 0x0007E684 File Offset: 0x0007C884
+		public void Notify_PawnDespawned()
+		{
+			this.cacheDirty = true;
+		}
+
+		// Token: 0x06001909 RID: 6409 RVA: 0x0007E684 File Offset: 0x0007C884
+		public void Notify_PawnSpawned()
+		{
+			this.cacheDirty = true;
+		}
+
+		// Token: 0x0600190A RID: 6410 RVA: 0x0007E684 File Offset: 0x0007C884
+		public void Notify_PawnChangedFaction()
+		{
+			this.cacheDirty = true;
+		}
+
+		// Token: 0x0600190B RID: 6411 RVA: 0x0007E684 File Offset: 0x0007C884
+		public void Notify_ConfigChanged()
+		{
+			this.cacheDirty = true;
+		}
+
+		// Token: 0x0600190C RID: 6412 RVA: 0x0007E690 File Offset: 0x0007C890
+		public void ExposeData()
+		{
+			Scribe_Collections.Look<AutoSlaughterConfig>(ref this.configs, "configs", LookMode.Deep, Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (this.configs.RemoveAll((AutoSlaughterConfig x) => x.animal == null || x.animal.IsCorpse) != 0)
 				{
-					tmpAnimals.Clear();
-					tmpAnimalsMale.Clear();
-					tmpAnimalsFemale.Clear();
-					tmpAnimalsMaleYoung.Clear();
-					tmpAnimalsFemaleYoung.Clear();
-					tmpAnimalsPregnant.Clear();
+					Log.Warning("Some auto-slaughter configs had null animals after loading.");
+				}
+				this.TryPopulateMissingAnimals();
+			}
+		}
+
+		// Token: 0x0600190D RID: 6413 RVA: 0x0007E6F8 File Offset: 0x0007C8F8
+		private void TryPopulateMissingAnimals()
+		{
+			HashSet<ThingDef> hashSet = new HashSet<ThingDef>();
+			hashSet.AddRange(from c in this.configs
+			select c.animal);
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			{
+				if (thingDef.race != null && thingDef.race.Animal && thingDef.GetStatValueAbstract(StatDefOf.Wildness, null) < 1f && !thingDef.race.Dryad && !thingDef.IsCorpse && !hashSet.Contains(thingDef))
+				{
+					this.configs.Add(new AutoSlaughterConfig
+					{
+						animal = thingDef
+					});
 				}
 			}
-			return animalsToSlaughterCached;
 		}
-	}
 
-	public static bool CanEverAutoSlaughter(Pawn animal)
-	{
-		if (animal.HomeFaction == Faction.OfPlayer)
-		{
-			return !animal.RaceProps.Dryad;
-		}
-		return false;
-	}
+		// Token: 0x0400161E RID: 5662
+		private static List<Pawn> tmpAnimals = new List<Pawn>();
 
-	public static bool CanAutoSlaughterNow(Pawn animal)
-	{
-		if (!CanEverAutoSlaughter(animal))
-		{
-			return false;
-		}
-		if (animal.GetLord() != null)
-		{
-			return false;
-		}
-		if (animal.inventory != null && animal.inventory.UnloadEverything)
-		{
-			return false;
-		}
-		return true;
-	}
+		// Token: 0x0400161F RID: 5663
+		private static List<Pawn> tmpAnimalsMale = new List<Pawn>();
 
-	public AutoSlaughterManager(Map map)
-	{
-		this.map = map;
-		TryPopulateMissingAnimals();
-	}
+		// Token: 0x04001620 RID: 5664
+		private static List<Pawn> tmpAnimalsMaleYoung = new List<Pawn>();
 
-	public void Notify_PawnDespawned()
-	{
-		cacheDirty = true;
-	}
+		// Token: 0x04001621 RID: 5665
+		private static List<Pawn> tmpAnimalsFemale = new List<Pawn>();
 
-	public void Notify_PawnSpawned()
-	{
-		cacheDirty = true;
-	}
+		// Token: 0x04001622 RID: 5666
+		private static List<Pawn> tmpAnimalsFemaleYoung = new List<Pawn>();
 
-	public void Notify_PawnChangedFaction()
-	{
-		cacheDirty = true;
-	}
+		// Token: 0x04001623 RID: 5667
+		private static List<Pawn> tmpAnimalsPregnant = new List<Pawn>();
 
-	public void Notify_ConfigChanged()
-	{
-		cacheDirty = true;
-	}
+		// Token: 0x04001624 RID: 5668
+		public Map map;
 
-	public void ExposeData()
-	{
-		Scribe_Collections.Look(ref configs, "configs", LookMode.Deep);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			if (configs.RemoveAll((AutoSlaughterConfig x) => x.animal == null || x.animal.IsCorpse) != 0)
-			{
-				Log.Warning("Some auto-slaughter configs had null animals after loading.");
-			}
-			TryPopulateMissingAnimals();
-		}
-	}
+		// Token: 0x04001625 RID: 5669
+		public List<AutoSlaughterConfig> configs = new List<AutoSlaughterConfig>();
 
-	private void TryPopulateMissingAnimals()
-	{
-		HashSet<ThingDef> hashSet = new HashSet<ThingDef>();
-		hashSet.AddRange(configs.Select((AutoSlaughterConfig c) => c.animal));
-		foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
-		{
-			if (allDef.race != null && allDef.race.Animal && allDef.GetStatValueAbstract(StatDefOf.Wildness) < 1f && !allDef.race.Dryad && !allDef.IsCorpse && !hashSet.Contains(allDef))
-			{
-				configs.Add(new AutoSlaughterConfig
-				{
-					animal = allDef
-				});
-			}
-		}
+		// Token: 0x04001626 RID: 5670
+		private List<Pawn> animalsToSlaughterCached = new List<Pawn>();
+
+		// Token: 0x04001627 RID: 5671
+		private bool cacheDirty;
 	}
 }

@@ -1,18 +1,18 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalCanCrawl : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x0200178A RID: 6026
+	public class ThinkNode_ConditionalCanCrawl : ThinkNode_Conditional
 	{
-		Lord lord = pawn.GetLord();
-		if (lord != null && lord.LordJob is LordJob_PsychicRitual)
+		// Token: 0x06008D5D RID: 36189 RVA: 0x002A0A20 File Offset: 0x0029EC20
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return false;
+			Lord lord = pawn.GetLord();
+			return (lord == null || !(lord.LordJob is LordJob_PsychicRitual)) && pawn.health.CanCrawl;
 		}
-		return pawn.health.CanCrawl;
 	}
 }

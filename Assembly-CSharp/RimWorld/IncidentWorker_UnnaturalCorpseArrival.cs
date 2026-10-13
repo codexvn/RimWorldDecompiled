@@ -1,38 +1,38 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class IncidentWorker_UnnaturalCorpseArrival : IncidentWorker
+namespace RimWorld
 {
-	protected override bool TryExecuteWorker(IncidentParms parms)
+	// Token: 0x02001DE0 RID: 7648
+	public class IncidentWorker_UnnaturalCorpseArrival : IncidentWorker
 	{
-		if (!(parms.target is Map map))
+		// Token: 0x0600AA81 RID: 43649 RVA: 0x0030C2AC File Offset: 0x0030A4AC
+		protected override bool TryExecuteWorker(IncidentParms parms)
 		{
-			return false;
+			Map map = parms.target as Map;
+			if (map == null)
+			{
+				return false;
+			}
+			Pawn pawn;
+			if (!QuestUtility.TryGetIdealColonist(out pawn, map, new Func<Pawn, bool>(this.ValidatePawn)))
+			{
+				return false;
+			}
+			UnnaturalCorpse unnaturalCorpse = AnomalyUtility.MakeUnnaturalCorpse(pawn);
+			Find.Anomaly.RegisterUnnaturalCorpse(pawn, unnaturalCorpse);
+			IntVec3 loc;
+			RCellFinder.TryFindRandomSpotJustOutsideColony(IntVec3.Invalid, map, out loc);
+			GenSpawn.Spawn(unnaturalCorpse, loc, map, WipeMode.Vanish);
+			EffecterDefOf.Skip_EntryNoDelay.Spawn(unnaturalCorpse, map, 1f).Cleanup();
+			base.SendStandardLetter("UnnaturalCorpseArrivalLabel".Translate(), "UnnaturalCorpseArrivalText".Translate(pawn.Named("PAWN")), LetterDefOf.ThreatSmall, parms, unnaturalCorpse, Array.Empty<NamedArgument>());
+			return true;
 		}
-		if (!QuestUtility.TryGetIdealColonist(out var pawn, map, ValidatePawn))
-		{
-			return false;
-		}
-		UnnaturalCorpse unnaturalCorpse = AnomalyUtility.MakeUnnaturalCorpse(pawn);
-		Find.Anomaly.RegisterUnnaturalCorpse(pawn, unnaturalCorpse);
-		RCellFinder.TryFindRandomSpotJustOutsideColony(IntVec3.Invalid, map, out var result);
-		GenSpawn.Spawn(unnaturalCorpse, result, map);
-		EffecterDefOf.Skip_EntryNoDelay.Spawn(unnaturalCorpse, map).Cleanup();
-		SendStandardLetter("UnnaturalCorpseArrivalLabel".Translate(), "UnnaturalCorpseArrivalText".Translate(pawn.Named("PAWN")), LetterDefOf.ThreatSmall, parms, unnaturalCorpse);
-		return true;
-	}
 
-	protected bool ValidatePawn(Pawn pawn)
-	{
-		if (!pawn.IsColonist && !pawn.IsSlaveOfColony)
+		// Token: 0x0600AA82 RID: 43650 RVA: 0x0030C35A File Offset: 0x0030A55A
+		protected bool ValidatePawn(Pawn pawn)
 		{
-			return false;
+			return (pawn.IsColonist || pawn.IsSlaveOfColony) && pawn.RaceProps.unnaturalCorpseDef != null && !Find.Anomaly.PawnHasUnnaturalCorpse(pawn);
 		}
-		if (pawn.RaceProps.unnaturalCorpseDef == null)
-		{
-			return false;
-		}
-		return !Find.Anomaly.PawnHasUnnaturalCorpse(pawn);
 	}
 }

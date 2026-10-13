@@ -1,29 +1,46 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class WorkGiver_StudyBase : WorkGiver_Scanner
+namespace RimWorld
 {
-	public override bool Prioritized => true;
-
-	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	// Token: 0x02001613 RID: 5651
+	public abstract class WorkGiver_StudyBase : WorkGiver_Scanner
 	{
-		return Find.StudyManager.GetStudiableThingsAndPlatforms(pawn.Map);
-	}
+		// Token: 0x17001476 RID: 5238
+		// (get) Token: 0x06008558 RID: 34136 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool Prioritized
+		{
+			get
+			{
+				return true;
+			}
+		}
 
-	public override float GetPriority(Pawn pawn, TargetInfo t)
-	{
-		Thing thing = t.Thing;
-		if (ModsConfig.AnomalyActive && thing is Building_HoldingPlatform building_HoldingPlatform)
+		// Token: 0x06008559 RID: 34137 RVA: 0x0027DFD7 File Offset: 0x0027C1D7
+		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			thing = building_HoldingPlatform.HeldPawn;
+			return Find.StudyManager.GetStudiableThingsAndPlatforms(pawn.Map);
 		}
-		if (thing == null)
+
+		// Token: 0x0600855A RID: 34138 RVA: 0x0027DFEC File Offset: 0x0027C1EC
+		public override float GetPriority(Pawn pawn, TargetInfo t)
 		{
-			return 0f;
+			Thing thing = t.Thing;
+			if (ModsConfig.AnomalyActive)
+			{
+				Building_HoldingPlatform building_HoldingPlatform = thing as Building_HoldingPlatform;
+				if (building_HoldingPlatform != null)
+				{
+					thing = building_HoldingPlatform.HeldPawn;
+				}
+			}
+			if (thing == null)
+			{
+				return 0f;
+			}
+			CompStudiable compStudiable = thing.TryGetComp<CompStudiable>();
+			return (float)(Find.TickManager.TicksGame - compStudiable.lastStudiedTick);
 		}
-		CompStudiable compStudiable = thing.TryGetComp<CompStudiable>();
-		return Find.TickManager.TicksGame - compStudiable.lastStudiedTick;
 	}
 }

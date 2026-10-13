@@ -1,25 +1,31 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class ScattererValidator_AvoidThingsOfDef : ScattererValidator
+namespace Verse
 {
-	public int radius = 1;
-
-	public List<ThingDef> thingsToAvoid = new List<ThingDef>();
-
-	public override bool Allows(IntVec3 c, Map map)
+	// Token: 0x020004B3 RID: 1203
+	public class ScattererValidator_AvoidThingsOfDef : ScattererValidator
 	{
-		foreach (ThingDef item in thingsToAvoid)
+		// Token: 0x06001F49 RID: 8009 RVA: 0x000A462C File Offset: 0x000A282C
+		public override bool Allows(IntVec3 c, Map map)
 		{
-			foreach (Thing item2 in map.listerThings.ThingsOfDef(item))
+			foreach (ThingDef def in this.thingsToAvoid)
 			{
-				if (c.InHorDistOf(item2.Position, radius))
+				foreach (Thing thing in map.listerThings.ThingsOfDef(def))
 				{
-					return false;
+					if (c.InHorDistOf(thing.Position, (float)this.radius))
+					{
+						return false;
+					}
 				}
 			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x04001AFB RID: 6907
+		public int radius = 1;
+
+		// Token: 0x04001AFC RID: 6908
+		public List<ThingDef> thingsToAvoid = new List<ThingDef>();
 	}
 }

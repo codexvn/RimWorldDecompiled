@@ -1,15 +1,19 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class LordToil_ExitMapRandom : LordToil
+namespace Verse.AI.Group
 {
-	public override void UpdateAllDuties()
+	// Token: 0x020010A6 RID: 4262
+	public class LordToil_ExitMapRandom : LordToil
 	{
-		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		// Token: 0x060068A7 RID: 26791 RVA: 0x00211090 File Offset: 0x0020F290
+		public override void UpdateAllDuties()
 		{
-			PawnDuty duty = new PawnDuty(DutyDefOf.ExitMapRandom);
-			lord.ownedPawns[i].mindState.duty = duty;
+			for (int i = 0; i < this.lord.ownedPawns.Count; i++)
+			{
+				PawnDuty duty = new PawnDuty(DutyDefOf.ExitMapRandom);
+				this.lord.ownedPawns[i].mindState.duty = duty;
+			}
 		}
 	}
 }

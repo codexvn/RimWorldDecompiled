@@ -1,45 +1,54 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbilityEffect_Coagulate : CompAbilityEffect
+namespace RimWorld
 {
-	private new CompProperties_AbilityCoagulate Props => (CompProperties_AbilityCoagulate)props;
-
-	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	// Token: 0x02002202 RID: 8706
+	public class CompAbilityEffect_Coagulate : CompAbilityEffect
 	{
-		base.Apply(target, dest);
-		Pawn pawn = target.Pawn;
-		if (pawn == null)
+		// Token: 0x17001D14 RID: 7444
+		// (get) Token: 0x0600BE9B RID: 48795 RVA: 0x003742EB File Offset: 0x003724EB
+		private new CompProperties_AbilityCoagulate Props
 		{
-			return;
-		}
-		int num = 0;
-		List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-		for (int num2 = hediffs.Count - 1; num2 >= 0; num2--)
-		{
-			if ((hediffs[num2] is Hediff_Injury || hediffs[num2] is Hediff_MissingPart) && hediffs[num2].TendableNow())
+			get
 			{
-				hediffs[num2].Tended(Props.tendQualityRange.RandomInRange, Props.tendQualityRange.TrueMax, 1);
-				num++;
+				return (CompProperties_AbilityCoagulate)this.props;
 			}
 		}
-		if (num > 0)
-		{
-			MoteMaker.ThrowText(pawn.DrawPos, pawn.Map, "NumWoundsTended".Translate(num), 3.65f);
-		}
-		FleckMaker.AttachedOverlay(pawn, FleckDefOf.FlashHollow, Vector3.zero, 1.5f);
-	}
 
-	public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
-	{
-		Pawn pawn = target.Pawn;
-		if (pawn != null && !AbilityUtility.ValidateHasTendableWound(pawn, throwMessages, parent))
+		// Token: 0x0600BE9C RID: 48796 RVA: 0x003742F8 File Offset: 0x003724F8
+		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
 		{
-			return false;
+			base.Apply(target, dest);
+			Pawn pawn = target.Pawn;
+			if (pawn == null)
+			{
+				return;
+			}
+			int num = 0;
+			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
+			for (int i = hediffs.Count - 1; i >= 0; i--)
+			{
+				if ((hediffs[i] is Hediff_Injury || hediffs[i] is Hediff_MissingPart) && hediffs[i].TendableNow(false))
+				{
+					hediffs[i].Tended(this.Props.tendQualityRange.RandomInRange, this.Props.tendQualityRange.TrueMax, 1);
+					num++;
+				}
+			}
+			if (num > 0)
+			{
+				MoteMaker.ThrowText(pawn.DrawPos, pawn.Map, "NumWoundsTended".Translate(num), 3.65f);
+			}
+			FleckMaker.AttachedOverlay(pawn, FleckDefOf.FlashHollow, Vector3.zero, 1.5f, -1f);
 		}
-		return base.Valid(target, throwMessages);
+
+		// Token: 0x0600BE9D RID: 48797 RVA: 0x003743E4 File Offset: 0x003725E4
+		public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
+		{
+			Pawn pawn = target.Pawn;
+			return (pawn == null || AbilityUtility.ValidateHasTendableWound(pawn, throwMessages, this.parent)) && base.Valid(target, throwMessages);
+		}
 	}
 }

@@ -1,94 +1,109 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public static class MeshUtility
+namespace RimWorld
 {
-	private static List<int> offsets = new List<int>();
-
-	private static List<bool> vertIsUsed = new List<bool>();
-
-	public static void RemoveVertices(List<Vector3> verts, List<TriangleIndices> tris, Predicate<Vector3> predicate)
+	// Token: 0x0200366F RID: 13935
+	public static class MeshUtility
 	{
-		int i = 0;
-		for (int count = tris.Count; i < count; i++)
+		// Token: 0x0601357D RID: 79229 RVA: 0x005C1420 File Offset: 0x005BF620
+		public static void RemoveVertices(List<Vector3> verts, List<TriangleIndices> tris, Predicate<Vector3> predicate)
 		{
-			TriangleIndices triangleIndices = tris[i];
-			if (predicate(verts[triangleIndices.v1]) || predicate(verts[triangleIndices.v2]) || predicate(verts[triangleIndices.v3]))
+			int i = 0;
+			int count = tris.Count;
+			while (i < count)
 			{
-				tris[i] = new TriangleIndices(-1, -1, -1);
+				TriangleIndices triangleIndices = tris[i];
+				if (predicate(verts[triangleIndices.v1]) || predicate(verts[triangleIndices.v2]) || predicate(verts[triangleIndices.v3]))
+				{
+					tris[i] = new TriangleIndices(-1, -1, -1);
+				}
+				i++;
 			}
+			tris.RemoveAll((TriangleIndices x) => x.v1 == -1);
+			MeshUtility.RemoveUnusedVertices(verts, tris);
 		}
-		tris.RemoveAll((TriangleIndices x) => x.v1 == -1);
-		RemoveUnusedVertices(verts, tris);
-	}
 
-	public static void RemoveUnusedVertices(List<Vector3> verts, List<TriangleIndices> tris)
-	{
-		vertIsUsed.Clear();
-		int i = 0;
-		for (int count = verts.Count; i < count; i++)
+		// Token: 0x0601357E RID: 79230 RVA: 0x005C14C0 File Offset: 0x005BF6C0
+		public static void RemoveUnusedVertices(List<Vector3> verts, List<TriangleIndices> tris)
 		{
-			vertIsUsed.Add(item: false);
-		}
-		int j = 0;
-		for (int count2 = tris.Count; j < count2; j++)
-		{
-			TriangleIndices triangleIndices = tris[j];
-			vertIsUsed[triangleIndices.v1] = true;
-			vertIsUsed[triangleIndices.v2] = true;
-			vertIsUsed[triangleIndices.v3] = true;
-		}
-		int num = 0;
-		offsets.Clear();
-		int k = 0;
-		for (int count3 = verts.Count; k < count3; k++)
-		{
-			if (!vertIsUsed[k])
+			MeshUtility.vertIsUsed.Clear();
+			int i = 0;
+			int count = verts.Count;
+			while (i < count)
 			{
-				num++;
+				MeshUtility.vertIsUsed.Add(false);
+				i++;
 			}
-			offsets.Add(num);
+			int j = 0;
+			int count2 = tris.Count;
+			while (j < count2)
+			{
+				TriangleIndices triangleIndices = tris[j];
+				MeshUtility.vertIsUsed[triangleIndices.v1] = true;
+				MeshUtility.vertIsUsed[triangleIndices.v2] = true;
+				MeshUtility.vertIsUsed[triangleIndices.v3] = true;
+				j++;
+			}
+			int num = 0;
+			MeshUtility.offsets.Clear();
+			int k = 0;
+			int count3 = verts.Count;
+			while (k < count3)
+			{
+				if (!MeshUtility.vertIsUsed[k])
+				{
+					num++;
+				}
+				MeshUtility.offsets.Add(num);
+				k++;
+			}
+			int l = 0;
+			int count4 = tris.Count;
+			while (l < count4)
+			{
+				TriangleIndices triangleIndices2 = tris[l];
+				tris[l] = new TriangleIndices(triangleIndices2.v1 - MeshUtility.offsets[triangleIndices2.v1], triangleIndices2.v2 - MeshUtility.offsets[triangleIndices2.v2], triangleIndices2.v3 - MeshUtility.offsets[triangleIndices2.v3]);
+				l++;
+			}
+			verts.RemoveAll((Vector3 elem, int index) => !MeshUtility.vertIsUsed[index]);
 		}
-		int l = 0;
-		for (int count4 = tris.Count; l < count4; l++)
-		{
-			TriangleIndices triangleIndices2 = tris[l];
-			tris[l] = new TriangleIndices(triangleIndices2.v1 - offsets[triangleIndices2.v1], triangleIndices2.v2 - offsets[triangleIndices2.v2], triangleIndices2.v3 - offsets[triangleIndices2.v3]);
-		}
-		verts.RemoveAll((Vector3 elem, int index) => !vertIsUsed[index]);
-	}
 
-	public static bool Visible(Vector3 point, float radius, Vector3 viewCenter, float viewAngle)
-	{
-		if (viewAngle >= 180f)
+		// Token: 0x0601357F RID: 79231 RVA: 0x005C162B File Offset: 0x005BF82B
+		public static bool Visible(Vector3 point, float radius, Vector3 viewCenter, float viewAngle)
 		{
-			return true;
+			return viewAngle >= 180f || Vector3.Angle(viewCenter * radius, point) <= viewAngle;
 		}
-		return Vector3.Angle(viewCenter * radius, point) <= viewAngle;
-	}
 
-	public static bool VisibleForWorldgen(Vector3 point, float radius, Vector3 viewCenter, float viewAngle)
-	{
-		if (viewAngle >= 180f)
+		// Token: 0x06013580 RID: 79232 RVA: 0x005C164C File Offset: 0x005BF84C
+		public static bool VisibleForWorldgen(Vector3 point, float radius, Vector3 viewCenter, float viewAngle)
 		{
-			return true;
+			if (viewAngle >= 180f)
+			{
+				return true;
+			}
+			float num = Vector3.Angle(viewCenter * radius, point) + -1E-05f;
+			if (Mathf.Abs(num - viewAngle) < 1E-06f)
+			{
+				Log.Warning(string.Format("Angle difference {0} is within epsilon; recommend adjusting visibility tweak", num - viewAngle));
+			}
+			return num <= viewAngle;
 		}
-		float num = Vector3.Angle(viewCenter * radius, point) + -1E-05f;
-		if (Mathf.Abs(num - viewAngle) < 1E-06f)
-		{
-			Log.Warning($"Angle difference {num - viewAngle} is within epsilon; recommend adjusting visibility tweak");
-		}
-		return num <= viewAngle;
-	}
 
-	public static Color32 MutateAlpha(this Color32 input, byte newAlpha)
-	{
-		input.a = newAlpha;
-		return input;
+		// Token: 0x06013581 RID: 79233 RVA: 0x005C16A4 File Offset: 0x005BF8A4
+		public static Color32 MutateAlpha(this Color32 input, byte newAlpha)
+		{
+			input.a = newAlpha;
+			return input;
+		}
+
+		// Token: 0x0400D6A2 RID: 54946
+		private static List<int> offsets = new List<int>();
+
+		// Token: 0x0400D6A3 RID: 54947
+		private static List<bool> vertIsUsed = new List<bool>();
 	}
 }

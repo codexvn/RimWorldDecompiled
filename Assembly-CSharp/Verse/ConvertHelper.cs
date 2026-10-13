@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Globalization;
@@ -6,410 +6,441 @@ using System.Xml;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public static class ConvertHelper
+namespace Verse
 {
-	public static bool CanConvert<T>(object obj)
+	// Token: 0x02000C6A RID: 3178
+	public static class ConvertHelper
 	{
-		return CanConvert(obj, typeof(T));
-	}
+		// Token: 0x06005138 RID: 20792 RVA: 0x001A6126 File Offset: 0x001A4326
+		public static bool CanConvert<T>(object obj)
+		{
+			return ConvertHelper.CanConvert(obj, typeof(T));
+		}
 
-	public static bool CanConvert(object obj, Type to)
-	{
-		if (obj == null)
+		// Token: 0x06005139 RID: 20793 RVA: 0x001A6138 File Offset: 0x001A4338
+		public static bool CanConvert(object obj, Type to)
 		{
-			return true;
-		}
-		if (to.IsInstanceOfType(obj))
-		{
-			return true;
-		}
-		if (to == typeof(string))
-		{
-			return true;
-		}
-		if (obj is string && !to.IsPrimitive && ParseHelper.CanParse(to, (string)obj))
-		{
-			return true;
-		}
-		if (obj is string && GenTypes.IsDef(to))
-		{
-			return true;
-		}
-		if (obj is string && to == typeof(Faction))
-		{
-			return true;
-		}
-		if (CanConvertBetweenDataTypes(obj.GetType(), to))
-		{
-			return true;
-		}
-		if (IsXml(obj) && !to.IsPrimitive)
-		{
-			return true;
-		}
-		if (to.IsGenericType && (to.GetGenericTypeDefinition() == typeof(IEnumerable<>) || to.GetGenericTypeDefinition() == typeof(List<>)) && to.GetGenericArguments().Length >= 1 && (!(to.GetGenericArguments()[0] == typeof(string)) || !(obj is string)) && obj is IEnumerable enumerable)
-		{
-			Type to2 = to.GetGenericArguments()[0];
-			bool flag = true;
-			foreach (object item in enumerable)
-			{
-				if (!CanConvert(item, to2))
-				{
-					flag = false;
-					break;
-				}
-			}
-			if (flag)
+			if (obj == null)
 			{
 				return true;
 			}
-		}
-		if (obj is IEnumerable && !(obj is string))
-		{
-			IEnumerable e = (IEnumerable)obj;
-			if (GenCollection.Count_EnumerableBase(e) == 1 && CanConvert(GenCollection.FirstOrDefault_EnumerableBase(e), to))
+			if (to.IsInstanceOfType(obj))
 			{
 				return true;
 			}
-		}
-		if (typeof(IList).IsAssignableFrom(to))
-		{
-			Type[] genericArguments = to.GetGenericArguments();
-			if (genericArguments.Length >= 1)
+			if (to == typeof(string))
 			{
-				return CanConvert(obj, genericArguments[0]);
+				return true;
 			}
-			return true;
-		}
-		if (to == typeof(IEnumerable))
-		{
-			return true;
-		}
-		if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-		{
-			Type[] genericArguments2 = to.GetGenericArguments();
-			if (genericArguments2.Length >= 1)
+			if (obj is string && !to.IsPrimitive && ParseHelper.CanParse(to, (string)obj))
 			{
-				return CanConvert(obj, genericArguments2[0]);
+				return true;
 			}
-			return true;
-		}
-		if (!(obj is IConvertible obj2))
-		{
-			return false;
-		}
-		Type type = Nullable.GetUnderlyingType(to) ?? to;
-		if (type != typeof(bool) && type != typeof(byte) && type != typeof(char) && type != typeof(DateTime) && type != typeof(decimal) && type != typeof(double) && type != typeof(short) && type != typeof(int) && type != typeof(long) && type != typeof(sbyte) && type != typeof(float) && type != typeof(string) && type != typeof(ushort) && type != typeof(uint) && type != typeof(ulong))
-		{
-			return false;
-		}
-		try
-		{
-			ConvertToPrimitive(obj2, to, null);
-		}
-		catch (FormatException)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	public static T Convert<T>(object obj)
-	{
-		return (T)Convert(obj, typeof(T), default(T));
-	}
-
-	public static object Convert(object obj, Type to)
-	{
-		if (to.IsValueType)
-		{
-			return Convert(obj, to, Activator.CreateInstance(to));
-		}
-		return Convert(obj, to, null);
-	}
-
-	public static object Convert(object obj, Type to, object defaultValue)
-	{
-		if (obj == null)
-		{
-			return defaultValue;
-		}
-		if (to.IsAssignableFrom(obj.GetType()))
-		{
-			return obj;
-		}
-		if (to == typeof(string))
-		{
-			return obj.ToString();
-		}
-		string text = obj as string;
-		if (text != null && !to.IsPrimitive && ParseHelper.CanParse(to, (string)obj))
-		{
-			if (text == "")
+			if (obj is string && GenTypes.IsDef(to))
 			{
-				return defaultValue;
+				return true;
 			}
-			return ParseHelper.FromString(text, to);
-		}
-		if (text != null && GenTypes.IsDef(to))
-		{
-			if (text == "")
+			if (obj is string && to == typeof(Faction))
 			{
-				return defaultValue;
+				return true;
 			}
-			return GenDefDatabase.GetDef(to, text);
-		}
-		if (text != null && to == typeof(Faction))
-		{
-			if (text == "")
+			if (ConvertHelper.CanConvertBetweenDataTypes(obj.GetType(), to))
 			{
-				return defaultValue;
+				return true;
 			}
-			List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
-			for (int i = 0; i < allFactionsListForReading.Count; i++)
+			if (ConvertHelper.IsXml(obj) && !to.IsPrimitive)
 			{
-				if (allFactionsListForReading[i].GetUniqueLoadID() == text)
+				return true;
+			}
+			if (to.IsGenericType && (to.GetGenericTypeDefinition() == typeof(IEnumerable<>) || to.GetGenericTypeDefinition() == typeof(List<>)) && to.GetGenericArguments().Length >= 1 && (!(to.GetGenericArguments()[0] == typeof(string)) || !(obj is string)))
+			{
+				IEnumerable enumerable = obj as IEnumerable;
+				if (enumerable != null)
 				{
-					return allFactionsListForReading[i];
+					Type to2 = to.GetGenericArguments()[0];
+					bool flag = true;
+					using (IEnumerator enumerator = enumerable.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							if (!ConvertHelper.CanConvert(enumerator.Current, to2))
+							{
+								flag = false;
+								break;
+							}
+						}
+					}
+					if (flag)
+					{
+						return true;
+					}
 				}
 			}
-			for (int j = 0; j < allFactionsListForReading.Count; j++)
+			if (obj is IEnumerable && !(obj is string))
 			{
-				if (allFactionsListForReading[j].HasName && allFactionsListForReading[j].Name == text)
+				IEnumerable e = (IEnumerable)obj;
+				if (GenCollection.Count_EnumerableBase(e) == 1 && ConvertHelper.CanConvert(GenCollection.FirstOrDefault_EnumerableBase(e), to))
 				{
-					return allFactionsListForReading[j];
+					return true;
 				}
 			}
-			for (int k = 0; k < allFactionsListForReading.Count; k++)
+			if (typeof(IList).IsAssignableFrom(to))
 			{
-				if (allFactionsListForReading[k].def.defName == text)
-				{
-					return allFactionsListForReading[k];
-				}
+				Type[] genericArguments = to.GetGenericArguments();
+				return genericArguments.Length < 1 || ConvertHelper.CanConvert(obj, genericArguments[0]);
 			}
-			if (text == "OfPlayer")
+			if (to == typeof(IEnumerable))
 			{
-				return Faction.OfPlayer;
+				return true;
 			}
-			return defaultValue;
-		}
-		if (CanConvertBetweenDataTypes(obj.GetType(), to))
-		{
-			return ConvertBetweenDataTypes(obj, to);
-		}
-		if (IsXml(obj) && !to.IsPrimitive)
-		{
+			if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+			{
+				Type[] genericArguments2 = to.GetGenericArguments();
+				return genericArguments2.Length < 1 || ConvertHelper.CanConvert(obj, genericArguments2[0]);
+			}
+			IConvertible convertible = obj as IConvertible;
+			if (convertible == null)
+			{
+				return false;
+			}
+			Type left = Nullable.GetUnderlyingType(to) ?? to;
+			if (left != typeof(bool) && left != typeof(byte) && left != typeof(char) && left != typeof(DateTime) && left != typeof(decimal) && left != typeof(double) && left != typeof(short) && left != typeof(int) && left != typeof(long) && left != typeof(sbyte) && left != typeof(float) && left != typeof(string) && left != typeof(ushort) && left != typeof(uint) && left != typeof(ulong))
+			{
+				return false;
+			}
 			try
 			{
-				Type type = to;
-				if (type == typeof(IEnumerable))
-				{
-					type = typeof(List<string>);
-				}
-				if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>) && type.GetGenericArguments().Length >= 1)
-				{
-					type = typeof(List<>).MakeGenericType(type.GetGenericArguments()[0]);
-				}
-				XmlDocument xmlDocument = new XmlDocument();
-				xmlDocument.LoadXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n" + text + "\n</root>");
-				object result = DirectXmlToObject.GetObjectFromXmlMethod(type)(xmlDocument.DocumentElement, arg2: true);
-				DirectXmlCrossRefLoader.ResolveAllWantedCrossReferences(FailMode.LogErrors);
-				return result;
+				ConvertHelper.ConvertToPrimitive(convertible, to, null);
 			}
-			finally
+			catch (FormatException)
 			{
-				DirectXmlCrossRefLoader.Clear();
+				return false;
 			}
+			return true;
 		}
-		if (to.IsGenericType && (to.GetGenericTypeDefinition() == typeof(IEnumerable<>) || to.GetGenericTypeDefinition() == typeof(List<>)) && to.GetGenericArguments().Length >= 1 && (!(to.GetGenericArguments()[0] == typeof(string)) || !(obj is string)) && obj is IEnumerable enumerable)
+
+		// Token: 0x0600513A RID: 20794 RVA: 0x001A64C0 File Offset: 0x001A46C0
+		public static T Convert<T>(object obj)
 		{
-			Type type2 = to.GetGenericArguments()[0];
-			bool flag = true;
-			foreach (object item in enumerable)
+			return (T)((object)ConvertHelper.Convert(obj, typeof(T), default(T)));
+		}
+
+		// Token: 0x0600513B RID: 20795 RVA: 0x001A64F0 File Offset: 0x001A46F0
+		public static object Convert(object obj, Type to)
+		{
+			if (to.IsValueType)
 			{
-				if (!CanConvert(item, type2))
-				{
-					flag = false;
-					break;
-				}
+				return ConvertHelper.Convert(obj, to, Activator.CreateInstance(to));
 			}
-			if (flag)
+			return ConvertHelper.Convert(obj, to, null);
+		}
+
+		// Token: 0x0600513C RID: 20796 RVA: 0x001A6510 File Offset: 0x001A4710
+		public static object Convert(object obj, Type to, object defaultValue)
+		{
+			if (obj == null)
 			{
-				IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(type2));
+				return defaultValue;
+			}
+			if (to.IsAssignableFrom(obj.GetType()))
+			{
+				return obj;
+			}
+			if (to == typeof(string))
+			{
+				return obj.ToString();
+			}
+			string text = obj as string;
+			if (text != null && !to.IsPrimitive && ParseHelper.CanParse(to, (string)obj))
+			{
+				if (text == "")
 				{
-					foreach (object item2 in enumerable)
+					return defaultValue;
+				}
+				return ParseHelper.FromString(text, to);
+			}
+			else if (text != null && GenTypes.IsDef(to))
+			{
+				if (text == "")
+				{
+					return defaultValue;
+				}
+				return GenDefDatabase.GetDef(to, text, true);
+			}
+			else if (text != null && to == typeof(Faction))
+			{
+				if (text == "")
+				{
+					return defaultValue;
+				}
+				List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
+				for (int i = 0; i < allFactionsListForReading.Count; i++)
+				{
+					if (allFactionsListForReading[i].GetUniqueLoadID() == text)
 					{
-						list.Add(Convert(item2, type2));
+						return allFactionsListForReading[i];
 					}
-					return list;
 				}
-			}
-		}
-		if (obj is IEnumerable && !(obj is string))
-		{
-			IEnumerable e = (IEnumerable)obj;
-			if (GenCollection.Count_EnumerableBase(e) == 1)
-			{
-				object obj2 = GenCollection.FirstOrDefault_EnumerableBase(e);
-				if (CanConvert(obj2, to))
+				for (int j = 0; j < allFactionsListForReading.Count; j++)
 				{
-					return Convert(obj2, to);
+					if (allFactionsListForReading[j].HasName && allFactionsListForReading[j].Name == text)
+					{
+						return allFactionsListForReading[j];
+					}
 				}
-			}
-		}
-		if (typeof(IList).IsAssignableFrom(to))
-		{
-			IList list2 = (IList)Activator.CreateInstance(to);
-			Type[] genericArguments = to.GetGenericArguments();
-			if (genericArguments.Length >= 1)
-			{
-				list2.Add(Convert(obj, genericArguments[0]));
+				for (int k = 0; k < allFactionsListForReading.Count; k++)
+				{
+					if (allFactionsListForReading[k].def.defName == text)
+					{
+						return allFactionsListForReading[k];
+					}
+				}
+				if (text == "OfPlayer")
+				{
+					return Faction.OfPlayer;
+				}
+				return defaultValue;
 			}
 			else
 			{
-				list2.Add(obj);
+				if (ConvertHelper.CanConvertBetweenDataTypes(obj.GetType(), to))
+				{
+					return ConvertHelper.ConvertBetweenDataTypes(obj, to);
+				}
+				if (ConvertHelper.IsXml(obj) && !to.IsPrimitive)
+				{
+					try
+					{
+						Type type = to;
+						if (type == typeof(IEnumerable))
+						{
+							type = typeof(List<string>);
+						}
+						if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(IEnumerable<>) && type.GetGenericArguments().Length >= 1)
+						{
+							type = typeof(List<>).MakeGenericType(new Type[]
+							{
+								type.GetGenericArguments()[0]
+							});
+						}
+						XmlDocument xmlDocument = new XmlDocument();
+						xmlDocument.LoadXml("<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<root>\n" + text + "\n</root>");
+						object result = DirectXmlToObject.GetObjectFromXmlMethod(type)(xmlDocument.DocumentElement, true);
+						DirectXmlCrossRefLoader.ResolveAllWantedCrossReferences(FailMode.LogErrors);
+						return result;
+					}
+					finally
+					{
+						DirectXmlCrossRefLoader.Clear();
+					}
+				}
+				if (to.IsGenericType && (to.GetGenericTypeDefinition() == typeof(IEnumerable<>) || to.GetGenericTypeDefinition() == typeof(List<>)) && to.GetGenericArguments().Length >= 1 && (!(to.GetGenericArguments()[0] == typeof(string)) || !(obj is string)))
+				{
+					IEnumerable enumerable = obj as IEnumerable;
+					if (enumerable != null)
+					{
+						Type type2 = to.GetGenericArguments()[0];
+						bool flag = true;
+						using (IEnumerator enumerator = enumerable.GetEnumerator())
+						{
+							while (enumerator.MoveNext())
+							{
+								if (!ConvertHelper.CanConvert(enumerator.Current, type2))
+								{
+									flag = false;
+									break;
+								}
+							}
+						}
+						if (flag)
+						{
+							IList list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(new Type[]
+							{
+								type2
+							}));
+							foreach (object obj2 in enumerable)
+							{
+								list.Add(ConvertHelper.Convert(obj2, type2));
+							}
+							return list;
+						}
+					}
+				}
+				if (obj is IEnumerable && !(obj is string))
+				{
+					IEnumerable e = (IEnumerable)obj;
+					if (GenCollection.Count_EnumerableBase(e) == 1)
+					{
+						object obj3 = GenCollection.FirstOrDefault_EnumerableBase(e);
+						if (ConvertHelper.CanConvert(obj3, to))
+						{
+							return ConvertHelper.Convert(obj3, to);
+						}
+					}
+				}
+				if (typeof(IList).IsAssignableFrom(to))
+				{
+					IList list2 = (IList)Activator.CreateInstance(to);
+					Type[] genericArguments = to.GetGenericArguments();
+					if (genericArguments.Length >= 1)
+					{
+						list2.Add(ConvertHelper.Convert(obj, genericArguments[0]));
+					}
+					else
+					{
+						list2.Add(obj);
+					}
+					return list2;
+				}
+				if (to == typeof(IEnumerable))
+				{
+					return Gen.YieldSingleNonGeneric<object>(obj);
+				}
+				object result2;
+				if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(IEnumerable<>))
+				{
+					Type[] genericArguments2 = to.GetGenericArguments();
+					if (genericArguments2.Length >= 1)
+					{
+						IList list3 = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(new Type[]
+						{
+							genericArguments2[0]
+						}));
+						list3.Add(ConvertHelper.Convert(obj, genericArguments2[0]));
+						return list3;
+					}
+					return Gen.YieldSingleNonGeneric<object>(obj);
+				}
+				else
+				{
+					IConvertible convertible = obj as IConvertible;
+					if (convertible == null)
+					{
+						return defaultValue;
+					}
+					try
+					{
+						result2 = ConvertHelper.ConvertToPrimitive(convertible, to, defaultValue);
+					}
+					catch (FormatException)
+					{
+						result2 = defaultValue;
+					}
+				}
+				return result2;
 			}
-			return list2;
 		}
-		if (to == typeof(IEnumerable))
+
+		// Token: 0x0600513D RID: 20797 RVA: 0x001A6A1C File Offset: 0x001A4C1C
+		public static bool IsXml(object obj)
 		{
-			return Gen.YieldSingleNonGeneric(obj);
-		}
-		if (to.IsGenericType && to.GetGenericTypeDefinition() == typeof(IEnumerable<>))
-		{
-			Type[] genericArguments2 = to.GetGenericArguments();
-			if (genericArguments2.Length >= 1)
+			if (obj is TaggedString)
 			{
-				IList obj3 = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(genericArguments2[0]));
-				obj3.Add(Convert(obj, genericArguments2[0]));
-				return obj3;
+				return false;
 			}
-			return Gen.YieldSingleNonGeneric(obj);
+			string text = obj as string;
+			if (text == null || text.IndexOf('<') < 0 || text.IndexOf('>') < 0)
+			{
+				return false;
+			}
+			string text2 = text.Trim();
+			return text2[0] == '<' && text2[text2.Length - 1] == '>';
 		}
-		if (!(obj is IConvertible obj4))
+
+		// Token: 0x0600513E RID: 20798 RVA: 0x001A6A7C File Offset: 0x001A4C7C
+		private static object ConvertToPrimitive(IConvertible obj, Type to, object defaultValue)
 		{
+			CultureInfo invariantCulture = CultureInfo.InvariantCulture;
+			Type left = Nullable.GetUnderlyingType(to) ?? to;
+			if (left == typeof(bool))
+			{
+				return System.Convert.ToBoolean(obj, invariantCulture);
+			}
+			if (left == typeof(byte))
+			{
+				return System.Convert.ToByte(obj, invariantCulture);
+			}
+			if (left == typeof(char))
+			{
+				return System.Convert.ToChar(obj, invariantCulture);
+			}
+			if (left == typeof(DateTime))
+			{
+				return System.Convert.ToDateTime(obj, invariantCulture);
+			}
+			if (left == typeof(decimal))
+			{
+				return System.Convert.ToDecimal(obj, invariantCulture);
+			}
+			if (left == typeof(double))
+			{
+				return System.Convert.ToDouble(obj, invariantCulture);
+			}
+			if (left == typeof(short))
+			{
+				return System.Convert.ToInt16(obj, invariantCulture);
+			}
+			if (left == typeof(int))
+			{
+				return System.Convert.ToInt32(obj, invariantCulture);
+			}
+			if (left == typeof(long))
+			{
+				return System.Convert.ToInt64(obj, invariantCulture);
+			}
+			if (left == typeof(sbyte))
+			{
+				return System.Convert.ToSByte(obj, invariantCulture);
+			}
+			if (left == typeof(float))
+			{
+				return System.Convert.ToSingle(obj, invariantCulture);
+			}
+			if (left == typeof(string))
+			{
+				return System.Convert.ToString(obj, invariantCulture);
+			}
+			if (left == typeof(ushort))
+			{
+				return System.Convert.ToUInt16(obj, invariantCulture);
+			}
+			if (left == typeof(uint))
+			{
+				return System.Convert.ToUInt32(obj, invariantCulture);
+			}
+			if (left == typeof(ulong))
+			{
+				return System.Convert.ToUInt64(obj, invariantCulture);
+			}
 			return defaultValue;
 		}
-		try
-		{
-			return ConvertToPrimitive(obj4, to, defaultValue);
-		}
-		catch (FormatException)
-		{
-			return defaultValue;
-		}
-	}
 
-	public static bool IsXml(object obj)
-	{
-		if (obj is TaggedString)
+		// Token: 0x0600513F RID: 20799 RVA: 0x001A6C68 File Offset: 0x001A4E68
+		private static bool CanConvertBetweenDataTypes(Type from, Type to)
 		{
-			return false;
+			return (from == typeof(IntRange) && to == typeof(FloatRange)) || (from == typeof(FloatRange) && to == typeof(IntRange));
 		}
-		if (!(obj is string text) || text.IndexOf('<') < 0 || text.IndexOf('>') < 0)
-		{
-			return false;
-		}
-		string text2 = text.Trim();
-		if (text2[0] == '<')
-		{
-			return text2[text2.Length - 1] == '>';
-		}
-		return false;
-	}
 
-	private static object ConvertToPrimitive(IConvertible obj, Type to, object defaultValue)
-	{
-		CultureInfo invariantCulture = CultureInfo.InvariantCulture;
-		Type type = Nullable.GetUnderlyingType(to) ?? to;
-		if (type == typeof(bool))
+		// Token: 0x06005140 RID: 20800 RVA: 0x001A6CC0 File Offset: 0x001A4EC0
+		private static object ConvertBetweenDataTypes(object from, Type to)
 		{
-			return System.Convert.ToBoolean(obj, invariantCulture);
-		}
-		if (type == typeof(byte))
-		{
-			return System.Convert.ToByte(obj, invariantCulture);
-		}
-		if (type == typeof(char))
-		{
-			return System.Convert.ToChar(obj, invariantCulture);
-		}
-		if (type == typeof(DateTime))
-		{
-			return System.Convert.ToDateTime(obj, invariantCulture);
-		}
-		if (type == typeof(decimal))
-		{
-			return System.Convert.ToDecimal(obj, invariantCulture);
-		}
-		if (type == typeof(double))
-		{
-			return System.Convert.ToDouble(obj, invariantCulture);
-		}
-		if (type == typeof(short))
-		{
-			return System.Convert.ToInt16(obj, invariantCulture);
-		}
-		if (type == typeof(int))
-		{
-			return System.Convert.ToInt32(obj, invariantCulture);
-		}
-		if (type == typeof(long))
-		{
-			return System.Convert.ToInt64(obj, invariantCulture);
-		}
-		if (type == typeof(sbyte))
-		{
-			return System.Convert.ToSByte(obj, invariantCulture);
-		}
-		if (type == typeof(float))
-		{
-			return System.Convert.ToSingle(obj, invariantCulture);
-		}
-		if (type == typeof(string))
-		{
-			return System.Convert.ToString(obj, invariantCulture);
-		}
-		if (type == typeof(ushort))
-		{
-			return System.Convert.ToUInt16(obj, invariantCulture);
-		}
-		if (type == typeof(uint))
-		{
-			return System.Convert.ToUInt32(obj, invariantCulture);
-		}
-		if (type == typeof(ulong))
-		{
-			return System.Convert.ToUInt64(obj, invariantCulture);
-		}
-		return defaultValue;
-	}
-
-	private static bool CanConvertBetweenDataTypes(Type from, Type to)
-	{
-		if (!(from == typeof(IntRange)) || !(to == typeof(FloatRange)))
-		{
-			if (from == typeof(FloatRange))
+			if (from is IntRange)
 			{
-				return to == typeof(IntRange);
+				IntRange intRange = (IntRange)from;
+				if (to == typeof(FloatRange))
+				{
+					return new FloatRange((float)intRange.min, (float)intRange.max);
+				}
 			}
-			return false;
+			if (from is FloatRange)
+			{
+				FloatRange floatRange = (FloatRange)from;
+				if (to == typeof(IntRange))
+				{
+					return new IntRange(Mathf.RoundToInt(floatRange.min), Mathf.RoundToInt(floatRange.max));
+				}
+			}
+			return null;
 		}
-		return true;
-	}
-
-	private static object ConvertBetweenDataTypes(object from, Type to)
-	{
-		if (from is IntRange intRange && to == typeof(FloatRange))
-		{
-			return new FloatRange(intRange.min, intRange.max);
-		}
-		if (from is FloatRange floatRange && to == typeof(IntRange))
-		{
-			return new IntRange(Mathf.RoundToInt(floatRange.min), Mathf.RoundToInt(floatRange.max));
-		}
-		return null;
 	}
 }

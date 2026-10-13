@@ -1,93 +1,104 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_MergeOutcomes : QuestPart
+namespace RimWorld
 {
-	public List<string> inSignals = new List<string>();
-
-	public string outSignal;
-
-	private List<QuestEndOutcome?> signalsReceived = new List<QuestEndOutcome?>();
-
-	public override void Notify_QuestSignalReceived(Signal signal)
+	// Token: 0x02001BD2 RID: 7122
+	public class QuestPart_MergeOutcomes : QuestPart
 	{
-		base.Notify_QuestSignalReceived(signal);
-		int num = inSignals.IndexOf(signal.tag);
-		if (num >= 0)
+		// Token: 0x06009E93 RID: 40595 RVA: 0x002DDADC File Offset: 0x002DBCDC
+		public override void Notify_QuestSignalReceived(Signal signal)
 		{
-			while (signalsReceived.Count <= num)
+			base.Notify_QuestSignalReceived(signal);
+			int num = this.inSignals.IndexOf(signal.tag);
+			if (num >= 0)
 			{
-				signalsReceived.Add(null);
+				while (this.signalsReceived.Count <= num)
+				{
+					this.signalsReceived.Add(null);
+				}
+				this.signalsReceived[num] = new QuestEndOutcome?(this.GetOutcome(signal.args));
+				this.CheckEnd();
 			}
-			signalsReceived[num] = GetOutcome(signal.args);
-			CheckEnd();
 		}
-	}
 
-	private QuestEndOutcome GetOutcome(SignalArgs args)
-	{
-		if (args.TryGetArg("OUTCOME", out QuestEndOutcome arg))
+		// Token: 0x06009E94 RID: 40596 RVA: 0x002DDB50 File Offset: 0x002DBD50
+		private QuestEndOutcome GetOutcome(SignalArgs args)
 		{
-			return arg;
+			QuestEndOutcome result;
+			if (args.TryGetArg<QuestEndOutcome>("OUTCOME", out result))
+			{
+				return result;
+			}
+			return QuestEndOutcome.Unknown;
 		}
-		return QuestEndOutcome.Unknown;
-	}
 
-	private void CheckEnd()
-	{
-		bool flag = false;
-		bool flag2 = false;
-		bool flag3 = inSignals.Count == signalsReceived.Count;
-		for (int i = 0; i < signalsReceived.Count; i++)
+		// Token: 0x06009E95 RID: 40597 RVA: 0x002DDB70 File Offset: 0x002DBD70
+		private void CheckEnd()
 		{
-			if (!signalsReceived[i].HasValue)
+			bool flag = false;
+			bool flag2 = false;
+			bool flag3 = this.inSignals.Count == this.signalsReceived.Count;
+			for (int i = 0; i < this.signalsReceived.Count; i++)
 			{
-				flag3 = false;
+				if (this.signalsReceived[i] == null)
+				{
+					flag3 = false;
+				}
+				else if (this.signalsReceived[i].Value == QuestEndOutcome.Success)
+				{
+					flag = true;
+				}
+				else if (this.signalsReceived[i].Value == QuestEndOutcome.Fail)
+				{
+					flag2 = true;
+				}
 			}
-			else if (signalsReceived[i].Value == QuestEndOutcome.Success)
+			if (flag2)
 			{
-				flag = true;
+				Find.SignalManager.SendSignal(new Signal(this.outSignal, QuestEndOutcome.Fail.Named("OUTCOME")));
+				return;
 			}
-			else if (signalsReceived[i].Value == QuestEndOutcome.Fail)
+			if (flag3)
 			{
-				flag2 = true;
+				if (flag)
+				{
+					Find.SignalManager.SendSignal(new Signal(this.outSignal, QuestEndOutcome.Success.Named("OUTCOME")));
+					return;
+				}
+				Find.SignalManager.SendSignal(new Signal(this.outSignal, QuestEndOutcome.Unknown.Named("OUTCOME")));
 			}
 		}
-		if (flag2)
-		{
-			Find.SignalManager.SendSignal(new Signal(outSignal, QuestEndOutcome.Fail.Named("OUTCOME")));
-		}
-		else if (flag3)
-		{
-			if (flag)
-			{
-				Find.SignalManager.SendSignal(new Signal(outSignal, QuestEndOutcome.Success.Named("OUTCOME")));
-			}
-			else
-			{
-				Find.SignalManager.SendSignal(new Signal(outSignal, QuestEndOutcome.Unknown.Named("OUTCOME")));
-			}
-		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Collections.Look(ref inSignals, "inSignals", LookMode.Value);
-		Scribe_Values.Look(ref outSignal, "outSignal");
-		Scribe_Collections.Look(ref signalsReceived, "signalsReceived", LookMode.Value);
-	}
-
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		inSignals.Clear();
-		for (int i = 0; i < 3; i++)
+		// Token: 0x06009E96 RID: 40598 RVA: 0x002DDC7C File Offset: 0x002DBE7C
+		public override void ExposeData()
 		{
-			inSignals.Add("DebugSignal" + Rand.Int);
+			base.ExposeData();
+			Scribe_Collections.Look<string>(ref this.inSignals, "inSignals", LookMode.Value, Array.Empty<object>());
+			Scribe_Values.Look<string>(ref this.outSignal, "outSignal", null, false);
+			Scribe_Collections.Look<QuestEndOutcome?>(ref this.signalsReceived, "signalsReceived", LookMode.Value, Array.Empty<object>());
 		}
-		outSignal = "DebugSignal" + Rand.Int;
+
+		// Token: 0x06009E97 RID: 40599 RVA: 0x002DDCD0 File Offset: 0x002DBED0
+		public override void AssignDebugData()
+		{
+			base.AssignDebugData();
+			this.inSignals.Clear();
+			for (int i = 0; i < 3; i++)
+			{
+				this.inSignals.Add("DebugSignal" + Rand.Int.ToString());
+			}
+			this.outSignal = "DebugSignal" + Rand.Int.ToString();
+		}
+
+		// Token: 0x04006DC2 RID: 28098
+		public List<string> inSignals = new List<string>();
+
+		// Token: 0x04006DC3 RID: 28099
+		public string outSignal;
+
+		// Token: 0x04006DC4 RID: 28100
+		private List<QuestEndOutcome?> signalsReceived = new List<QuestEndOutcome?>();
 	}
 }

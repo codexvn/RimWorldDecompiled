@@ -1,14 +1,18 @@
+﻿using System;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordJob_FleshbeastAssault : LordJob
+namespace RimWorld
 {
-	public override StateGraph CreateGraph()
+	// Token: 0x02001655 RID: 5717
+	public class LordJob_FleshbeastAssault : LordJob
 	{
-		StateGraph stateGraph = new StateGraph();
-		LordToil_FleshbeastAssault toil = new LordToil_FleshbeastAssault();
-		stateGraph.AddToil(toil);
-		return stateGraph;
+		// Token: 0x060086C5 RID: 34501 RVA: 0x00283AAC File Offset: 0x00281CAC
+		public override StateGraph CreateGraph()
+		{
+			StateGraph stateGraph = new StateGraph();
+			LordToil_FleshbeastAssault toil = new LordToil_FleshbeastAssault();
+			stateGraph.AddToil(toil);
+			return stateGraph;
+		}
 	}
 }

@@ -1,7 +1,10 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class WeaponCategoryDef : Def
+namespace RimWorld
 {
+	// Token: 0x02001B28 RID: 6952
+	public class WeaponCategoryDef : Def
+	{
+	}
 }

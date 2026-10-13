@@ -1,27 +1,37 @@
-using System;
+﻿using System;
 
-namespace Verse.AI.Group;
-
-public class Trigger_TickCondition : Trigger
+namespace Verse.AI.Group
 {
-	private Func<bool> condition;
-
-	private int checkEveryTicks = 1;
-
-	private TriggerData_Reason Data => (TriggerData_Reason)data;
-
-	public Trigger_TickCondition(Func<bool> condition, int checkEveryTicks = 1)
+	// Token: 0x020010C5 RID: 4293
+	public class Trigger_TickCondition : Trigger
 	{
-		this.condition = condition;
-		this.checkEveryTicks = checkEveryTicks;
-	}
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
-	{
-		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % checkEveryTicks == 0)
+		// Token: 0x1700103A RID: 4154
+		// (get) Token: 0x06006906 RID: 26886 RVA: 0x00212257 File Offset: 0x00210457
+		private TriggerData_Reason Data
 		{
-			return condition();
+			get
+			{
+				return (TriggerData_Reason)this.data;
+			}
 		}
-		return false;
+
+		// Token: 0x06006907 RID: 26887 RVA: 0x00212264 File Offset: 0x00210464
+		public Trigger_TickCondition(Func<bool> condition, int checkEveryTicks = 1)
+		{
+			this.condition = condition;
+			this.checkEveryTicks = checkEveryTicks;
+		}
+
+		// Token: 0x06006908 RID: 26888 RVA: 0x00212281 File Offset: 0x00210481
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
+		{
+			return signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % this.checkEveryTicks == 0 && this.condition();
+		}
+
+		// Token: 0x04004A5E RID: 19038
+		private Func<bool> condition;
+
+		// Token: 0x04004A5F RID: 19039
+		private int checkEveryTicks = 1;
 	}
 }

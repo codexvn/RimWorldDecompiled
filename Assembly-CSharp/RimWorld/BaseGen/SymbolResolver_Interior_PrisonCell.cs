@@ -1,21 +1,25 @@
-namespace RimWorld.BaseGen;
+﻿using System;
 
-public class SymbolResolver_Interior_PrisonCell : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private const int FoodStockpileSize = 3;
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003998 RID: 14744
+	public class SymbolResolver_Interior_PrisonCell : SymbolResolver
 	{
-		ThingSetMakerParams value = new ThingSetMakerParams
+		// Token: 0x060143DB RID: 82907 RVA: 0x0060AB14 File Offset: 0x00608D14
+		public override void Resolve(ResolveParams rp)
 		{
-			techLevel = ((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Spacer)
-		};
-		ResolveParams resolveParams = rp;
-		resolveParams.thingSetMakerDef = ThingSetMakerDefOf.MapGen_PrisonCellStockpile;
-		resolveParams.thingSetMakerParams = value;
-		resolveParams.innerStockpileSize = 3;
-		BaseGen.symbolStack.Push("innerStockpile", resolveParams);
-		InteriorSymbolResolverUtility.PushBedroomHeatersCoolersAndLightSourcesSymbols(rp, hasToSpawnLightSource: false);
-		BaseGen.symbolStack.Push("prisonerBed", rp);
+			ThingSetMakerParams value = default(ThingSetMakerParams);
+			value.techLevel = new TechLevel?((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Spacer);
+			ResolveParams resolveParams = rp;
+			resolveParams.thingSetMakerDef = ThingSetMakerDefOf.MapGen_PrisonCellStockpile;
+			resolveParams.thingSetMakerParams = new ThingSetMakerParams?(value);
+			resolveParams.innerStockpileSize = new int?(3);
+			BaseGen.symbolStack.Push("innerStockpile", resolveParams, null);
+			InteriorSymbolResolverUtility.PushBedroomHeatersCoolersAndLightSourcesSymbols(rp, false);
+			BaseGen.symbolStack.Push("prisonerBed", rp, null);
+		}
+
+		// Token: 0x0400DFAD RID: 57261
+		private const int FoodStockpileSize = 3;
 	}
 }

@@ -1,145 +1,175 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_AddContentsToShuttle : QuestPart
+namespace RimWorld
 {
-	public string inSignal;
-
-	public Thing shuttle;
-
-	private List<Thing> items = new List<Thing>();
-
-	private List<Pawn> pawns = new List<Pawn>();
-
-	public IEnumerable<Thing> Things
+	// Token: 0x02001BFF RID: 7167
+	public class QuestPart_AddContentsToShuttle : QuestPart
 	{
-		get
+		// Token: 0x17001880 RID: 6272
+		// (get) Token: 0x06009F85 RID: 40837 RVA: 0x002E0B9E File Offset: 0x002DED9E
+		// (set) Token: 0x06009F86 RID: 40838 RVA: 0x002E0BB8 File Offset: 0x002DEDB8
+		public IEnumerable<Thing> Things
 		{
-			return items.Concat(pawns.Cast<Thing>());
-		}
-		set
-		{
-			items.Clear();
-			pawns.Clear();
-			if (value == null)
+			get
 			{
-				return;
+				return this.items.Concat(this.pawns.Cast<Thing>());
 			}
-			foreach (Thing item2 in value)
+			set
 			{
-				if (item2.Destroyed)
+				this.items.Clear();
+				this.pawns.Clear();
+				if (value != null)
 				{
-					Log.Error("Tried to add a destroyed thing to QuestPart_AddContentsToShuttle: " + item2.ToStringSafe());
+					foreach (Thing thing in value)
+					{
+						if (thing.Destroyed)
+						{
+							Log.Error("Tried to add a destroyed thing to QuestPart_AddContentsToShuttle: " + thing.ToStringSafe<Thing>());
+						}
+						else
+						{
+							Pawn pawn = thing as Pawn;
+							if (pawn != null)
+							{
+								this.pawns.Add(pawn);
+							}
+							else
+							{
+								this.items.Add(thing);
+							}
+						}
+					}
 				}
-				else if (item2 is Pawn item)
+			}
+		}
+
+		// Token: 0x17001881 RID: 6273
+		// (get) Token: 0x06009F87 RID: 40839 RVA: 0x002E0C58 File Offset: 0x002DEE58
+		public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
+		{
+			get
+			{
+				foreach (Dialog_InfoCard.Hyperlink hyperlink in base.Hyperlinks)
 				{
-					pawns.Add(item);
+					yield return hyperlink;
 				}
-				else
+				IEnumerator<Dialog_InfoCard.Hyperlink> enumerator = null;
+				foreach (Thing outerThing in this.items)
 				{
-					items.Add(item2);
+					ThingDef def = outerThing.GetInnerIfMinified().def;
+					yield return new Dialog_InfoCard.Hyperlink(def, -1);
+				}
+				List<Thing>.Enumerator enumerator2 = default(List<Thing>.Enumerator);
+				yield break;
+				yield break;
+			}
+		}
+
+		// Token: 0x17001882 RID: 6274
+		// (get) Token: 0x06009F88 RID: 40840 RVA: 0x002E0C68 File Offset: 0x002DEE68
+		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		{
+			get
+			{
+				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				{
+					yield return globalTargetInfo;
+				}
+				IEnumerator<GlobalTargetInfo> enumerator = null;
+				foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
+				{
+					yield return t;
+				}
+				IEnumerator<Pawn> enumerator2 = null;
+				yield break;
+				yield break;
+			}
+		}
+
+		// Token: 0x06009F89 RID: 40841 RVA: 0x002E0C78 File Offset: 0x002DEE78
+		public override void Notify_QuestSignalReceived(Signal signal)
+		{
+			base.Notify_QuestSignalReceived(signal);
+			if (signal.tag == this.inSignal && this.shuttle != null)
+			{
+				this.pawns.RemoveAll((Pawn x) => x.Destroyed);
+				this.items.RemoveAll((Thing x) => x.Destroyed);
+				for (int i = 0; i < this.pawns.Count; i++)
+				{
+					if (this.pawns[i].IsWorldPawn())
+					{
+						Find.WorldPawns.RemovePawn(this.pawns[i]);
+					}
+				}
+				CompTransporter compTransporter = this.shuttle.TryGetComp<CompTransporter>();
+				compTransporter.innerContainer.TryAddRangeOrTransfer(this.pawns, true, false);
+				compTransporter.innerContainer.TryAddRangeOrTransfer(this.items, true, false);
+				this.items.Clear();
+			}
+		}
+
+		// Token: 0x06009F8A RID: 40842 RVA: 0x002E0D7D File Offset: 0x002DEF7D
+		public override bool QuestPartReserves(Pawn p)
+		{
+			return this.pawns.Contains(p);
+		}
+
+		// Token: 0x06009F8B RID: 40843 RVA: 0x002E0D8B File Offset: 0x002DEF8B
+		public override void ReplacePawnReferences(Pawn replace, Pawn with)
+		{
+			this.pawns.Replace(replace, with);
+		}
+
+		// Token: 0x06009F8C RID: 40844 RVA: 0x002E0D9C File Offset: 0x002DEF9C
+		public override void Cleanup()
+		{
+			base.Cleanup();
+			for (int i = 0; i < this.items.Count; i++)
+			{
+				if (!this.items[i].Destroyed)
+				{
+					this.items[i].Destroy(DestroyMode.Vanish);
 				}
 			}
+			this.items.Clear();
 		}
-	}
 
-	public override IEnumerable<Dialog_InfoCard.Hyperlink> Hyperlinks
-	{
-		get
+		// Token: 0x06009F8D RID: 40845 RVA: 0x002E0DF8 File Offset: 0x002DEFF8
+		public override void ExposeData()
 		{
-			foreach (Dialog_InfoCard.Hyperlink hyperlink in base.Hyperlinks)
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
+			Scribe_Collections.Look<Thing>(ref this.items, "items", LookMode.Deep, Array.Empty<object>());
+			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
+			Scribe_References.Look<Thing>(ref this.shuttle, "shuttle", false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				yield return hyperlink;
-			}
-			foreach (Thing item in items)
-			{
-				ThingDef def = item.GetInnerIfMinified().def;
-				yield return new Dialog_InfoCard.Hyperlink(def);
-			}
-		}
-	}
-
-	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
-	{
-		get
-		{
-			foreach (GlobalTargetInfo questLookTarget in base.QuestLookTargets)
-			{
-				yield return questLookTarget;
-			}
-			foreach (Pawn questLookTarget2 in PawnsArriveQuestPartUtility.GetQuestLookTargets(pawns))
-			{
-				yield return questLookTarget2;
+				this.items.RemoveAll((Thing x) => x == null);
+				this.pawns.RemoveAll((Pawn x) => x == null);
 			}
 		}
-	}
 
-	public override void Notify_QuestSignalReceived(Signal signal)
-	{
-		base.Notify_QuestSignalReceived(signal);
-		if (!(signal.tag == inSignal) || shuttle == null)
+		// Token: 0x06009F8E RID: 40846 RVA: 0x002E0EB8 File Offset: 0x002DF0B8
+		public override void AssignDebugData()
 		{
-			return;
+			base.AssignDebugData();
+			this.inSignal = "DebugSignal" + Rand.Int.ToString();
 		}
-		pawns.RemoveAll((Pawn x) => x.Destroyed);
-		items.RemoveAll((Thing x) => x.Destroyed);
-		for (int num = 0; num < pawns.Count; num++)
-		{
-			if (pawns[num].IsWorldPawn())
-			{
-				Find.WorldPawns.RemovePawn(pawns[num]);
-			}
-		}
-		CompTransporter compTransporter = shuttle.TryGetComp<CompTransporter>();
-		compTransporter.innerContainer.TryAddRangeOrTransfer(pawns);
-		compTransporter.innerContainer.TryAddRangeOrTransfer(items);
-		items.Clear();
-	}
 
-	public override bool QuestPartReserves(Pawn p)
-	{
-		return pawns.Contains(p);
-	}
+		// Token: 0x04006E5B RID: 28251
+		public string inSignal;
 
-	public override void ReplacePawnReferences(Pawn replace, Pawn with)
-	{
-		pawns.Replace(replace, with);
-	}
+		// Token: 0x04006E5C RID: 28252
+		public Thing shuttle;
 
-	public override void Cleanup()
-	{
-		base.Cleanup();
-		for (int i = 0; i < items.Count; i++)
-		{
-			if (!items[i].Destroyed)
-			{
-				items[i].Destroy();
-			}
-		}
-		items.Clear();
-	}
+		// Token: 0x04006E5D RID: 28253
+		private List<Thing> items = new List<Thing>();
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref inSignal, "inSignal");
-		Scribe_Collections.Look(ref items, "items", LookMode.Deep);
-		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
-		Scribe_References.Look(ref shuttle, "shuttle");
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			items.RemoveAll((Thing x) => x == null);
-			pawns.RemoveAll((Pawn x) => x == null);
-		}
-	}
-
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		inSignal = "DebugSignal" + Rand.Int;
+		// Token: 0x04006E5E RID: 28254
+		private List<Pawn> pawns = new List<Pawn>();
 	}
 }

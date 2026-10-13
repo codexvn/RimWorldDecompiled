@@ -1,76 +1,96 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_ReleaseAnimalToWild : JobDriver
+namespace RimWorld
 {
-	private const TargetIndex AnimalInd = TargetIndex.A;
-
-	private const int WaitForTicks = 180;
-
-	protected Pawn Animal => (Pawn)job.targetA.Thing;
-
-	public static bool TryFindClosestOutsideCell(IntVec3 root, Map map, TraverseParms traverseParms, Pawn pawn, out IntVec3 cell)
+	// Token: 0x02001127 RID: 4391
+	public class JobDriver_ReleaseAnimalToWild : JobDriver
 	{
-		cell = default(IntVec3);
-		if (CellFinder.TryFindClosestRegionWith(root.GetRegion(map), traverseParms, (Region r) => r.District.TouchesMapEdge, 99999, out var result))
+		// Token: 0x17001087 RID: 4231
+		// (get) Token: 0x06006B18 RID: 27416 RVA: 0x0021B747 File Offset: 0x00219947
+		protected Pawn Animal
 		{
-			float num = float.PositiveInfinity;
-			foreach (IntVec3 cell2 in result.Cells)
+			get
 			{
-				if (cell2.Standable(map) && (pawn == null || !cell2.IsForbidden(pawn)))
+				return (Pawn)this.job.targetA.Thing;
+			}
+		}
+
+		// Token: 0x06006B19 RID: 27417 RVA: 0x0021C1D0 File Offset: 0x0021A3D0
+		public static bool TryFindClosestOutsideCell(IntVec3 root, Map map, TraverseParms traverseParms, Pawn pawn, out IntVec3 cell)
+		{
+			cell = default(IntVec3);
+			Region region;
+			if (CellFinder.TryFindClosestRegionWith(root.GetRegion(map, RegionType.Set_Passable), traverseParms, (Region r) => r.District.TouchesMapEdge, 99999, out region, RegionType.Set_Passable))
+			{
+				float num = float.PositiveInfinity;
+				foreach (IntVec3 intVec in region.Cells)
 				{
-					float num2 = cell2.DistanceToSquared(root);
-					if (num2 < num)
+					if (intVec.Standable(map) && (pawn == null || !intVec.IsForbidden(pawn)))
 					{
-						num = num2;
-						cell = cell2;
+						float num2 = (float)intVec.DistanceToSquared(root);
+						if (num2 < num)
+						{
+							num = num2;
+							cell = intVec;
+						}
 					}
 				}
+				return num != float.PositiveInfinity;
 			}
-			return num != float.PositiveInfinity;
+			return false;
 		}
-		return false;
-	}
 
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
-	{
-		return pawn.Reserve(job.GetTarget(TargetIndex.A), job, 1, -1, null, errorOnFailed);
-	}
+		// Token: 0x06006B1A RID: 27418 RVA: 0x001D81A7 File Offset: 0x001D63A7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A), this.job, 1, -1, null, errorOnFailed, false);
+		}
 
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOn(() => Animal.Dead);
-		this.FailOn(() => Animal.Faction != Faction.OfPlayer);
-		this.FailOn(() => Animal.InAggroMentalState);
-		this.FailOn(() => Animal.MapHeld.designationManager.DesignationOn(Animal, DesignationDefOf.ReleaseAnimalToWild) == null);
-		yield return Toils_Reserve.Reserve(TargetIndex.A);
-		yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell);
-		Toil waitToil = Toils_General.WaitWith(TargetIndex.A, 180).WithProgressBarToilDelay(TargetIndex.A);
-		yield return Toils_Jump.JumpIf(waitToil, () => Animal.Position.GetRegion(base.Map).District.TouchesMapEdge);
-		yield return Toils_Haul.StartCarryThing(TargetIndex.A);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.initAction = delegate
+		// Token: 0x06006B1B RID: 27419 RVA: 0x0021C29C File Offset: 0x0021A49C
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			Pawn actor = toil.actor;
-			if (!TryFindClosestOutsideCell(actor.Position, actor.Map, TraverseParms.For(actor), actor, out var cell))
+			this.FailOn(() => this.Animal.Dead);
+			this.FailOn(() => this.Animal.Faction != Faction.OfPlayer);
+			this.FailOn(() => this.Animal.InAggroMentalState);
+			this.FailOn(() => this.Animal.MapHeld.designationManager.DesignationOn(this.Animal, DesignationDefOf.ReleaseAnimalToWild) == null);
+			yield return Toils_Reserve.Reserve(TargetIndex.A, 1, -1, null, false);
+			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.OnCell, false);
+			Toil waitToil = Toils_General.WaitWith(TargetIndex.A, 180, false, false, false, TargetIndex.None, PathEndMode.Touch).WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
+			yield return Toils_Jump.JumpIf(waitToil, () => this.Animal.Position.GetRegion(base.Map, RegionType.Set_Passable).District.TouchesMapEdge);
+			JobDriver_ReleaseAnimalToWild.<>c__DisplayClass6_0 CS$<>8__locals1 = new JobDriver_ReleaseAnimalToWild.<>c__DisplayClass6_0();
+			CS$<>8__locals1.<>4__this = this;
+			yield return Toils_Haul.StartCarryThing(TargetIndex.A, false, false, false, true, false);
+			CS$<>8__locals1.toil = ToilMaker.MakeToil("MakeNewToils");
+			CS$<>8__locals1.toil.initAction = delegate()
 			{
-				EndJobWith(JobCondition.Incompletable);
-			}
-			else
+				Pawn actor = CS$<>8__locals1.toil.actor;
+				IntVec3 c;
+				if (!JobDriver_ReleaseAnimalToWild.TryFindClosestOutsideCell(actor.Position, actor.Map, TraverseParms.For(actor, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), actor, out c))
+				{
+					CS$<>8__locals1.<>4__this.EndJobWith(JobCondition.Incompletable);
+					return;
+				}
+				actor.pather.StartPath(c, PathEndMode.OnCell);
+			};
+			CS$<>8__locals1.toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+			yield return CS$<>8__locals1.toil;
+			yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.A, null, false, false);
+			CS$<>8__locals1 = null;
+			yield return waitToil;
+			yield return Toils_General.Do(delegate
 			{
-				actor.pather.StartPath(cell, PathEndMode.OnCell);
-			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-		yield return toil;
-		yield return Toils_Haul.PlaceHauledThingInCell(TargetIndex.A, null, storageMode: false);
-		yield return waitToil;
-		yield return Toils_General.Do(delegate
-		{
-			ReleaseAnimalToWildUtility.DoReleaseAnimal(Animal, pawn);
-		});
+				ReleaseAnimalToWildUtility.DoReleaseAnimal(this.Animal, this.pawn);
+			});
+			yield break;
+		}
+
+		// Token: 0x04004B81 RID: 19329
+		private const TargetIndex AnimalInd = TargetIndex.A;
+
+		// Token: 0x04004B82 RID: 19330
+		private const int WaitForTicks = 180;
 	}
 }

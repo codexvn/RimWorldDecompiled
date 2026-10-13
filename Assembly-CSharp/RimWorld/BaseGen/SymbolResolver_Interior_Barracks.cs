@@ -1,10 +1,15 @@
-namespace RimWorld.BaseGen;
+﻿using System;
 
-public class SymbolResolver_Interior_Barracks : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003993 RID: 14739
+	public class SymbolResolver_Interior_Barracks : SymbolResolver
 	{
-		InteriorSymbolResolverUtility.PushBedroomHeatersCoolersAndLightSourcesSymbols(rp);
-		BaseGen.symbolStack.Push("fillWithBeds", rp);
+		// Token: 0x060143D0 RID: 82896 RVA: 0x0060A884 File Offset: 0x00608A84
+		public override void Resolve(ResolveParams rp)
+		{
+			InteriorSymbolResolverUtility.PushBedroomHeatersCoolersAndLightSourcesSymbols(rp, true);
+			BaseGen.symbolStack.Push("fillWithBeds", rp, null);
+		}
 	}
 }

@@ -1,19 +1,24 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class PlaceWorker_ShowPlantHarmRadius : PlaceWorker
+namespace RimWorld
 {
-	public override void DrawGhost(ThingDef def, IntVec3 center, Rot4 rot, Color ghostCol, Thing thing = null)
+	// Token: 0x02003801 RID: 14337
+	public class PlaceWorker_ShowPlantHarmRadius : PlaceWorker
 	{
-		if (thing == null)
+		// Token: 0x06013D8C RID: 81292 RVA: 0x005E481C File Offset: 0x005E2A1C
+		public override void DrawGhost(ThingDef def, IntVec3 center, Rot4 rot, Color ghostCol, Thing thing = null)
 		{
-			return;
-		}
-		CompPlantHarmRadius compPlantHarmRadius = thing.TryGetComp<CompPlantHarmRadius>();
-		if (compPlantHarmRadius != null)
-		{
+			if (thing == null)
+			{
+				return;
+			}
+			CompPlantHarmRadius compPlantHarmRadius = thing.TryGetComp<CompPlantHarmRadius>();
+			if (compPlantHarmRadius == null)
+			{
+				return;
+			}
 			float currentRadius = compPlantHarmRadius.CurrentRadius;
 			if (currentRadius < 50f)
 			{

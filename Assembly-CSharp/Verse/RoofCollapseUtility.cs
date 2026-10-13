@@ -1,53 +1,61 @@
-namespace Verse;
+﻿using System;
 
-public static class RoofCollapseUtility
+namespace Verse
 {
-	public const float RoofMaxSupportDistance = 6.9f;
-
-	public static readonly int RoofSupportRadialCellsCount = GenRadial.NumCellsInRadius(6.9f);
-
-	public static bool WithinRangeOfRoofHolder(IntVec3 c, Map map, bool assumeNonNoRoofCellsAreRoofed = false)
+	// Token: 0x02000520 RID: 1312
+	public static class RoofCollapseUtility
 	{
-		bool connected = false;
-		map.floodFiller.FloodFill(c, (IntVec3 x) => (x.Roofed(map) || x == c || (assumeNonNoRoofCellsAreRoofed && !map.areaManager.NoRoof[x])) && x.InHorDistOf(c, 6.9f), delegate(IntVec3 x)
+		// Token: 0x06002236 RID: 8758 RVA: 0x000B2690 File Offset: 0x000B0890
+		public static bool WithinRangeOfRoofHolder(IntVec3 c, Map map, bool assumeNonNoRoofCellsAreRoofed = false)
 		{
-			for (int i = 0; i < 5; i++)
+			bool connected = false;
+			map.floodFiller.FloodFill(c, (IntVec3 x) => (x.Roofed(map) || x == c || (assumeNonNoRoofCellsAreRoofed && !map.areaManager.NoRoof[x])) && x.InHorDistOf(c, 6.9f), delegate(IntVec3 x)
 			{
-				IntVec3 c2 = x + GenAdj.CardinalDirectionsAndInside[i];
-				if (c2.InBounds(map) && c2.InHorDistOf(c, 6.9f))
+				for (int i = 0; i < 5; i++)
 				{
-					Building edifice = c2.GetEdifice(map);
-					if (edifice != null && edifice.def.holdsRoof)
+					IntVec3 c2 = x + GenAdj.CardinalDirectionsAndInside[i];
+					if (c2.InBounds(map) && c2.InHorDistOf(c, 6.9f))
 					{
-						connected = true;
-						return true;
+						Building edifice = c2.GetEdifice(map);
+						if (edifice != null && edifice.def.holdsRoof)
+						{
+							connected = true;
+							return true;
+						}
 					}
 				}
-			}
-			return false;
-		});
-		return connected;
-	}
+				return false;
+			}, int.MaxValue, false, null);
+			return connected;
+		}
 
-	public static bool ConnectedToRoofHolder(IntVec3 c, Map map, bool assumeRoofAtRoot)
-	{
-		bool connected = false;
-		map.floodFiller.FloodFill(c, (IntVec3 x) => (x.Roofed(map) || (x == c && assumeRoofAtRoot)) && !connected, delegate(IntVec3 x)
+		// Token: 0x06002237 RID: 8759 RVA: 0x000B26FC File Offset: 0x000B08FC
+		public static bool ConnectedToRoofHolder(IntVec3 c, Map map, bool assumeRoofAtRoot)
 		{
-			for (int i = 0; i < 5; i++)
+			bool connected = false;
+			map.floodFiller.FloodFill(c, (IntVec3 x) => (x.Roofed(map) || (x == c & assumeRoofAtRoot)) && !connected, delegate(IntVec3 x)
 			{
-				IntVec3 c2 = x + GenAdj.CardinalDirectionsAndInside[i];
-				if (c2.InBounds(map))
+				for (int i = 0; i < 5; i++)
 				{
-					Building edifice = c2.GetEdifice(map);
-					if (edifice != null && edifice.def.holdsRoof)
+					IntVec3 c2 = x + GenAdj.CardinalDirectionsAndInside[i];
+					if (c2.InBounds(map))
 					{
-						connected = true;
-						break;
+						Building edifice = c2.GetEdifice(map);
+						if (edifice != null && edifice.def.holdsRoof)
+						{
+							connected = true;
+							return;
+						}
 					}
 				}
-			}
-		});
-		return connected;
+			}, int.MaxValue, false, null);
+			return connected;
+		}
+
+		// Token: 0x04001CCE RID: 7374
+		public const float RoofMaxSupportDistance = 6.9f;
+
+		// Token: 0x04001CCF RID: 7375
+		public static readonly int RoofSupportRadialCellsCount = GenRadial.NumCellsInRadius(6.9f);
 	}
 }

@@ -1,13 +1,18 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_EquippableAbility : CompProperties
+namespace RimWorld
 {
-	public AbilityDef abilityDef;
-
-	public CompProperties_EquippableAbility()
+	// Token: 0x02002C73 RID: 11379
+	public class CompProperties_EquippableAbility : CompProperties
 	{
-		compClass = typeof(CompEquippableAbility);
+		// Token: 0x0600FF2F RID: 65327 RVA: 0x0049F5D2 File Offset: 0x0049D7D2
+		public CompProperties_EquippableAbility()
+		{
+			this.compClass = typeof(CompEquippableAbility);
+		}
+
+		// Token: 0x0400A70C RID: 42764
+		public AbilityDef abilityDef;
 	}
 }

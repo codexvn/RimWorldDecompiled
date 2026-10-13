@@ -1,41 +1,48 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class CompShipPart : ThingComp
+namespace RimWorld
 {
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
+	// Token: 0x02002F12 RID: 12050
+	public class CompShipPart : ThingComp
 	{
-		Command_Action command_Action = new Command_Action();
-		command_Action.action = ShowReport;
-		command_Action.defaultLabel = "CommandShipLaunchReport".Translate();
-		command_Action.defaultDesc = "CommandShipLaunchReportDesc".Translate();
-		command_Action.hotKey = KeyBindingDefOf.Misc4;
-		command_Action.icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport");
-		yield return command_Action;
-	}
-
-	public void ShowReport()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		if (!ShipUtility.LaunchFailReasons((Building)parent).Any())
+		// Token: 0x06011032 RID: 69682 RVA: 0x004E4B0F File Offset: 0x004E2D0F
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
-			stringBuilder.AppendLine("ShipReportCanLaunch".Translate());
-		}
-		else
-		{
-			stringBuilder.AppendLine("ShipReportCannotLaunch".Translate());
-			foreach (string item in ShipUtility.LaunchFailReasons((Building)parent))
+			yield return new Command_Action
 			{
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine(item);
-			}
+				action = new Action(this.ShowReport),
+				defaultLabel = "CommandShipLaunchReport".Translate(),
+				defaultDesc = "CommandShipLaunchReportDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc4,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchReport", true)
+			};
+			yield break;
 		}
-		Dialog_MessageBox window = new Dialog_MessageBox(stringBuilder.ToString());
-		Find.WindowStack.Add(window);
+
+		// Token: 0x06011033 RID: 69683 RVA: 0x004E4B20 File Offset: 0x004E2D20
+		public void ShowReport()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			if (!ShipUtility.LaunchFailReasons((Building)this.parent).Any<string>())
+			{
+				stringBuilder.AppendLine("ShipReportCanLaunch".Translate());
+			}
+			else
+			{
+				stringBuilder.AppendLine("ShipReportCannotLaunch".Translate());
+				foreach (string value in ShipUtility.LaunchFailReasons((Building)this.parent))
+				{
+					stringBuilder.AppendLine();
+					stringBuilder.AppendLine(value);
+				}
+			}
+			Dialog_MessageBox window = new Dialog_MessageBox(stringBuilder.ToString(), null, null, null, null, null, false, null, null, WindowLayer.Dialog);
+			Find.WindowStack.Add(window);
+		}
 	}
 }

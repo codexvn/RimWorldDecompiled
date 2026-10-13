@@ -1,590 +1,663 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class Gene_Deathrest : Gene
+namespace RimWorld
 {
-	private int deathrestCapacity;
-
-	private List<Thing> boundBuildings = new List<Thing>();
-
-	public float adjustedDeathrestTicks;
-
-	public int deathrestTicks;
-
-	public bool autoWake;
-
-	public int chamberThoughtIndex = -1;
-
-	private bool notifiedWakeOK;
-
-	[Unsaved(false)]
-	private Gene_Hemogen cachedHemogenGene;
-
-	[Unsaved(false)]
-	private Need_Deathrest cachedDeathrestNeed;
-
-	[Unsaved(false)]
-	private List<CompDeathrestBindable> cachedBoundComps;
-
-	[Unsaved(false)]
-	private GeneGizmo_DeathrestCapacity gizmo;
-
-	private const int InitialDeathrestCapacity = 1;
-
-	public const int BaseDeathrestTicksWithoutInterruptedHediff = 240000;
-
-	public const float PresencePercentRequiredToApply = 0.75f;
-
-	private static readonly CachedTexture WakeCommandTex = new CachedTexture("UI/Gizmos/Wake");
-
-	private static readonly CachedTexture AutoWakeCommandTex = new CachedTexture("UI/Gizmos/DeathrestAutoWake");
-
-	private const int LessonDeathrestTicks = 200;
-
-	private const int SunlightCheckInterval = 150;
-
-	public Need_Deathrest DeathrestNeed
+	// Token: 0x02003837 RID: 14391
+	public class Gene_Deathrest : Gene
 	{
-		get
+		// Token: 0x170032A7 RID: 12967
+		// (get) Token: 0x06013E29 RID: 81449 RVA: 0x005E73E4 File Offset: 0x005E55E4
+		public Need_Deathrest DeathrestNeed
 		{
-			if (cachedDeathrestNeed == null)
+			get
 			{
-				pawn.needs.TryGetNeed(out cachedDeathrestNeed);
-			}
-			return cachedDeathrestNeed;
-		}
-	}
-
-	public List<Thing> BoundBuildings => boundBuildings;
-
-	public List<CompDeathrestBindable> BoundComps
-	{
-		get
-		{
-			if (cachedBoundComps == null)
-			{
-				cachedBoundComps = new List<CompDeathrestBindable>();
-				foreach (Thing boundBuilding in boundBuildings)
+				if (this.cachedDeathrestNeed == null)
 				{
-					if (CanUseBindableNow(boundBuilding))
+					this.pawn.needs.TryGetNeed<Need_Deathrest>(out this.cachedDeathrestNeed);
+				}
+				return this.cachedDeathrestNeed;
+			}
+		}
+
+		// Token: 0x170032A8 RID: 12968
+		// (get) Token: 0x06013E2A RID: 81450 RVA: 0x005E740B File Offset: 0x005E560B
+		public List<Thing> BoundBuildings
+		{
+			get
+			{
+				return this.boundBuildings;
+			}
+		}
+
+		// Token: 0x170032A9 RID: 12969
+		// (get) Token: 0x06013E2B RID: 81451 RVA: 0x005E7414 File Offset: 0x005E5614
+		public List<CompDeathrestBindable> BoundComps
+		{
+			get
+			{
+				if (this.cachedBoundComps == null)
+				{
+					this.cachedBoundComps = new List<CompDeathrestBindable>();
+					foreach (Thing thing in this.boundBuildings)
 					{
-						cachedBoundComps.Add(boundBuilding.TryGetComp<CompDeathrestBindable>());
+						if (this.CanUseBindableNow(thing))
+						{
+							this.cachedBoundComps.Add(thing.TryGetComp<CompDeathrestBindable>());
+						}
 					}
 				}
+				return this.cachedBoundComps;
 			}
-			return cachedBoundComps;
 		}
-	}
 
-	public float DeathrestEfficiency
-	{
-		get
+		// Token: 0x170032AA RID: 12970
+		// (get) Token: 0x06013E2C RID: 81452 RVA: 0x005E7494 File Offset: 0x005E5694
+		public float DeathrestEfficiency
 		{
-			float num = 1f;
-			foreach (CompDeathrestBindable boundComp in BoundComps)
+			get
 			{
-				if (boundComp.Props.deathrestEffectivenessFactor > 0f && boundComp.CanIncreasePresence)
+				float num = 1f;
+				foreach (CompDeathrestBindable compDeathrestBindable in this.BoundComps)
 				{
-					num *= boundComp.Props.deathrestEffectivenessFactor;
+					if (compDeathrestBindable.Props.deathrestEffectivenessFactor > 0f && compDeathrestBindable.CanIncreasePresence)
+					{
+						num *= compDeathrestBindable.Props.deathrestEffectivenessFactor;
+					}
 				}
+				return num;
 			}
-			return num;
 		}
-	}
 
-	public int MinDeathrestTicks => Mathf.RoundToInt(240000f / DeathrestEfficiency);
-
-	public int DeathrestCapacity => deathrestCapacity;
-
-	public int CurrentCapacity
-	{
-		get
+		// Token: 0x170032AB RID: 12971
+		// (get) Token: 0x06013E2D RID: 81453 RVA: 0x005E7510 File Offset: 0x005E5710
+		public int MinDeathrestTicks
 		{
-			int num = 0;
-			for (int i = 0; i < boundBuildings.Count; i++)
+			get
 			{
-				CompDeathrestBindable compDeathrestBindable = boundBuildings[i].TryGetComp<CompDeathrestBindable>();
-				if (compDeathrestBindable != null && compDeathrestBindable.Props.countsTowardsBuildingLimit)
+				return Mathf.RoundToInt(240000f / this.DeathrestEfficiency);
+			}
+		}
+
+		// Token: 0x170032AC RID: 12972
+		// (get) Token: 0x06013E2E RID: 81454 RVA: 0x005E7523 File Offset: 0x005E5723
+		public int DeathrestCapacity
+		{
+			get
+			{
+				return this.deathrestCapacity;
+			}
+		}
+
+		// Token: 0x170032AD RID: 12973
+		// (get) Token: 0x06013E2F RID: 81455 RVA: 0x005E752C File Offset: 0x005E572C
+		public int CurrentCapacity
+		{
+			get
+			{
+				int num = 0;
+				for (int i = 0; i < this.boundBuildings.Count; i++)
 				{
-					num++;
+					CompDeathrestBindable compDeathrestBindable = this.boundBuildings[i].TryGetComp<CompDeathrestBindable>();
+					if (compDeathrestBindable != null && compDeathrestBindable.Props.countsTowardsBuildingLimit)
+					{
+						num++;
+					}
 				}
+				return num;
 			}
-			return num;
 		}
-	}
 
-	public bool AtBuildingCapacityLimit => CurrentCapacity >= deathrestCapacity;
-
-	public float DeathrestPercent => Mathf.Clamp01((float)deathrestTicks / (float)MinDeathrestTicks);
-
-	public bool ShowWakeAlert
-	{
-		get
+		// Token: 0x170032AE RID: 12974
+		// (get) Token: 0x06013E30 RID: 81456 RVA: 0x005E7578 File Offset: 0x005E5778
+		public bool AtBuildingCapacityLimit
 		{
-			if (DeathrestPercent >= 1f)
+			get
 			{
-				return !autoWake;
+				return this.CurrentCapacity >= this.deathrestCapacity;
 			}
-			return false;
 		}
-	}
 
-	public override void PostAdd()
-	{
-		if (ModLister.CheckBiotech("Deathrest"))
+		// Token: 0x170032AF RID: 12975
+		// (get) Token: 0x06013E31 RID: 81457 RVA: 0x005E758B File Offset: 0x005E578B
+		public float DeathrestPercent
 		{
-			base.PostAdd();
-			Reset();
-		}
-	}
-
-	public override void PostRemove()
-	{
-		base.PostRemove();
-		Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Deathrest);
-		if (firstHediffOfDef != null)
-		{
-			pawn.health.RemoveHediff(firstHediffOfDef);
-		}
-		Hediff firstHediffOfDef2 = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.DeathrestExhaustion);
-		if (firstHediffOfDef2 != null)
-		{
-			pawn.health.RemoveHediff(firstHediffOfDef2);
-		}
-		RemoveOldDeathrestBonuses();
-		Reset();
-	}
-
-	public override void TickInterval(int delta)
-	{
-		base.TickInterval(delta);
-		if (pawn.IsHashIntervalTick(200, delta) && pawn.IsColonistPlayerControlled)
-		{
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.Deathrest, OpportunityType.Important);
-		}
-	}
-
-	public void OffsetCapacity(int offset, bool sendNotification = true)
-	{
-		int num = deathrestCapacity;
-		deathrestCapacity += offset;
-		if (sendNotification && PawnUtility.ShouldSendNotificationAbout(pawn))
-		{
-			Messages.Message("MessageDeathrestCapacityChanged".Translate(pawn.Named("PAWN"), num.Named("OLD"), deathrestCapacity.Named("NEW")), pawn, MessageTypeDefOf.PositiveEvent);
-		}
-	}
-
-	public void TickDeathresting(bool paused, int delta)
-	{
-		if (paused)
-		{
-			return;
-		}
-		if (DeathrestNeed != null)
-		{
-			DeathrestNeed.lastDeathrestTick = Find.TickManager.TicksGame;
-		}
-		deathrestTicks += delta;
-		adjustedDeathrestTicks += DeathrestEfficiency * (float)delta;
-		foreach (CompDeathrestBindable boundComp in BoundComps)
-		{
-			boundComp.TryIncreasePresence(delta);
-		}
-		if (DeathrestPercent >= 1f && !notifiedWakeOK)
-		{
-			notifiedWakeOK = true;
-			if (autoWake)
+			get
 			{
-				Wake();
+				return Mathf.Clamp01((float)this.deathrestTicks / (float)this.MinDeathrestTicks);
+			}
+		}
+
+		// Token: 0x170032B0 RID: 12976
+		// (get) Token: 0x06013E32 RID: 81458 RVA: 0x005E75A1 File Offset: 0x005E57A1
+		public bool ShowWakeAlert
+		{
+			get
+			{
+				return this.DeathrestPercent >= 1f && !this.autoWake;
+			}
+		}
+
+		// Token: 0x06013E33 RID: 81459 RVA: 0x005E75BB File Offset: 0x005E57BB
+		public override void PostAdd()
+		{
+			if (!ModLister.CheckBiotech("Deathrest"))
+			{
 				return;
 			}
-			if (PawnUtility.ShouldSendNotificationAbout(pawn))
-			{
-				Messages.Message("MessageDeathrestingPawnCanWakeSafely".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.PositiveEvent);
-			}
+			base.PostAdd();
+			this.Reset();
 		}
-		if (pawn.Spawned && pawn.IsHashIntervalTick(150, delta) && PawnOrBedTouchingSunlight())
-		{
-			if (PawnUtility.ShouldSendNotificationAbout(pawn))
-			{
-				Messages.Message("MessagePawnWokenFromSunlight".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NegativeEvent);
-			}
-			Wake();
-		}
-	}
 
-	private bool PawnOrBedTouchingSunlight()
-	{
-		Building_Bed building_Bed = pawn.CurrentBed();
-		if (building_Bed != null)
+		// Token: 0x06013E34 RID: 81460 RVA: 0x005E75D8 File Offset: 0x005E57D8
+		public override void PostRemove()
 		{
-			foreach (IntVec3 item in building_Bed.OccupiedRect())
+			base.PostRemove();
+			Hediff firstHediffOfDef = this.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Deathrest, false);
+			if (firstHediffOfDef != null)
 			{
-				if (item.InSunlight(building_Bed.Map))
+				this.pawn.health.RemoveHediff(firstHediffOfDef);
+			}
+			Hediff firstHediffOfDef2 = this.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.DeathrestExhaustion, false);
+			if (firstHediffOfDef2 != null)
+			{
+				this.pawn.health.RemoveHediff(firstHediffOfDef2);
+			}
+			this.RemoveOldDeathrestBonuses();
+			this.Reset();
+		}
+
+		// Token: 0x06013E35 RID: 81461 RVA: 0x005E7657 File Offset: 0x005E5857
+		public override void TickInterval(int delta)
+		{
+			base.TickInterval(delta);
+			if (this.pawn.IsHashIntervalTick(200, delta) && this.pawn.IsColonistPlayerControlled)
+			{
+				LessonAutoActivator.TeachOpportunity(ConceptDefOf.Deathrest, OpportunityType.Important);
+			}
+		}
+
+		// Token: 0x06013E36 RID: 81462 RVA: 0x005E768C File Offset: 0x005E588C
+		public void OffsetCapacity(int offset, bool sendNotification = true)
+		{
+			int num = this.deathrestCapacity;
+			this.deathrestCapacity += offset;
+			if (sendNotification && PawnUtility.ShouldSendNotificationAbout(this.pawn))
+			{
+				Messages.Message("MessageDeathrestCapacityChanged".Translate(this.pawn.Named("PAWN"), num.Named("OLD"), this.deathrestCapacity.Named("NEW")), this.pawn, MessageTypeDefOf.PositiveEvent, true);
+			}
+		}
+
+		// Token: 0x06013E37 RID: 81463 RVA: 0x005E7718 File Offset: 0x005E5918
+		public void TickDeathresting(bool paused, int delta)
+		{
+			if (paused)
+			{
+				return;
+			}
+			if (this.DeathrestNeed != null)
+			{
+				this.DeathrestNeed.lastDeathrestTick = Find.TickManager.TicksGame;
+			}
+			this.deathrestTicks += delta;
+			this.adjustedDeathrestTicks += this.DeathrestEfficiency * (float)delta;
+			foreach (CompDeathrestBindable compDeathrestBindable in this.BoundComps)
+			{
+				compDeathrestBindable.TryIncreasePresence(delta);
+			}
+			if (this.DeathrestPercent >= 1f && !this.notifiedWakeOK)
+			{
+				this.notifiedWakeOK = true;
+				if (this.autoWake)
 				{
-					return true;
+					this.Wake();
+					return;
+				}
+				if (PawnUtility.ShouldSendNotificationAbout(this.pawn))
+				{
+					Messages.Message("MessageDeathrestingPawnCanWakeSafely".Translate(this.pawn.Named("PAWN")), this.pawn, MessageTypeDefOf.PositiveEvent, true);
 				}
 			}
-		}
-		return false;
-	}
-
-	public void Notify_DeathrestStarted()
-	{
-		RemoveOldDeathrestBonuses();
-		TryLinkToNearbyDeathrestBuildings();
-		notifiedWakeOK = false;
-	}
-
-	public void Notify_DeathrestEnded()
-	{
-		foreach (Thing boundBuilding in boundBuildings)
-		{
-			boundBuilding.TryGetComp<CompDeathrestBindable>().Notify_DeathrestEnded();
-		}
-	}
-
-	public void Notify_BoundBuildingDeSpawned(Thing building)
-	{
-		boundBuildings.Remove(building);
-		cachedBoundComps = null;
-	}
-
-	public void TryLinkToNearbyDeathrestBuildings()
-	{
-		if (!ModsConfig.BiotechActive || !pawn.Spawned)
-		{
-			return;
-		}
-		cachedBoundComps = null;
-		Room room = pawn.GetRoom();
-		if (room == null)
-		{
-			return;
-		}
-		foreach (Region region in room.Regions)
-		{
-			foreach (Thing item in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
+			if (this.pawn.Spawned && this.pawn.IsHashIntervalTick(150, delta) && this.PawnOrBedTouchingSunlight())
 			{
-				CompDeathrestBindable bindComp = item.TryGetComp<CompDeathrestBindable>();
-				if (CanBindToBindable(bindComp))
+				if (PawnUtility.ShouldSendNotificationAbout(this.pawn))
 				{
-					BindTo(bindComp);
+					Messages.Message("MessagePawnWokenFromSunlight".Translate(this.pawn.Named("PAWN")), this.pawn, MessageTypeDefOf.NegativeEvent, true);
 				}
+				this.Wake();
 			}
 		}
-	}
 
-	public void RemoveOldDeathrestBonuses()
-	{
-		List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-		for (int num = hediffs.Count - 1; num >= 0; num--)
+		// Token: 0x06013E38 RID: 81464 RVA: 0x005E788C File Offset: 0x005E5A8C
+		private bool PawnOrBedTouchingSunlight()
 		{
-			if (hediffs[num].def.removeOnDeathrestStart)
+			Building_Bed building_Bed = this.pawn.CurrentBed();
+			if (building_Bed != null)
 			{
-				pawn.health.RemoveHediff(hediffs[num]);
-			}
-		}
-		pawn.genes.GetFirstGeneOfType<Gene_Hemogen>()?.ResetMax();
-	}
-
-	private void ApplyDeathrestBuildingBonuses()
-	{
-		if (deathrestTicks == 0)
-		{
-			return;
-		}
-		Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.InterruptedDeathrest);
-		if (firstHediffOfDef != null)
-		{
-			pawn.health.RemoveHediff(firstHediffOfDef);
-		}
-		foreach (CompDeathrestBindable boundComp in BoundComps)
-		{
-			if ((float)boundComp.presenceTicks / (float)deathrestTicks >= 0.75f)
-			{
-				boundComp.Apply();
-			}
-		}
-	}
-
-	public bool CanBindToBindable(CompDeathrestBindable bindComp)
-	{
-		if (!ModsConfig.BiotechActive)
-		{
-			return false;
-		}
-		if (bindComp == null)
-		{
-			return false;
-		}
-		if (bindComp.parent.Faction != pawn.Faction)
-		{
-			return false;
-		}
-		if (boundBuildings.Contains(bindComp.parent))
-		{
-			return false;
-		}
-		if (bindComp.Props.countsTowardsBuildingLimit && AtBuildingCapacityLimit)
-		{
-			return false;
-		}
-		if (!bindComp.CanBindTo(pawn))
-		{
-			return false;
-		}
-		if (!CanUseBindableNow(bindComp.parent))
-		{
-			return false;
-		}
-		if (BindingWillExceedStackLimit(bindComp))
-		{
-			return false;
-		}
-		return true;
-	}
-
-	public bool BindingWillExceedStackLimit(CompDeathrestBindable bindComp)
-	{
-		if (boundBuildings.Contains(bindComp.parent))
-		{
-			return false;
-		}
-		int stackLimit = bindComp.Props.stackLimit;
-		if (stackLimit > 0)
-		{
-			int num = 0;
-			for (int i = 0; i < boundBuildings.Count; i++)
-			{
-				if (boundBuildings[i].def == bindComp.parent.def)
+				using (CellRect.Enumerator enumerator = building_Bed.OccupiedRect().GetEnumerator())
 				{
-					num++;
-					if (num >= stackLimit)
+					while (enumerator.MoveNext())
 					{
-						return true;
+						if (enumerator.Current.InSunlight(building_Bed.Map))
+						{
+							return true;
+						}
+					}
+				}
+				return false;
+			}
+			return false;
+		}
+
+		// Token: 0x06013E39 RID: 81465 RVA: 0x005E7900 File Offset: 0x005E5B00
+		public void Notify_DeathrestStarted()
+		{
+			this.RemoveOldDeathrestBonuses();
+			this.TryLinkToNearbyDeathrestBuildings();
+			this.notifiedWakeOK = false;
+		}
+
+		// Token: 0x06013E3A RID: 81466 RVA: 0x005E7918 File Offset: 0x005E5B18
+		public void Notify_DeathrestEnded()
+		{
+			foreach (Thing thing in this.boundBuildings)
+			{
+				thing.TryGetComp<CompDeathrestBindable>().Notify_DeathrestEnded();
+			}
+		}
+
+		// Token: 0x06013E3B RID: 81467 RVA: 0x005E7970 File Offset: 0x005E5B70
+		public void Notify_BoundBuildingDeSpawned(Thing building)
+		{
+			this.boundBuildings.Remove(building);
+			this.cachedBoundComps = null;
+		}
+
+		// Token: 0x06013E3C RID: 81468 RVA: 0x005E7988 File Offset: 0x005E5B88
+		public void TryLinkToNearbyDeathrestBuildings()
+		{
+			if (!ModsConfig.BiotechActive || !this.pawn.Spawned)
+			{
+				return;
+			}
+			this.cachedBoundComps = null;
+			Room room = this.pawn.GetRoom(RegionType.Set_All);
+			if (room == null)
+			{
+				return;
+			}
+			foreach (Region region in room.Regions)
+			{
+				foreach (Thing thing in region.ListerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial))
+				{
+					CompDeathrestBindable bindComp = thing.TryGetComp<CompDeathrestBindable>();
+					if (this.CanBindToBindable(bindComp))
+					{
+						this.BindTo(bindComp);
 					}
 				}
 			}
 		}
-		return false;
-	}
 
-	private bool CanUseBindableNow(Thing building)
-	{
-		if (!ModsConfig.BiotechActive)
+		// Token: 0x06013E3D RID: 81469 RVA: 0x005E7A58 File Offset: 0x005E5C58
+		public void RemoveOldDeathrestBonuses()
 		{
-			return false;
+			List<Hediff> hediffs = this.pawn.health.hediffSet.hediffs;
+			for (int i = hediffs.Count - 1; i >= 0; i--)
+			{
+				if (hediffs[i].def.removeOnDeathrestStart)
+				{
+					this.pawn.health.RemoveHediff(hediffs[i]);
+				}
+			}
+			Gene_Hemogen firstGeneOfType = this.pawn.genes.GetFirstGeneOfType<Gene_Hemogen>();
+			if (firstGeneOfType == null)
+			{
+				return;
+			}
+			firstGeneOfType.ResetMax();
 		}
-		CompDeathrestBindable compDeathrestBindable = building.TryGetComp<CompDeathrestBindable>();
-		if (compDeathrestBindable == null)
+
+		// Token: 0x06013E3E RID: 81470 RVA: 0x005E7AD4 File Offset: 0x005E5CD4
+		private void ApplyDeathrestBuildingBonuses()
 		{
-			return false;
+			if (this.deathrestTicks == 0)
+			{
+				return;
+			}
+			Hediff firstHediffOfDef = this.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.InterruptedDeathrest, false);
+			if (firstHediffOfDef != null)
+			{
+				this.pawn.health.RemoveHediff(firstHediffOfDef);
+			}
+			foreach (CompDeathrestBindable compDeathrestBindable in this.BoundComps)
+			{
+				if ((float)compDeathrestBindable.presenceTicks / (float)this.deathrestTicks >= 0.75f)
+				{
+					compDeathrestBindable.Apply();
+				}
+			}
 		}
-		Building_Bed building_Bed = pawn.CurrentBed();
-		if (building_Bed == null)
+
+		// Token: 0x06013E3F RID: 81471 RVA: 0x005E7B78 File Offset: 0x005E5D78
+		public bool CanBindToBindable(CompDeathrestBindable bindComp)
 		{
-			return false;
+			return ModsConfig.BiotechActive && bindComp != null && bindComp.parent.Faction == this.pawn.Faction && !this.boundBuildings.Contains(bindComp.parent) && (!bindComp.Props.countsTowardsBuildingLimit || !this.AtBuildingCapacityLimit) && bindComp.CanBindTo(this.pawn) && this.CanUseBindableNow(bindComp.parent) && !this.BindingWillExceedStackLimit(bindComp);
 		}
-		if (compDeathrestBindable.Props.mustBeLayingInToBind)
+
+		// Token: 0x06013E40 RID: 81472 RVA: 0x005E7C08 File Offset: 0x005E5E08
+		public bool BindingWillExceedStackLimit(CompDeathrestBindable bindComp)
 		{
-			if (building_Bed != building)
+			if (this.boundBuildings.Contains(bindComp.parent))
 			{
 				return false;
 			}
-		}
-		else if (!building_Bed.def.HasComp(typeof(CompDeathrestBindable)))
-		{
-			return false;
-		}
-		if (!building.Spawned || building.Map != pawn.MapHeld || building.GetRoom() != pawn.GetRoom())
-		{
-			return false;
-		}
-		if (!GenSight.LineOfSight(pawn.Position, building.OccupiedRect().CenterCell, pawn.Map))
-		{
-			return false;
-		}
-		return true;
-	}
-
-	public void BindTo(CompDeathrestBindable bindComp)
-	{
-		bindComp.BindTo(pawn);
-		boundBuildings.Add(bindComp.parent);
-		cachedBoundComps = null;
-		if (PawnUtility.ShouldSendNotificationAbout(pawn) && bindComp.Props.countsTowardsBuildingLimit)
-		{
-			Messages.Message("MessageDeathrestBuildingBound".Translate(bindComp.parent.Named("BUILDING"), pawn.Named("PAWN"), CurrentCapacity.Named("CUR"), DeathrestCapacity.Named("MAX")), new LookTargets(bindComp.parent, pawn), MessageTypeDefOf.NeutralEvent, historical: false);
-		}
-	}
-
-	public override void Reset()
-	{
-		deathrestCapacity = 1;
-		foreach (CompDeathrestBindable boundComp in BoundComps)
-		{
-			boundComp.Notify_DeathrestGeneRemoved();
-		}
-		cachedBoundComps = null;
-	}
-
-	public override void Notify_NewColony()
-	{
-		if (!pawn.BeingTransportedOnGravship)
-		{
-			boundBuildings.Clear();
-			cachedBoundComps = null;
-		}
-	}
-
-	public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
-	{
-		base.Notify_PawnDied(dinfo, culprit);
-		boundBuildings.Clear();
-		cachedBoundComps = null;
-		cachedDeathrestNeed = null;
-	}
-
-	public void Wake()
-	{
-		if (DeathrestPercent < 1f)
-		{
-			pawn.health.AddHediff(HediffDefOf.InterruptedDeathrest);
-		}
-		else
-		{
-			ApplyDeathrestBuildingBonuses();
-		}
-		Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Deathrest);
-		if (firstHediffOfDef != null)
-		{
-			pawn.health.RemoveHediff(firstHediffOfDef);
-		}
-		deathrestTicks = 0;
-		adjustedDeathrestTicks = 0f;
-	}
-
-	public override IEnumerable<Gizmo> GetGizmos()
-	{
-		if (!Active)
-		{
-			yield break;
-		}
-		if (gizmo == null)
-		{
-			gizmo = new GeneGizmo_DeathrestCapacity(this);
-		}
-		if (Find.Selector.SelectedPawns.Count == 1)
-		{
-			yield return gizmo;
-		}
-		if (pawn.Deathresting)
-		{
-			if (pawn.IsColonistPlayerControlled || pawn.IsPrisonerOfColony)
+			int stackLimit = bindComp.Props.stackLimit;
+			if (stackLimit > 0)
 			{
-				string text = "WakeDesc".Translate(pawn.Named("PAWN"), deathrestTicks.ToStringTicksToPeriod().Named("DURATION")).Resolve() + "\n\n";
-				text = ((!(DeathrestPercent < 1f)) ? (text + "WakeExtraDesc_Safe".Translate(pawn.Named("PAWN")).Resolve()) : (text + "WakeExtraDesc_Exhaustion".Translate(pawn.Named("PAWN"), MinDeathrestTicks.ToStringTicksToPeriod().Named("TOTAL")).Resolve()));
-				Command_Action command_Action = new Command_Action
+				int num = 0;
+				for (int i = 0; i < this.boundBuildings.Count; i++)
 				{
-					defaultLabel = "Wake".Translate().CapitalizeFirst(),
-					defaultDesc = text,
-					icon = WakeCommandTex.Texture,
-					action = delegate
+					if (this.boundBuildings[i].def == bindComp.parent.def)
 					{
-						if (DeathrestPercent < 1f)
+						num++;
+						if (num >= stackLimit)
 						{
-							Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation("WarningWakingInterruptsDeathrest".Translate(pawn.Named("PAWN"), MinDeathrestTicks.ToStringTicksToPeriod().Named("MINDURATION"), deathrestTicks.ToStringTicksToPeriod().Named("CURDURATION")), Wake, destructive: true);
-							Find.WindowStack.Add(window);
-						}
-						else
-						{
-							Wake();
+							return true;
 						}
 					}
-				};
-				if (SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead(pawn))
-				{
-					command_Action.Disable("WakeDisabledCriticalCondition".Translate(pawn.Named("PAWN")));
 				}
-				yield return command_Action;
-				if (DeathrestPercent < 1f)
+			}
+			return false;
+		}
+
+		// Token: 0x06013E41 RID: 81473 RVA: 0x005E7C7C File Offset: 0x005E5E7C
+		private bool CanUseBindableNow(Thing building)
+		{
+			if (!ModsConfig.BiotechActive)
+			{
+				return false;
+			}
+			CompDeathrestBindable compDeathrestBindable = building.TryGetComp<CompDeathrestBindable>();
+			if (compDeathrestBindable == null)
+			{
+				return false;
+			}
+			Building_Bed building_Bed = this.pawn.CurrentBed();
+			if (building_Bed == null)
+			{
+				return false;
+			}
+			if (compDeathrestBindable.Props.mustBeLayingInToBind)
+			{
+				if (building_Bed != building)
 				{
-					yield return new Command_Toggle
+					return false;
+				}
+			}
+			else if (!building_Bed.def.HasComp(typeof(CompDeathrestBindable)))
+			{
+				return false;
+			}
+			return building.Spawned && building.Map == this.pawn.MapHeld && building.GetRoom(RegionType.Set_All) == this.pawn.GetRoom(RegionType.Set_All) && GenSight.LineOfSight(this.pawn.Position, building.OccupiedRect().CenterCell, this.pawn.Map);
+		}
+
+		// Token: 0x06013E42 RID: 81474 RVA: 0x005E7D40 File Offset: 0x005E5F40
+		public void BindTo(CompDeathrestBindable bindComp)
+		{
+			bindComp.BindTo(this.pawn);
+			this.boundBuildings.Add(bindComp.parent);
+			this.cachedBoundComps = null;
+			if (PawnUtility.ShouldSendNotificationAbout(this.pawn) && bindComp.Props.countsTowardsBuildingLimit)
+			{
+				Messages.Message("MessageDeathrestBuildingBound".Translate(bindComp.parent.Named("BUILDING"), this.pawn.Named("PAWN"), this.CurrentCapacity.Named("CUR"), this.DeathrestCapacity.Named("MAX")), new LookTargets(new TargetInfo[]
+				{
+					bindComp.parent,
+					this.pawn
+				}), MessageTypeDefOf.NeutralEvent, false);
+			}
+		}
+
+		// Token: 0x06013E43 RID: 81475 RVA: 0x005E7E24 File Offset: 0x005E6024
+		public override void Reset()
+		{
+			this.deathrestCapacity = 1;
+			foreach (CompDeathrestBindable compDeathrestBindable in this.BoundComps)
+			{
+				compDeathrestBindable.Notify_DeathrestGeneRemoved();
+			}
+			this.cachedBoundComps = null;
+		}
+
+		// Token: 0x06013E44 RID: 81476 RVA: 0x005E7E84 File Offset: 0x005E6084
+		public override void Notify_NewColony()
+		{
+			if (this.pawn.BeingTransportedOnGravship)
+			{
+				return;
+			}
+			this.boundBuildings.Clear();
+			this.cachedBoundComps = null;
+		}
+
+		// Token: 0x06013E45 RID: 81477 RVA: 0x005E7EA6 File Offset: 0x005E60A6
+		public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
+		{
+			base.Notify_PawnDied(dinfo, culprit);
+			this.boundBuildings.Clear();
+			this.cachedBoundComps = null;
+			this.cachedDeathrestNeed = null;
+		}
+
+		// Token: 0x06013E46 RID: 81478 RVA: 0x005E7ECC File Offset: 0x005E60CC
+		public void Wake()
+		{
+			if (this.DeathrestPercent < 1f)
+			{
+				this.pawn.health.AddHediff(HediffDefOf.InterruptedDeathrest, null, null, null);
+			}
+			else
+			{
+				this.ApplyDeathrestBuildingBonuses();
+			}
+			Hediff firstHediffOfDef = this.pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Deathrest, false);
+			if (firstHediffOfDef != null)
+			{
+				this.pawn.health.RemoveHediff(firstHediffOfDef);
+			}
+			this.deathrestTicks = 0;
+			this.adjustedDeathrestTicks = 0f;
+		}
+
+		// Token: 0x06013E47 RID: 81479 RVA: 0x005E7F51 File Offset: 0x005E6151
+		public override IEnumerable<Gizmo> GetGizmos()
+		{
+			if (!this.Active)
+			{
+				yield break;
+			}
+			if (this.gizmo == null)
+			{
+				this.gizmo = new GeneGizmo_DeathrestCapacity(this);
+			}
+			if (Find.Selector.SelectedPawns.Count == 1)
+			{
+				yield return this.gizmo;
+			}
+			if (this.pawn.Deathresting)
+			{
+				if (this.pawn.IsColonistPlayerControlled || this.pawn.IsPrisonerOfColony)
+				{
+					string text = "WakeDesc".Translate(this.pawn.Named("PAWN"), this.deathrestTicks.ToStringTicksToPeriod(true, false, true, true, false).Named("DURATION")).Resolve() + "\n\n";
+					if (this.DeathrestPercent < 1f)
 					{
-						defaultLabel = "AutoWake".Translate().CapitalizeFirst(),
-						defaultDesc = "AutoWakeDesc".Translate(pawn.Named("PAWN")).Resolve(),
-						icon = AutoWakeCommandTex.Texture,
-						isActive = () => autoWake,
-						toggleAction = delegate
+						text += "WakeExtraDesc_Exhaustion".Translate(this.pawn.Named("PAWN"), this.MinDeathrestTicks.ToStringTicksToPeriod(true, false, true, true, false).Named("TOTAL")).Resolve();
+					}
+					else
+					{
+						text += "WakeExtraDesc_Safe".Translate(this.pawn.Named("PAWN")).Resolve();
+					}
+					Command_Action command_Action = new Command_Action
+					{
+						defaultLabel = "Wake".Translate().CapitalizeFirst(),
+						defaultDesc = text,
+						icon = Gene_Deathrest.WakeCommandTex.Texture,
+						action = delegate()
 						{
-							autoWake = !autoWake;
+							if (this.DeathrestPercent < 1f)
+							{
+								Dialog_MessageBox window = Dialog_MessageBox.CreateConfirmation("WarningWakingInterruptsDeathrest".Translate(this.pawn.Named("PAWN"), this.MinDeathrestTicks.ToStringTicksToPeriod(true, false, true, true, false).Named("MINDURATION"), this.deathrestTicks.ToStringTicksToPeriod(true, false, true, true, false).Named("CURDURATION")), new Action(this.Wake), true, null, WindowLayer.Dialog);
+								Find.WindowStack.Add(window);
+								return;
+							}
+							this.Wake();
 						}
 					};
+					if (SanguophageUtility.ShouldBeDeathrestingOrInComaInsteadOfDead(this.pawn))
+					{
+						command_Action.Disable("WakeDisabledCriticalCondition".Translate(this.pawn.Named("PAWN")));
+					}
+					yield return command_Action;
+					if (this.DeathrestPercent < 1f)
+					{
+						Command_Toggle command_Toggle = new Command_Toggle
+						{
+							defaultLabel = "AutoWake".Translate().CapitalizeFirst(),
+							defaultDesc = "AutoWakeDesc".Translate(this.pawn.Named("PAWN")).Resolve(),
+							icon = Gene_Deathrest.AutoWakeCommandTex.Texture,
+							isActive = (() => this.autoWake),
+							toggleAction = delegate()
+							{
+								this.autoWake = !this.autoWake;
+							}
+						};
+						yield return command_Toggle;
+					}
+				}
+				if (DebugSettings.ShowDevGizmos)
+				{
+					Command_Action command_Action2 = new Command_Action
+					{
+						defaultLabel = "DEV: Wake and apply bonuses",
+						action = delegate()
+						{
+							this.deathrestTicks = this.MinDeathrestTicks + 1;
+							this.adjustedDeathrestTicks = 240001f;
+							foreach (CompDeathrestBindable compDeathrestBindable in this.BoundComps)
+							{
+								compDeathrestBindable.presenceTicks = this.deathrestTicks;
+							}
+							this.Wake();
+						}
+					};
+					yield return command_Action2;
 				}
 			}
 			if (DebugSettings.ShowDevGizmos)
 			{
 				yield return new Command_Action
 				{
-					defaultLabel = "DEV: Wake and apply bonuses",
-					action = delegate
+					defaultLabel = "DEV: Set capacity",
+					action = delegate()
 					{
-						deathrestTicks = MinDeathrestTicks + 1;
-						adjustedDeathrestTicks = 240001f;
-						foreach (CompDeathrestBindable boundComp in BoundComps)
+						List<FloatMenuOption> list = new List<FloatMenuOption>();
+						for (int i = 1; i <= 20; i++)
 						{
-							boundComp.presenceTicks = deathrestTicks;
+							int newCap = i;
+							list.Add(new FloatMenuOption(newCap.ToString(), delegate()
+							{
+								this.OffsetCapacity(newCap - this.deathrestCapacity, false);
+							}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
 						}
-						Wake();
+						Find.WindowStack.Add(new FloatMenu(list));
 					}
 				};
 			}
-		}
-		if (!DebugSettings.ShowDevGizmos)
-		{
 			yield break;
 		}
-		yield return new Command_Action
-		{
-			defaultLabel = "DEV: Set capacity",
-			action = delegate
-			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				for (int i = 1; i <= 20; i++)
-				{
-					int newCap = i;
-					list.Add(new FloatMenuOption(newCap.ToString(), delegate
-					{
-						OffsetCapacity(newCap - deathrestCapacity, sendNotification: false);
-					}));
-				}
-				Find.WindowStack.Add(new FloatMenu(list));
-			}
-		};
-	}
 
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-	{
-		yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "DeathrestCapacity".Translate().CapitalizeFirst(), deathrestCapacity.ToString(), "DeathrestCapacityDesc".Translate(), 1010);
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref deathrestCapacity, "deathrestCapacity", 1);
-		Scribe_Values.Look(ref adjustedDeathrestTicks, "adjustedDeathrestTicks", 0f);
-		Scribe_Values.Look(ref deathrestTicks, "deathrestTicks", 0);
-		Scribe_Values.Look(ref autoWake, "autoWake", defaultValue: false);
-		Scribe_Values.Look(ref chamberThoughtIndex, "chamberThoughtIndex", -1);
-		Scribe_Values.Look(ref notifiedWakeOK, "notifiedWakeOK", defaultValue: false);
-		Scribe_Collections.Look(ref boundBuildings, "boundBuildings", LookMode.Reference);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x06013E48 RID: 81480 RVA: 0x005E7F61 File Offset: 0x005E6161
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
 		{
-			boundBuildings.RemoveAll((Thing x) => x == null);
+			yield return new StatDrawEntry(StatCategoryDefOf.Genetics, "DeathrestCapacity".Translate().CapitalizeFirst(), this.deathrestCapacity.ToString(), "DeathrestCapacityDesc".Translate(), 1010, null, null, false, false);
+			yield break;
 		}
+
+		// Token: 0x06013E49 RID: 81481 RVA: 0x005E7F74 File Offset: 0x005E6174
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<int>(ref this.deathrestCapacity, "deathrestCapacity", 1, false);
+			Scribe_Values.Look<float>(ref this.adjustedDeathrestTicks, "adjustedDeathrestTicks", 0f, false);
+			Scribe_Values.Look<int>(ref this.deathrestTicks, "deathrestTicks", 0, false);
+			Scribe_Values.Look<bool>(ref this.autoWake, "autoWake", false, false);
+			Scribe_Values.Look<int>(ref this.chamberThoughtIndex, "chamberThoughtIndex", -1, false);
+			Scribe_Values.Look<bool>(ref this.notifiedWakeOK, "notifiedWakeOK", false, false);
+			Scribe_Collections.Look<Thing>(ref this.boundBuildings, "boundBuildings", LookMode.Reference, Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.boundBuildings.RemoveAll((Thing x) => x == null);
+			}
+		}
+
+		// Token: 0x0400DBD9 RID: 56281
+		private int deathrestCapacity;
+
+		// Token: 0x0400DBDA RID: 56282
+		private List<Thing> boundBuildings = new List<Thing>();
+
+		// Token: 0x0400DBDB RID: 56283
+		public float adjustedDeathrestTicks;
+
+		// Token: 0x0400DBDC RID: 56284
+		public int deathrestTicks;
+
+		// Token: 0x0400DBDD RID: 56285
+		public bool autoWake;
+
+		// Token: 0x0400DBDE RID: 56286
+		public int chamberThoughtIndex = -1;
+
+		// Token: 0x0400DBDF RID: 56287
+		private bool notifiedWakeOK;
+
+		// Token: 0x0400DBE0 RID: 56288
+		[Unsaved(false)]
+		private Gene_Hemogen cachedHemogenGene;
+
+		// Token: 0x0400DBE1 RID: 56289
+		[Unsaved(false)]
+		private Need_Deathrest cachedDeathrestNeed;
+
+		// Token: 0x0400DBE2 RID: 56290
+		[Unsaved(false)]
+		private List<CompDeathrestBindable> cachedBoundComps;
+
+		// Token: 0x0400DBE3 RID: 56291
+		[Unsaved(false)]
+		private GeneGizmo_DeathrestCapacity gizmo;
+
+		// Token: 0x0400DBE4 RID: 56292
+		private const int InitialDeathrestCapacity = 1;
+
+		// Token: 0x0400DBE5 RID: 56293
+		public const int BaseDeathrestTicksWithoutInterruptedHediff = 240000;
+
+		// Token: 0x0400DBE6 RID: 56294
+		public const float PresencePercentRequiredToApply = 0.75f;
+
+		// Token: 0x0400DBE7 RID: 56295
+		private static readonly CachedTexture WakeCommandTex = new CachedTexture("UI/Gizmos/Wake");
+
+		// Token: 0x0400DBE8 RID: 56296
+		private static readonly CachedTexture AutoWakeCommandTex = new CachedTexture("UI/Gizmos/DeathrestAutoWake");
+
+		// Token: 0x0400DBE9 RID: 56297
+		private const int LessonDeathrestTicks = 200;
+
+		// Token: 0x0400DBEA RID: 56298
+		private const int SunlightCheckInterval = 150;
 	}
 }

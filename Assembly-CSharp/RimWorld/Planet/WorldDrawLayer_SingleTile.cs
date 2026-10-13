@@ -1,58 +1,71 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public abstract class WorldDrawLayer_SingleTile : WorldDrawLayer
+namespace RimWorld.Planet
 {
-	private PlanetTile lastDrawnPlanetTile = new PlanetTile(-1);
-
-	private List<Vector3> verts = new List<Vector3>();
-
-	protected abstract PlanetTile Tile { get; }
-
-	protected abstract Material Material { get; }
-
-	public override bool ShouldRegenerate
+	// Token: 0x02003C98 RID: 15512
+	public abstract class WorldDrawLayer_SingleTile : WorldDrawLayer
 	{
-		get
+		// Token: 0x17003482 RID: 13442
+		// (get) Token: 0x06015141 RID: 86337
+		protected abstract PlanetTile Tile { get; }
+
+		// Token: 0x17003483 RID: 13443
+		// (get) Token: 0x06015142 RID: 86338
+		protected abstract Material Material { get; }
+
+		// Token: 0x17003484 RID: 13444
+		// (get) Token: 0x06015143 RID: 86339 RVA: 0x0064EE46 File Offset: 0x0064D046
+		public override bool ShouldRegenerate
 		{
-			if (!base.ShouldRegenerate)
+			get
 			{
-				return Tile != lastDrawnPlanetTile;
+				return base.ShouldRegenerate || this.Tile != this.lastDrawnPlanetTile;
 			}
-			return true;
 		}
-	}
 
-	public override IEnumerable Regenerate()
-	{
-		foreach (object item in base.Regenerate())
+		// Token: 0x06015144 RID: 86340 RVA: 0x0064EE63 File Offset: 0x0064D063
+		public override IEnumerable Regenerate()
 		{
-			yield return item;
-		}
-		PlanetTile tile = Tile;
-		if (tile.Valid && tile.Layer == planetLayer)
-		{
-			LayerSubMesh subMesh = GetSubMesh(Material);
-			Find.WorldGrid.GetTileVertices(tile, verts);
-			int count = subMesh.verts.Count;
-			int i = 0;
-			for (int count2 = verts.Count; i < count2; i++)
+			foreach (object obj in base.Regenerate())
 			{
-				subMesh.verts.Add(verts[i] + verts[i].normalized * 0.02f);
-				subMesh.uvs.Add((GenGeo.RegularPolygonVertexPosition(count2, i) + Vector2.one) / 2f);
-				if (i < count2 - 2)
+				yield return obj;
+			}
+			IEnumerator enumerator = null;
+			PlanetTile tile = this.Tile;
+			if (tile.Valid && tile.Layer == this.planetLayer)
+			{
+				LayerSubMesh subMesh = base.GetSubMesh(this.Material);
+				Find.WorldGrid.GetTileVertices(tile, this.verts);
+				int count = subMesh.verts.Count;
+				int i = 0;
+				int count2 = this.verts.Count;
+				while (i < count2)
 				{
-					subMesh.tris.Add(count + i + 2);
-					subMesh.tris.Add(count + i + 1);
-					subMesh.tris.Add(count);
+					subMesh.verts.Add(this.verts[i] + this.verts[i].normalized * 0.02f);
+					subMesh.uvs.Add((GenGeo.RegularPolygonVertexPosition(count2, i, 0f) + Vector2.one) / 2f);
+					if (i < count2 - 2)
+					{
+						subMesh.tris.Add(count + i + 2);
+						subMesh.tris.Add(count + i + 1);
+						subMesh.tris.Add(count);
+					}
+					i++;
 				}
+				base.FinalizeMesh(MeshParts.All);
 			}
-			FinalizeMesh(MeshParts.All);
+			this.lastDrawnPlanetTile = tile;
+			yield break;
+			yield break;
 		}
-		lastDrawnPlanetTile = tile;
+
+		// Token: 0x0400EB25 RID: 60197
+		private PlanetTile lastDrawnPlanetTile = new PlanetTile(-1);
+
+		// Token: 0x0400EB26 RID: 60198
+		private List<Vector3> verts = new List<Vector3>();
 	}
 }

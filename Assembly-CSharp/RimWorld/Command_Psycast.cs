@@ -1,50 +1,70 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Command_Psycast : Command_Ability
+namespace RimWorld
 {
-	public override string TopRightLabel
+	// Token: 0x020021ED RID: 8685
+	public class Command_Psycast : Command_Ability
 	{
-		get
+		// Token: 0x0600BE42 RID: 48706 RVA: 0x00372F0F File Offset: 0x0037110F
+		public Command_Psycast(Psycast ability, Pawn pawn) : base(ability, pawn)
 		{
-			AbilityDef def = ability.def;
-			string text = "";
-			if (def.EntropyGain > float.Epsilon)
-			{
-				text += "NeuralHeatLetter".Translate() + ": " + def.EntropyGain.ToString() + "\n";
-			}
-			if (def.PsyfocusCost > float.Epsilon)
-			{
-				string text2 = "";
-				text2 = ((!def.AnyCompOverridesPsyfocusCost) ? def.PsyfocusCostPercent : ((!(def.PsyfocusCostRange.Span > float.Epsilon)) ? def.PsyfocusCostPercentMax : (def.PsyfocusCostRange.min * 100f + "-" + def.PsyfocusCostPercentMax)));
-				text += "PsyfocusLetter".Translate() + ": " + text2;
-			}
-			return text.TrimEndNewlines();
 		}
-	}
 
-	public Command_Psycast(Psycast ability, Pawn pawn)
-		: base(ability, pawn)
-	{
-	}
-
-	protected override void DisabledCheck()
-	{
-		AbilityDef def = ability.def;
-		Pawn pawn = ability.pawn;
-		disabled = false;
-		if (def.EntropyGain > float.Epsilon)
+		// Token: 0x0600BE43 RID: 48707 RVA: 0x00372F1C File Offset: 0x0037111C
+		protected override void DisabledCheck()
 		{
-			if (pawn.GetPsylinkLevel() < def.level)
+			AbilityDef def = this.ability.def;
+			Pawn pawn = this.ability.pawn;
+			this.disabled = false;
+			if (def.EntropyGain > 1E-45f)
 			{
-				DisableWithReason("CommandPsycastHigherLevelPsylinkRequired".Translate(def.level));
+				if (pawn.GetPsylinkLevel() < def.level)
+				{
+					base.DisableWithReason("CommandPsycastHigherLevelPsylinkRequired".Translate(def.level));
+				}
+				else if (pawn.psychicEntropy.WouldOverflowEntropy(def.EntropyGain + PsycastUtility.TotalEntropyFromQueuedPsycasts(pawn)))
+				{
+					base.DisableWithReason("CommandPsycastWouldExceedEntropy".Translate(def.label));
+				}
 			}
-			else if (pawn.psychicEntropy.WouldOverflowEntropy(def.EntropyGain + PsycastUtility.TotalEntropyFromQueuedPsycasts(pawn)))
+			base.DisabledCheck();
+		}
+
+		// Token: 0x17001D05 RID: 7429
+		// (get) Token: 0x0600BE44 RID: 48708 RVA: 0x00372FC8 File Offset: 0x003711C8
+		public override string TopRightLabel
+		{
+			get
 			{
-				DisableWithReason("CommandPsycastWouldExceedEntropy".Translate(def.label));
+				AbilityDef def = this.ability.def;
+				string text = "";
+				if (def.EntropyGain > 1E-45f)
+				{
+					text += "NeuralHeatLetter".Translate() + ": " + def.EntropyGain.ToString() + "\n";
+				}
+				if (def.PsyfocusCost > 1E-45f)
+				{
+					string t;
+					if (def.AnyCompOverridesPsyfocusCost)
+					{
+						if (def.PsyfocusCostRange.Span > 1E-45f)
+						{
+							t = (def.PsyfocusCostRange.min * 100f).ToString() + "-" + def.PsyfocusCostPercentMax;
+						}
+						else
+						{
+							t = def.PsyfocusCostPercentMax;
+						}
+					}
+					else
+					{
+						t = def.PsyfocusCostPercent;
+					}
+					text += "PsyfocusLetter".Translate() + ": " + t;
+				}
+				return text.TrimEndNewlines();
 			}
 		}
-		base.DisabledCheck();
 	}
 }

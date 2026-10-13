@@ -1,33 +1,38 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_PawnExperiencingDangerousTemperatures : Trigger
+namespace Verse.AI.Group
 {
-	private float temperatureHediffThreshold = 0.15f;
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010E4 RID: 4324
+	public class Trigger_PawnExperiencingDangerousTemperatures : Trigger
 	{
-		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
+		// Token: 0x0600694A RID: 26954 RVA: 0x00212F74 File Offset: 0x00211174
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
 			{
-				Pawn pawn = lord.ownedPawns[i];
-				if (pawn.Spawned && !pawn.Dead && !pawn.Downed)
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Heatstroke);
-					if (firstHediffOfDef != null && firstHediffOfDef.Severity > temperatureHediffThreshold)
+					Pawn pawn = lord.ownedPawns[i];
+					if (pawn.Spawned && !pawn.Dead && !pawn.Downed)
 					{
-						return true;
-					}
-					Hediff firstHediffOfDef2 = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Hypothermia);
-					if (firstHediffOfDef2 != null && firstHediffOfDef2.Severity > temperatureHediffThreshold)
-					{
-						return true;
+						Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Heatstroke, false);
+						if (firstHediffOfDef != null && firstHediffOfDef.Severity > this.temperatureHediffThreshold)
+						{
+							return true;
+						}
+						Hediff firstHediffOfDef2 = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Hypothermia, false);
+						if (firstHediffOfDef2 != null && firstHediffOfDef2.Severity > this.temperatureHediffThreshold)
+						{
+							return true;
+						}
 					}
 				}
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04004A7E RID: 19070
+		private float temperatureHediffThreshold = 0.15f;
 	}
 }

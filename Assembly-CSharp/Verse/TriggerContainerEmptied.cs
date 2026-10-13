@@ -1,38 +1,47 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class TriggerContainerEmptied : Thing
+namespace Verse
 {
-	public string signalTag;
-
-	public Thing container;
-
-	protected override void Tick()
+	// Token: 0x0200087E RID: 2174
+	public class TriggerContainerEmptied : Thing
 	{
-		if (!base.Spawned || !this.IsHashIntervalTick(60))
+		// Token: 0x0600371E RID: 14110 RVA: 0x00127848 File Offset: 0x00125A48
+		protected override void Tick()
 		{
-			return;
-		}
-		CompThingContainer compThingContainer = container?.TryGetComp<CompThingContainer>();
-		if (compThingContainer == null)
-		{
-			Destroy();
-		}
-		else if (!compThingContainer.innerContainer.Any)
-		{
-			Find.SignalManager.SendSignal(new Signal(signalTag));
-			if (!base.Destroyed)
+			if (!base.Spawned || !this.IsHashIntervalTick(60))
 			{
-				Destroy();
+				return;
+			}
+			Thing thing = this.container;
+			CompThingContainer compThingContainer = (thing != null) ? thing.TryGetComp<CompThingContainer>() : null;
+			if (compThingContainer == null)
+			{
+				this.Destroy(DestroyMode.Vanish);
+				return;
+			}
+			if (!compThingContainer.innerContainer.Any)
+			{
+				Find.SignalManager.SendSignal(new Signal(this.signalTag, false));
+				if (!base.Destroyed)
+				{
+					this.Destroy(DestroyMode.Vanish);
+				}
 			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref signalTag, "signalTag");
-		Scribe_References.Look(ref container, "container");
+		// Token: 0x0600371F RID: 14111 RVA: 0x001278B8 File Offset: 0x00125AB8
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.signalTag, "signalTag", null, false);
+			Scribe_References.Look<Thing>(ref this.container, "container", false);
+		}
+
+		// Token: 0x04002956 RID: 10582
+		public string signalTag;
+
+		// Token: 0x04002957 RID: 10583
+		public Thing container;
 	}
 }

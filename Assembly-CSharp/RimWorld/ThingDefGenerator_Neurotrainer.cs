@@ -1,136 +1,164 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class ThingDefGenerator_Neurotrainer
+namespace RimWorld
 {
-	public static string NeurotrainerDefPrefix = "Neurotrainer";
-
-	public static string PsytrainerDefPrefix = "Psytrainer";
-
-	private const int MaxAbilityLevel = 6;
-
-	public static IEnumerable<ThingDef> ImpliedThingDefs(bool hotReload = false)
+	// Token: 0x02001919 RID: 6425
+	public class ThingDefGenerator_Neurotrainer
 	{
-		foreach (AbilityDef allDef in DefDatabase<AbilityDef>.AllDefs)
+		// Token: 0x06009205 RID: 37381 RVA: 0x002B0EDF File Offset: 0x002AF0DF
+		public static IEnumerable<ThingDef> ImpliedThingDefs(bool hotReload = false)
 		{
-			if (allDef.IsPsycast)
+			foreach (AbilityDef abilityDef in DefDatabase<AbilityDef>.AllDefs)
 			{
-				ThingDef thingDef = BaseNeurotrainer(PsytrainerDefPrefix + "_" + allDef.defName, hotReload);
-				thingDef.label = "PsycastNeurotrainerLabel".Translate(allDef.label);
-				thingDef.description = "PsycastNeurotrainerDescription".Translate(allDef.Named("PSYCAST"), allDef.description.Named("PSYCASTDESCRIPTION"));
-				thingDef.comps.Add(new CompProperties_Usable
+				if (abilityDef.IsPsycast)
+				{
+					ThingDef thingDef = ThingDefGenerator_Neurotrainer.BaseNeurotrainer(ThingDefGenerator_Neurotrainer.PsytrainerDefPrefix + "_" + abilityDef.defName, hotReload);
+					thingDef.label = "PsycastNeurotrainerLabel".Translate(abilityDef.label);
+					thingDef.description = "PsycastNeurotrainerDescription".Translate(abilityDef.Named("PSYCAST"), abilityDef.description.Named("PSYCASTDESCRIPTION"));
+					thingDef.comps.Add(new CompProperties_Usable
+					{
+						useJob = JobDefOf.UseNeurotrainer,
+						useLabel = "PsycastNeurotrainerUseLabel".Translate(abilityDef.label),
+						showUseGizmo = true
+					});
+					thingDef.comps.Add(new CompProperties_UseEffect_GainAbility
+					{
+						ability = abilityDef
+					});
+					thingDef.statBases.Add(new StatModifier
+					{
+						stat = StatDefOf.MarketValue,
+						value = Mathf.Round(Mathf.Lerp(100f, 1000f, (float)abilityDef.level / 6f))
+					});
+					thingDef.thingCategories = new List<ThingCategoryDef>
+					{
+						ThingCategoryDefOf.NeurotrainersPsycast
+					};
+					thingDef.thingSetMakerTags = new List<string>
+					{
+						"RewardStandardLowFreq"
+					};
+					thingDef.modContentPack = abilityDef.modContentPack;
+					thingDef.descriptionHyperlinks = new List<DefHyperlink>
+					{
+						new DefHyperlink(abilityDef)
+					};
+					yield return thingDef;
+				}
+			}
+			IEnumerator<AbilityDef> enumerator = null;
+			foreach (SkillDef skillDef in DefDatabase<SkillDef>.AllDefs)
+			{
+				ThingDef thingDef2 = ThingDefGenerator_Neurotrainer.BaseNeurotrainer(ThingDefGenerator_Neurotrainer.NeurotrainerDefPrefix + "_" + skillDef.defName, hotReload);
+				thingDef2.label = "SkillNeurotrainerLabel".Translate(skillDef.label);
+				thingDef2.description = "SkillNeurotrainerDescription".Translate();
+				thingDef2.comps.Add(new CompProperties_Usable
 				{
 					useJob = JobDefOf.UseNeurotrainer,
-					useLabel = "PsycastNeurotrainerUseLabel".Translate(allDef.label),
+					useLabel = "SkillNeurotrainerUseLabel".Translate(skillDef.label),
 					showUseGizmo = true
 				});
-				thingDef.comps.Add(new CompProperties_UseEffect_GainAbility
+				thingDef2.comps.Add(new CompProperties_UseEffect_LearnSkill
 				{
-					ability = allDef
+					skill = skillDef
 				});
-				thingDef.statBases.Add(new StatModifier
+				thingDef2.statBases.Add(new StatModifier
 				{
 					stat = StatDefOf.MarketValue,
-					value = Mathf.Round(Mathf.Lerp(100f, 1000f, (float)allDef.level / 6f))
+					value = 750f
 				});
-				thingDef.thingCategories = new List<ThingCategoryDef> { ThingCategoryDefOf.NeurotrainersPsycast };
-				thingDef.thingSetMakerTags = new List<string> { "RewardStandardLowFreq" };
-				thingDef.modContentPack = allDef.modContentPack;
-				thingDef.descriptionHyperlinks = new List<DefHyperlink>
+				thingDef2.thingCategories = new List<ThingCategoryDef>
 				{
-					new DefHyperlink(allDef)
+					ThingCategoryDefOf.NeurotrainersSkill
 				};
-				yield return thingDef;
+				thingDef2.thingSetMakerTags = new List<string>
+				{
+					"RewardStandardMidFreq",
+					"SkillNeurotrainer"
+				};
+				thingDef2.modContentPack = skillDef.modContentPack;
+				yield return thingDef2;
 			}
+			IEnumerator<SkillDef> enumerator2 = null;
+			yield break;
+			yield break;
 		}
-		foreach (SkillDef allDef2 in DefDatabase<SkillDef>.AllDefs)
-		{
-			ThingDef thingDef2 = BaseNeurotrainer(NeurotrainerDefPrefix + "_" + allDef2.defName, hotReload);
-			thingDef2.label = "SkillNeurotrainerLabel".Translate(allDef2.label);
-			thingDef2.description = "SkillNeurotrainerDescription".Translate();
-			thingDef2.comps.Add(new CompProperties_Usable
-			{
-				useJob = JobDefOf.UseNeurotrainer,
-				useLabel = "SkillNeurotrainerUseLabel".Translate(allDef2.label),
-				showUseGizmo = true
-			});
-			thingDef2.comps.Add(new CompProperties_UseEffect_LearnSkill
-			{
-				skill = allDef2
-			});
-			thingDef2.statBases.Add(new StatModifier
-			{
-				stat = StatDefOf.MarketValue,
-				value = 750f
-			});
-			thingDef2.thingCategories = new List<ThingCategoryDef> { ThingCategoryDefOf.NeurotrainersSkill };
-			thingDef2.thingSetMakerTags = new List<string> { "RewardStandardMidFreq", "SkillNeurotrainer" };
-			thingDef2.modContentPack = allDef2.modContentPack;
-			yield return thingDef2;
-		}
-	}
 
-	private static ThingDef BaseNeurotrainer(string defName, bool hotReload = false)
-	{
-		ThingDef obj = (hotReload ? (DefDatabase<ThingDef>.GetNamed(defName, errorOnFail: false) ?? new ThingDef()) : new ThingDef());
-		obj.defName = defName;
-		obj.category = ThingCategory.Item;
-		obj.selectable = true;
-		obj.thingClass = typeof(ThingWithComps);
-		obj.comps = new List<CompProperties>
+		// Token: 0x06009206 RID: 37382 RVA: 0x002B0EF0 File Offset: 0x002AF0F0
+		private static ThingDef BaseNeurotrainer(string defName, bool hotReload = false)
 		{
-			new CompProperties_UseEffectPlaySound
+			ThingDef thingDef = hotReload ? (DefDatabase<ThingDef>.GetNamed(defName, false) ?? new ThingDef()) : new ThingDef();
+			thingDef.defName = defName;
+			thingDef.category = ThingCategory.Item;
+			thingDef.selectable = true;
+			thingDef.thingClass = typeof(ThingWithComps);
+			thingDef.comps = new List<CompProperties>
 			{
-				soundOnUsed = SoundDefOf.MechSerumUsed
-			},
-			new CompProperties_UseEffectDestroySelf
+				new CompProperties_UseEffectPlaySound
+				{
+					soundOnUsed = SoundDefOf.MechSerumUsed
+				},
+				new CompProperties_UseEffectDestroySelf
+				{
+					compClass = typeof(CompUseEffect_DestroySelf)
+				},
+				new CompProperties_Forbiddable()
+			};
+			thingDef.graphicData = new GraphicData
 			{
-				compClass = typeof(CompUseEffect_DestroySelf)
-			},
-			new CompProperties_Forbiddable()
-		};
-		obj.graphicData = new GraphicData
-		{
-			texPath = "Things/Item/Special/MechSerumNeurotrainer",
-			graphicClass = typeof(Graphic_Single)
-		};
-		obj.drawGUIOverlay = false;
-		obj.statBases = new List<StatModifier>
-		{
-			new StatModifier
+				texPath = "Things/Item/Special/MechSerumNeurotrainer",
+				graphicClass = typeof(Graphic_Single)
+			};
+			thingDef.drawGUIOverlay = false;
+			thingDef.statBases = new List<StatModifier>
 			{
-				stat = StatDefOf.MaxHitPoints,
-				value = 80f
-			},
-			new StatModifier
+				new StatModifier
+				{
+					stat = StatDefOf.MaxHitPoints,
+					value = 80f
+				},
+				new StatModifier
+				{
+					stat = StatDefOf.Mass,
+					value = 0.2f
+				},
+				new StatModifier
+				{
+					stat = StatDefOf.DeteriorationRate,
+					value = 2f
+				},
+				new StatModifier
+				{
+					stat = StatDefOf.Flammability,
+					value = 0.2f
+				}
+			};
+			thingDef.techLevel = TechLevel.Ultra;
+			thingDef.altitudeLayer = AltitudeLayer.Item;
+			thingDef.alwaysHaulable = true;
+			thingDef.rotatable = false;
+			thingDef.pathCost = 14;
+			thingDef.tradeTags = new List<string>
 			{
-				stat = StatDefOf.Mass,
-				value = 0.2f
-			},
-			new StatModifier
-			{
-				stat = StatDefOf.DeteriorationRate,
-				value = 2f
-			},
-			new StatModifier
-			{
-				stat = StatDefOf.Flammability,
-				value = 0.2f
-			}
-		};
-		obj.techLevel = TechLevel.Ultra;
-		obj.altitudeLayer = AltitudeLayer.Item;
-		obj.alwaysHaulable = true;
-		obj.rotatable = false;
-		obj.pathCost = 14;
-		obj.tradeTags = new List<string> { "ExoticMisc" };
-		obj.stackLimit = 1;
-		obj.tradeNeverStack = true;
-		obj.forceDebugSpawnable = true;
-		obj.drawerType = DrawerType.MapMeshOnly;
-		return obj;
+				"ExoticMisc"
+			};
+			thingDef.stackLimit = 1;
+			thingDef.tradeNeverStack = true;
+			thingDef.forceDebugSpawnable = true;
+			thingDef.drawerType = DrawerType.MapMeshOnly;
+			return thingDef;
+		}
+
+		// Token: 0x04005D1D RID: 23837
+		public static string NeurotrainerDefPrefix = "Neurotrainer";
+
+		// Token: 0x04005D1E RID: 23838
+		public static string PsytrainerDefPrefix = "Psytrainer";
+
+		// Token: 0x04005D1F RID: 23839
+		private const int MaxAbilityLevel = 6;
 	}
 }

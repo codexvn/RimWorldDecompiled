@@ -1,23 +1,27 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_MasochistWearingBodyStrap : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x020018B6 RID: 6326
+	public class ThoughtWorker_MasochistWearingBodyStrap : ThoughtWorker
 	{
-		if (ModsConfig.IdeologyActive)
+		// Token: 0x06009082 RID: 36994 RVA: 0x002A9728 File Offset: 0x002A7928
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			List<Apparel> wornApparel = p.apparel.WornApparel;
-			for (int i = 0; i < wornApparel.Count; i++)
+			if (ModsConfig.IdeologyActive)
 			{
-				if (wornApparel[i].def == ThingDefOf.Apparel_BodyStrap)
+				List<Apparel> wornApparel = p.apparel.WornApparel;
+				for (int i = 0; i < wornApparel.Count; i++)
 				{
-					return true;
+					if (wornApparel[i].def == ThingDefOf.Apparel_BodyStrap)
+					{
+						return true;
+					}
 				}
 			}
+			return ThoughtState.Inactive;
 		}
-		return ThoughtState.Inactive;
 	}
 }

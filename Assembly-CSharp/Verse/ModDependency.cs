@@ -1,99 +1,136 @@
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public class ModDependency : ModRequirement
+namespace Verse
 {
-	public string downloadUrl;
-
-	public string steamWorkshopUrl;
-
-	public override string RequirementTypeLabel => "ModDependsOn".Translate("");
-
-	public override bool IsSatisfied
+	// Token: 0x02000582 RID: 1410
+	public class ModDependency : ModRequirement
 	{
-		get
+		// Token: 0x170006A5 RID: 1701
+		// (get) Token: 0x060024FB RID: 9467 RVA: 0x000BF029 File Offset: 0x000BD229
+		public override string RequirementTypeLabel
 		{
-			if (ModLister.GetActiveModWithIdentifier(packageId, ignorePostfix: true) == null)
+			get
 			{
-				return alternativePackageIds?.Any((string id) => ModLister.GetActiveModWithIdentifier(id, ignorePostfix: true) != null) ?? false;
+				return "ModDependsOn".Translate("");
 			}
-			return true;
 		}
-	}
 
-	private ModMetaData Mod
-	{
-		get
+		// Token: 0x170006A6 RID: 1702
+		// (get) Token: 0x060024FC RID: 9468 RVA: 0x000BF044 File Offset: 0x000BD244
+		public override bool IsSatisfied
 		{
-			ModMetaData modWithIdentifier = ModLister.GetModWithIdentifier(packageId, ignorePostfix: true);
-			if (modWithIdentifier != null)
+			get
 			{
-				return modWithIdentifier;
+				if (ModLister.GetActiveModWithIdentifier(this.packageId, true) != null)
+				{
+					return true;
+				}
+				List<string> alternativePackageIds = this.alternativePackageIds;
+				if (alternativePackageIds == null)
+				{
+					return false;
+				}
+				return alternativePackageIds.Any((string id) => ModLister.GetActiveModWithIdentifier(id, true) != null);
 			}
-			if (alternativePackageIds.NullOrEmpty())
+		}
+
+		// Token: 0x170006A7 RID: 1703
+		// (get) Token: 0x060024FD RID: 9469 RVA: 0x000BF094 File Offset: 0x000BD294
+		private ModMetaData Mod
+		{
+			get
 			{
-				return null;
-			}
-			foreach (string alternativePackageId in alternativePackageIds)
-			{
-				modWithIdentifier = ModLister.GetModWithIdentifier(alternativePackageId, ignorePostfix: true);
+				ModMetaData modWithIdentifier = ModLister.GetModWithIdentifier(this.packageId, true);
 				if (modWithIdentifier != null)
 				{
 					return modWithIdentifier;
 				}
+				if (this.alternativePackageIds.NullOrEmpty<string>())
+				{
+					return null;
+				}
+				foreach (string identifier in this.alternativePackageIds)
+				{
+					modWithIdentifier = ModLister.GetModWithIdentifier(identifier, true);
+					if (modWithIdentifier != null)
+					{
+						return modWithIdentifier;
+					}
+				}
+				return null;
 			}
-			return null;
 		}
-	}
 
-	public override Texture2D StatusIcon
-	{
-		get
+		// Token: 0x170006A8 RID: 1704
+		// (get) Token: 0x060024FE RID: 9470 RVA: 0x000BF114 File Offset: 0x000BD314
+		public override Texture2D StatusIcon
 		{
-			if (Mod == null)
+			get
 			{
-				return ModRequirement.NotInstalled;
+				if (this.Mod == null)
+				{
+					return ModRequirement.NotInstalled;
+				}
+				if (!this.Mod.Active)
+				{
+					return ModRequirement.Installed;
+				}
+				return ModRequirement.Resolved;
 			}
-			if (!Mod.Active)
-			{
-				return ModRequirement.Installed;
-			}
-			return ModRequirement.Resolved;
 		}
-	}
 
-	public override string Tooltip
-	{
-		get
+		// Token: 0x170006A9 RID: 1705
+		// (get) Token: 0x060024FF RID: 9471 RVA: 0x000BF13C File Offset: 0x000BD33C
+		public override string Tooltip
 		{
-			if (Mod == null)
+			get
 			{
-				return base.Tooltip + "\n" + "ContentNotInstalled".Translate() + "\n\n" + "ModClickToGoToWebsite".Translate();
+				if (this.Mod == null)
+				{
+					return base.Tooltip + "\n" + "ContentNotInstalled".Translate() + "\n\n" + "ModClickToGoToWebsite".Translate();
+				}
+				if (!this.Mod.Active)
+				{
+					return base.Tooltip + "\n" + "ContentInstalledButNotActive".Translate() + "\n\n" + "ModClickToSelect".Translate();
+				}
+				return base.Tooltip;
 			}
-			if (!Mod.Active)
-			{
-				return base.Tooltip + "\n" + "ContentInstalledButNotActive".Translate() + "\n\n" + "ModClickToSelect".Translate();
-			}
-			return base.Tooltip;
 		}
-	}
 
-	public string Url => steamWorkshopUrl ?? downloadUrl;
-
-	public override void OnClicked(Page_ModsConfig window)
-	{
-		if (Mod == null)
+		// Token: 0x170006AA RID: 1706
+		// (get) Token: 0x06002500 RID: 9472 RVA: 0x000BF1E0 File Offset: 0x000BD3E0
+		public string Url
 		{
-			if (!Url.NullOrEmpty())
+			get
 			{
-				SteamUtility.OpenUrl(Url);
+				return this.steamWorkshopUrl ?? this.downloadUrl;
 			}
 		}
-		else if (!Mod.Active)
+
+		// Token: 0x06002501 RID: 9473 RVA: 0x000BF1F2 File Offset: 0x000BD3F2
+		public override void OnClicked(Page_ModsConfig window)
 		{
-			window.SelectMod(Mod);
+			if (this.Mod == null)
+			{
+				if (!this.Url.NullOrEmpty())
+				{
+					SteamUtility.OpenUrl(this.Url);
+					return;
+				}
+			}
+			else if (!this.Mod.Active)
+			{
+				window.SelectMod(this.Mod);
+			}
 		}
+
+		// Token: 0x04001E77 RID: 7799
+		public string downloadUrl;
+
+		// Token: 0x04001E78 RID: 7800
+		public string steamWorkshopUrl;
 	}
 }

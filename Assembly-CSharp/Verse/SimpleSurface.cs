@@ -1,73 +1,92 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse;
-
-public class SimpleSurface : IEnumerable<SurfaceColumn>, IEnumerable
+namespace Verse
 {
-	private List<SurfaceColumn> columns = new List<SurfaceColumn>();
-
-	public float Evaluate(float x, float y)
+	// Token: 0x02000C86 RID: 3206
+	public class SimpleSurface : IEnumerable<SurfaceColumn>, IEnumerable
 	{
-		if (columns.Count == 0)
+		// Token: 0x06005241 RID: 21057 RVA: 0x001A9E30 File Offset: 0x001A8030
+		public float Evaluate(float x, float y)
 		{
-			Log.Error("Evaluating a SimpleCurve2D with no columns.");
-			return 0f;
-		}
-		if (x <= columns[0].x)
-		{
-			return columns[0].y.Evaluate(y);
-		}
-		if (x >= columns[columns.Count - 1].x)
-		{
-			return columns[columns.Count - 1].y.Evaluate(y);
-		}
-		SurfaceColumn surfaceColumn = columns[0];
-		SurfaceColumn surfaceColumn2 = columns[columns.Count - 1];
-		for (int i = 0; i < columns.Count; i++)
-		{
-			if (x <= columns[i].x)
+			if (this.columns.Count == 0)
 			{
-				surfaceColumn2 = columns[i];
-				if (i > 0)
+				Log.Error("Evaluating a SimpleCurve2D with no columns.");
+				return 0f;
+			}
+			if (x <= this.columns[0].x)
+			{
+				return this.columns[0].y.Evaluate(y);
+			}
+			if (x >= this.columns[this.columns.Count - 1].x)
+			{
+				return this.columns[this.columns.Count - 1].y.Evaluate(y);
+			}
+			SurfaceColumn surfaceColumn = this.columns[0];
+			SurfaceColumn surfaceColumn2 = this.columns[this.columns.Count - 1];
+			int i = 0;
+			while (i < this.columns.Count)
+			{
+				if (x <= this.columns[i].x)
 				{
-					surfaceColumn = columns[i - 1];
+					surfaceColumn2 = this.columns[i];
+					if (i > 0)
+					{
+						surfaceColumn = this.columns[i - 1];
+						break;
+					}
+					break;
 				}
-				break;
+				else
+				{
+					i++;
+				}
 			}
+			float t = (x - surfaceColumn.x) / (surfaceColumn2.x - surfaceColumn.x);
+			return Mathf.Lerp(surfaceColumn.y.Evaluate(y), surfaceColumn2.y.Evaluate(y), t);
 		}
-		float t = (x - surfaceColumn.x) / (surfaceColumn2.x - surfaceColumn.x);
-		return Mathf.Lerp(surfaceColumn.y.Evaluate(y), surfaceColumn2.y.Evaluate(y), t);
-	}
 
-	public void Add(SurfaceColumn newColumn)
-	{
-		columns.Add(newColumn);
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return GetEnumerator();
-	}
-
-	public IEnumerator<SurfaceColumn> GetEnumerator()
-	{
-		foreach (SurfaceColumn column in columns)
+		// Token: 0x06005242 RID: 21058 RVA: 0x001A9F71 File Offset: 0x001A8171
+		public void Add(SurfaceColumn newColumn)
 		{
-			yield return column;
+			this.columns.Add(newColumn);
 		}
-	}
 
-	public IEnumerable<string> ConfigErrors(string prefix)
-	{
-		for (int i = 0; i < columns.Count - 1; i++)
+		// Token: 0x06005243 RID: 21059 RVA: 0x001A9F7F File Offset: 0x001A817F
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			if (columns[i + 1].x < columns[i].x)
+			return this.GetEnumerator();
+		}
+
+		// Token: 0x06005244 RID: 21060 RVA: 0x001A9F87 File Offset: 0x001A8187
+		public IEnumerator<SurfaceColumn> GetEnumerator()
+		{
+			foreach (SurfaceColumn surfaceColumn in this.columns)
 			{
-				yield return prefix + ": columns are out of order";
-				break;
+				yield return surfaceColumn;
 			}
+			List<SurfaceColumn>.Enumerator enumerator = default(List<SurfaceColumn>.Enumerator);
+			yield break;
+			yield break;
 		}
+
+		// Token: 0x06005245 RID: 21061 RVA: 0x001A9F96 File Offset: 0x001A8196
+		public IEnumerable<string> ConfigErrors(string prefix)
+		{
+			for (int i = 0; i < this.columns.Count - 1; i++)
+			{
+				if (this.columns[i + 1].x < this.columns[i].x)
+				{
+					yield return prefix + ": columns are out of order";
+					break;
+				}
+			}
+			yield break;
+		}
+
+		// Token: 0x04003AF9 RID: 15097
+		private List<SurfaceColumn> columns = new List<SurfaceColumn>();
 	}
 }

@@ -1,36 +1,41 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class ThoughtWorker_ApparelThought : ThoughtWorker
+namespace RimWorld
 {
-	protected abstract bool ApparelCounts(Apparel apparel);
-
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x0200187A RID: 6266
+	public abstract class ThoughtWorker_ApparelThought : ThoughtWorker
 	{
-		string text = null;
-		int num = 0;
-		List<Apparel> wornApparel = p.apparel.WornApparel;
-		for (int i = 0; i < wornApparel.Count; i++)
+		// Token: 0x06008FDD RID: 36829
+		protected abstract bool ApparelCounts(Apparel apparel);
+
+		// Token: 0x06008FDE RID: 36830 RVA: 0x002A7670 File Offset: 0x002A5870
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			if (ApparelCounts(wornApparel[i]))
+			string text = null;
+			int num = 0;
+			List<Apparel> wornApparel = p.apparel.WornApparel;
+			for (int i = 0; i < wornApparel.Count; i++)
 			{
-				if (text == null)
+				if (this.ApparelCounts(wornApparel[i]))
 				{
-					text = wornApparel[i].def.label;
+					if (text == null)
+					{
+						text = wornApparel[i].def.label;
+					}
+					num++;
 				}
-				num++;
 			}
+			if (num == 0)
+			{
+				return ThoughtState.Inactive;
+			}
+			if (num >= 5)
+			{
+				return ThoughtState.ActiveAtStage(4, text);
+			}
+			return ThoughtState.ActiveAtStage(num - 1, text);
 		}
-		if (num == 0)
-		{
-			return ThoughtState.Inactive;
-		}
-		if (num >= 5)
-		{
-			return ThoughtState.ActiveAtStage(4, text);
-		}
-		return ThoughtState.ActiveAtStage(num - 1, text);
 	}
 }

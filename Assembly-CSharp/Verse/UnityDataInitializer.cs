@@ -1,19 +1,25 @@
-namespace Verse;
+﻿using System;
 
-public static class UnityDataInitializer
+namespace Verse
 {
-	public static bool initializing;
-
-	public static void CopyUnityData()
+	// Token: 0x02000133 RID: 307
+	public static class UnityDataInitializer
 	{
-		initializing = true;
-		try
+		// Token: 0x06000983 RID: 2435 RVA: 0x0002D478 File Offset: 0x0002B678
+		public static void CopyUnityData()
 		{
-			UnityData.CopyUnityData();
+			UnityDataInitializer.initializing = true;
+			try
+			{
+				UnityData.CopyUnityData();
+			}
+			finally
+			{
+				UnityDataInitializer.initializing = false;
+			}
 		}
-		finally
-		{
-			initializing = false;
-		}
+
+		// Token: 0x040004BD RID: 1213
+		public static bool initializing;
 	}
 }

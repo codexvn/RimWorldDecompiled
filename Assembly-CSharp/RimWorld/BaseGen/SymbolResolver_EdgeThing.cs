@@ -1,195 +1,231 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_EdgeThing : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private List<int> randomRotations = new List<int> { 0, 1, 2, 3 };
-
-	private int MaxTriesToAvoidOtherEdgeThings = 4;
-
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x02003910 RID: 14608
+	public class SymbolResolver_EdgeThing : SymbolResolver
 	{
-		if (!base.CanResolve(rp))
+		// Token: 0x06014233 RID: 82483 RVA: 0x005FF8F0 File Offset: 0x005FDAF0
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return false;
-		}
-		if (rp.singleThingDef != null)
-		{
-			bool valueOrDefault = rp.edgeThingAvoidOtherEdgeThings == true;
-			bool valueOrDefault2 = rp.edgeThingMustReachMapEdge == true;
-			IntVec3 spawnCell;
-			if (rp.thingRot.HasValue)
+			if (!base.CanResolve(rp))
 			{
-				if (!TryFindSpawnCell(rp.rect, rp.singleThingDef, rp.thingRot.Value, valueOrDefault, valueOrDefault2, out spawnCell))
+				return false;
+			}
+			if (rp.singleThingDef != null)
+			{
+				bool valueOrDefault = rp.edgeThingAvoidOtherEdgeThings.GetValueOrDefault();
+				bool valueOrDefault2 = rp.edgeThingMustReachMapEdge.GetValueOrDefault();
+				if (rp.thingRot != null)
 				{
-					return false;
+					IntVec3 intVec;
+					if (!this.TryFindSpawnCell(rp.rect, rp.singleThingDef, rp.thingRot.Value, valueOrDefault, valueOrDefault2, out intVec))
+					{
+						return false;
+					}
+				}
+				else if (!rp.singleThingDef.rotatable)
+				{
+					IntVec3 intVec;
+					if (!this.TryFindSpawnCell(rp.rect, rp.singleThingDef, Rot4.North, valueOrDefault, valueOrDefault2, out intVec))
+					{
+						return false;
+					}
+				}
+				else
+				{
+					bool flag = false;
+					for (int i = 0; i < 4; i++)
+					{
+						IntVec3 intVec;
+						if (this.TryFindSpawnCell(rp.rect, rp.singleThingDef, new Rot4(i), valueOrDefault, valueOrDefault2, out intVec))
+						{
+							flag = true;
+							break;
+						}
+					}
+					if (!flag)
+					{
+						return false;
+					}
 				}
 			}
-			else if (!rp.singleThingDef.rotatable)
+			return true;
+		}
+
+		// Token: 0x06014234 RID: 82484 RVA: 0x005FF9C8 File Offset: 0x005FDBC8
+		public override void Resolve(ResolveParams rp)
+		{
+			ThingDef thingDef = rp.singleThingDef ?? (from x in DefDatabase<ThingDef>.AllDefsListForReading
+			where (x.IsWeapon || x.IsMedicine || x.IsDrug) && x.graphicData != null && !x.destroyOnDrop && x.size.x <= rp.rect.Width && x.size.z <= rp.rect.Width && x.size.x <= rp.rect.Height && x.size.z <= rp.rect.Height
+			select x).RandomElement<ThingDef>();
+			IntVec3 invalid = IntVec3.Invalid;
+			Rot4 value = Rot4.North;
+			bool valueOrDefault = rp.edgeThingAvoidOtherEdgeThings.GetValueOrDefault();
+			bool valueOrDefault2 = rp.edgeThingMustReachMapEdge.GetValueOrDefault();
+			if (rp.thingRot != null)
 			{
-				if (!TryFindSpawnCell(rp.rect, rp.singleThingDef, Rot4.North, valueOrDefault, valueOrDefault2, out spawnCell))
+				if (!this.TryFindSpawnCell(rp.rect, thingDef, rp.thingRot.Value, valueOrDefault, valueOrDefault2, out invalid))
 				{
-					return false;
+					return;
 				}
+				value = rp.thingRot.Value;
+			}
+			else if (!thingDef.rotatable)
+			{
+				if (!this.TryFindSpawnCell(rp.rect, thingDef, Rot4.North, valueOrDefault, valueOrDefault2, out invalid))
+				{
+					return;
+				}
+				value = Rot4.North;
 			}
 			else
 			{
+				this.randomRotations.Shuffle<int>();
 				bool flag = false;
-				for (int i = 0; i < 4; i++)
+				for (int i = 0; i < this.randomRotations.Count; i++)
 				{
-					if (TryFindSpawnCell(rp.rect, rp.singleThingDef, new Rot4(i), valueOrDefault, valueOrDefault2, out spawnCell))
+					if (this.TryFindSpawnCell(rp.rect, thingDef, new Rot4(this.randomRotations[i]), valueOrDefault, valueOrDefault2, out invalid))
 					{
+						value = new Rot4(this.randomRotations[i]);
 						flag = true;
 						break;
 					}
 				}
 				if (!flag)
 				{
-					return false;
+					return;
 				}
 			}
+			ResolveParams rp2 = rp;
+			rp2.rect = CellRect.SingleCell(invalid);
+			rp2.thingRot = new Rot4?(value);
+			rp2.singleThingDef = thingDef;
+			BaseGen.symbolStack.Push("thing", rp2, null);
 		}
-		return true;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		ThingDef thingDef = rp.singleThingDef ?? DefDatabase<ThingDef>.AllDefsListForReading.Where((ThingDef x) => (x.IsWeapon || x.IsMedicine || x.IsDrug) && x.graphicData != null && !x.destroyOnDrop && x.size.x <= rp.rect.Width && x.size.z <= rp.rect.Width && x.size.x <= rp.rect.Height && x.size.z <= rp.rect.Height).RandomElement();
-		IntVec3 spawnCell = IntVec3.Invalid;
-		Rot4 value = Rot4.North;
-		bool valueOrDefault = rp.edgeThingAvoidOtherEdgeThings == true;
-		bool valueOrDefault2 = rp.edgeThingMustReachMapEdge == true;
-		if (rp.thingRot.HasValue)
+		// Token: 0x06014235 RID: 82485 RVA: 0x005FFB70 File Offset: 0x005FDD70
+		private bool TryFindSpawnCell(CellRect rect, ThingDef thingDef, Rot4 rot, bool avoidOtherEdgeThings, bool mustReachMapEdge, out IntVec3 spawnCell)
 		{
-			if (!TryFindSpawnCell(rp.rect, thingDef, rp.thingRot.Value, valueOrDefault, valueOrDefault2, out spawnCell))
+			if (avoidOtherEdgeThings)
 			{
-				return;
-			}
-			value = rp.thingRot.Value;
-		}
-		else if (!thingDef.rotatable)
-		{
-			if (!TryFindSpawnCell(rp.rect, thingDef, Rot4.North, valueOrDefault, valueOrDefault2, out spawnCell))
-			{
-				return;
-			}
-			value = Rot4.North;
-		}
-		else
-		{
-			randomRotations.Shuffle();
-			bool flag = false;
-			for (int num = 0; num < randomRotations.Count; num++)
-			{
-				if (TryFindSpawnCell(rp.rect, thingDef, new Rot4(randomRotations[num]), valueOrDefault, valueOrDefault2, out spawnCell))
+				spawnCell = IntVec3.Invalid;
+				int num = -1;
+				for (int i = 0; i < this.MaxTriesToAvoidOtherEdgeThings; i++)
 				{
-					value = new Rot4(randomRotations[num]);
-					flag = true;
-					break;
-				}
-			}
-			if (!flag)
-			{
-				return;
-			}
-		}
-		ResolveParams resolveParams = rp;
-		resolveParams.rect = CellRect.SingleCell(spawnCell);
-		resolveParams.thingRot = value;
-		resolveParams.singleThingDef = thingDef;
-		BaseGen.symbolStack.Push("thing", resolveParams);
-	}
-
-	private bool TryFindSpawnCell(CellRect rect, ThingDef thingDef, Rot4 rot, bool avoidOtherEdgeThings, bool mustReachMapEdge, out IntVec3 spawnCell)
-	{
-		if (avoidOtherEdgeThings)
-		{
-			spawnCell = IntVec3.Invalid;
-			int num = -1;
-			for (int i = 0; i < MaxTriesToAvoidOtherEdgeThings; i++)
-			{
-				if (!TryFindSpawnCell(rect, thingDef, rot, mustReachMapEdge, out var spawnCell2))
-				{
-					continue;
-				}
-				int distanceSquaredToExistingEdgeThing = GetDistanceSquaredToExistingEdgeThing(spawnCell2, rect, thingDef);
-				if (!spawnCell.IsValid || distanceSquaredToExistingEdgeThing > num)
-				{
-					spawnCell = spawnCell2;
-					num = distanceSquaredToExistingEdgeThing;
-					if (num == int.MaxValue)
+					IntVec3 intVec;
+					if (this.TryFindSpawnCell(rect, thingDef, rot, mustReachMapEdge, out intVec))
 					{
-						break;
+						int distanceSquaredToExistingEdgeThing = this.GetDistanceSquaredToExistingEdgeThing(intVec, rect, thingDef);
+						if (!spawnCell.IsValid || distanceSquaredToExistingEdgeThing > num)
+						{
+							spawnCell = intVec;
+							num = distanceSquaredToExistingEdgeThing;
+							if (num == 2147483647)
+							{
+								break;
+							}
+						}
 					}
 				}
+				return spawnCell.IsValid;
 			}
-			return spawnCell.IsValid;
+			return this.TryFindSpawnCell(rect, thingDef, rot, mustReachMapEdge, out spawnCell);
 		}
-		return TryFindSpawnCell(rect, thingDef, rot, mustReachMapEdge, out spawnCell);
-	}
 
-	private bool TryFindSpawnCell(CellRect rect, ThingDef thingDef, Rot4 rot, bool mustReachMapEdge, out IntVec3 spawnCell)
-	{
-		Map map = BaseGen.globalSettings.map;
-		IntVec3 center = IntVec3.Zero;
-		IntVec2 size = thingDef.size;
-		GenAdj.AdjustForRotation(ref center, ref size, rot);
-		CellRect rect2 = CellRect.Empty;
-		TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors);
-		Predicate<CellRect> basePredicate = (CellRect x) => x.Cells.All((IntVec3 y) => y.Standable(map)) && !GenSpawn.WouldWipeAnythingWith(x, thingDef, map, (Thing z) => z.def.category == ThingCategory.Building) && (thingDef.category != ThingCategory.Item || x.CenterCell.GetFirstItem(map) == null) && (!mustReachMapEdge || map.reachability.CanReachMapEdge(x.CenterCell, traverseParms));
-		bool flag = false;
-		if (thingDef.category == ThingCategory.Building)
+		// Token: 0x06014236 RID: 82486 RVA: 0x005FFBF0 File Offset: 0x005FDDF0
+		private bool TryFindSpawnCell(CellRect rect, ThingDef thingDef, Rot4 rot, bool mustReachMapEdge, out IntVec3 spawnCell)
 		{
-			flag = rect.TryFindRandomInnerRectTouchingEdge(size, out rect2, (CellRect x) => basePredicate(x) && !BaseGenUtility.AnyDoorAdjacentCardinalTo(x, map) && GenConstruct.TerrainCanSupport(x, map, thingDef));
-			if (!flag)
+			Map map = BaseGen.globalSettings.map;
+			IntVec3 zero = IntVec3.Zero;
+			IntVec2 size = thingDef.size;
+			GenAdj.AdjustForRotation(ref zero, ref size, rot);
+			CellRect empty = CellRect.Empty;
+			TraverseParms traverseParms = TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false);
+			Func<IntVec3, bool> <>9__3;
+			Predicate<CellRect> basePredicate = delegate(CellRect x)
 			{
-				flag = rect.TryFindRandomInnerRectTouchingEdge(size, out rect2, (CellRect x) => basePredicate(x) && !BaseGenUtility.AnyDoorAdjacentCardinalTo(x, map));
+				IEnumerable<IntVec3> cells = x.Cells;
+				Func<IntVec3, bool> predicate;
+				if ((predicate = <>9__3) == null)
+				{
+					predicate = (<>9__3 = ((IntVec3 y) => y.Standable(map)));
+				}
+				if (cells.All(predicate))
+				{
+					if (!GenSpawn.WouldWipeAnythingWith(x, thingDef, map, (Thing z) => z.def.category == ThingCategory.Building) && (thingDef.category != ThingCategory.Item || x.CenterCell.GetFirstItem(map) == null))
+					{
+						return !mustReachMapEdge || map.reachability.CanReachMapEdge(x.CenterCell, traverseParms);
+					}
+				}
+				return false;
+			};
+			bool flag = false;
+			if (thingDef.category == ThingCategory.Building)
+			{
+				flag = rect.TryFindRandomInnerRectTouchingEdge(size, out empty, (CellRect x) => basePredicate(x) && !BaseGenUtility.AnyDoorAdjacentCardinalTo(x, map) && GenConstruct.TerrainCanSupport(x, map, thingDef));
+				if (!flag)
+				{
+					flag = rect.TryFindRandomInnerRectTouchingEdge(size, out empty, (CellRect x) => basePredicate(x) && !BaseGenUtility.AnyDoorAdjacentCardinalTo(x, map));
+				}
 			}
-		}
-		if (!flag && !rect.TryFindRandomInnerRectTouchingEdge(size, out rect2, basePredicate))
-		{
+			if (!flag && !rect.TryFindRandomInnerRectTouchingEdge(size, out empty, basePredicate))
+			{
+				spawnCell = IntVec3.Invalid;
+				return false;
+			}
+			foreach (IntVec3 intVec in empty)
+			{
+				if (GenAdj.OccupiedRect(intVec, rot, thingDef.size) == empty)
+				{
+					spawnCell = intVec;
+					return true;
+				}
+			}
+			Log.Error("We found a valid rect but we couldn't find the root position. This should never happen.");
 			spawnCell = IntVec3.Invalid;
 			return false;
 		}
-		foreach (IntVec3 item in rect2)
-		{
-			if (GenAdj.OccupiedRect(item, rot, thingDef.size) == rect2)
-			{
-				spawnCell = item;
-				return true;
-			}
-		}
-		Log.Error("We found a valid rect but we couldn't find the root position. This should never happen.");
-		spawnCell = IntVec3.Invalid;
-		return false;
-	}
 
-	private int GetDistanceSquaredToExistingEdgeThing(IntVec3 cell, CellRect rect, ThingDef thingDef)
-	{
-		Map map = BaseGen.globalSettings.map;
-		int num = int.MaxValue;
-		foreach (IntVec3 edgeCell in rect.EdgeCells)
+		// Token: 0x06014237 RID: 82487 RVA: 0x005FFD54 File Offset: 0x005FDF54
+		private int GetDistanceSquaredToExistingEdgeThing(IntVec3 cell, CellRect rect, ThingDef thingDef)
 		{
-			List<Thing> thingList = edgeCell.GetThingList(map);
-			bool flag = false;
-			for (int i = 0; i < thingList.Count; i++)
+			Map map = BaseGen.globalSettings.map;
+			int num = int.MaxValue;
+			foreach (IntVec3 intVec in rect.EdgeCells)
 			{
-				if (thingList[i].def == thingDef)
+				List<Thing> thingList = intVec.GetThingList(map);
+				bool flag = false;
+				for (int i = 0; i < thingList.Count; i++)
 				{
-					flag = true;
-					break;
+					if (thingList[i].def == thingDef)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					num = Mathf.Min(num, cell.DistanceToSquared(intVec));
 				}
 			}
-			if (flag)
-			{
-				num = Mathf.Min(num, cell.DistanceToSquared(edgeCell));
-			}
+			return num;
 		}
-		return num;
+
+		// Token: 0x0400DEC5 RID: 57029
+		private List<int> randomRotations = new List<int>
+		{
+			0,
+			1,
+			2,
+			3
+		};
+
+		// Token: 0x0400DEC6 RID: 57030
+		private int MaxTriesToAvoidOtherEdgeThings = 4;
 	}
 }

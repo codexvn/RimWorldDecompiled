@@ -1,23 +1,33 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SmokepopBelt : Apparel
+namespace RimWorld
 {
-	private float ApparelScorePerBeltRadius = 0.046f;
-
-	public override void Notify_BulletImpactNearby(BulletImpactData impactData)
+	// Token: 0x02002B59 RID: 11097
+	public class SmokepopBelt : Apparel
 	{
-		base.Notify_BulletImpactNearby(impactData);
-		Pawn wearer = base.Wearer;
-		if (wearer != null && !wearer.Dead && !impactData.bullet.DamageDef.isExplosive && impactData.bullet.Launcher is Building_Turret && impactData.bullet.Launcher != null && impactData.bullet.Launcher.HostileTo(base.Wearer) && !wearer.IsColonist && wearer.Spawned && !wearer.Position.AnyGas(wearer.Map, GasType.BlindSmoke))
+		// Token: 0x0600F82B RID: 63531 RVA: 0x004830DC File Offset: 0x004812DC
+		public override void Notify_BulletImpactNearby(BulletImpactData impactData)
 		{
-			Verb_SmokePop.Pop(this.TryGetComp<CompApparelReloadable>());
+			base.Notify_BulletImpactNearby(impactData);
+			Pawn wearer = base.Wearer;
+			if (wearer == null || wearer.Dead)
+			{
+				return;
+			}
+			if (!impactData.bullet.DamageDef.isExplosive && impactData.bullet.Launcher is Building_Turret && impactData.bullet.Launcher != null && impactData.bullet.Launcher.HostileTo(base.Wearer) && !wearer.IsColonist && wearer.Spawned && !wearer.Position.AnyGas(wearer.Map, GasType.BlindSmoke))
+			{
+				Verb_SmokePop.Pop(this.TryGetComp<CompApparelReloadable>());
+			}
 		}
-	}
 
-	public override float GetSpecialApparelScoreOffset()
-	{
-		return this.GetStatValue(StatDefOf.PackRadius) * ApparelScorePerBeltRadius;
+		// Token: 0x0600F82C RID: 63532 RVA: 0x0048317B File Offset: 0x0048137B
+		public override float GetSpecialApparelScoreOffset()
+		{
+			return this.GetStatValue(StatDefOf.PackRadius, true, -1) * this.ApparelScorePerBeltRadius;
+		}
+
+		// Token: 0x0400A331 RID: 41777
+		private float ApparelScorePerBeltRadius = 0.046f;
 	}
 }

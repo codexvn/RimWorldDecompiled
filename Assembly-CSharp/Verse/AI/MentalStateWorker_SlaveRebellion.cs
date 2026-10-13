@@ -1,19 +1,15 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalStateWorker_SlaveRebellion : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000FAC RID: 4012
+	public class MentalStateWorker_SlaveRebellion : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x060062A2 RID: 25250 RVA: 0x001F1613 File Offset: 0x001EF813
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			return base.StateCanOccur(pawn) && pawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking) && SlaveRebellionUtility.FindSlaveForRebellion(pawn) != null;
 		}
-		if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Talking))
-		{
-			return false;
-		}
-		return SlaveRebellionUtility.FindSlaveForRebellion(pawn) != null;
 	}
 }

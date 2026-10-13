@@ -1,105 +1,160 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class FloatMenuOptionProvider_Childcare : FloatMenuOptionProvider
+namespace RimWorld
 {
-	protected override bool Drafted => false;
-
-	protected override bool Undrafted => true;
-
-	protected override bool Multiselect => false;
-
-	public override bool CanTargetDespawned => true;
-
-	protected override bool AppliesInt(FloatMenuContext context)
+	// Token: 0x020032DC RID: 13020
+	public class FloatMenuOptionProvider_Childcare : FloatMenuOptionProvider
 	{
-		return ModsConfig.BiotechActive;
-	}
-
-	public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
-	{
-		if (!ChildcareUtility.CanSuckle(clickedPawn, out var reason))
+		// Token: 0x17002F67 RID: 12135
+		// (get) Token: 0x06012521 RID: 75041 RVA: 0x00002501 File Offset: 0x00000701
+		protected override bool Drafted
 		{
-			yield break;
+			get
+			{
+				return false;
+			}
 		}
-		if (ChildcareUtility.CanBreastfeed(context.FirstSelectedPawn, out reason))
+
+		// Token: 0x17002F68 RID: 12136
+		// (get) Token: 0x06012522 RID: 75042 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool Undrafted
 		{
-			if (!ChildcareUtility.HasBreastfeedCompatibleFactions(context.FirstSelectedPawn, clickedPawn))
+			get
+			{
+				return true;
+			}
+		}
+
+		// Token: 0x17002F69 RID: 12137
+		// (get) Token: 0x06012523 RID: 75043 RVA: 0x00002501 File Offset: 0x00000701
+		protected override bool Multiselect
+		{
+			get
+			{
+				return false;
+			}
+		}
+
+		// Token: 0x17002F6A RID: 12138
+		// (get) Token: 0x06012524 RID: 75044 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool CanTargetDespawned
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		// Token: 0x06012525 RID: 75045 RVA: 0x00563089 File Offset: 0x00561289
+		protected override bool AppliesInt(FloatMenuContext context)
+		{
+			return ModsConfig.BiotechActive;
+		}
+
+		// Token: 0x06012526 RID: 75046 RVA: 0x00565E8A File Offset: 0x0056408A
+		public override IEnumerable<FloatMenuOption> GetOptionsFor(Pawn clickedPawn, FloatMenuContext context)
+		{
+			FloatMenuOptionProvider_Childcare.<>c__DisplayClass9_0 CS$<>8__locals1 = new FloatMenuOptionProvider_Childcare.<>c__DisplayClass9_0();
+			CS$<>8__locals1.context = context;
+			ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
+			if (!ChildcareUtility.CanSuckle(clickedPawn, out breastfeedFailReason))
 			{
 				yield break;
 			}
-			if (!ChildcareUtility.CanMomAutoBreastfeedBabyNow(context.FirstSelectedPawn, clickedPawn, forced: true, out var reason2))
+			Job job;
+			if (ChildcareUtility.CanBreastfeed(CS$<>8__locals1.context.FirstSelectedPawn, out breastfeedFailReason))
 			{
-				TaggedString taggedString = "BabyCareBreastfeedUnable".Translate(clickedPawn.Named("BABY")) + ": " + reason2.Value.Translate(context.FirstSelectedPawn, context.FirstSelectedPawn, clickedPawn).CapitalizeFirst();
-				yield return new FloatMenuOption(taggedString, null);
-			}
-			else
-			{
-				Job job = ChildcareUtility.MakeBreastfeedJob(clickedPawn);
-				if (context.FirstSelectedPawn.jobs.curJob != null && context.FirstSelectedPawn.jobs.curJob.JobIsSameAs(context.FirstSelectedPawn, job))
+				if (!ChildcareUtility.HasBreastfeedCompatibleFactions(CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn))
 				{
-					yield return new FloatMenuOption("AlreadyBreastfeeding".Translate(clickedPawn.Named("BABY")), null);
+					yield break;
+				}
+				ChildcareUtility.BreastfeedFailReason? breastfeedFailReason2;
+				if (!ChildcareUtility.CanMomAutoBreastfeedBabyNow(CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn, true, out breastfeedFailReason2))
+				{
+					TaggedString taggedString = "BabyCareBreastfeedUnable".Translate(clickedPawn.Named("BABY")) + ": " + breastfeedFailReason2.Value.Translate(CS$<>8__locals1.context.FirstSelectedPawn, CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn).CapitalizeFirst();
+					yield return new FloatMenuOption(taggedString, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
 				}
 				else
 				{
-					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("BabyCareBreastfeed".Translate(clickedPawn.Named("BABY")), delegate
+					Job job = ChildcareUtility.MakeBreastfeedJob(clickedPawn, null);
+					if (CS$<>8__locals1.context.FirstSelectedPawn.jobs.curJob != null && CS$<>8__locals1.context.FirstSelectedPawn.jobs.curJob.JobIsSameAs(CS$<>8__locals1.context.FirstSelectedPawn, job))
 					{
-						context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-					}), context.FirstSelectedPawn, clickedPawn);
+						yield return new FloatMenuOption("AlreadyBreastfeeding".Translate(clickedPawn.Named("BABY")), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					}
+					else
+					{
+						yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("BabyCareBreastfeed".Translate(clickedPawn.Named("BABY")), delegate()
+						{
+							CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn, "ReservedBy", null);
+					}
 				}
 			}
-		}
-		if (CaravanFormingUtility.IsFormingCaravanOrDownedPawnToBeTakenByCaravan(clickedPawn))
-		{
-			yield break;
-		}
-		if (!ChildcareUtility.CanHaulBabyNow(context.FirstSelectedPawn, clickedPawn, ignoreOtherReservations: false, out var reason3))
-		{
-			if (context.FirstSelectedPawn.MapHeld.reservationManager.TryGetReserver(clickedPawn, context.FirstSelectedPawn.Faction, out var reserver))
-			{
-				yield return new FloatMenuOption(string.Format("{0}: {1} {2}", "CannotCarryToSafePlace".Translate(), clickedPawn.LabelShort, "ReservedBy".Translate(reserver.LabelShort, reserver).Resolve().StripTags()), null);
-			}
-			else if (reason3.HasValue && reason3 == ChildcareUtility.BreastfeedFailReason.HaulerCannotReachBaby)
-			{
-				yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "NoPath".Translate().CapitalizeFirst()), null);
-			}
-			else
-			{
-				yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "Incapable".Translate().CapitalizeFirst()), null);
-			}
-			yield break;
-		}
-		LocalTargetInfo targetB = ChildcareUtility.SafePlaceForBaby(clickedPawn, context.FirstSelectedPawn);
-		if (!targetB.IsValid)
-		{
-			yield break;
-		}
-		if (targetB.Thing is Building_Bed building_Bed)
-		{
-			if (clickedPawn.CurrentBed() == building_Bed)
+			if (CaravanFormingUtility.IsFormingCaravanOrDownedPawnToBeTakenByCaravan(clickedPawn))
 			{
 				yield break;
 			}
-		}
-		else if (clickedPawn.Spawned && clickedPawn.Position == targetB.Cell)
-		{
-			yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "NoBetterSafePlace".Translate().CapitalizeFirst()), null);
+			ChildcareUtility.BreastfeedFailReason? breastfeedFailReason3;
+			if (!ChildcareUtility.CanHaulBabyNow(CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn, false, out breastfeedFailReason3))
+			{
+				Pawn pawn;
+				if (CS$<>8__locals1.context.FirstSelectedPawn.MapHeld.reservationManager.TryGetReserver(clickedPawn, CS$<>8__locals1.context.FirstSelectedPawn.Faction, out pawn))
+				{
+					yield return new FloatMenuOption(string.Format("{0}: {1} {2}", "CannotCarryToSafePlace".Translate(), clickedPawn.LabelShort, "ReservedBy".Translate(pawn.LabelShort, pawn).Resolve().StripTags()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				}
+				else
+				{
+					if (breastfeedFailReason3 != null)
+					{
+						breastfeedFailReason = breastfeedFailReason3;
+						ChildcareUtility.BreastfeedFailReason breastfeedFailReason4 = ChildcareUtility.BreastfeedFailReason.HaulerCannotReachBaby;
+						if (breastfeedFailReason.GetValueOrDefault() == breastfeedFailReason4 & breastfeedFailReason != null)
+						{
+							yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "NoPath".Translate().CapitalizeFirst()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+							goto IL_470;
+						}
+					}
+					yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "Incapable".Translate().CapitalizeFirst()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				}
+				IL_470:
+				yield break;
+			}
+			LocalTargetInfo targetB = ChildcareUtility.SafePlaceForBaby(clickedPawn, CS$<>8__locals1.context.FirstSelectedPawn, false);
+			if (!targetB.IsValid)
+			{
+				yield break;
+			}
+			Building_Bed building_Bed = targetB.Thing as Building_Bed;
+			if (building_Bed != null)
+			{
+				if (clickedPawn.CurrentBed() == building_Bed)
+				{
+					yield break;
+				}
+			}
+			else if (clickedPawn.Spawned && clickedPawn.Position == targetB.Cell)
+			{
+				yield return new FloatMenuOption(string.Format("{0}: {1}", "CannotCarryToSafePlace".Translate(), "NoBetterSafePlace".Translate().CapitalizeFirst()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				yield break;
+			}
+			job = JobMaker.MakeJob(JobDefOf.BringBabyToSafety, clickedPawn, targetB);
+			if (CS$<>8__locals1.context.FirstSelectedPawn.jobs.curJob != null && CS$<>8__locals1.context.FirstSelectedPawn.jobs.curJob.JobIsSameAs(CS$<>8__locals1.context.FirstSelectedPawn, job))
+			{
+				yield return new FloatMenuOption("AlreadyCarryingToSafePlace".Translate(clickedPawn.Named("BABY")), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+			}
+			else
+			{
+				yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("CarryToSafePlace".Translate(clickedPawn.Named("BABY")), delegate()
+				{
+					job.count = 1;
+					CS$<>8__locals1.context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+				}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), CS$<>8__locals1.context.FirstSelectedPawn, clickedPawn, "ReservedBy", null);
+			}
 			yield break;
 		}
-		Job job2 = JobMaker.MakeJob(JobDefOf.BringBabyToSafety, clickedPawn, targetB);
-		if (context.FirstSelectedPawn.jobs.curJob != null && context.FirstSelectedPawn.jobs.curJob.JobIsSameAs(context.FirstSelectedPawn, job2))
-		{
-			yield return new FloatMenuOption("AlreadyCarryingToSafePlace".Translate(clickedPawn.Named("BABY")), null);
-			yield break;
-		}
-		yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("CarryToSafePlace".Translate(clickedPawn.Named("BABY")), delegate
-		{
-			job2.count = 1;
-			context.FirstSelectedPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
-		}), context.FirstSelectedPawn, clickedPawn);
 	}
 }

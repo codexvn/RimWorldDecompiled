@@ -1,117 +1,138 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse.Sound;
-
-public class SustainerManager
+namespace Verse.Sound
 {
-	private List<Sustainer> allSustainers = new List<Sustainer>();
-
-	private static Dictionary<SoundDef, List<Sustainer>> playingPerDef = new Dictionary<SoundDef, List<Sustainer>>();
-
-	private static readonly Comparison<Sustainer> SortSustainersByCameraDistanceCached = (Sustainer a, Sustainer b) => a.CameraDistanceSquared.CompareTo(b.CameraDistanceSquared);
-
-	public List<Sustainer> AllSustainers => allSustainers;
-
-	public void RegisterSustainer(Sustainer newSustainer)
+	// Token: 0x02000E47 RID: 3655
+	public class SustainerManager
 	{
-		allSustainers.Add(newSustainer);
-	}
-
-	public void DeregisterSustainer(Sustainer oldSustainer)
-	{
-		allSustainers.Remove(oldSustainer);
-	}
-
-	public bool SustainerExists(SoundDef def)
-	{
-		for (int i = 0; i < allSustainers.Count; i++)
+		// Token: 0x17000ECD RID: 3789
+		// (get) Token: 0x06005C17 RID: 23575 RVA: 0x001D73D8 File Offset: 0x001D55D8
+		public List<Sustainer> AllSustainers
 		{
-			if (allSustainers[i].def == def)
+			get
 			{
-				return true;
+				return this.allSustainers;
 			}
 		}
-		return false;
-	}
 
-	public void SustainerManagerUpdate()
-	{
-		for (int num = allSustainers.Count - 1; num >= 0; num--)
+		// Token: 0x06005C18 RID: 23576 RVA: 0x001D73E0 File Offset: 0x001D55E0
+		public void RegisterSustainer(Sustainer newSustainer)
 		{
-			allSustainers[num].SustainerUpdate();
+			this.allSustainers.Add(newSustainer);
 		}
-		UpdateAllSustainerScopes();
-	}
 
-	public void UpdateAllSustainerScopes()
-	{
-		playingPerDef.Clear();
-		for (int i = 0; i < allSustainers.Count; i++)
+		// Token: 0x06005C19 RID: 23577 RVA: 0x001D73EE File Offset: 0x001D55EE
+		public void DeregisterSustainer(Sustainer oldSustainer)
 		{
-			Sustainer sustainer = allSustainers[i];
-			if (!playingPerDef.ContainsKey(sustainer.def))
-			{
-				List<Sustainer> list = SimplePool<List<Sustainer>>.Get();
-				list.Add(sustainer);
-				playingPerDef.Add(sustainer.def, list);
-			}
-			else
-			{
-				playingPerDef[sustainer.def].Add(sustainer);
-			}
+			this.allSustainers.Remove(oldSustainer);
 		}
-		foreach (KeyValuePair<SoundDef, List<Sustainer>> item in playingPerDef)
+
+		// Token: 0x06005C1A RID: 23578 RVA: 0x001D7400 File Offset: 0x001D5600
+		public bool SustainerExists(SoundDef def)
 		{
-			SoundDef key = item.Key;
-			List<Sustainer> value = item.Value;
-			if (value.Count - key.maxVoices < 0)
+			for (int i = 0; i < this.allSustainers.Count; i++)
 			{
-				for (int j = 0; j < value.Count; j++)
+				if (this.allSustainers[i].def == def)
 				{
-					value[j].scopeFader.inScope = true;
-				}
-				continue;
-			}
-			for (int k = 0; k < value.Count; k++)
-			{
-				value[k].scopeFader.inScope = false;
-			}
-			value.Sort(SortSustainersByCameraDistanceCached);
-			int num = 0;
-			for (int l = 0; l < value.Count; l++)
-			{
-				value[l].scopeFader.inScope = true;
-				num++;
-				if (num >= key.maxVoices)
-				{
-					break;
+					return true;
 				}
 			}
-			for (int m = 0; m < value.Count; m++)
+			return false;
+		}
+
+		// Token: 0x06005C1B RID: 23579 RVA: 0x001D743C File Offset: 0x001D563C
+		public void SustainerManagerUpdate()
+		{
+			for (int i = this.allSustainers.Count - 1; i >= 0; i--)
 			{
-				if (!value[m].scopeFader.inScope)
+				this.allSustainers[i].SustainerUpdate();
+			}
+			this.UpdateAllSustainerScopes();
+		}
+
+		// Token: 0x06005C1C RID: 23580 RVA: 0x001D7478 File Offset: 0x001D5678
+		public void UpdateAllSustainerScopes()
+		{
+			SustainerManager.playingPerDef.Clear();
+			for (int i = 0; i < this.allSustainers.Count; i++)
+			{
+				Sustainer sustainer = this.allSustainers[i];
+				if (!SustainerManager.playingPerDef.ContainsKey(sustainer.def))
 				{
-					value[m].scopeFader.inScopePercent = 0f;
+					List<Sustainer> list = SimplePool<List<Sustainer>>.Get();
+					list.Add(sustainer);
+					SustainerManager.playingPerDef.Add(sustainer.def, list);
+				}
+				else
+				{
+					SustainerManager.playingPerDef[sustainer.def].Add(sustainer);
+				}
+			}
+			foreach (KeyValuePair<SoundDef, List<Sustainer>> keyValuePair in SustainerManager.playingPerDef)
+			{
+				SoundDef key = keyValuePair.Key;
+				List<Sustainer> value = keyValuePair.Value;
+				if (value.Count - key.maxVoices < 0)
+				{
+					for (int j = 0; j < value.Count; j++)
+					{
+						value[j].scopeFader.inScope = true;
+					}
+				}
+				else
+				{
+					for (int k = 0; k < value.Count; k++)
+					{
+						value[k].scopeFader.inScope = false;
+					}
+					value.Sort(SustainerManager.SortSustainersByCameraDistanceCached);
+					int num = 0;
+					for (int l = 0; l < value.Count; l++)
+					{
+						value[l].scopeFader.inScope = true;
+						num++;
+						if (num >= key.maxVoices)
+						{
+							break;
+						}
+					}
+					for (int m = 0; m < value.Count; m++)
+					{
+						if (!value[m].scopeFader.inScope)
+						{
+							value[m].scopeFader.inScopePercent = 0f;
+						}
+					}
+				}
+			}
+			foreach (KeyValuePair<SoundDef, List<Sustainer>> keyValuePair2 in SustainerManager.playingPerDef)
+			{
+				keyValuePair2.Value.Clear();
+				SimplePool<List<Sustainer>>.Return(keyValuePair2.Value);
+			}
+			SustainerManager.playingPerDef.Clear();
+		}
+
+		// Token: 0x06005C1D RID: 23581 RVA: 0x001D76C0 File Offset: 0x001D58C0
+		public void EndAllInMap(Map map)
+		{
+			for (int i = this.allSustainers.Count - 1; i >= 0; i--)
+			{
+				if (this.allSustainers[i].info.Maker.Map == map)
+				{
+					this.allSustainers[i].End();
 				}
 			}
 		}
-		foreach (KeyValuePair<SoundDef, List<Sustainer>> item2 in playingPerDef)
-		{
-			item2.Value.Clear();
-			SimplePool<List<Sustainer>>.Return(item2.Value);
-		}
-		playingPerDef.Clear();
-	}
 
-	public void EndAllInMap(Map map)
-	{
-		for (int num = allSustainers.Count - 1; num >= 0; num--)
-		{
-			if (allSustainers[num].info.Maker.Map == map)
-			{
-				allSustainers[num].End();
-			}
-		}
+		// Token: 0x040042BD RID: 17085
+		private List<Sustainer> allSustainers = new List<Sustainer>();
+
+		// Token: 0x040042BE RID: 17086
+		private static Dictionary<SoundDef, List<Sustainer>> playingPerDef = new Dictionary<SoundDef, List<Sustainer>>();
+
+		// Token: 0x040042BF RID: 17087
+		private static readonly Comparison<Sustainer> SortSustainersByCameraDistanceCached = (Sustainer a, Sustainer b) => a.CameraDistanceSquared.CompareTo(b.CameraDistanceSquared);
 	}
 }

@@ -1,57 +1,66 @@
-using System;
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class Graphic_MealVariants : Graphic_StackCount
+namespace Verse
 {
-	public override Graphic SubGraphicFor(Thing thing)
+	// Token: 0x020008A2 RID: 2210
+	public class Graphic_MealVariants : Graphic_StackCount
 	{
-		return subGraphics[SubGraphicTypeIndex(thing) + SubGraphicIndexOffset(thing)];
-	}
-
-	public int SubGraphicTypeIndex(Thing thing)
-	{
-		if (!ModsConfig.IdeologyActive)
+		// Token: 0x060037F1 RID: 14321 RVA: 0x0012ADB7 File Offset: 0x00128FB7
+		public override Graphic SubGraphicFor(Thing thing)
 		{
-			return 0;
+			return this.subGraphics[this.SubGraphicTypeIndex(thing) + this.SubGraphicIndexOffset(thing)];
 		}
-		return FoodUtility.GetFoodKind(thing) switch
-		{
-			FoodKind.Meat => subGraphics.Length / 3, 
-			FoodKind.NonMeat => subGraphics.Length / 3 * 2, 
-			_ => 0, 
-		};
-	}
 
-	public int SubGraphicIndexOffset(Thing thing)
-	{
-		if (thing == null)
+		// Token: 0x060037F2 RID: 14322 RVA: 0x0012ADD0 File Offset: 0x00128FD0
+		public int SubGraphicTypeIndex(Thing thing)
 		{
-			return 0;
-		}
-		switch (subGraphics.Length / 3)
-		{
-		case 1:
-			return 0;
-		case 2:
-			if (thing.stackCount == 1)
+			if (!ModsConfig.IdeologyActive)
 			{
 				return 0;
 			}
-			return 1;
-		case 3:
-			if (thing.stackCount == 1)
+			FoodKind foodKind = FoodUtility.GetFoodKind(thing);
+			if (foodKind == FoodKind.Meat)
+			{
+				return this.subGraphics.Length / 3;
+			}
+			if (foodKind != FoodKind.NonMeat)
 			{
 				return 0;
 			}
-			if (thing.stackCount == thing.def.stackLimit)
+			return this.subGraphics.Length / 3 * 2;
+		}
+
+		// Token: 0x060037F3 RID: 14323 RVA: 0x0012AE10 File Offset: 0x00129010
+		public int SubGraphicIndexOffset(Thing thing)
+		{
+			if (thing == null)
 			{
-				return 2;
+				return 0;
 			}
-			return 1;
-		default:
-			throw new NotImplementedException("More than 3 different stack size meal graphics per meal type not supported");
+			switch (this.subGraphics.Length / 3)
+			{
+			case 1:
+				return 0;
+			case 2:
+				if (thing.stackCount == 1)
+				{
+					return 0;
+				}
+				return 1;
+			case 3:
+				if (thing.stackCount == 1)
+				{
+					return 0;
+				}
+				if (thing.stackCount == thing.def.stackLimit)
+				{
+					return 2;
+				}
+				return 1;
+			default:
+				throw new NotImplementedException("More than 3 different stack size meal graphics per meal type not supported");
+			}
 		}
 	}
 }

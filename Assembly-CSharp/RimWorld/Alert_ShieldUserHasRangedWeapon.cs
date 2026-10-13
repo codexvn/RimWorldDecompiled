@@ -1,60 +1,66 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_ShieldUserHasRangedWeapon : Alert
+namespace RimWorld
 {
-	private List<Pawn> shieldUsersWithRangedWeaponResult = new List<Pawn>();
-
-	private List<Pawn> ShieldUsersWithRangedWeapon
+	// Token: 0x0200301F RID: 12319
+	public class Alert_ShieldUserHasRangedWeapon : Alert
 	{
-		get
+		// Token: 0x17002CE8 RID: 11496
+		// (get) Token: 0x06011541 RID: 70977 RVA: 0x004F835C File Offset: 0x004F655C
+		private List<Pawn> ShieldUsersWithRangedWeapon
 		{
-			shieldUsersWithRangedWeaponResult.Clear();
-			foreach (Pawn item in PawnsFinder.AllMaps_FreeColonistsSpawned)
+			get
 			{
-				ThingWithComps primary = item.equipment.Primary;
-				if (primary == null || !primary.def.IsRangedWeapon)
+				this.shieldUsersWithRangedWeaponResult.Clear();
+				foreach (Pawn pawn in PawnsFinder.AllMaps_FreeColonistsSpawned)
 				{
-					continue;
-				}
-				bool flag = false;
-				List<VerbProperties> verbs = primary.def.Verbs;
-				for (int i = 0; i < verbs.Count; i++)
-				{
-					if (typeof(Verb_LaunchProjectile).IsAssignableFrom(verbs[i].verbClass))
+					ThingWithComps primary = pawn.equipment.Primary;
+					if (primary != null && primary.def.IsRangedWeapon)
 					{
-						flag = true;
-						break;
+						bool flag = false;
+						List<VerbProperties> verbs = primary.def.Verbs;
+						for (int i = 0; i < verbs.Count; i++)
+						{
+							if (typeof(Verb_LaunchProjectile).IsAssignableFrom(verbs[i].verbClass))
+							{
+								flag = true;
+								break;
+							}
+						}
+						if (flag)
+						{
+							List<Apparel> wornApparel = pawn.apparel.WornApparel;
+							for (int j = 0; j < wornApparel.Count; j++)
+							{
+								if (wornApparel[j].def.IsShieldThatBlocksRanged)
+								{
+									this.shieldUsersWithRangedWeaponResult.Add(pawn);
+									break;
+								}
+							}
+						}
 					}
 				}
-				if (!flag)
-				{
-					continue;
-				}
-				List<Apparel> wornApparel = item.apparel.WornApparel;
-				for (int j = 0; j < wornApparel.Count; j++)
-				{
-					if (wornApparel[j].def.IsShieldThatBlocksRanged)
-					{
-						shieldUsersWithRangedWeaponResult.Add(item);
-						break;
-					}
-				}
+				return this.shieldUsersWithRangedWeaponResult;
 			}
-			return shieldUsersWithRangedWeaponResult;
 		}
-	}
 
-	public Alert_ShieldUserHasRangedWeapon()
-	{
-		defaultLabel = "ShieldUserHasRangedWeapon".Translate();
-		defaultExplanation = "ShieldUserHasRangedWeaponDesc".Translate();
-	}
+		// Token: 0x06011542 RID: 70978 RVA: 0x004F8474 File Offset: 0x004F6674
+		public Alert_ShieldUserHasRangedWeapon()
+		{
+			this.defaultLabel = "ShieldUserHasRangedWeapon".Translate();
+			this.defaultExplanation = "ShieldUserHasRangedWeaponDesc".Translate();
+		}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(ShieldUsersWithRangedWeapon);
+		// Token: 0x06011543 RID: 70979 RVA: 0x004F84B1 File Offset: 0x004F66B1
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.ShieldUsersWithRangedWeapon);
+		}
+
+		// Token: 0x0400B385 RID: 45957
+		private List<Pawn> shieldUsersWithRangedWeaponResult = new List<Pawn>();
 	}
 }

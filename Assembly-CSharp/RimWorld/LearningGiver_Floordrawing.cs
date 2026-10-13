@@ -1,136 +1,94 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class LearningGiver_Floordrawing : LearningGiver
+namespace RimWorld
 {
-	private static readonly IntVec3[] offsets = new IntVec3[2]
+	// Token: 0x02001518 RID: 5400
+	public class LearningGiver_Floordrawing : LearningGiver
 	{
-		IntVec3.East,
-		IntVec3.South
-	};
+		// Token: 0x060080A6 RID: 32934 RVA: 0x0026C324 File Offset: 0x0026A524
+		public static bool TryFindFloordrawingSpots(Pawn pawn, out IntVec3 drawFrom, out IntVec3 drawOn)
+		{
+			LearningGiver_Floordrawing.<>c__DisplayClass2_0 CS$<>8__locals1 = new LearningGiver_Floordrawing.<>c__DisplayClass2_0();
+			CS$<>8__locals1.pawn = pawn;
+			CS$<>8__locals1.traverseParams = TraverseParms.For(CS$<>8__locals1.pawn, Danger.None, TraverseMode.ByPawn, false, false, false, true);
+			CS$<>8__locals1.innerDrawFrom = IntVec3.Invalid;
+			CS$<>8__locals1.innerDrawOn = IntVec3.Invalid;
+			CS$<>8__locals1.<TryFindFloordrawingSpots>g__FindDrawCell|0(false);
+			if (CS$<>8__locals1.innerDrawFrom == IntVec3.Invalid)
+			{
+				CS$<>8__locals1.<TryFindFloordrawingSpots>g__FindDrawCell|0(true);
+			}
+			drawFrom = CS$<>8__locals1.innerDrawFrom;
+			drawOn = CS$<>8__locals1.innerDrawOn;
+			return drawFrom != IntVec3.Invalid && drawOn != IntVec3.Invalid;
+		}
 
-	public static bool TryFindFloordrawingSpots(Pawn pawn, out IntVec3 drawFrom, out IntVec3 drawOn)
-	{
-		TraverseParms traverseParams = TraverseParms.For(pawn, Danger.None);
-		IntVec3 innerDrawFrom = IntVec3.Invalid;
-		IntVec3 innerDrawOn = IntVec3.Invalid;
-		FindDrawCell(desperate: false);
-		if (innerDrawFrom == IntVec3.Invalid)
+		// Token: 0x060080A7 RID: 32935 RVA: 0x0026C3CC File Offset: 0x0026A5CC
+		public static bool CanFloorDrawFrom(IntVec3 spot, Pawn drawer)
 		{
-			FindDrawCell(desperate: true);
+			Map map = drawer.Map;
+			return spot.InBounds(map) && spot.Standable(map) && !spot.IsForbidden(drawer) && map.areaManager.Home[spot] && spot.GetDoor(map) == null && drawer.CanReserve(spot, 1, -1, null, false);
 		}
-		drawFrom = innerDrawFrom;
-		drawOn = innerDrawOn;
-		if (drawFrom != IntVec3.Invalid && drawOn != IntVec3.Invalid)
+
+		// Token: 0x060080A8 RID: 32936 RVA: 0x0026C429 File Offset: 0x0026A629
+		private static bool CanDrawOn(IntVec3 cell, Map map, bool desperate)
 		{
-			return true;
+			return FilthMaker.CanMakeFilth(cell, map, ThingDefOf.Filth_Floordrawing, FilthSourceFlags.Pawn) && (desperate || (cell.GetFirstItem(map) == null && cell.GetFirstBuilding(map) == null && cell.GetFirstThing(map) == null));
 		}
-		return false;
-		void FindDrawCell(bool desperate)
+
+		// Token: 0x060080A9 RID: 32937 RVA: 0x0026C460 File Offset: 0x0026A660
+		public static bool TryFloorDrawCellPair(IntVec3 companionCell, bool canDrawOnRoot, Pawn drawer, bool desperate, out bool shouldDrawOnRoot)
 		{
-			RegionTraverser.BreadthFirstTraverse(pawn.Position, pawn.Map, (Region from, Region r) => r.Allows(traverseParams, isDestination: false), delegate(Region r)
+			shouldDrawOnRoot = false;
+			if (!LearningGiver_Floordrawing.CanFloorDrawFrom(companionCell, drawer))
 			{
-				if (r.IsForbiddenEntirely(pawn))
-				{
-					return false;
-				}
-				IntVec3 result;
-				return r.DangerFor(pawn) != Danger.Deadly && r.TryFindRandomCellInRegion(CellValidator, out result);
-			}, desperate ? 200 : 40);
-			bool CellValidator(IntVec3 c)
-			{
-				if (!CanFloorDrawFrom(c, pawn))
-				{
-					return false;
-				}
-				bool canDrawOnRoot = CanDrawOn(c, pawn.Map, desperate);
-				IntVec3[] array = offsets;
-				foreach (IntVec3 intVec in array)
-				{
-					IntVec3 intVec2 = c + intVec;
-					if (CanFloorDrawFrom(intVec2, pawn) && TryFloorDrawCellPair(intVec2, canDrawOnRoot, pawn, desperate, out var shouldDrawOnRoot))
-					{
-						innerDrawOn = (shouldDrawOnRoot ? c : intVec2);
-						innerDrawFrom = (shouldDrawOnRoot ? intVec2 : c);
-						return true;
-					}
-				}
 				return false;
 			}
-		}
-	}
-
-	public static bool CanFloorDrawFrom(IntVec3 spot, Pawn drawer)
-	{
-		Map map = drawer.Map;
-		if (spot.InBounds(map) && spot.Standable(map) && !spot.IsForbidden(drawer) && map.areaManager.Home[spot] && spot.GetDoor(map) == null)
-		{
-			return drawer.CanReserve(spot);
-		}
-		return false;
-	}
-
-	private static bool CanDrawOn(IntVec3 cell, Map map, bool desperate)
-	{
-		if (FilthMaker.CanMakeFilth(cell, map, ThingDefOf.Filth_Floordrawing, FilthSourceFlags.Pawn))
-		{
-			if (!desperate)
+			bool flag = LearningGiver_Floordrawing.CanDrawOn(companionCell, drawer.Map, desperate);
+			if (!canDrawOnRoot && !flag)
 			{
-				if (cell.GetFirstItem(map) == null && cell.GetFirstBuilding(map) == null)
-				{
-					return cell.GetFirstThing<Filth>(map) == null;
-				}
 				return false;
 			}
+			if (!canDrawOnRoot)
+			{
+				return true;
+			}
+			if (!flag)
+			{
+				shouldDrawOnRoot = true;
+				return true;
+			}
+			shouldDrawOnRoot = Rand.Bool;
 			return true;
 		}
-		return false;
-	}
 
-	public static bool TryFloorDrawCellPair(IntVec3 companionCell, bool canDrawOnRoot, Pawn drawer, bool desperate, out bool shouldDrawOnRoot)
-	{
-		shouldDrawOnRoot = false;
-		if (!CanFloorDrawFrom(companionCell, drawer))
+		// Token: 0x060080AA RID: 32938 RVA: 0x0026C4AC File Offset: 0x0026A6AC
+		public override bool CanDo(Pawn pawn)
 		{
-			return false;
+			IntVec3 intVec;
+			IntVec3 intVec2;
+			return base.CanDo(pawn) && LearningGiver_Floordrawing.TryFindFloordrawingSpots(pawn, out intVec, out intVec2);
 		}
-		bool flag = CanDrawOn(companionCell, drawer.Map, desperate);
-		if (!canDrawOnRoot && !flag)
-		{
-			return false;
-		}
-		if (!canDrawOnRoot)
-		{
-			return true;
-		}
-		if (!flag)
-		{
-			shouldDrawOnRoot = true;
-			return true;
-		}
-		shouldDrawOnRoot = Rand.Bool;
-		return true;
-	}
 
-	public override bool CanDo(Pawn pawn)
-	{
-		if (!base.CanDo(pawn))
+		// Token: 0x060080AB RID: 32939 RVA: 0x0026C4D0 File Offset: 0x0026A6D0
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return false;
+			IntVec3 c;
+			IntVec3 c2;
+			if (!LearningGiver_Floordrawing.TryFindFloordrawingSpots(pawn, out c, out c2))
+			{
+				return null;
+			}
+			return JobMaker.MakeJob(this.def.jobDef, c, c2);
 		}
-		IntVec3 drawFrom;
-		IntVec3 drawOn;
-		return TryFindFloordrawingSpots(pawn, out drawFrom, out drawOn);
-	}
 
-	public override Job TryGiveJob(Pawn pawn)
-	{
-		if (!TryFindFloordrawingSpots(pawn, out var drawFrom, out var drawOn))
+		// Token: 0x040055FE RID: 22014
+		private static readonly IntVec3[] offsets = new IntVec3[]
 		{
-			return null;
-		}
-		return JobMaker.MakeJob(def.jobDef, drawFrom, drawOn);
+			IntVec3.East,
+			IntVec3.South
+		};
 	}
 }

@@ -1,29 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_Read : JoyGiver
+namespace RimWorld
 {
-	public override bool CanBeGivenTo(Pawn pawn)
+	// Token: 0x020014F2 RID: 5362
+	public class JoyGiver_Read : JoyGiver
 	{
-		if (!BookUtility.CanReadNow(pawn))
+		// Token: 0x06007FEA RID: 32746 RVA: 0x00268131 File Offset: 0x00266331
+		public override bool CanBeGivenTo(Pawn pawn)
 		{
-			return false;
+			return BookUtility.CanReadNow(pawn) && !PawnUtility.WillSoonHaveBasicNeed(pawn, 0.05f) && base.CanBeGivenTo(pawn);
 		}
-		if (PawnUtility.WillSoonHaveBasicNeed(pawn))
-		{
-			return false;
-		}
-		return base.CanBeGivenTo(pawn);
-	}
 
-	public override Job TryGiveJob(Pawn pawn)
-	{
-		if (BookUtility.TryGetRandomBookToRead(pawn, out var book))
+		// Token: 0x06007FEB RID: 32747 RVA: 0x00268154 File Offset: 0x00266354
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return JobMaker.MakeJob(def.jobDef, book);
+			Book t;
+			if (BookUtility.TryGetRandomBookToRead(pawn, out t))
+			{
+				return JobMaker.MakeJob(this.def.jobDef, t);
+			}
+			return null;
 		}
-		return null;
 	}
 }

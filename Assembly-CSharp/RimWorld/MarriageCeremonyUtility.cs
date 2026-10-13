@@ -1,150 +1,125 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public static class MarriageCeremonyUtility
+namespace RimWorld
 {
-	public static bool AcceptableGameConditionsToStartCeremony(Map map)
+	// Token: 0x020016D0 RID: 5840
+	public static class MarriageCeremonyUtility
 	{
-		if (!GatheringsUtility.AcceptableGameConditionsToContinueGathering(map))
+		// Token: 0x060089E8 RID: 35304 RVA: 0x00292A20 File Offset: 0x00290C20
+		public static bool AcceptableGameConditionsToStartCeremony(Map map)
 		{
-			return false;
-		}
-		if (GenLocalDate.HourInteger(map) < 5 || GenLocalDate.HourInteger(map) > 16)
-		{
-			return false;
-		}
-		if (GatheringsUtility.AnyLordJobPreventsNewGatherings(map))
-		{
-			return false;
-		}
-		if (map.dangerWatcher.DangerRating != StoryDanger.None)
-		{
-			return false;
-		}
-		int num = 0;
-		foreach (Pawn item in map.mapPawns.FreeColonistsSpawned)
-		{
-			if (item.Drafted)
+			if (!GatheringsUtility.AcceptableGameConditionsToContinueGathering(map))
 			{
-				num++;
+				return false;
 			}
-		}
-		if ((float)num / (float)map.mapPawns.FreeColonistsSpawnedCount >= 0.5f)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	public static bool FianceReadyToStartCeremony(Pawn pawn, Pawn otherPawn)
-	{
-		if (!FianceCanContinueCeremony(pawn, otherPawn))
-		{
-			return false;
-		}
-		if (pawn.health.hediffSet.BleedRateTotal > 0f)
-		{
-			return false;
-		}
-		if (HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn))
-		{
-			return false;
-		}
-		if (PawnUtility.WillSoonHaveBasicNeed(pawn))
-		{
-			return false;
-		}
-		if (IsCurrentlyMarryingSomeone(pawn))
-		{
-			return false;
-		}
-		if (pawn.GetLord() != null)
-		{
-			return false;
-		}
-		if (!pawn.Drafted && !pawn.InMentalState && pawn.Awake() && !pawn.IsBurning())
-		{
-			return !pawn.InBed();
-		}
-		return false;
-	}
-
-	public static bool FianceCanContinueCeremony(Pawn pawn, Pawn otherPawn)
-	{
-		if (!GatheringsUtility.PawnCanStartOrContinueGathering(pawn))
-		{
-			return false;
-		}
-		if (pawn.HostileTo(otherPawn))
-		{
-			return false;
-		}
-		if (pawn.Spawned && !pawn.Downed)
-		{
-			return !pawn.InMentalState;
-		}
-		return false;
-	}
-
-	public static bool ShouldGuestKeepAttendingCeremony(Pawn p)
-	{
-		return GatheringsUtility.ShouldGuestKeepAttendingGathering(p);
-	}
-
-	public static void Married(Pawn firstPawn, Pawn secondPawn)
-	{
-		LovePartnerRelationUtility.ChangeSpouseRelationsToExSpouse(firstPawn);
-		LovePartnerRelationUtility.ChangeSpouseRelationsToExSpouse(secondPawn);
-		firstPawn.relations.RemoveDirectRelation(PawnRelationDefOf.Fiance, secondPawn);
-		firstPawn.relations.TryRemoveDirectRelation(PawnRelationDefOf.ExSpouse, secondPawn);
-		firstPawn.relations.AddDirectRelation(PawnRelationDefOf.Spouse, secondPawn);
-		AddNewlyMarriedThoughts(firstPawn, secondPawn);
-		AddNewlyMarriedThoughts(secondPawn, firstPawn);
-		if (firstPawn.needs.mood != null)
-		{
-			firstPawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.DivorcedMe, secondPawn);
-		}
-		if (secondPawn.needs.mood != null)
-		{
-			secondPawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.DivorcedMe, firstPawn);
-		}
-		if (firstPawn.relations.nextMarriageNameChange != secondPawn.relations.nextMarriageNameChange)
-		{
-			Log.Warning("Marriage name change is different on marrying pawns. This is weird, but not harmful.");
-		}
-		SpouseRelationUtility.ChangeNameAfterMarriage(firstPawn, secondPawn, firstPawn.relations.nextMarriageNameChange);
-		LovePartnerRelationUtility.TryToShareBed(firstPawn, secondPawn);
-		TaleRecorder.RecordTale(TaleDefOf.Marriage, firstPawn, secondPawn);
-		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(firstPawn.GetHistoryEventForSpouseCount(), firstPawn.Named(HistoryEventArgsNames.Doer)));
-		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(secondPawn.GetHistoryEventForSpouseCount(), secondPawn.Named(HistoryEventArgsNames.Doer)));
-	}
-
-	private static void AddNewlyMarriedThoughts(Pawn pawn, Pawn otherPawn)
-	{
-		if (pawn.needs.mood != null)
-		{
-			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.GotMarried, otherPawn);
-			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.HoneymoonPhase, otherPawn);
-		}
-	}
-
-	private static bool IsCurrentlyMarryingSomeone(Pawn p)
-	{
-		if (!p.Spawned)
-		{
-			return false;
-		}
-		List<Lord> lords = p.Map.lordManager.lords;
-		for (int i = 0; i < lords.Count; i++)
-		{
-			if (lords[i].LordJob is LordJob_Joinable_MarriageCeremony lordJob_Joinable_MarriageCeremony && (lordJob_Joinable_MarriageCeremony.firstPawn == p || lordJob_Joinable_MarriageCeremony.secondPawn == p))
+			if (GenLocalDate.HourInteger(map) < 5 || GenLocalDate.HourInteger(map) > 16)
 			{
-				return true;
+				return false;
 			}
+			if (GatheringsUtility.AnyLordJobPreventsNewGatherings(map))
+			{
+				return false;
+			}
+			if (map.dangerWatcher.DangerRating != StoryDanger.None)
+			{
+				return false;
+			}
+			int num = 0;
+			using (List<Pawn>.Enumerator enumerator = map.mapPawns.FreeColonistsSpawned.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.Drafted)
+					{
+						num++;
+					}
+				}
+			}
+			return (float)num / (float)map.mapPawns.FreeColonistsSpawnedCount < 0.5f;
 		}
-		return false;
+
+		// Token: 0x060089E9 RID: 35305 RVA: 0x00292AD0 File Offset: 0x00290CD0
+		public static bool FianceReadyToStartCeremony(Pawn pawn, Pawn otherPawn)
+		{
+			return MarriageCeremonyUtility.FianceCanContinueCeremony(pawn, otherPawn) && pawn.health.hediffSet.BleedRateTotal <= 0f && !HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn) && !PawnUtility.WillSoonHaveBasicNeed(pawn, 0.05f) && !MarriageCeremonyUtility.IsCurrentlyMarryingSomeone(pawn) && pawn.GetLord() == null && (!pawn.Drafted && !pawn.InMentalState && pawn.Awake() && !pawn.IsBurning()) && !pawn.InBed();
+		}
+
+		// Token: 0x060089EA RID: 35306 RVA: 0x00292B59 File Offset: 0x00290D59
+		public static bool FianceCanContinueCeremony(Pawn pawn, Pawn otherPawn)
+		{
+			return GatheringsUtility.PawnCanStartOrContinueGathering(pawn) && !pawn.HostileTo(otherPawn) && (pawn.Spawned && !pawn.Downed) && !pawn.InMentalState;
+		}
+
+		// Token: 0x060089EB RID: 35307 RVA: 0x00292B8B File Offset: 0x00290D8B
+		public static bool ShouldGuestKeepAttendingCeremony(Pawn p)
+		{
+			return GatheringsUtility.ShouldGuestKeepAttendingGathering(p);
+		}
+
+		// Token: 0x060089EC RID: 35308 RVA: 0x00292B94 File Offset: 0x00290D94
+		public static void Married(Pawn firstPawn, Pawn secondPawn)
+		{
+			LovePartnerRelationUtility.ChangeSpouseRelationsToExSpouse(firstPawn);
+			LovePartnerRelationUtility.ChangeSpouseRelationsToExSpouse(secondPawn);
+			firstPawn.relations.RemoveDirectRelation(PawnRelationDefOf.Fiance, secondPawn);
+			firstPawn.relations.TryRemoveDirectRelation(PawnRelationDefOf.ExSpouse, secondPawn);
+			firstPawn.relations.AddDirectRelation(PawnRelationDefOf.Spouse, secondPawn);
+			MarriageCeremonyUtility.AddNewlyMarriedThoughts(firstPawn, secondPawn);
+			MarriageCeremonyUtility.AddNewlyMarriedThoughts(secondPawn, firstPawn);
+			if (firstPawn.needs.mood != null)
+			{
+				firstPawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.DivorcedMe, secondPawn);
+			}
+			if (secondPawn.needs.mood != null)
+			{
+				secondPawn.needs.mood.thoughts.memories.RemoveMemoriesOfDefWhereOtherPawnIs(ThoughtDefOf.DivorcedMe, firstPawn);
+			}
+			if (firstPawn.relations.nextMarriageNameChange != secondPawn.relations.nextMarriageNameChange)
+			{
+				Log.Warning("Marriage name change is different on marrying pawns. This is weird, but not harmful.");
+			}
+			SpouseRelationUtility.ChangeNameAfterMarriage(firstPawn, secondPawn, firstPawn.relations.nextMarriageNameChange);
+			LovePartnerRelationUtility.TryToShareBed(firstPawn, secondPawn);
+			TaleRecorder.RecordTale(TaleDefOf.Marriage, new object[]
+			{
+				firstPawn,
+				secondPawn
+			});
+			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(firstPawn.GetHistoryEventForSpouseCount(), firstPawn.Named(HistoryEventArgsNames.Doer)), true);
+			Find.HistoryEventsManager.RecordEvent(new HistoryEvent(secondPawn.GetHistoryEventForSpouseCount(), secondPawn.Named(HistoryEventArgsNames.Doer)), true);
+		}
+
+		// Token: 0x060089ED RID: 35309 RVA: 0x00292CE0 File Offset: 0x00290EE0
+		private static void AddNewlyMarriedThoughts(Pawn pawn, Pawn otherPawn)
+		{
+			if (pawn.needs.mood == null)
+			{
+				return;
+			}
+			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.GotMarried, otherPawn, null);
+			pawn.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.HoneymoonPhase, otherPawn, null);
+		}
+
+		// Token: 0x060089EE RID: 35310 RVA: 0x00292D40 File Offset: 0x00290F40
+		private static bool IsCurrentlyMarryingSomeone(Pawn p)
+		{
+			if (!p.Spawned)
+			{
+				return false;
+			}
+			List<Lord> lords = p.Map.lordManager.lords;
+			for (int i = 0; i < lords.Count; i++)
+			{
+				LordJob_Joinable_MarriageCeremony lordJob_Joinable_MarriageCeremony = lords[i].LordJob as LordJob_Joinable_MarriageCeremony;
+				if (lordJob_Joinable_MarriageCeremony != null && (lordJob_Joinable_MarriageCeremony.firstPawn == p || lordJob_Joinable_MarriageCeremony.secondPawn == p))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
 	}
 }

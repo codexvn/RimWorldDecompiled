@@ -1,41 +1,48 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class CompRitualEffect_Constant : RitualVisualEffectComp
+namespace RimWorld
 {
-	protected bool spawned;
-
-	public override void OnSetup(RitualVisualEffect parent, LordJob_Ritual ritual, bool loading)
+	// Token: 0x020027ED RID: 10221
+	public abstract class CompRitualEffect_Constant : RitualVisualEffectComp
 	{
-		base.OnSetup(parent, ritual, loading);
-		Spawn(ritual);
-	}
-
-	protected virtual void Spawn(LordJob_Ritual ritual)
-	{
-		Mote mote = SpawnMote(ritual);
-		if (mote != null)
+		// Token: 0x0600DFCC RID: 57292 RVA: 0x0041BA4F File Offset: 0x00419C4F
+		public override void OnSetup(RitualVisualEffect parent, LordJob_Ritual ritual, bool loading)
 		{
-			parent.AddMoteToMaintain(mote);
-			if (props.colorOverride.HasValue)
-			{
-				mote.instanceColor = props.colorOverride.Value;
-			}
-			else
-			{
-				mote.instanceColor = parent.def.tintColor;
-			}
-			spawned = true;
+			base.OnSetup(parent, ritual, loading);
+			this.Spawn(ritual);
 		}
-	}
 
-	public override void TickInterval(int delta)
-	{
-		base.TickInterval(delta);
-		if (!spawned)
+		// Token: 0x0600DFCD RID: 57293 RVA: 0x0041BA64 File Offset: 0x00419C64
+		protected virtual void Spawn(LordJob_Ritual ritual)
 		{
-			Spawn(parent.ritual);
+			Mote mote = this.SpawnMote(ritual, null);
+			if (mote != null)
+			{
+				this.parent.AddMoteToMaintain(mote);
+				if (this.props.colorOverride != null)
+				{
+					mote.instanceColor = this.props.colorOverride.Value;
+				}
+				else
+				{
+					mote.instanceColor = this.parent.def.tintColor;
+				}
+				this.spawned = true;
+			}
 		}
+
+		// Token: 0x0600DFCE RID: 57294 RVA: 0x0041BAD8 File Offset: 0x00419CD8
+		public override void TickInterval(int delta)
+		{
+			base.TickInterval(delta);
+			if (!this.spawned)
+			{
+				this.Spawn(this.parent.ritual);
+			}
+		}
+
+		// Token: 0x040096A2 RID: 38562
+		protected bool spawned;
 	}
 }

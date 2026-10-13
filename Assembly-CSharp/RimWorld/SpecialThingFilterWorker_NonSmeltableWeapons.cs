@@ -1,42 +1,44 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SpecialThingFilterWorker_NonSmeltableWeapons : SpecialThingFilterWorker
+namespace RimWorld
 {
-	public override bool Matches(Thing t)
+	// Token: 0x020036C4 RID: 14020
+	public class SpecialThingFilterWorker_NonSmeltableWeapons : SpecialThingFilterWorker
 	{
-		return !t.Smeltable;
-	}
-
-	public override bool CanEverMatch(ThingDef def)
-	{
-		if (!def.IsWeapon)
+		// Token: 0x06013775 RID: 79733 RVA: 0x005C8E04 File Offset: 0x005C7004
+		public override bool Matches(Thing t)
 		{
-			return false;
+			return !t.Smeltable;
 		}
-		if (!def.thingCategories.NullOrEmpty())
+
+		// Token: 0x06013776 RID: 79734 RVA: 0x005C8E1C File Offset: 0x005C701C
+		public override bool CanEverMatch(ThingDef def)
 		{
-			for (int i = 0; i < def.thingCategories.Count; i++)
+			if (!def.IsWeapon)
 			{
-				for (ThingCategoryDef thingCategoryDef = def.thingCategories[i]; thingCategoryDef != null; thingCategoryDef = thingCategoryDef.parent)
+				return false;
+			}
+			if (!def.thingCategories.NullOrEmpty<ThingCategoryDef>())
+			{
+				for (int i = 0; i < def.thingCategories.Count; i++)
 				{
-					if (thingCategoryDef == ThingCategoryDefOf.Weapons)
+					for (ThingCategoryDef thingCategoryDef = def.thingCategories[i]; thingCategoryDef != null; thingCategoryDef = thingCategoryDef.parent)
 					{
-						return true;
+						if (thingCategoryDef == ThingCategoryDefOf.Weapons)
+						{
+							return true;
+						}
 					}
 				}
 			}
+			return false;
 		}
-		return false;
-	}
 
-	public override bool AlwaysMatches(ThingDef def)
-	{
-		if (CanEverMatch(def))
+		// Token: 0x06013777 RID: 79735 RVA: 0x005C8E7A File Offset: 0x005C707A
+		public override bool AlwaysMatches(ThingDef def)
 		{
-			return !def.PotentiallySmeltable;
+			return this.CanEverMatch(def) && !def.PotentiallySmeltable;
 		}
-		return false;
 	}
 }

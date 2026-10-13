@@ -1,134 +1,248 @@
-using System;
+﻿using System;
 using System.IO;
 using NAudio.Wave;
 
-namespace NVorbis.NAudioSupport;
-
-internal class VorbisWaveReader : WaveStream, IDisposable, ISampleProvider, IWaveProvider
+namespace NVorbis.NAudioSupport
 {
-	private VorbisReader _reader;
-
-	private WaveFormat _waveFormat;
-
-	[ThreadStatic]
-	private static float[] _conversionBuffer;
-
-	public override WaveFormat WaveFormat => _waveFormat;
-
-	public override long Length => (long)(_reader.TotalTime.TotalSeconds * (double)_waveFormat.SampleRate * (double)_waveFormat.Channels * 4.0);
-
-	public override long Position
+	// Token: 0x0200005B RID: 91
+	internal class VorbisWaveReader : WaveStream, IDisposable, ISampleProvider, IWaveProvider
 	{
-		get
+		// Token: 0x060001D6 RID: 470 RVA: 0x0000B1CA File Offset: 0x000093CA
+		public VorbisWaveReader(string fileName)
 		{
-			return (long)(_reader.DecodedTime.TotalMilliseconds * (double)_reader.SampleRate * (double)_reader.Channels * 4.0);
+			this._reader = new VorbisReader(fileName);
+			this._waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(this._reader.SampleRate, this._reader.Channels);
 		}
-		set
+
+		// Token: 0x060001D7 RID: 471 RVA: 0x0000B1FF File Offset: 0x000093FF
+		public VorbisWaveReader(Stream sourceStream)
 		{
-			if (value < 0 || value > Length)
+			this._reader = new VorbisReader(sourceStream, false);
+			this._waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(this._reader.SampleRate, this._reader.Channels);
+		}
+
+		// Token: 0x060001D8 RID: 472 RVA: 0x0000B235 File Offset: 0x00009435
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && this._reader != null)
 			{
-				throw new ArgumentOutOfRangeException("value");
+				this._reader.Dispose();
+				this._reader = null;
 			}
-			_reader.DecodedTime = TimeSpan.FromSeconds((double)value / (double)_reader.SampleRate / (double)_reader.Channels / 4.0);
+			base.Dispose(disposing);
 		}
-	}
 
-	public bool IsParameterChange => _reader.IsParameterChange;
-
-	public int StreamCount => _reader.StreamCount;
-
-	public int? NextStreamIndex { get; set; }
-
-	public int CurrentStream
-	{
-		get
+		// Token: 0x17000047 RID: 71
+		// (get) Token: 0x060001D9 RID: 473 RVA: 0x0000B25B File Offset: 0x0000945B
+		public override WaveFormat WaveFormat
 		{
-			return _reader.StreamIndex;
-		}
-		set
-		{
-			if (!_reader.SwitchStreams(value))
+			get
 			{
-				throw new InvalidDataException("The selected stream is not a valid Vorbis stream!");
-			}
-			if (NextStreamIndex.HasValue && value == NextStreamIndex.Value)
-			{
-				NextStreamIndex = null;
+				return this._waveFormat;
 			}
 		}
-	}
 
-	public int UpperBitrate => _reader.UpperBitrate;
-
-	public int NominalBitrate => _reader.NominalBitrate;
-
-	public int LowerBitrate => _reader.LowerBitrate;
-
-	public string Vendor => _reader.Vendor;
-
-	public string[] Comments => _reader.Comments;
-
-	public long ContainerOverheadBits => _reader.ContainerOverheadBits;
-
-	public IVorbisStreamStatus[] Stats => _reader.Stats;
-
-	public VorbisWaveReader(string fileName)
-	{
-		_reader = new VorbisReader(fileName);
-		_waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(_reader.SampleRate, _reader.Channels);
-	}
-
-	public VorbisWaveReader(Stream sourceStream)
-	{
-		_reader = new VorbisReader(sourceStream, closeStreamOnDispose: false);
-		_waveFormat = WaveFormat.CreateIeeeFloatWaveFormat(_reader.SampleRate, _reader.Channels);
-	}
-
-	protected override void Dispose(bool disposing)
-	{
-		if (disposing && _reader != null)
+		// Token: 0x17000048 RID: 72
+		// (get) Token: 0x060001DA RID: 474 RVA: 0x0000B264 File Offset: 0x00009464
+		public override long Length
 		{
-			_reader.Dispose();
-			_reader = null;
-		}
-		base.Dispose(disposing);
-	}
-
-	public override int Read(byte[] buffer, int offset, int count)
-	{
-		count /= 4;
-		count -= count % _reader.Channels;
-		float[] array = _conversionBuffer ?? (_conversionBuffer = new float[count]);
-		if (array.Length < count)
-		{
-			array = (_conversionBuffer = new float[count]);
-		}
-		int num = Read(array, 0, count) * 4;
-		Buffer.BlockCopy(array, 0, buffer, offset, num);
-		return num;
-	}
-
-	public int Read(float[] buffer, int offset, int count)
-	{
-		return _reader.ReadSamples(buffer, offset, count);
-	}
-
-	public void ClearParameterChange()
-	{
-		_reader.ClearParameterChange();
-	}
-
-	public bool GetNextStreamIndex()
-	{
-		if (!NextStreamIndex.HasValue)
-		{
-			int streamCount = _reader.StreamCount;
-			if (_reader.FindNextStream())
+			get
 			{
-				NextStreamIndex = streamCount;
-				return true;
+				return (long)(this._reader.TotalTime.TotalSeconds * (double)this._waveFormat.SampleRate * (double)this._waveFormat.Channels * 4.0);
 			}
 		}
-		return false;
+
+		// Token: 0x17000049 RID: 73
+		// (get) Token: 0x060001DB RID: 475 RVA: 0x0000B2AC File Offset: 0x000094AC
+		// (set) Token: 0x060001DC RID: 476 RVA: 0x0000B2F4 File Offset: 0x000094F4
+		public override long Position
+		{
+			get
+			{
+				return (long)(this._reader.DecodedTime.TotalMilliseconds * (double)this._reader.SampleRate * (double)this._reader.Channels * 4.0);
+			}
+			set
+			{
+				if (value < 0L || value > this.Length)
+				{
+					throw new ArgumentOutOfRangeException("value");
+				}
+				this._reader.DecodedTime = TimeSpan.FromSeconds((double)value / (double)this._reader.SampleRate / (double)this._reader.Channels / 4.0);
+			}
+		}
+
+		// Token: 0x060001DD RID: 477 RVA: 0x0000B350 File Offset: 0x00009550
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			count /= 4;
+			count -= count % this._reader.Channels;
+			float[] array;
+			if ((array = VorbisWaveReader._conversionBuffer) == null)
+			{
+				array = (VorbisWaveReader._conversionBuffer = new float[count]);
+			}
+			float[] array2 = array;
+			if (array2.Length < count)
+			{
+				array2 = (VorbisWaveReader._conversionBuffer = new float[count]);
+			}
+			int num = this.Read(array2, 0, count) * 4;
+			Buffer.BlockCopy(array2, 0, buffer, offset, num);
+			return num;
+		}
+
+		// Token: 0x060001DE RID: 478 RVA: 0x0000B3B3 File Offset: 0x000095B3
+		public int Read(float[] buffer, int offset, int count)
+		{
+			return this._reader.ReadSamples(buffer, offset, count);
+		}
+
+		// Token: 0x1700004A RID: 74
+		// (get) Token: 0x060001DF RID: 479 RVA: 0x0000B3C3 File Offset: 0x000095C3
+		public bool IsParameterChange
+		{
+			get
+			{
+				return this._reader.IsParameterChange;
+			}
+		}
+
+		// Token: 0x060001E0 RID: 480 RVA: 0x0000B3D0 File Offset: 0x000095D0
+		public void ClearParameterChange()
+		{
+			this._reader.ClearParameterChange();
+		}
+
+		// Token: 0x1700004B RID: 75
+		// (get) Token: 0x060001E1 RID: 481 RVA: 0x0000B3DD File Offset: 0x000095DD
+		public int StreamCount
+		{
+			get
+			{
+				return this._reader.StreamCount;
+			}
+		}
+
+		// Token: 0x1700004C RID: 76
+		// (get) Token: 0x060001E2 RID: 482 RVA: 0x0000B3EA File Offset: 0x000095EA
+		// (set) Token: 0x060001E3 RID: 483 RVA: 0x0000B3F2 File Offset: 0x000095F2
+		public int? NextStreamIndex { get; set; }
+
+		// Token: 0x060001E4 RID: 484 RVA: 0x0000B3FC File Offset: 0x000095FC
+		public bool GetNextStreamIndex()
+		{
+			if (this.NextStreamIndex == null)
+			{
+				int streamCount = this._reader.StreamCount;
+				if (this._reader.FindNextStream())
+				{
+					this.NextStreamIndex = new int?(streamCount);
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x1700004D RID: 77
+		// (get) Token: 0x060001E5 RID: 485 RVA: 0x0000B441 File Offset: 0x00009641
+		// (set) Token: 0x060001E6 RID: 486 RVA: 0x0000B450 File Offset: 0x00009650
+		public int CurrentStream
+		{
+			get
+			{
+				return this._reader.StreamIndex;
+			}
+			set
+			{
+				if (!this._reader.SwitchStreams(value))
+				{
+					throw new InvalidDataException("The selected stream is not a valid Vorbis stream!");
+				}
+				if (this.NextStreamIndex != null && value == this.NextStreamIndex.Value)
+				{
+					this.NextStreamIndex = null;
+				}
+			}
+		}
+
+		// Token: 0x1700004E RID: 78
+		// (get) Token: 0x060001E7 RID: 487 RVA: 0x0000B4A6 File Offset: 0x000096A6
+		public int UpperBitrate
+		{
+			get
+			{
+				return this._reader.UpperBitrate;
+			}
+		}
+
+		// Token: 0x1700004F RID: 79
+		// (get) Token: 0x060001E8 RID: 488 RVA: 0x0000B4B3 File Offset: 0x000096B3
+		public int NominalBitrate
+		{
+			get
+			{
+				return this._reader.NominalBitrate;
+			}
+		}
+
+		// Token: 0x17000050 RID: 80
+		// (get) Token: 0x060001E9 RID: 489 RVA: 0x0000B4C0 File Offset: 0x000096C0
+		public int LowerBitrate
+		{
+			get
+			{
+				return this._reader.LowerBitrate;
+			}
+		}
+
+		// Token: 0x17000051 RID: 81
+		// (get) Token: 0x060001EA RID: 490 RVA: 0x0000B4CD File Offset: 0x000096CD
+		public string Vendor
+		{
+			get
+			{
+				return this._reader.Vendor;
+			}
+		}
+
+		// Token: 0x17000052 RID: 82
+		// (get) Token: 0x060001EB RID: 491 RVA: 0x0000B4DA File Offset: 0x000096DA
+		public string[] Comments
+		{
+			get
+			{
+				return this._reader.Comments;
+			}
+		}
+
+		// Token: 0x17000053 RID: 83
+		// (get) Token: 0x060001EC RID: 492 RVA: 0x0000B4E7 File Offset: 0x000096E7
+		public long ContainerOverheadBits
+		{
+			get
+			{
+				return this._reader.ContainerOverheadBits;
+			}
+		}
+
+		// Token: 0x17000054 RID: 84
+		// (get) Token: 0x060001ED RID: 493 RVA: 0x0000B4F4 File Offset: 0x000096F4
+		public IVorbisStreamStatus[] Stats
+		{
+			get
+			{
+				return this._reader.Stats;
+			}
+		}
+
+		// Token: 0x040000E6 RID: 230
+		private VorbisReader _reader;
+
+		// Token: 0x040000E7 RID: 231
+		private WaveFormat _waveFormat;
+
+		// Token: 0x040000E8 RID: 232
+		[ThreadStatic]
+		private static float[] _conversionBuffer;
 	}
 }

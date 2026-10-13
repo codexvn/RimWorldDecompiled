@@ -1,40 +1,49 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_Pass : QuestPartCanDisable
+namespace RimWorld
 {
-	public string inSignal;
-
-	public string outSignal;
-
-	public QuestEndOutcome? outSignalOutcomeArg;
-
-	protected override void ProcessQuestSignal(Signal signal)
+	// Token: 0x02001B83 RID: 7043
+	public class QuestPart_Pass : QuestPartCanDisable
 	{
-		if (signal.tag == inSignal)
+		// Token: 0x06009D4C RID: 40268 RVA: 0x002D9998 File Offset: 0x002D7B98
+		protected override void ProcessQuestSignal(Signal signal)
 		{
-			SignalArgs args = new SignalArgs(signal.args);
-			if (outSignalOutcomeArg.HasValue)
+			if (signal.tag == this.inSignal)
 			{
-				args.Add(outSignalOutcomeArg.Value.Named("OUTCOME"));
+				SignalArgs args = new SignalArgs(signal.args);
+				if (this.outSignalOutcomeArg != null)
+				{
+					args.Add(this.outSignalOutcomeArg.Value.Named("OUTCOME"));
+				}
+				Find.SignalManager.SendSignal(new Signal(this.outSignal, args, false));
 			}
-			Find.SignalManager.SendSignal(new Signal(outSignal, args));
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref inSignal, "inSignal");
-		Scribe_Values.Look(ref outSignal, "outSignal");
-		Scribe_Values.Look(ref outSignalOutcomeArg, "outSignalOutcomeArg");
-	}
+		// Token: 0x06009D4D RID: 40269 RVA: 0x002D9A0C File Offset: 0x002D7C0C
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
+			Scribe_Values.Look<string>(ref this.outSignal, "outSignal", null, false);
+			Scribe_Values.Look<QuestEndOutcome?>(ref this.outSignalOutcomeArg, "outSignalOutcomeArg", null, false);
+		}
 
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		inSignal = "DebugSignal" + Rand.Int;
-		outSignal = "DebugSignal" + Rand.Int;
+		// Token: 0x06009D4E RID: 40270 RVA: 0x002D9A60 File Offset: 0x002D7C60
+		public override void AssignDebugData()
+		{
+			base.AssignDebugData();
+			this.inSignal = "DebugSignal" + Rand.Int.ToString();
+			this.outSignal = "DebugSignal" + Rand.Int.ToString();
+		}
+
+		// Token: 0x04006D0C RID: 27916
+		public string inSignal;
+
+		// Token: 0x04006D0D RID: 27917
+		public string outSignal;
+
+		// Token: 0x04006D0E RID: 27918
+		public QuestEndOutcome? outSignalOutcomeArg;
 	}
 }

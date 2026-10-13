@@ -1,22 +1,34 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class CompAbilityEffect_WithDuration : CompAbilityEffect
+namespace RimWorld
 {
-	public new CompProperties_AbilityEffectWithDuration Props => (CompProperties_AbilityEffectWithDuration)props;
-
-	public float GetDurationSeconds(Pawn target)
+	// Token: 0x020022AD RID: 8877
+	public abstract class CompAbilityEffect_WithDuration : CompAbilityEffect
 	{
-		if (Props.durationSecondsOverride != FloatRange.Zero)
+		// Token: 0x17001D90 RID: 7568
+		// (get) Token: 0x0600C125 RID: 49445 RVA: 0x0037ED70 File Offset: 0x0037CF70
+		public new CompProperties_AbilityEffectWithDuration Props
 		{
-			return Props.durationSecondsOverride.RandomInRange;
+			get
+			{
+				return (CompProperties_AbilityEffectWithDuration)this.props;
+			}
 		}
-		float num = parent.def.GetStatValueAbstract(StatDefOf.Ability_Duration, parent.pawn);
-		if (Props.durationMultiplier != null)
+
+		// Token: 0x0600C126 RID: 49446 RVA: 0x0037ED80 File Offset: 0x0037CF80
+		public float GetDurationSeconds(Pawn target)
 		{
-			num *= target.GetStatValue(Props.durationMultiplier);
+			if (this.Props.durationSecondsOverride != FloatRange.Zero)
+			{
+				return this.Props.durationSecondsOverride.RandomInRange;
+			}
+			float num = this.parent.def.GetStatValueAbstract(StatDefOf.Ability_Duration, this.parent.pawn);
+			if (this.Props.durationMultiplier != null)
+			{
+				num *= target.GetStatValue(this.Props.durationMultiplier, true, -1);
+			}
+			return num;
 		}
-		return num;
 	}
 }

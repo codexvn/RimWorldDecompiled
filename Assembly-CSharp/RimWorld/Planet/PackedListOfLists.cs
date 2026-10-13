@@ -1,84 +1,99 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityEngine;
 
-namespace RimWorld.Planet;
-
-public static class PackedListOfLists
+namespace RimWorld.Planet
 {
-	private static readonly List<int> vertAdjacentTrisCount = new List<int>();
-
-	public static void AddList<T>(List<int> offsets, List<T> values, List<T> listToAdd)
+	// Token: 0x02003CDA RID: 15578
+	public static class PackedListOfLists
 	{
-		offsets.Add(values.Count);
-		values.AddRange(listToAdd);
-	}
+		// Token: 0x060152DF RID: 86751 RVA: 0x00656B23 File Offset: 0x00654D23
+		public static void AddList<T>(List<int> offsets, List<T> values, List<T> listToAdd)
+		{
+			offsets.Add(values.Count);
+			values.AddRange(listToAdd);
+		}
 
-	public static void GetList<T>(List<int> offsets, List<T> values, int listIndex, List<T> outList)
-	{
-		outList.Clear();
-		int num = offsets[listIndex];
-		int num2 = values.Count;
-		if (listIndex + 1 < offsets.Count)
+		// Token: 0x060152E0 RID: 86752 RVA: 0x00656B38 File Offset: 0x00654D38
+		public static void GetList<T>(List<int> offsets, List<T> values, int listIndex, List<T> outList)
 		{
-			num2 = offsets[listIndex + 1];
+			outList.Clear();
+			int num = offsets[listIndex];
+			int num2 = values.Count;
+			if (listIndex + 1 < offsets.Count)
+			{
+				num2 = offsets[listIndex + 1];
+			}
+			for (int i = num; i < num2; i++)
+			{
+				outList.Add(values[i]);
+			}
 		}
-		for (int i = num; i < num2; i++)
-		{
-			outList.Add(values[i]);
-		}
-	}
 
-	public static (int start, int end) GetListIndexes<T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex) where T : unmanaged
-	{
-		if (!offsets.IsCreated || !values.IsCreated)
+		// Token: 0x060152E1 RID: 86753 RVA: 0x00656B88 File Offset: 0x00654D88
+		[return: TupleElementNames(new string[]
 		{
-			return (start: 0, end: 0);
-		}
-		int item = offsets[listIndex];
-		int item2 = values.Length;
-		if (listIndex + 1 < offsets.Length)
+			"start",
+			"end"
+		})]
+		public static ValueTuple<int, int> GetListIndexes<[IsUnmanaged] T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex) where T : struct, ValueType
 		{
-			item2 = offsets[listIndex + 1];
+			if (!offsets.IsCreated || !values.IsCreated)
+			{
+				return new ValueTuple<int, int>(0, 0);
+			}
+			int item = offsets[listIndex];
+			int item2 = values.Length;
+			if (listIndex + 1 < offsets.Length)
+			{
+				item2 = offsets[listIndex + 1];
+			}
+			return new ValueTuple<int, int>(item, item2);
 		}
-		return (start: item, end: item2);
-	}
 
-	public static void GetList<T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex, List<T> outList) where T : unmanaged
-	{
-		outList.Clear();
-		if (offsets.IsCreated && values.IsCreated)
+		// Token: 0x060152E2 RID: 86754 RVA: 0x00656BDC File Offset: 0x00654DDC
+		public static void GetList<[IsUnmanaged] T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex, List<T> outList) where T : struct, ValueType
 		{
-			(int start, int end) listIndexes = GetListIndexes(offsets, values, listIndex);
-			int item = listIndexes.start;
-			int item2 = listIndexes.end;
+			outList.Clear();
+			if (!offsets.IsCreated || !values.IsCreated)
+			{
+				return;
+			}
+			ValueTuple<int, int> listIndexes = PackedListOfLists.GetListIndexes<T>(offsets, values, listIndex);
+			int item = listIndexes.Item1;
+			int item2 = listIndexes.Item2;
 			for (int i = item; i < item2; i++)
 			{
 				outList.Add(values[i]);
 			}
 		}
-	}
 
-	public static void GetListValuesIndices<T>(List<int> offsets, List<T> values, int listIndex, List<int> outList)
-	{
-		outList.Clear();
-		int num = offsets[listIndex];
-		int num2 = values.Count;
-		if (listIndex + 1 < offsets.Count)
+		// Token: 0x060152E3 RID: 86755 RVA: 0x00656C34 File Offset: 0x00654E34
+		public static void GetListValuesIndices<T>(List<int> offsets, List<T> values, int listIndex, List<int> outList)
 		{
-			num2 = offsets[listIndex + 1];
+			outList.Clear();
+			int num = offsets[listIndex];
+			int num2 = values.Count;
+			if (listIndex + 1 < offsets.Count)
+			{
+				num2 = offsets[listIndex + 1];
+			}
+			for (int i = num; i < num2; i++)
+			{
+				outList.Add(i);
+			}
 		}
-		for (int i = num; i < num2; i++)
-		{
-			outList.Add(i);
-		}
-	}
 
-	public static void GetListValuesIndices<T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex, List<int> outList) where T : unmanaged
-	{
-		outList.Clear();
-		if (offsets.IsCreated && values.IsCreated)
+		// Token: 0x060152E4 RID: 86756 RVA: 0x00656C7C File Offset: 0x00654E7C
+		public static void GetListValuesIndices<[IsUnmanaged] T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex, List<int> outList) where T : struct, ValueType
 		{
+			outList.Clear();
+			if (!offsets.IsCreated || !values.IsCreated)
+			{
+				return;
+			}
 			int num = offsets[listIndex];
 			int num2 = values.Length;
 			if (listIndex + 1 < offsets.Length)
@@ -90,75 +105,107 @@ public static class PackedListOfLists
 				outList.Add(i);
 			}
 		}
-	}
 
-	public static int GetListCount<T>(List<int> offsets, List<T> values, int listIndex)
-	{
-		int num = offsets[listIndex];
-		int num2 = values.Count;
-		if (listIndex + 1 < offsets.Count)
+		// Token: 0x060152E5 RID: 86757 RVA: 0x00656CDC File Offset: 0x00654EDC
+		public static int GetListCount<T>(List<int> offsets, List<T> values, int listIndex)
 		{
-			num2 = offsets[listIndex + 1];
-		}
-		return num2 - num;
-	}
-
-	public static int GetListCount<T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex) where T : unmanaged
-	{
-		int num = offsets[listIndex];
-		if (!offsets.IsCreated || !values.IsCreated)
-		{
-			return 0;
-		}
-		int num2 = values.Length;
-		if (listIndex + 1 < offsets.Length)
-		{
-			num2 = offsets[listIndex + 1];
-		}
-		return num2 - num;
-	}
-
-	public static void GenerateVertToTrisPackedList(List<Vector3> verts, List<TriangleIndices> tris, List<int> outOffsets, List<int> outValues)
-	{
-		outOffsets.Clear();
-		outValues.Clear();
-		vertAdjacentTrisCount.Clear();
-		int i = 0;
-		for (int count = verts.Count; i < count; i++)
-		{
-			vertAdjacentTrisCount.Add(0);
-		}
-		int j = 0;
-		for (int count2 = tris.Count; j < count2; j++)
-		{
-			TriangleIndices triangleIndices = tris[j];
-			vertAdjacentTrisCount[triangleIndices.v1]++;
-			vertAdjacentTrisCount[triangleIndices.v2]++;
-			vertAdjacentTrisCount[triangleIndices.v3]++;
-		}
-		int num = 0;
-		int k = 0;
-		for (int count3 = verts.Count; k < count3; k++)
-		{
-			outOffsets.Add(num);
-			int num2 = vertAdjacentTrisCount[k];
-			vertAdjacentTrisCount[k] = 0;
-			for (int l = 0; l < num2; l++)
+			int num = offsets[listIndex];
+			int num2 = values.Count;
+			if (listIndex + 1 < offsets.Count)
 			{
-				outValues.Add(-1);
+				num2 = offsets[listIndex + 1];
 			}
-			num += num2;
+			return num2 - num;
 		}
-		int m = 0;
-		for (int count4 = tris.Count; m < count4; m++)
+
+		// Token: 0x060152E6 RID: 86758 RVA: 0x00656D10 File Offset: 0x00654F10
+		public static int GetListCount<[IsUnmanaged] T>(NativeArray<int> offsets, NativeArray<T> values, int listIndex) where T : struct, ValueType
 		{
-			TriangleIndices triangleIndices2 = tris[m];
-			outValues[outOffsets[triangleIndices2.v1] + vertAdjacentTrisCount[triangleIndices2.v1]] = m;
-			outValues[outOffsets[triangleIndices2.v2] + vertAdjacentTrisCount[triangleIndices2.v2]] = m;
-			outValues[outOffsets[triangleIndices2.v3] + vertAdjacentTrisCount[triangleIndices2.v3]] = m;
-			vertAdjacentTrisCount[triangleIndices2.v1]++;
-			vertAdjacentTrisCount[triangleIndices2.v2]++;
-			vertAdjacentTrisCount[triangleIndices2.v3]++;
+			int num = offsets[listIndex];
+			if (!offsets.IsCreated || !values.IsCreated)
+			{
+				return 0;
+			}
+			int num2 = values.Length;
+			if (listIndex + 1 < offsets.Length)
+			{
+				num2 = offsets[listIndex + 1];
+			}
+			return num2 - num;
 		}
+
+		// Token: 0x060152E7 RID: 86759 RVA: 0x00656D5C File Offset: 0x00654F5C
+		public static void GenerateVertToTrisPackedList(List<Vector3> verts, List<TriangleIndices> tris, List<int> outOffsets, List<int> outValues)
+		{
+			outOffsets.Clear();
+			outValues.Clear();
+			PackedListOfLists.vertAdjacentTrisCount.Clear();
+			int i = 0;
+			int count = verts.Count;
+			while (i < count)
+			{
+				PackedListOfLists.vertAdjacentTrisCount.Add(0);
+				i++;
+			}
+			int j = 0;
+			int count2 = tris.Count;
+			while (j < count2)
+			{
+				TriangleIndices triangleIndices = tris[j];
+				List<int> list = PackedListOfLists.vertAdjacentTrisCount;
+				int num = triangleIndices.v1;
+				int num2 = list[num];
+				list[num] = num2 + 1;
+				List<int> list2 = PackedListOfLists.vertAdjacentTrisCount;
+				num2 = triangleIndices.v2;
+				num = list2[num2];
+				list2[num2] = num + 1;
+				List<int> list3 = PackedListOfLists.vertAdjacentTrisCount;
+				num = triangleIndices.v3;
+				num2 = list3[num];
+				list3[num] = num2 + 1;
+				j++;
+			}
+			int num3 = 0;
+			int k = 0;
+			int count3 = verts.Count;
+			while (k < count3)
+			{
+				outOffsets.Add(num3);
+				int num4 = PackedListOfLists.vertAdjacentTrisCount[k];
+				PackedListOfLists.vertAdjacentTrisCount[k] = 0;
+				for (int l = 0; l < num4; l++)
+				{
+					outValues.Add(-1);
+				}
+				num3 += num4;
+				k++;
+			}
+			int m = 0;
+			int count4 = tris.Count;
+			while (m < count4)
+			{
+				TriangleIndices triangleIndices2 = tris[m];
+				outValues[outOffsets[triangleIndices2.v1] + PackedListOfLists.vertAdjacentTrisCount[triangleIndices2.v1]] = m;
+				outValues[outOffsets[triangleIndices2.v2] + PackedListOfLists.vertAdjacentTrisCount[triangleIndices2.v2]] = m;
+				outValues[outOffsets[triangleIndices2.v3] + PackedListOfLists.vertAdjacentTrisCount[triangleIndices2.v3]] = m;
+				List<int> list4 = PackedListOfLists.vertAdjacentTrisCount;
+				int num2 = triangleIndices2.v1;
+				int num = list4[num2];
+				list4[num2] = num + 1;
+				List<int> list5 = PackedListOfLists.vertAdjacentTrisCount;
+				num = triangleIndices2.v2;
+				num2 = list5[num];
+				list5[num] = num2 + 1;
+				List<int> list6 = PackedListOfLists.vertAdjacentTrisCount;
+				num2 = triangleIndices2.v3;
+				num = list6[num2];
+				list6[num2] = num + 1;
+				m++;
+			}
+		}
+
+		// Token: 0x0400EC51 RID: 60497
+		private static readonly List<int> vertAdjacentTrisCount = new List<int>();
 	}
 }

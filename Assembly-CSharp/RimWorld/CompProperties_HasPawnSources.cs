@@ -1,13 +1,18 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_HasPawnSources : CompProperties
+namespace RimWorld
 {
-	public bool affectLabel = true;
-
-	public CompProperties_HasPawnSources()
+	// Token: 0x02002CDC RID: 11484
+	public class CompProperties_HasPawnSources : CompProperties
 	{
-		compClass = typeof(CompHasPawnSources);
+		// Token: 0x0601021E RID: 66078 RVA: 0x004AAEA0 File Offset: 0x004A90A0
+		public CompProperties_HasPawnSources()
+		{
+			this.compClass = typeof(CompHasPawnSources);
+		}
+
+		// Token: 0x0400A88B RID: 43147
+		public bool affectLabel = true;
 	}
 }

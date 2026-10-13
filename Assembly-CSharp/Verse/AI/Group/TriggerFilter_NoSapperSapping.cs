@@ -1,19 +1,23 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class TriggerFilter_NoSapperSapping : TriggerFilter
+namespace Verse.AI.Group
 {
-	public override bool AllowActivation(Lord lord, TriggerSignal signal)
+	// Token: 0x020010C0 RID: 4288
+	public class TriggerFilter_NoSapperSapping : TriggerFilter
 	{
-		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		// Token: 0x060068FD RID: 26877 RVA: 0x00212114 File Offset: 0x00210314
+		public override bool AllowActivation(Lord lord, TriggerSignal signal)
 		{
-			Pawn pawn = lord.ownedPawns[i];
-			if ((pawn.mindState.duty != null && pawn.mindState.duty.def == DutyDefOf.Sapper && pawn.CurJob != null && pawn.CurJob.def == JobDefOf.Mine && pawn.CurJob.targetA.Cell.InHorDistOf(pawn.Position, 5f)) || (pawn.CurJob.def == JobDefOf.UseVerbOnThing && pawn.CurJob.targetA.Cell.InHorDistOf(pawn.Position, 20f)))
+			for (int i = 0; i < lord.ownedPawns.Count; i++)
 			{
-				return false;
+				Pawn pawn = lord.ownedPawns[i];
+				if ((pawn.mindState.duty != null && pawn.mindState.duty.def == DutyDefOf.Sapper && pawn.CurJob != null && pawn.CurJob.def == JobDefOf.Mine && pawn.CurJob.targetA.Cell.InHorDistOf(pawn.Position, 5f)) || (pawn.CurJob.def == JobDefOf.UseVerbOnThing && pawn.CurJob.targetA.Cell.InHorDistOf(pawn.Position, 20f)))
+				{
+					return false;
+				}
 			}
+			return true;
 		}
-		return true;
 	}
 }

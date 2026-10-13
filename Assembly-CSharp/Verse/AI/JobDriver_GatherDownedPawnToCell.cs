@@ -1,23 +1,39 @@
+﻿using System;
 using Verse.AI.Group;
 
-namespace Verse.AI;
-
-public class JobDriver_GatherDownedPawnToCell : JobDriver_HaulToCell
+namespace Verse.AI
 {
-	protected override bool DropCarriedThingIfNotTarget => true;
-
-	protected override Toil BeforeDrop()
+	// Token: 0x02000EC1 RID: 3777
+	public class JobDriver_GatherDownedPawnToCell : JobDriver_HaulToCell
 	{
-		return Toils_General.DoAtomic(delegate
+		// Token: 0x17000F36 RID: 3894
+		// (get) Token: 0x06005F04 RID: 24324 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool DropCarriedThingIfNotTarget
 		{
-			if (base.pawn.carryTracker.CarriedThing is Pawn pawn)
+			get
 			{
-				base.pawn.GetLord().CurLordToil?.Notify_ReachedDutyLocation(pawn);
+				return true;
 			}
-			else
+		}
+
+		// Token: 0x06005F05 RID: 24325 RVA: 0x001E34E3 File Offset: 0x001E16E3
+		protected override Toil BeforeDrop()
+		{
+			return Toils_General.DoAtomic(delegate
 			{
-				Log.Error("Carried thing wasn't a Pawn in JobDriver_GatherDownedPawnToCell.");
-			}
-		});
+				Pawn pawn = this.pawn.carryTracker.CarriedThing as Pawn;
+				if (pawn == null)
+				{
+					Log.Error("Carried thing wasn't a Pawn in JobDriver_GatherDownedPawnToCell.");
+					return;
+				}
+				LordToil curLordToil = this.pawn.GetLord().CurLordToil;
+				if (curLordToil == null)
+				{
+					return;
+				}
+				curLordToil.Notify_ReachedDutyLocation(pawn);
+			});
+		}
 	}
 }

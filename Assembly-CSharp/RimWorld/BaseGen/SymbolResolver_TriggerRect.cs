@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_TriggerRect : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003940 RID: 14656
+	public class SymbolResolver_TriggerRect : SymbolResolver
 	{
-		RectTrigger obj = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger);
-		obj.signalTag = rp.rectTriggerSignalTag;
-		obj.Rect = rp.rect;
-		obj.destroyIfUnfogged = rp.destroyIfUnfogged == true;
-		GenSpawn.Spawn(obj, rp.rect.CenterCell, BaseGen.globalSettings.map);
+		// Token: 0x060142D5 RID: 82645 RVA: 0x00603424 File Offset: 0x00601624
+		public override void Resolve(ResolveParams rp)
+		{
+			RectTrigger rectTrigger = (RectTrigger)ThingMaker.MakeThing(ThingDefOf.RectTrigger, null);
+			rectTrigger.signalTag = rp.rectTriggerSignalTag;
+			rectTrigger.Rect = rp.rect;
+			rectTrigger.destroyIfUnfogged = rp.destroyIfUnfogged.GetValueOrDefault();
+			GenSpawn.Spawn(rectTrigger, rp.rect.CenterCell, BaseGen.globalSettings.map, WipeMode.Vanish);
+		}
 	}
 }

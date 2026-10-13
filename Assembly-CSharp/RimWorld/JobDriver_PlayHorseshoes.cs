@@ -1,17 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class JobDriver_PlayHorseshoes : JobDriver_WatchBuilding
+namespace RimWorld
 {
-	private const int HorseshoeThrowInterval = 400;
-
-	protected override void WatchTickAction(int delta)
+	// Token: 0x020011E5 RID: 4581
+	public class JobDriver_PlayHorseshoes : JobDriver_WatchBuilding
 	{
-		if (pawn.IsHashIntervalTick(400, delta))
+		// Token: 0x06006FEE RID: 28654 RVA: 0x0022CB84 File Offset: 0x0022AD84
+		protected override void WatchTickAction(int delta)
 		{
-			FleckMaker.ThrowHorseshoe(pawn, base.TargetA.Cell);
+			if (this.pawn.IsHashIntervalTick(400, delta))
+			{
+				FleckMaker.ThrowHorseshoe(this.pawn, base.TargetA.Cell);
+			}
+			base.WatchTickAction(delta);
 		}
-		base.WatchTickAction(delta);
+
+		// Token: 0x04004DF9 RID: 19961
+		private const int HorseshoeThrowInterval = 400;
 	}
 }

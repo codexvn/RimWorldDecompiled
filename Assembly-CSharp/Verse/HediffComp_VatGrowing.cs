@@ -1,20 +1,29 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class HediffComp_VatGrowing : HediffComp
+namespace Verse
 {
-	public override bool CompShouldRemove
+	// Token: 0x02000717 RID: 1815
+	public class HediffComp_VatGrowing : HediffComp
 	{
-		get
+		// Token: 0x170007DF RID: 2015
+		// (get) Token: 0x06002C53 RID: 11347 RVA: 0x000E6118 File Offset: 0x000E4318
+		public override bool CompShouldRemove
 		{
-			if (!base.Pawn.Spawned)
+			get
 			{
-				return !(base.Pawn.ParentHolder is Building_GrowthVat);
+				return base.Pawn.Spawned || !(base.Pawn.ParentHolder is Building_GrowthVat);
 			}
-			return true;
+		}
+
+		// Token: 0x170007E0 RID: 2016
+		// (get) Token: 0x06002C54 RID: 11348 RVA: 0x000E6140 File Offset: 0x000E4340
+		public override string CompTipStringExtra
+		{
+			get
+			{
+				return "AgingSpeed".Translate() + ": x" + 20.ToString();
+			}
 		}
 	}
-
-	public override string CompTipStringExtra => string.Concat("AgingSpeed".Translate() + ": x", 20.ToString());
 }

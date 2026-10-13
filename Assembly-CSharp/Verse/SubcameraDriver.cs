@@ -1,82 +1,100 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public class SubcameraDriver : MonoBehaviour
+namespace Verse
 {
-	private Camera[] subcameras;
-
-	public void Init()
+	// Token: 0x020001E2 RID: 482
+	public class SubcameraDriver : MonoBehaviour
 	{
-		if (subcameras != null || !PlayDataLoader.Loaded)
+		// Token: 0x06000D04 RID: 3332 RVA: 0x0003DE9C File Offset: 0x0003C09C
+		public void Init()
 		{
-			return;
-		}
-		Camera camera = Find.Camera;
-		subcameras = new Camera[DefDatabase<SubcameraDef>.DefCount];
-		foreach (SubcameraDef item in DefDatabase<SubcameraDef>.AllDefsListForReading)
-		{
-			GameObject obj = new GameObject();
-			obj.name = item.defName;
-			obj.transform.parent = base.transform;
-			obj.transform.localPosition = Vector3.zero;
-			obj.transform.localScale = Vector3.one;
-			obj.transform.localRotation = Quaternion.identity;
-			Camera camera2 = obj.AddComponent<Camera>();
-			camera2.orthographic = camera.orthographic;
-			camera2.orthographicSize = camera.orthographicSize;
-			camera2.cullingMask = ((!item.layer.NullOrEmpty()) ? LayerMask.GetMask(item.layer) : 0);
-			camera2.nearClipPlane = camera.nearClipPlane;
-			camera2.farClipPlane = camera.farClipPlane;
-			camera2.useOcclusionCulling = camera.useOcclusionCulling;
-			camera2.allowHDR = camera.allowHDR;
-			camera2.renderingPath = camera.renderingPath;
-			camera2.enabled = item.startEnabled;
-			camera2.clearFlags = CameraClearFlags.Color;
-			camera2.backgroundColor = item.backgroundColor;
-			camera2.depth = item.depth;
-			subcameras[item.index] = camera2;
-		}
-	}
-
-	public void UpdatePositions(Camera camera)
-	{
-		if (subcameras == null)
-		{
-			return;
-		}
-		for (int i = 0; i < subcameras.Length; i++)
-		{
-			SubcameraDef subcameraDef = DefDatabase<SubcameraDef>.AllDefsListForReading[i];
-			if (!subcameraDef.doNotUpdate)
+			if (this.subcameras != null)
 			{
-				Camera obj = subcameras[i];
-				obj.orthographicSize = camera.orthographicSize;
-				RenderTexture renderTexture = obj.targetTexture;
-				if (renderTexture != null && (renderTexture.width != Screen.width || renderTexture.height != Screen.height))
+				return;
+			}
+			if (!PlayDataLoader.Loaded)
+			{
+				return;
+			}
+			Camera camera = Find.Camera;
+			this.subcameras = new Camera[DefDatabase<SubcameraDef>.DefCount];
+			foreach (SubcameraDef subcameraDef in DefDatabase<SubcameraDef>.AllDefsListForReading)
+			{
+				Camera camera2 = new GameObject
 				{
-					Object.Destroy(renderTexture);
-					renderTexture = null;
-				}
-				if (renderTexture == null)
+					name = subcameraDef.defName,
+					transform = 
+					{
+						parent = base.transform,
+						localPosition = Vector3.zero,
+						localScale = Vector3.one,
+						localRotation = Quaternion.identity
+					}
+				}.AddComponent<Camera>();
+				camera2.orthographic = camera.orthographic;
+				camera2.orthographicSize = camera.orthographicSize;
+				camera2.cullingMask = (subcameraDef.layer.NullOrEmpty() ? 0 : LayerMask.GetMask(new string[]
 				{
-					renderTexture = new RenderTexture(Screen.width, Screen.height, 0, subcameraDef.BestFormat);
-				}
-				if (!renderTexture.IsCreated())
-				{
-					renderTexture.Create();
-				}
-				obj.targetTexture = renderTexture;
+					subcameraDef.layer
+				}));
+				camera2.nearClipPlane = camera.nearClipPlane;
+				camera2.farClipPlane = camera.farClipPlane;
+				camera2.useOcclusionCulling = camera.useOcclusionCulling;
+				camera2.allowHDR = camera.allowHDR;
+				camera2.renderingPath = camera.renderingPath;
+				camera2.enabled = subcameraDef.startEnabled;
+				camera2.clearFlags = CameraClearFlags.Color;
+				camera2.backgroundColor = subcameraDef.backgroundColor;
+				camera2.depth = (float)subcameraDef.depth;
+				this.subcameras[(int)subcameraDef.index] = camera2;
 			}
 		}
-	}
 
-	public Camera GetSubcamera(SubcameraDef def)
-	{
-		if (subcameras == null || def == null || subcameras.Length <= def.index)
+		// Token: 0x06000D05 RID: 3333 RVA: 0x0003E030 File Offset: 0x0003C230
+		public void UpdatePositions(Camera camera)
 		{
-			return null;
+			if (this.subcameras == null)
+			{
+				return;
+			}
+			for (int i = 0; i < this.subcameras.Length; i++)
+			{
+				SubcameraDef subcameraDef = DefDatabase<SubcameraDef>.AllDefsListForReading[i];
+				if (!subcameraDef.doNotUpdate)
+				{
+					Camera camera2 = this.subcameras[i];
+					camera2.orthographicSize = camera.orthographicSize;
+					RenderTexture renderTexture = camera2.targetTexture;
+					if (renderTexture != null && (renderTexture.width != Screen.width || renderTexture.height != Screen.height))
+					{
+						UnityEngine.Object.Destroy(renderTexture);
+						renderTexture = null;
+					}
+					if (renderTexture == null)
+					{
+						renderTexture = new RenderTexture(Screen.width, Screen.height, 0, subcameraDef.BestFormat);
+					}
+					if (!renderTexture.IsCreated())
+					{
+						renderTexture.Create();
+					}
+					camera2.targetTexture = renderTexture;
+				}
+			}
 		}
-		return subcameras[def.index];
+
+		// Token: 0x06000D06 RID: 3334 RVA: 0x0003E0EE File Offset: 0x0003C2EE
+		public Camera GetSubcamera(SubcameraDef def)
+		{
+			if (this.subcameras == null || def == null || this.subcameras.Length <= (int)def.index)
+			{
+				return null;
+			}
+			return this.subcameras[(int)def.index];
+		}
+
+		// Token: 0x0400078D RID: 1933
+		private Camera[] subcameras;
 	}
 }

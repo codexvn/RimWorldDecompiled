@@ -1,238 +1,292 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_BasePart_Outdoors_Division_Grid : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private class Child
+	// Token: 0x020038F7 RID: 14583
+	public class SymbolResolver_BasePart_Outdoors_Division_Grid : SymbolResolver
 	{
-		public CellRect rect;
-
-		public int gridX;
-
-		public int gridY;
-
-		public bool merged;
-	}
-
-	private List<Pair<int, int>> optionsX = new List<Pair<int, int>>();
-
-	private List<Pair<int, int>> optionsZ = new List<Pair<int, int>>();
-
-	private List<Child> children = new List<Child>();
-
-	private const int MinWidthOrHeight = 13;
-
-	private const int MinRoomsPerRow = 2;
-
-	private const int MaxRoomsPerRow = 4;
-
-	private const int MinPathwayWidth = 1;
-
-	private const int MaxPathwayWidth = 5;
-
-	private const int MinRoomSize = 6;
-
-	private const float AllowNonSquareRoomsInTheFirstStepChance = 0.2f;
-
-	private static List<Pair<Pair<int, int>, Pair<int, int>>> options = new List<Pair<Pair<int, int>, Pair<int, int>>>();
-
-	public override bool CanResolve(ResolveParams rp)
-	{
-		if (!base.CanResolve(rp))
+		// Token: 0x060141E3 RID: 82403 RVA: 0x005FD77C File Offset: 0x005FB97C
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return false;
-		}
-		if (rp.rect.Width < 13 && rp.rect.Height < 13)
-		{
-			return false;
-		}
-		FillOptions(rp.rect);
-		if (optionsX.Any())
-		{
-			return optionsZ.Any();
-		}
-		return false;
-	}
-
-	public override void Resolve(ResolveParams rp)
-	{
-		FillOptions(rp.rect);
-		if ((Rand.Chance(0.2f) || (!TryResolveRandomOption(0, 0, rp) && !TryResolveRandomOption(0, 1, rp))) && !TryResolveRandomOption(1, 0, rp) && !TryResolveRandomOption(2, 0, rp) && !TryResolveRandomOption(2, 1, rp) && !TryResolveRandomOption(999999, 999999, rp))
-		{
-			ResolveParams resolveParams = rp;
-			Log.Warning("Grid resolver could not resolve any grid size. params=" + resolveParams.ToString());
-		}
-	}
-
-	private void FillOptions(CellRect rect)
-	{
-		FillOptions(optionsX, rect.Width);
-		FillOptions(optionsZ, rect.Height);
-		if (optionsZ.Any((Pair<int, int> x) => x.First > 1))
-		{
-			optionsX.RemoveAll((Pair<int, int> x) => x.First >= 3 && GetRoomSize(x.First, x.Second, rect.Width) <= 7);
-		}
-		if (optionsX.Any((Pair<int, int> x) => x.First > 1))
-		{
-			optionsZ.RemoveAll((Pair<int, int> x) => x.First >= 3 && GetRoomSize(x.First, x.Second, rect.Height) <= 7);
-		}
-	}
-
-	private void FillOptions(List<Pair<int, int>> outOptions, int length)
-	{
-		outOptions.Clear();
-		for (int i = 2; i <= 4; i++)
-		{
-			for (int j = 1; j <= 5; j++)
+			if (!base.CanResolve(rp))
 			{
-				int roomSize = GetRoomSize(i, j, length);
-				if (roomSize != -1 && roomSize >= 6 && roomSize >= 2 * j - 1)
+				return false;
+			}
+			if (rp.rect.Width < 13 && rp.rect.Height < 13)
+			{
+				return false;
+			}
+			this.FillOptions(rp.rect);
+			return this.optionsX.Any<Pair<int, int>>() && this.optionsZ.Any<Pair<int, int>>();
+		}
+
+		// Token: 0x060141E4 RID: 82404 RVA: 0x005FD7DC File Offset: 0x005FB9DC
+		public override void Resolve(ResolveParams rp)
+		{
+			this.FillOptions(rp.rect);
+			if (!Rand.Chance(0.2f))
+			{
+				if (this.TryResolveRandomOption(0, 0, rp))
 				{
-					outOptions.Add(new Pair<int, int>(i, j));
+					return;
+				}
+				if (this.TryResolveRandomOption(0, 1, rp))
+				{
+					return;
+				}
+			}
+			if (this.TryResolveRandomOption(1, 0, rp))
+			{
+				return;
+			}
+			if (this.TryResolveRandomOption(2, 0, rp))
+			{
+				return;
+			}
+			if (this.TryResolveRandomOption(2, 1, rp))
+			{
+				return;
+			}
+			if (this.TryResolveRandomOption(999999, 999999, rp))
+			{
+				return;
+			}
+			string str = "Grid resolver could not resolve any grid size. params=";
+			ResolveParams resolveParams = rp;
+			Log.Warning(str + resolveParams.ToString());
+		}
+
+		// Token: 0x060141E5 RID: 82405 RVA: 0x005FD870 File Offset: 0x005FBA70
+		private void FillOptions(CellRect rect)
+		{
+			this.FillOptions(this.optionsX, rect.Width);
+			this.FillOptions(this.optionsZ, rect.Height);
+			if (this.optionsZ.Any((Pair<int, int> x) => x.First > 1))
+			{
+				this.optionsX.RemoveAll((Pair<int, int> x) => x.First >= 3 && this.GetRoomSize(x.First, x.Second, rect.Width) <= 7);
+			}
+			if (this.optionsX.Any((Pair<int, int> x) => x.First > 1))
+			{
+				this.optionsZ.RemoveAll((Pair<int, int> x) => x.First >= 3 && this.GetRoomSize(x.First, x.Second, rect.Height) <= 7);
+			}
+		}
+
+		// Token: 0x060141E6 RID: 82406 RVA: 0x005FD948 File Offset: 0x005FBB48
+		private void FillOptions(List<Pair<int, int>> outOptions, int length)
+		{
+			outOptions.Clear();
+			for (int i = 2; i <= 4; i++)
+			{
+				for (int j = 1; j <= 5; j++)
+				{
+					int roomSize = this.GetRoomSize(i, j, length);
+					if (roomSize != -1 && roomSize >= 6 && roomSize >= 2 * j - 1)
+					{
+						outOptions.Add(new Pair<int, int>(i, j));
+					}
 				}
 			}
 		}
-	}
 
-	private int GetRoomSize(int roomsPerRow, int pathwayWidth, int totalLength)
-	{
-		int num = totalLength - (roomsPerRow - 1) * pathwayWidth;
-		if (num % roomsPerRow != 0)
+		// Token: 0x060141E7 RID: 82407 RVA: 0x005FD99C File Offset: 0x005FBB9C
+		private int GetRoomSize(int roomsPerRow, int pathwayWidth, int totalLength)
 		{
-			return -1;
-		}
-		return num / roomsPerRow;
-	}
-
-	private bool TryResolveRandomOption(int maxWidthHeightDiff, int maxPathwayWidthDiff, ResolveParams rp)
-	{
-		options.Clear();
-		for (int i = 0; i < optionsX.Count; i++)
-		{
-			int first = optionsX[i].First;
-			int second = optionsX[i].Second;
-			int roomSize = GetRoomSize(first, second, rp.rect.Width);
-			for (int j = 0; j < optionsZ.Count; j++)
+			int num = totalLength - (roomsPerRow - 1) * pathwayWidth;
+			if (num % roomsPerRow != 0)
 			{
-				int first2 = optionsZ[j].First;
-				int second2 = optionsZ[j].Second;
-				int roomSize2 = GetRoomSize(first2, second2, rp.rect.Height);
-				if (Mathf.Abs(roomSize - roomSize2) <= maxWidthHeightDiff && Mathf.Abs(second - second2) <= maxPathwayWidthDiff)
+				return -1;
+			}
+			return num / roomsPerRow;
+		}
+
+		// Token: 0x060141E8 RID: 82408 RVA: 0x005FD9BC File Offset: 0x005FBBBC
+		private bool TryResolveRandomOption(int maxWidthHeightDiff, int maxPathwayWidthDiff, ResolveParams rp)
+		{
+			SymbolResolver_BasePart_Outdoors_Division_Grid.options.Clear();
+			for (int i = 0; i < this.optionsX.Count; i++)
+			{
+				int first = this.optionsX[i].First;
+				int second = this.optionsX[i].Second;
+				int roomSize = this.GetRoomSize(first, second, rp.rect.Width);
+				for (int j = 0; j < this.optionsZ.Count; j++)
 				{
-					options.Add(new Pair<Pair<int, int>, Pair<int, int>>(optionsX[i], optionsZ[j]));
+					int first2 = this.optionsZ[j].First;
+					int second2 = this.optionsZ[j].Second;
+					int roomSize2 = this.GetRoomSize(first2, second2, rp.rect.Height);
+					if (Mathf.Abs(roomSize - roomSize2) <= maxWidthHeightDiff && Mathf.Abs(second - second2) <= maxPathwayWidthDiff)
+					{
+						SymbolResolver_BasePart_Outdoors_Division_Grid.options.Add(new Pair<Pair<int, int>, Pair<int, int>>(this.optionsX[i], this.optionsZ[j]));
+					}
 				}
 			}
-		}
-		if (options.Any())
-		{
-			Pair<Pair<int, int>, Pair<int, int>> pair = options.RandomElement();
-			ResolveOption(pair.First.First, pair.First.Second, pair.Second.First, pair.Second.Second, rp);
-			return true;
-		}
-		return false;
-	}
-
-	private void ResolveOption(int roomsPerRowX, int pathwayWidthX, int roomsPerRowZ, int pathwayWidthZ, ResolveParams rp)
-	{
-		Map map = BaseGen.globalSettings.map;
-		int roomSize = GetRoomSize(roomsPerRowX, pathwayWidthX, rp.rect.Width);
-		int roomSize2 = GetRoomSize(roomsPerRowZ, pathwayWidthZ, rp.rect.Height);
-		ThingDef thingDef = null;
-		if (pathwayWidthX >= 3)
-		{
-			thingDef = ((rp.faction != null && (int)rp.faction.def.techLevel < 4) ? ThingDefOf.TorchLamp : ThingDefOf.StandingLamp);
-		}
-		TerrainDef floorDef = rp.pathwayFloorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction);
-		int num = roomSize;
-		for (int i = 0; i < roomsPerRowX - 1; i++)
-		{
-			CellRect rect = new CellRect(rp.rect.minX + num, rp.rect.minZ, pathwayWidthX, rp.rect.Height);
-			ResolveParams resolveParams = rp;
-			resolveParams.rect = rect;
-			resolveParams.floorDef = floorDef;
-			resolveParams.streetHorizontal = false;
-			BaseGen.symbolStack.Push("street", resolveParams);
-			num += roomSize + pathwayWidthX;
-		}
-		int num2 = roomSize2;
-		for (int j = 0; j < roomsPerRowZ - 1; j++)
-		{
-			CellRect rect2 = new CellRect(rp.rect.minX, rp.rect.minZ + num2, rp.rect.Width, pathwayWidthZ);
-			ResolveParams resolveParams2 = rp;
-			resolveParams2.rect = rect2;
-			resolveParams2.floorDef = floorDef;
-			resolveParams2.streetHorizontal = true;
-			BaseGen.symbolStack.Push("street", resolveParams2);
-			num2 += roomSize2 + pathwayWidthZ;
-		}
-		num = 0;
-		num2 = 0;
-		children.Clear();
-		for (int k = 0; k < roomsPerRowX; k++)
-		{
-			for (int l = 0; l < roomsPerRowZ; l++)
+			if (SymbolResolver_BasePart_Outdoors_Division_Grid.options.Any<Pair<Pair<int, int>, Pair<int, int>>>())
 			{
-				Child child = new Child();
-				child.rect = new CellRect(rp.rect.minX + num, rp.rect.minZ + num2, roomSize, roomSize2);
-				child.gridX = k;
-				child.gridY = l;
-				children.Add(child);
+				Pair<Pair<int, int>, Pair<int, int>> pair = SymbolResolver_BasePart_Outdoors_Division_Grid.options.RandomElement<Pair<Pair<int, int>, Pair<int, int>>>();
+				this.ResolveOption(pair.First.First, pair.First.Second, pair.Second.First, pair.Second.Second, rp);
+				return true;
+			}
+			return false;
+		}
+
+		// Token: 0x060141E9 RID: 82409 RVA: 0x005FDB3C File Offset: 0x005FBD3C
+		private void ResolveOption(int roomsPerRowX, int pathwayWidthX, int roomsPerRowZ, int pathwayWidthZ, ResolveParams rp)
+		{
+			Map map = BaseGen.globalSettings.map;
+			int roomSize = this.GetRoomSize(roomsPerRowX, pathwayWidthX, rp.rect.Width);
+			int roomSize2 = this.GetRoomSize(roomsPerRowZ, pathwayWidthZ, rp.rect.Height);
+			ThingDef thingDef = null;
+			if (pathwayWidthX >= 3)
+			{
+				if (rp.faction == null || rp.faction.def.techLevel >= TechLevel.Industrial)
+				{
+					thingDef = ThingDefOf.StandingLamp;
+				}
+				else
+				{
+					thingDef = ThingDefOf.TorchLamp;
+				}
+			}
+			TerrainDef floorDef = rp.pathwayFloorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction, false);
+			int num = roomSize;
+			for (int i = 0; i < roomsPerRowX - 1; i++)
+			{
+				CellRect rect = new CellRect(rp.rect.minX + num, rp.rect.minZ, pathwayWidthX, rp.rect.Height);
+				ResolveParams resolveParams = rp;
+				resolveParams.rect = rect;
+				resolveParams.floorDef = floorDef;
+				resolveParams.streetHorizontal = new bool?(false);
+				BaseGen.symbolStack.Push("street", resolveParams, null);
+				num += roomSize + pathwayWidthX;
+			}
+			int num2 = roomSize2;
+			for (int j = 0; j < roomsPerRowZ - 1; j++)
+			{
+				CellRect rect2 = new CellRect(rp.rect.minX, rp.rect.minZ + num2, rp.rect.Width, pathwayWidthZ);
+				ResolveParams resolveParams2 = rp;
+				resolveParams2.rect = rect2;
+				resolveParams2.floorDef = floorDef;
+				resolveParams2.streetHorizontal = new bool?(true);
+				BaseGen.symbolStack.Push("street", resolveParams2, null);
 				num2 += roomSize2 + pathwayWidthZ;
 			}
-			num += roomSize + pathwayWidthX;
+			num = 0;
 			num2 = 0;
-		}
-		MergeRandomChildren();
-		children.Shuffle();
-		for (int m = 0; m < children.Count; m++)
-		{
-			if (thingDef != null)
+			this.children.Clear();
+			for (int k = 0; k < roomsPerRowX; k++)
 			{
-				IntVec3 c = new IntVec3(children[m].rect.maxX + 1, 0, children[m].rect.maxZ);
-				if (rp.rect.Contains(c) && c.Standable(map))
+				for (int l = 0; l < roomsPerRowZ; l++)
 				{
-					ResolveParams resolveParams3 = rp;
-					resolveParams3.rect = CellRect.SingleCell(c);
-					resolveParams3.singleThingDef = thingDef;
-					BaseGen.symbolStack.Push("thing", resolveParams3);
+					SymbolResolver_BasePart_Outdoors_Division_Grid.Child child = new SymbolResolver_BasePart_Outdoors_Division_Grid.Child();
+					child.rect = new CellRect(rp.rect.minX + num, rp.rect.minZ + num2, roomSize, roomSize2);
+					child.gridX = k;
+					child.gridY = l;
+					this.children.Add(child);
+					num2 += roomSize2 + pathwayWidthZ;
 				}
+				num += roomSize + pathwayWidthX;
+				num2 = 0;
 			}
-			ResolveParams resolveParams4 = rp;
-			resolveParams4.rect = children[m].rect;
-			BaseGen.symbolStack.Push("basePart_outdoors", resolveParams4);
+			this.MergeRandomChildren();
+			this.children.Shuffle<SymbolResolver_BasePart_Outdoors_Division_Grid.Child>();
+			for (int m = 0; m < this.children.Count; m++)
+			{
+				if (thingDef != null)
+				{
+					IntVec3 c = new IntVec3(this.children[m].rect.maxX + 1, 0, this.children[m].rect.maxZ);
+					if (rp.rect.Contains(c) && c.Standable(map))
+					{
+						ResolveParams resolveParams3 = rp;
+						resolveParams3.rect = CellRect.SingleCell(c);
+						resolveParams3.singleThingDef = thingDef;
+						BaseGen.symbolStack.Push("thing", resolveParams3, null);
+					}
+				}
+				ResolveParams resolveParams4 = rp;
+				resolveParams4.rect = this.children[m].rect;
+				BaseGen.symbolStack.Push("basePart_outdoors", resolveParams4, null);
+			}
 		}
-	}
 
-	private void MergeRandomChildren()
-	{
-		if (children.Count < 4)
+		// Token: 0x060141EA RID: 82410 RVA: 0x005FDE4C File Offset: 0x005FC04C
+		private void MergeRandomChildren()
 		{
-			return;
-		}
-		int num = GenMath.RoundRandom((float)children.Count / 6f);
-		for (int i = 0; i < num; i++)
-		{
-			Child child = children.Find((Child x) => !x.merged);
-			if (child != null)
+			if (this.children.Count < 4)
 			{
-				Child child2 = children.Find((Child x) => x != child && ((Mathf.Abs(x.gridX - child.gridX) == 1 && x.gridY == child.gridY) || (Mathf.Abs(x.gridY - child.gridY) == 1 && x.gridX == child.gridX)));
-				if (child2 != null)
-				{
-					children.Remove(child);
-					children.Remove(child2);
-					Child child3 = new Child();
-					child3.gridX = Mathf.Min(child.gridX, child2.gridX);
-					child3.gridY = Mathf.Min(child.gridY, child2.gridY);
-					child3.merged = true;
-					child3.rect = CellRect.FromLimits(Mathf.Min(child.rect.minX, child2.rect.minX), Mathf.Min(child.rect.minZ, child2.rect.minZ), Mathf.Max(child.rect.maxX, child2.rect.maxX), Mathf.Max(child.rect.maxZ, child2.rect.maxZ));
-					children.Add(child3);
-				}
-				continue;
+				return;
 			}
-			break;
+			int num = GenMath.RoundRandom((float)this.children.Count / 6f);
+			for (int i = 0; i < num; i++)
+			{
+				SymbolResolver_BasePart_Outdoors_Division_Grid.Child child = this.children.Find((SymbolResolver_BasePart_Outdoors_Division_Grid.Child x) => !x.merged);
+				if (child == null)
+				{
+					break;
+				}
+				SymbolResolver_BasePart_Outdoors_Division_Grid.Child child3 = this.children.Find((SymbolResolver_BasePart_Outdoors_Division_Grid.Child x) => x != child && ((Mathf.Abs(x.gridX - child.gridX) == 1 && x.gridY == child.gridY) || (Mathf.Abs(x.gridY - child.gridY) == 1 && x.gridX == child.gridX)));
+				if (child3 != null)
+				{
+					this.children.Remove(child);
+					this.children.Remove(child3);
+					SymbolResolver_BasePart_Outdoors_Division_Grid.Child child2 = new SymbolResolver_BasePart_Outdoors_Division_Grid.Child();
+					child2.gridX = Mathf.Min(child.gridX, child3.gridX);
+					child2.gridY = Mathf.Min(child.gridY, child3.gridY);
+					child2.merged = true;
+					child2.rect = CellRect.FromLimits(Mathf.Min(child.rect.minX, child3.rect.minX), Mathf.Min(child.rect.minZ, child3.rect.minZ), Mathf.Max(child.rect.maxX, child3.rect.maxX), Mathf.Max(child.rect.maxZ, child3.rect.maxZ));
+					this.children.Add(child2);
+				}
+			}
+		}
+
+		// Token: 0x0400DE9B RID: 56987
+		private List<Pair<int, int>> optionsX = new List<Pair<int, int>>();
+
+		// Token: 0x0400DE9C RID: 56988
+		private List<Pair<int, int>> optionsZ = new List<Pair<int, int>>();
+
+		// Token: 0x0400DE9D RID: 56989
+		private List<SymbolResolver_BasePart_Outdoors_Division_Grid.Child> children = new List<SymbolResolver_BasePart_Outdoors_Division_Grid.Child>();
+
+		// Token: 0x0400DE9E RID: 56990
+		private const int MinWidthOrHeight = 13;
+
+		// Token: 0x0400DE9F RID: 56991
+		private const int MinRoomsPerRow = 2;
+
+		// Token: 0x0400DEA0 RID: 56992
+		private const int MaxRoomsPerRow = 4;
+
+		// Token: 0x0400DEA1 RID: 56993
+		private const int MinPathwayWidth = 1;
+
+		// Token: 0x0400DEA2 RID: 56994
+		private const int MaxPathwayWidth = 5;
+
+		// Token: 0x0400DEA3 RID: 56995
+		private const int MinRoomSize = 6;
+
+		// Token: 0x0400DEA4 RID: 56996
+		private const float AllowNonSquareRoomsInTheFirstStepChance = 0.2f;
+
+		// Token: 0x0400DEA5 RID: 56997
+		private static List<Pair<Pair<int, int>, Pair<int, int>>> options = new List<Pair<Pair<int, int>, Pair<int, int>>>();
+
+		// Token: 0x020038F8 RID: 14584
+		private class Child
+		{
+			// Token: 0x0400DEA6 RID: 56998
+			public CellRect rect;
+
+			// Token: 0x0400DEA7 RID: 56999
+			public int gridX;
+
+			// Token: 0x0400DEA8 RID: 57000
+			public int gridY;
+
+			// Token: 0x0400DEA9 RID: 57001
+			public bool merged;
 		}
 	}
 }

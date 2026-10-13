@@ -1,44 +1,48 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class PlaceWorker_ReportWorkSpeedPenalties : PlaceWorker
+namespace RimWorld
 {
-	public override void PostPlace(Map map, BuildableDef def, IntVec3 loc, Rot4 rot)
+	// Token: 0x020037E3 RID: 14307
+	public class PlaceWorker_ReportWorkSpeedPenalties : PlaceWorker
 	{
-		if (!(def is ThingDef thingDef))
+		// Token: 0x06013D44 RID: 81220 RVA: 0x005E3590 File Offset: 0x005E1790
+		public override void PostPlace(Map map, BuildableDef def, IntVec3 loc, Rot4 rot)
 		{
-			return;
-		}
-		bool flag = StatPart_WorkTableOutdoors.Applies(thingDef, map, loc);
-		bool flag2 = StatPart_WorkTableTemperature.Applies(thingDef, map, loc);
-		bool flag3 = StatPart_WorkTableRoomRole.WouldApplyToBuildingIfPlaced(thingDef, map, loc);
-		if (!(flag || flag2 || flag3))
-		{
-			return;
-		}
-		string text = "WillGetWorkSpeedPenalty".Translate(def.label).CapitalizeFirst() + ": ";
-		string text2 = "";
-		if (flag)
-		{
-			text2 += "Outdoors".Translate().CapitalizeFirst();
-		}
-		if (flag2)
-		{
-			if (!text2.NullOrEmpty())
+			ThingDef thingDef = def as ThingDef;
+			if (thingDef == null)
 			{
-				text2 += ", ";
+				return;
 			}
-			text2 += "BadTemperature".Translate();
-		}
-		if (flag3)
-		{
-			if (!text2.NullOrEmpty())
+			bool flag = StatPart_WorkTableOutdoors.Applies(thingDef, map, loc);
+			bool flag2 = StatPart_WorkTableTemperature.Applies(thingDef, map, loc);
+			bool flag3 = StatPart_WorkTableRoomRole.WouldApplyToBuildingIfPlaced(thingDef, map, loc);
+			if (flag || flag2 || flag3)
 			{
-				text2 += ", ";
+				string str = "WillGetWorkSpeedPenalty".Translate(def.label).CapitalizeFirst() + ": ";
+				string text = "";
+				if (flag)
+				{
+					text += "Outdoors".Translate().CapitalizeFirst();
+				}
+				if (flag2)
+				{
+					if (!text.NullOrEmpty())
+					{
+						text += ", ";
+					}
+					text += "BadTemperature".Translate();
+				}
+				if (flag3)
+				{
+					if (!text.NullOrEmpty())
+					{
+						text += ", ";
+					}
+					text += "NotInRoomRole".Translate(thingDef.building.workTableRoomRole.label);
+				}
+				Messages.Message(str + text.CapitalizeFirst() + ".", new TargetInfo(loc, map, false), MessageTypeDefOf.CautionInput, false);
 			}
-			text2 += "NotInRoomRole".Translate(thingDef.building.workTableRoomRole.label);
 		}
-		Messages.Message(string.Concat(text + text2.CapitalizeFirst(), "."), new TargetInfo(loc, map), MessageTypeDefOf.CautionInput, historical: false);
 	}
 }

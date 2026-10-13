@@ -1,15 +1,16 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompTargetable_AllAnimalsOnTheMap : CompTargetable_AllPawnsOnTheMap
+namespace RimWorld
 {
-	public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	// Token: 0x02002F20 RID: 12064
+	public class CompTargetable_AllAnimalsOnTheMap : CompTargetable_AllPawnsOnTheMap
 	{
-		if (target.Thing is Pawn { IsAnimal: not false })
+		// Token: 0x0601108C RID: 69772 RVA: 0x004E61D0 File Offset: 0x004E43D0
+		public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
 		{
-			return base.ValidateTarget(target.Thing, showMessages);
+			Pawn pawn = target.Thing as Pawn;
+			return pawn != null && pawn.IsAnimal && base.ValidateTarget(target.Thing, showMessages);
 		}
-		return false;
 	}
 }

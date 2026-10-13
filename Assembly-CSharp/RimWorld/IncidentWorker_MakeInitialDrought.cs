@@ -1,12 +1,17 @@
-namespace RimWorld;
+﻿using System;
 
-public class IncidentWorker_MakeInitialDrought : IncidentWorker_MakeGameCondition
+namespace RimWorld
 {
-	protected override bool TryExecuteWorker(IncidentParms parms)
+	// Token: 0x02001DB2 RID: 7602
+	public class IncidentWorker_MakeInitialDrought : IncidentWorker_MakeGameCondition
 	{
-		GameConditionManager gameConditionManager = parms.target.GameConditionManager;
-		GameCondition cond = GameConditionMaker.MakeConditionPermanent(GetGameConditionDef(parms));
-		gameConditionManager.RegisterCondition(cond);
-		return true;
+		// Token: 0x0600A9DB RID: 43483 RVA: 0x00309A3C File Offset: 0x00307C3C
+		protected override bool TryExecuteWorker(IncidentParms parms)
+		{
+			GameConditionManager gameConditionManager = parms.target.GameConditionManager;
+			GameCondition cond = GameConditionMaker.MakeConditionPermanent(this.GetGameConditionDef(parms));
+			gameConditionManager.RegisterCondition(cond);
+			return true;
+		}
 	}
 }

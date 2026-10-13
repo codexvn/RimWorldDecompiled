@@ -1,380 +1,430 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public class OverlayDrawer
+namespace RimWorld
 {
-	private Dictionary<Thing, OverlayTypes> overlaysToDraw = new Dictionary<Thing, OverlayTypes>();
-
-	private Dictionary<Thing, ThingOverlaysHandle> overlayHandles = new Dictionary<Thing, ThingOverlaysHandle>();
-
-	private Vector3 curOffset;
-
-	private DrawBatch drawBatch = new DrawBatch();
-
-	private static readonly Material ForbiddenMat;
-
-	private static readonly Material NeedsPowerMat;
-
-	private static readonly Material PowerOffMat;
-
-	private static readonly Material QuestionMarkMat;
-
-	private static readonly Material BrokenDownMat;
-
-	private static readonly Material OutOfFuelMat;
-
-	private static readonly Material WickMaterialA;
-
-	private static readonly Material WickMaterialB;
-
-	private static readonly Material SelfShutdownMat;
-
-	private const int AltitudeIndex_Forbidden = 4;
-
-	private const int AltitudeIndex_BurningWick = 5;
-
-	private const int AltitudeIndex_QuestionMark = 6;
-
-	private static float SingleCellForbiddenOffset;
-
-	public const float PulseFrequency = 4f;
-
-	public const float PulseAmplitude = 0.7f;
-
-	private static readonly float BaseAlt;
-
-	private const float StackOffsetMultipiler = 0.25f;
-
-	static OverlayDrawer()
+	// Token: 0x02002971 RID: 10609
+	[StaticConstructorOnStartup]
+	public class OverlayDrawer
 	{
-		ForbiddenMat = MaterialPool.MatFrom("Things/Special/ForbiddenOverlay", ShaderDatabase.MetaOverlay);
-		NeedsPowerMat = MaterialPool.MatFrom("UI/Overlays/NeedsPower", ShaderDatabase.MetaOverlay);
-		PowerOffMat = MaterialPool.MatFrom("UI/Overlays/PowerOff", ShaderDatabase.MetaOverlay);
-		QuestionMarkMat = MaterialPool.MatFrom("UI/Overlays/QuestionMark", ShaderDatabase.MetaOverlay);
-		BrokenDownMat = MaterialPool.MatFrom("UI/Overlays/BrokenDown", ShaderDatabase.MetaOverlay);
-		OutOfFuelMat = MaterialPool.MatFrom("UI/Overlays/OutOfFuel", ShaderDatabase.MetaOverlay);
-		WickMaterialA = MaterialPool.MatFrom("Things/Special/BurningWickA", ShaderDatabase.MetaOverlay);
-		WickMaterialB = MaterialPool.MatFrom("Things/Special/BurningWickB", ShaderDatabase.MetaOverlay);
-		SelfShutdownMat = MaterialPool.MatFrom("UI/Overlays/SelfShutdown", ShaderDatabase.MetaOverlay);
-		SingleCellForbiddenOffset = 0.3f;
-		BaseAlt = AltitudeLayer.MetaOverlays.AltitudeFor();
-	}
-
-	public ThingOverlaysHandle GetOverlaysHandle(Thing thing)
-	{
-		if (!thing.Spawned)
+		// Token: 0x0600E8E9 RID: 59625 RVA: 0x0043CDFC File Offset: 0x0043AFFC
+		public ThingOverlaysHandle GetOverlaysHandle(Thing thing)
 		{
-			return null;
-		}
-		if (!overlayHandles.TryGetValue(thing, out var value))
-		{
-			value = new ThingOverlaysHandle(this, thing);
-			overlayHandles.Add(thing, value);
-		}
-		return value;
-	}
-
-	public void DisposeHandle(Thing thing)
-	{
-		if (overlayHandles.TryGetValue(thing, out var value))
-		{
-			value.Dispose();
-		}
-		overlayHandles.Remove(thing);
-	}
-
-	public OverlayHandle Enable(Thing thing, OverlayTypes types)
-	{
-		return GetOverlaysHandle(thing).Enable(types);
-	}
-
-	public void Disable(Thing thing, ref OverlayHandle? handle)
-	{
-		GetOverlaysHandle(thing).Disable(ref handle);
-	}
-
-	public void DrawOverlay(Thing t, OverlayTypes overlayType)
-	{
-		if (overlayType != OverlayTypes.None && !WorldComponent_GravshipController.CutsceneInProgress)
-		{
-			if (overlaysToDraw.TryGetValue(t, out var value))
+			if (!thing.Spawned)
 			{
-				overlaysToDraw[t] = value | overlayType;
+				return null;
 			}
-			else
+			ThingOverlaysHandle thingOverlaysHandle;
+			if (!this.overlayHandles.TryGetValue(thing, out thingOverlaysHandle))
 			{
-				overlaysToDraw.Add(t, overlayType);
+				thingOverlaysHandle = new ThingOverlaysHandle(this, thing);
+				this.overlayHandles.Add(thing, thingOverlaysHandle);
 			}
+			return thingOverlaysHandle;
 		}
-	}
 
-	public void DrawAllOverlays()
-	{
-		if (WorldComponent_GravshipController.CutsceneInProgress)
+		// Token: 0x0600E8EA RID: 59626 RVA: 0x0043CE3C File Offset: 0x0043B03C
+		public void DisposeHandle(Thing thing)
 		{
-			return;
-		}
-		try
-		{
-			foreach (KeyValuePair<Thing, ThingOverlaysHandle> overlayHandle in overlayHandles)
+			ThingOverlaysHandle thingOverlaysHandle;
+			if (this.overlayHandles.TryGetValue(thing, out thingOverlaysHandle))
 			{
-				if (!overlayHandle.Key.Fogged())
-				{
-					DrawOverlay(overlayHandle.Key, overlayHandle.Value.OverlayTypes);
-				}
+				thingOverlaysHandle.Dispose();
 			}
-			foreach (KeyValuePair<Thing, OverlayTypes> item in overlaysToDraw)
+			this.overlayHandles.Remove(thing);
+		}
+
+		// Token: 0x0600E8EB RID: 59627 RVA: 0x0043CE6C File Offset: 0x0043B06C
+		public OverlayHandle Enable(Thing thing, OverlayTypes types)
+		{
+			return this.GetOverlaysHandle(thing).Enable(types);
+		}
+
+		// Token: 0x0600E8EC RID: 59628 RVA: 0x0043CE7B File Offset: 0x0043B07B
+		public void Disable(Thing thing, ref OverlayHandle? handle)
+		{
+			this.GetOverlaysHandle(thing).Disable(ref handle);
+		}
+
+		// Token: 0x0600E8ED RID: 59629 RVA: 0x0043CE8C File Offset: 0x0043B08C
+		public void DrawOverlay(Thing t, OverlayTypes overlayType)
+		{
+			if (overlayType == OverlayTypes.None || WorldComponent_GravshipController.CutsceneInProgress)
 			{
-				curOffset = Vector3.zero;
-				Thing key = item.Key;
-				OverlayTypes value = item.Value;
-				if ((value & OverlayTypes.BurningWick) != OverlayTypes.None)
+				return;
+			}
+			OverlayTypes overlayTypes;
+			if (this.overlaysToDraw.TryGetValue(t, out overlayTypes))
+			{
+				this.overlaysToDraw[t] = (overlayTypes | overlayType);
+				return;
+			}
+			this.overlaysToDraw.Add(t, overlayType);
+		}
+
+		// Token: 0x0600E8EE RID: 59630 RVA: 0x0043CED4 File Offset: 0x0043B0D4
+		public void DrawAllOverlays()
+		{
+			if (WorldComponent_GravshipController.CutsceneInProgress)
+			{
+				return;
+			}
+			try
+			{
+				foreach (KeyValuePair<Thing, ThingOverlaysHandle> keyValuePair in this.overlayHandles)
 				{
-					RenderBurningWick(key);
-				}
-				else
-				{
-					OverlayTypes overlayTypes = OverlayTypes.NeedsPower | OverlayTypes.PowerOff;
-					int bitCountOf = Gen.GetBitCountOf((long)(value & overlayTypes));
-					float num = StackOffsetFor(key);
-					switch (bitCountOf)
+					if (!keyValuePair.Key.Fogged())
 					{
-					case 1:
-						curOffset = Vector3.zero;
-						break;
-					case 2:
-						curOffset = new Vector3(-0.5f * num, 0f, 0f);
-						break;
-					case 3:
-						curOffset = new Vector3(-1.5f * num, 0f, 0f);
-						break;
-					}
-					if ((value & OverlayTypes.NeedsPower) != OverlayTypes.None)
-					{
-						RenderNeedsPowerOverlay(key);
-					}
-					if ((value & OverlayTypes.PowerOff) != OverlayTypes.None)
-					{
-						RenderPowerOffOverlay(key);
-					}
-					if ((value & OverlayTypes.BrokenDown) != OverlayTypes.None)
-					{
-						RenderBrokenDownOverlay(key);
-					}
-					if ((value & OverlayTypes.OutOfFuel) != OverlayTypes.None)
-					{
-						RenderOutOfFuelOverlay(key);
+						this.DrawOverlay(keyValuePair.Key, keyValuePair.Value.OverlayTypes);
 					}
 				}
-				if ((value & OverlayTypes.ForbiddenBig) != OverlayTypes.None)
+				foreach (KeyValuePair<Thing, OverlayTypes> keyValuePair2 in this.overlaysToDraw)
 				{
-					RenderForbiddenBigOverlay(key);
-				}
-				if ((value & OverlayTypes.Forbidden) != OverlayTypes.None)
-				{
-					RenderForbiddenOverlay(key);
-				}
-				if ((value & OverlayTypes.ForbiddenRefuel) != OverlayTypes.None)
-				{
-					RenderForbiddenRefuelOverlay(key);
-				}
-				if ((value & OverlayTypes.QuestionMark) != OverlayTypes.None)
-				{
-					RenderQuestionMarkOverlay(key);
-				}
-				if ((value & OverlayTypes.SelfShutdown) != OverlayTypes.None && ModsConfig.BiotechActive)
-				{
-					RenderRechargineOverlay(key);
-				}
-				if ((value & OverlayTypes.ForbiddenAtomizer) != OverlayTypes.None && ModsConfig.BiotechActive)
-				{
-					RenderForbiddenAtomizerOverlay(key);
+					this.curOffset = Vector3.zero;
+					Thing key = keyValuePair2.Key;
+					OverlayTypes value = keyValuePair2.Value;
+					if ((value & OverlayTypes.BurningWick) != OverlayTypes.None)
+					{
+						this.RenderBurningWick(key);
+					}
+					else
+					{
+						OverlayTypes overlayTypes = OverlayTypes.NeedsPower | OverlayTypes.PowerOff;
+						int bitCountOf = Gen.GetBitCountOf((long)(value & overlayTypes));
+						float num = this.StackOffsetFor(key);
+						switch (bitCountOf)
+						{
+						case 1:
+							this.curOffset = Vector3.zero;
+							break;
+						case 2:
+							this.curOffset = new Vector3(-0.5f * num, 0f, 0f);
+							break;
+						case 3:
+							this.curOffset = new Vector3(-1.5f * num, 0f, 0f);
+							break;
+						}
+						if ((value & OverlayTypes.NeedsPower) != OverlayTypes.None)
+						{
+							this.RenderNeedsPowerOverlay(key);
+						}
+						if ((value & OverlayTypes.PowerOff) != OverlayTypes.None)
+						{
+							this.RenderPowerOffOverlay(key);
+						}
+						if ((value & OverlayTypes.BrokenDown) != OverlayTypes.None)
+						{
+							this.RenderBrokenDownOverlay(key);
+						}
+						if ((value & OverlayTypes.OutOfFuel) != OverlayTypes.None)
+						{
+							this.RenderOutOfFuelOverlay(key);
+						}
+					}
+					if ((value & OverlayTypes.ForbiddenBig) != OverlayTypes.None)
+					{
+						this.RenderForbiddenBigOverlay(key);
+					}
+					if ((value & OverlayTypes.Forbidden) != OverlayTypes.None)
+					{
+						this.RenderForbiddenOverlay(key);
+					}
+					if ((value & OverlayTypes.ForbiddenRefuel) != OverlayTypes.None)
+					{
+						this.RenderForbiddenRefuelOverlay(key);
+					}
+					if ((value & OverlayTypes.QuestionMark) != OverlayTypes.None)
+					{
+						this.RenderQuestionMarkOverlay(key);
+					}
+					if ((value & OverlayTypes.SelfShutdown) != OverlayTypes.None && ModsConfig.BiotechActive)
+					{
+						this.RenderRechargineOverlay(key);
+					}
+					if ((value & OverlayTypes.ForbiddenAtomizer) != OverlayTypes.None && ModsConfig.BiotechActive)
+					{
+						this.RenderForbiddenAtomizerOverlay(key);
+					}
 				}
 			}
+			finally
+			{
+				this.overlaysToDraw.Clear();
+			}
+			this.drawBatch.Flush(true);
 		}
-		finally
+
+		// Token: 0x0600E8EF RID: 59631 RVA: 0x0043D134 File Offset: 0x0043B334
+		private float StackOffsetFor(Thing t)
 		{
-			overlaysToDraw.Clear();
+			return (float)t.RotatedSize.x * 0.25f;
 		}
-		drawBatch.Flush();
-	}
 
-	private float StackOffsetFor(Thing t)
-	{
-		return (float)t.RotatedSize.x * 0.25f;
-	}
-
-	private void RenderNeedsPowerOverlay(Thing t)
-	{
-		RenderPulsingOverlay(t, NeedsPowerMat, 2);
-	}
-
-	private void RenderPowerOffOverlay(Thing t)
-	{
-		RenderPulsingOverlay(t, PowerOffMat, 3);
-	}
-
-	private void RenderBrokenDownOverlay(Thing t)
-	{
-		RenderPulsingOverlay(t, BrokenDownMat, 4);
-	}
-
-	private void RenderRechargineOverlay(Thing t)
-	{
-		Vector3 drawPos = t.DrawPos;
-		drawPos.y = BaseAlt + 0.21951221f;
-		RenderPulsingOverlayInternal(t, SelfShutdownMat, drawPos, MeshPool.plane05);
-	}
-
-	private void RenderOutOfFuelOverlay(Thing t)
-	{
-		CompRefuelable compRefuelable = t.TryGetComp<CompRefuelable>();
-		Material mat = MaterialPool.MatFrom((compRefuelable != null) ? compRefuelable.Props.FuelIcon : ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
-		RenderPulsingOverlay(t, mat, 5, incrementOffset: false);
-		RenderPulsingOverlay(t, OutOfFuelMat, 6);
-	}
-
-	private void RenderPulsingOverlay(Thing thing, Material mat, int altInd, bool incrementOffset = true)
-	{
-		Mesh plane = MeshPool.plane08;
-		RenderPulsingOverlay(thing, mat, altInd, plane, incrementOffset);
-	}
-
-	private void RenderPulsingOverlay(Thing thing, Material mat, int altInd, Mesh mesh, bool incrementOffset = true)
-	{
-		Vector3 drawPos = thing.TrueCenter();
-		drawPos.y = BaseAlt + 0.03658537f * (float)altInd;
-		drawPos += curOffset;
-		if (thing.def.building != null && thing.def.building.isAttachment)
+		// Token: 0x0600E8F0 RID: 59632 RVA: 0x0043D148 File Offset: 0x0043B348
+		private void RenderNeedsPowerOverlay(Thing t)
 		{
-			drawPos += (thing.Rotation.AsVector2 * 0.5f).ToVector3();
+			this.RenderPulsingOverlay(t, OverlayDrawer.NeedsPowerMat, 2, true);
 		}
-		drawPos.y = Mathf.Min(drawPos.y, Find.Camera.transform.position.y - 0.1f);
-		if (incrementOffset)
+
+		// Token: 0x0600E8F1 RID: 59633 RVA: 0x0043D158 File Offset: 0x0043B358
+		private void RenderPowerOffOverlay(Thing t)
 		{
-			curOffset.x += StackOffsetFor(thing);
+			this.RenderPulsingOverlay(t, OverlayDrawer.PowerOffMat, 3, true);
 		}
-		RenderPulsingOverlayInternal(thing, mat, drawPos, mesh);
-	}
 
-	private void RenderPulsingOverlayInternal(Thing thing, Material mat, Vector3 drawPos, Mesh mesh)
-	{
-		float num = ((float)Math.Sin((Time.realtimeSinceStartup + 397f * (float)(thing.thingIDNumber % 571)) * 4f) + 1f) * 0.5f;
-		num = 0.3f + num * 0.7f;
-		Material material = FadedMaterialPool.FadedVersionOf(mat, num);
-		drawBatch.DrawMesh(mesh, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), material, 0, renderInstanced: true);
-	}
-
-	private void RenderForbiddenRefuelOverlay(Thing t)
-	{
-		CompRefuelable compRefuelable = t.TryGetComp<CompRefuelable>();
-		Material material = MaterialPool.MatFrom((compRefuelable != null) ? compRefuelable.Props.FuelIcon : ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlayDesaturated, Color.white);
-		Vector3 pos = t.TrueCenter();
-		pos.y = BaseAlt + 15f / 82f;
-		new Vector3(pos.x, pos.y + 0.03658537f, pos.z);
-		drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), material, 0, renderInstanced: true);
-		drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), ForbiddenMat, 0, renderInstanced: true);
-	}
-
-	private void RenderForbiddenAtomizerOverlay(Thing t)
-	{
-		if (ModsConfig.BiotechActive)
+		// Token: 0x0600E8F2 RID: 59634 RVA: 0x0043D168 File Offset: 0x0043B368
+		private void RenderBrokenDownOverlay(Thing t)
 		{
+			this.RenderPulsingOverlay(t, OverlayDrawer.BrokenDownMat, 4, true);
+		}
+
+		// Token: 0x0600E8F3 RID: 59635 RVA: 0x0043D178 File Offset: 0x0043B378
+		private void RenderRechargineOverlay(Thing t)
+		{
+			Vector3 drawPos = t.DrawPos;
+			drawPos.y = OverlayDrawer.BaseAlt + 0.21951221f;
+			this.RenderPulsingOverlayInternal(t, OverlayDrawer.SelfShutdownMat, drawPos, MeshPool.plane05);
+		}
+
+		// Token: 0x0600E8F4 RID: 59636 RVA: 0x0043D1B0 File Offset: 0x0043B3B0
+		private void RenderOutOfFuelOverlay(Thing t)
+		{
+			CompRefuelable compRefuelable = t.TryGetComp<CompRefuelable>();
+			Material mat = MaterialPool.MatFrom((compRefuelable != null) ? compRefuelable.Props.FuelIcon : ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlay, Color.white);
+			this.RenderPulsingOverlay(t, mat, 5, false);
+			this.RenderPulsingOverlay(t, OverlayDrawer.OutOfFuelMat, 6, true);
+		}
+
+		// Token: 0x0600E8F5 RID: 59637 RVA: 0x0043D208 File Offset: 0x0043B408
+		private void RenderPulsingOverlay(Thing thing, Material mat, int altInd, bool incrementOffset = true)
+		{
+			Mesh plane = MeshPool.plane08;
+			this.RenderPulsingOverlay(thing, mat, altInd, plane, incrementOffset);
+		}
+
+		// Token: 0x0600E8F6 RID: 59638 RVA: 0x0043D228 File Offset: 0x0043B428
+		private void RenderPulsingOverlay(Thing thing, Material mat, int altInd, Mesh mesh, bool incrementOffset = true)
+		{
+			Vector3 vector = thing.TrueCenter();
+			vector.y = OverlayDrawer.BaseAlt + 0.03658537f * (float)altInd;
+			vector += this.curOffset;
+			if (thing.def.building != null && thing.def.building.isAttachment)
+			{
+				vector += (thing.Rotation.AsVector2 * 0.5f).ToVector3();
+			}
+			vector.y = Mathf.Min(vector.y, Find.Camera.transform.position.y - 0.1f);
+			if (incrementOffset)
+			{
+				this.curOffset.x = this.curOffset.x + this.StackOffsetFor(thing);
+			}
+			this.RenderPulsingOverlayInternal(thing, mat, vector, mesh);
+		}
+
+		// Token: 0x0600E8F7 RID: 59639 RVA: 0x0043D2F4 File Offset: 0x0043B4F4
+		private void RenderPulsingOverlayInternal(Thing thing, Material mat, Vector3 drawPos, Mesh mesh)
+		{
+			float num = ((float)Math.Sin((double)((Time.realtimeSinceStartup + 397f * (float)(thing.thingIDNumber % 571)) * 4f)) + 1f) * 0.5f;
+			num = 0.3f + num * 0.7f;
+			Material material = FadedMaterialPool.FadedVersionOf(mat, num);
+			this.drawBatch.DrawMesh(mesh, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), material, 0, true);
+		}
+
+		// Token: 0x0600E8F8 RID: 59640 RVA: 0x0043D36C File Offset: 0x0043B56C
+		private void RenderForbiddenRefuelOverlay(Thing t)
+		{
+			CompRefuelable compRefuelable = t.TryGetComp<CompRefuelable>();
+			Material material = MaterialPool.MatFrom((compRefuelable != null) ? compRefuelable.Props.FuelIcon : ThingDefOf.Chemfuel.uiIcon, ShaderDatabase.MetaOverlayDesaturated, Color.white);
+			Vector3 vector = t.TrueCenter();
+			vector.y = OverlayDrawer.BaseAlt + 0.18292683f;
+			new Vector3(vector.x, vector.y + 0.03658537f, vector.z);
+			this.drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(vector, Quaternion.identity, Vector3.one), material, 0, true);
+			this.drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(vector, Quaternion.identity, Vector3.one), OverlayDrawer.ForbiddenMat, 0, true);
+		}
+
+		// Token: 0x0600E8F9 RID: 59641 RVA: 0x0043D42C File Offset: 0x0043B62C
+		private void RenderForbiddenAtomizerOverlay(Thing t)
+		{
+			if (!ModsConfig.BiotechActive)
+			{
+				return;
+			}
 			t.TryGetComp<CompAtomizer>();
 			Material material = MaterialPool.MatFrom(ThingDefOf.Wastepack.uiIcon, ShaderDatabase.MetaOverlayDesaturated, Color.white);
 			Vector3 pos = t.TrueCenter();
-			pos.y = BaseAlt + 15f / 82f;
-			drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), material, 0, renderInstanced: true);
-			drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), ForbiddenMat, 0, renderInstanced: true);
+			pos.y = OverlayDrawer.BaseAlt + 0.18292683f;
+			this.drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), material, 0, true);
+			this.drawBatch.DrawMesh(MeshPool.plane08, Matrix4x4.TRS(pos, Quaternion.identity, Vector3.one), OverlayDrawer.ForbiddenMat, 0, true);
 		}
-	}
 
-	private void RenderForbiddenOverlay(Thing t)
-	{
-		Vector3 drawPos = t.DrawPos;
-		bool? flag = (t.def.entityDefToBuild as ThingDef)?.building?.isAttachment;
-		bool num;
-		if (!flag.HasValue)
+		// Token: 0x0600E8FA RID: 59642 RVA: 0x0043D4C8 File Offset: 0x0043B6C8
+		private void RenderForbiddenOverlay(Thing t)
 		{
-			BuildingProperties building = t.def.building;
-			if (building == null)
+			Vector3 vector = t.DrawPos;
+			ThingDef thingDef = t.def.entityDefToBuild as ThingDef;
+			bool? flag;
+			if (thingDef == null)
 			{
-				goto IL_0094;
+				flag = null;
 			}
-			num = building.isAttachment;
-		}
-		else
-		{
-			num = flag == true;
-		}
-		if (num)
-		{
-			drawPos += (t.Rotation.AsVector2 * 0.5f).ToVector3();
-		}
-		goto IL_0094;
-		IL_0094:
-		if (t.RotatedSize.z == 1)
-		{
-			drawPos.z -= SingleCellForbiddenOffset;
-		}
-		else
-		{
-			drawPos.z -= (float)t.RotatedSize.z * 0.3f;
-		}
-		drawPos.y = BaseAlt + 0.14634147f;
-		drawBatch.DrawMesh(MeshPool.plane05, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), ForbiddenMat, 0, renderInstanced: true);
-	}
-
-	private void RenderForbiddenBigOverlay(Thing t)
-	{
-		Vector3 drawPos = t.DrawPos;
-		bool? flag = (t.def.entityDefToBuild as ThingDef)?.building?.isAttachment;
-		bool num;
-		if (!flag.HasValue)
-		{
-			BuildingProperties building = t.def.building;
-			if (building == null)
+			else
 			{
-				goto IL_0094;
+				BuildingProperties building = thingDef.building;
+				flag = ((building != null) ? new bool?(building.isAttachment) : null);
 			}
-			num = building.isAttachment;
+			bool? flag2 = flag;
+			bool flag3;
+			if (flag2 == null)
+			{
+				BuildingProperties building2 = t.def.building;
+				flag3 = (building2 != null && building2.isAttachment);
+			}
+			else
+			{
+				flag3 = flag2.GetValueOrDefault();
+			}
+			if (flag3)
+			{
+				vector += (t.Rotation.AsVector2 * 0.5f).ToVector3();
+			}
+			if (t.RotatedSize.z == 1)
+			{
+				vector.z -= OverlayDrawer.SingleCellForbiddenOffset;
+			}
+			else
+			{
+				vector.z -= (float)t.RotatedSize.z * 0.3f;
+			}
+			vector.y = OverlayDrawer.BaseAlt + 0.14634147f;
+			this.drawBatch.DrawMesh(MeshPool.plane05, Matrix4x4.TRS(vector, Quaternion.identity, Vector3.one), OverlayDrawer.ForbiddenMat, 0, true);
 		}
-		else
-		{
-			num = flag == true;
-		}
-		if (num)
-		{
-			drawPos += (t.Rotation.AsVector2 * 0.5f).ToVector3();
-		}
-		goto IL_0094;
-		IL_0094:
-		drawPos.y = BaseAlt + 0.14634147f;
-		drawBatch.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), ForbiddenMat, 0, renderInstanced: true);
-	}
 
-	private void RenderBurningWick(Thing parent)
-	{
-		Material material = (((parent.thingIDNumber + Find.TickManager.TicksGame) % 6 >= 3) ? WickMaterialB : WickMaterialA);
-		Vector3 drawPos = parent.DrawPos;
-		drawPos.y = BaseAlt + 15f / 82f;
-		drawBatch.DrawMesh(MeshPool.plane20, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), material, 0, renderInstanced: true);
-	}
-
-	private void RenderQuestionMarkOverlay(Thing t)
-	{
-		Vector3 drawPos = t.DrawPos;
-		drawPos.y = BaseAlt + 0.21951221f;
-		if (t is Pawn)
+		// Token: 0x0600E8FB RID: 59643 RVA: 0x0043D5E0 File Offset: 0x0043B7E0
+		private void RenderForbiddenBigOverlay(Thing t)
 		{
-			drawPos.x += (float)t.def.size.x - 0.52f;
-			drawPos.z += (float)t.def.size.z - 0.45f;
+			Vector3 vector = t.DrawPos;
+			ThingDef thingDef = t.def.entityDefToBuild as ThingDef;
+			bool? flag;
+			if (thingDef == null)
+			{
+				flag = null;
+			}
+			else
+			{
+				BuildingProperties building = thingDef.building;
+				flag = ((building != null) ? new bool?(building.isAttachment) : null);
+			}
+			bool? flag2 = flag;
+			bool flag3;
+			if (flag2 == null)
+			{
+				BuildingProperties building2 = t.def.building;
+				flag3 = (building2 != null && building2.isAttachment);
+			}
+			else
+			{
+				flag3 = flag2.GetValueOrDefault();
+			}
+			if (flag3)
+			{
+				vector += (t.Rotation.AsVector2 * 0.5f).ToVector3();
+			}
+			vector.y = OverlayDrawer.BaseAlt + 0.14634147f;
+			this.drawBatch.DrawMesh(MeshPool.plane10, Matrix4x4.TRS(vector, Quaternion.identity, Vector3.one), OverlayDrawer.ForbiddenMat, 0, true);
 		}
-		RenderPulsingOverlayInternal(t, QuestionMarkMat, drawPos, MeshPool.plane05);
+
+		// Token: 0x0600E8FC RID: 59644 RVA: 0x0043D6BC File Offset: 0x0043B8BC
+		private void RenderBurningWick(Thing parent)
+		{
+			Material material;
+			if ((parent.thingIDNumber + Find.TickManager.TicksGame) % 6 < 3)
+			{
+				material = OverlayDrawer.WickMaterialA;
+			}
+			else
+			{
+				material = OverlayDrawer.WickMaterialB;
+			}
+			Vector3 drawPos = parent.DrawPos;
+			drawPos.y = OverlayDrawer.BaseAlt + 0.18292683f;
+			this.drawBatch.DrawMesh(MeshPool.plane20, Matrix4x4.TRS(drawPos, Quaternion.identity, Vector3.one), material, 0, true);
+		}
+
+		// Token: 0x0600E8FD RID: 59645 RVA: 0x0043D72C File Offset: 0x0043B92C
+		private void RenderQuestionMarkOverlay(Thing t)
+		{
+			Vector3 drawPos = t.DrawPos;
+			drawPos.y = OverlayDrawer.BaseAlt + 0.21951221f;
+			if (t is Pawn)
+			{
+				drawPos.x += (float)t.def.size.x - 0.52f;
+				drawPos.z += (float)t.def.size.z - 0.45f;
+			}
+			this.RenderPulsingOverlayInternal(t, OverlayDrawer.QuestionMarkMat, drawPos, MeshPool.plane05);
+		}
+
+		// Token: 0x04009B27 RID: 39719
+		private Dictionary<Thing, OverlayTypes> overlaysToDraw = new Dictionary<Thing, OverlayTypes>();
+
+		// Token: 0x04009B28 RID: 39720
+		private Dictionary<Thing, ThingOverlaysHandle> overlayHandles = new Dictionary<Thing, ThingOverlaysHandle>();
+
+		// Token: 0x04009B29 RID: 39721
+		private Vector3 curOffset;
+
+		// Token: 0x04009B2A RID: 39722
+		private DrawBatch drawBatch = new DrawBatch();
+
+		// Token: 0x04009B2B RID: 39723
+		private static readonly Material ForbiddenMat = MaterialPool.MatFrom("Things/Special/ForbiddenOverlay", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B2C RID: 39724
+		private static readonly Material NeedsPowerMat = MaterialPool.MatFrom("UI/Overlays/NeedsPower", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B2D RID: 39725
+		private static readonly Material PowerOffMat = MaterialPool.MatFrom("UI/Overlays/PowerOff", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B2E RID: 39726
+		private static readonly Material QuestionMarkMat = MaterialPool.MatFrom("UI/Overlays/QuestionMark", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B2F RID: 39727
+		private static readonly Material BrokenDownMat = MaterialPool.MatFrom("UI/Overlays/BrokenDown", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B30 RID: 39728
+		private static readonly Material OutOfFuelMat = MaterialPool.MatFrom("UI/Overlays/OutOfFuel", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B31 RID: 39729
+		private static readonly Material WickMaterialA = MaterialPool.MatFrom("Things/Special/BurningWickA", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B32 RID: 39730
+		private static readonly Material WickMaterialB = MaterialPool.MatFrom("Things/Special/BurningWickB", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B33 RID: 39731
+		private static readonly Material SelfShutdownMat = MaterialPool.MatFrom("UI/Overlays/SelfShutdown", ShaderDatabase.MetaOverlay);
+
+		// Token: 0x04009B34 RID: 39732
+		private const int AltitudeIndex_Forbidden = 4;
+
+		// Token: 0x04009B35 RID: 39733
+		private const int AltitudeIndex_BurningWick = 5;
+
+		// Token: 0x04009B36 RID: 39734
+		private const int AltitudeIndex_QuestionMark = 6;
+
+		// Token: 0x04009B37 RID: 39735
+		private static float SingleCellForbiddenOffset = 0.3f;
+
+		// Token: 0x04009B38 RID: 39736
+		public const float PulseFrequency = 4f;
+
+		// Token: 0x04009B39 RID: 39737
+		public const float PulseAmplitude = 0.7f;
+
+		// Token: 0x04009B3A RID: 39738
+		private static readonly float BaseAlt = AltitudeLayer.MetaOverlays.AltitudeFor();
+
+		// Token: 0x04009B3B RID: 39739
+		private const float StackOffsetMultipiler = 0.25f;
 	}
 }

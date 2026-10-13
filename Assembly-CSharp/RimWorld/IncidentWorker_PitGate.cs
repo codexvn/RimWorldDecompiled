@@ -1,41 +1,44 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class IncidentWorker_PitGate : IncidentWorker
+namespace RimWorld
 {
-	public static readonly LargeBuildingSpawnParms PitGateSpawnParms = new LargeBuildingSpawnParms
+	// Token: 0x02001DBF RID: 7615
+	public class IncidentWorker_PitGate : IncidentWorker
 	{
-		ignoreTerrainAffordance = true
-	};
+		// Token: 0x0600AA07 RID: 43527 RVA: 0x0030A460 File Offset: 0x00308660
+		protected override bool CanFireNowSub(IncidentParms parms)
+		{
+			if (!ModsConfig.AnomalyActive)
+			{
+				return false;
+			}
+			Map map = (Map)parms.target;
+			return base.CanFireNowSub(parms) && map.listerThings.ThingsOfDef(ThingDefOf.PitGate).Count == 0 && map.listerThings.ThingsOfDef(ThingDefOf.PitGateSpawner).Count == 0;
+		}
 
-	protected override bool CanFireNowSub(IncidentParms parms)
-	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x0600AA08 RID: 43528 RVA: 0x0030A4BC File Offset: 0x003086BC
+		protected override bool TryExecuteWorker(IncidentParms parms)
 		{
-			return false;
+			Map map = (Map)parms.target;
+			IntVec3 loc;
+			if (!LargeBuildingCellFinder.TryFindCell(out loc, map, IncidentWorker_PitGate.PitGateSpawnParms.ForThing(ThingDefOf.PitGate), null, null, false))
+			{
+				return false;
+			}
+			BuildingGroundSpawner buildingGroundSpawner = (BuildingGroundSpawner)ThingMaker.MakeThing(ThingDefOf.PitGateSpawner, null);
+			PitGate pitGate = buildingGroundSpawner.ThingToSpawn as PitGate;
+			pitGate.SetFaction(Faction.OfEntities, null);
+			pitGate.pointsMultiplier = parms.pointMultiplier;
+			GenSpawn.Spawn(buildingGroundSpawner, loc, map, WipeMode.Vanish);
+			base.SendStandardLetter(parms, buildingGroundSpawner, Array.Empty<NamedArgument>());
+			return true;
 		}
-		Map map = (Map)parms.target;
-		if (base.CanFireNowSub(parms) && map.listerThings.ThingsOfDef(ThingDefOf.PitGate).Count == 0)
-		{
-			return map.listerThings.ThingsOfDef(ThingDefOf.PitGateSpawner).Count == 0;
-		}
-		return false;
-	}
 
-	protected override bool TryExecuteWorker(IncidentParms parms)
-	{
-		Map map = (Map)parms.target;
-		if (!LargeBuildingCellFinder.TryFindCell(out var cell, map, PitGateSpawnParms.ForThing(ThingDefOf.PitGate)))
+		// Token: 0x0400756A RID: 30058
+		public static readonly LargeBuildingSpawnParms PitGateSpawnParms = new LargeBuildingSpawnParms
 		{
-			return false;
-		}
-		BuildingGroundSpawner buildingGroundSpawner = (BuildingGroundSpawner)ThingMaker.MakeThing(ThingDefOf.PitGateSpawner);
-		PitGate obj = buildingGroundSpawner.ThingToSpawn as PitGate;
-		obj.SetFaction(Faction.OfEntities);
-		obj.pointsMultiplier = parms.pointMultiplier;
-		GenSpawn.Spawn(buildingGroundSpawner, cell, map);
-		SendStandardLetter(parms, buildingGroundSpawner);
-		return true;
+			ignoreTerrainAffordance = true
+		};
 	}
 }

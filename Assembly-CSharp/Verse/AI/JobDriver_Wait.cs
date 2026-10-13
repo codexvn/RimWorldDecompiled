@@ -1,154 +1,195 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class JobDriver_Wait : JobDriver
+namespace Verse.AI
 {
-	private const int TargetSearchInterval = 4;
-
-	public override string GetReport()
+	// Token: 0x02000E8C RID: 3724
+	public class JobDriver_Wait : JobDriver
 	{
-		if (job.def == JobDefOf.Wait_Combat && pawn.RaceProps.Humanlike && pawn.WorkTagIsDisabled(WorkTags.Violent))
+		// Token: 0x06005DDF RID: 24031 RVA: 0x001DE884 File Offset: 0x001DCA84
+		public override string GetReport()
 		{
-			return "ReportStanding".Translate();
-		}
-		return base.GetReport();
-	}
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
-	{
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		Toil toil = (job.forceSleep ? Toils_LayDown.LayDown(TargetIndex.A, hasBed: false, lookForOtherJobs: false) : ToilMaker.MakeToil("MakeNewToils"));
-		toil.initAction = (Action)Delegate.Combine(toil.initAction, (Action)delegate
-		{
-			base.Map.pawnDestinationReservationManager.Reserve(pawn, job, pawn.Position);
-			pawn.pather?.StopDead();
-			CheckForAutoAttack();
-		});
-		toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, (Action<int>)delegate(int delta)
-		{
-			if (job.expiryInterval == -1 && job.def == JobDefOf.Wait_Combat && !pawn.Drafted)
+			if (this.job.def == JobDefOf.Wait_Combat && this.pawn.RaceProps.Humanlike && this.pawn.WorkTagIsDisabled(WorkTags.Violent))
 			{
-				Log.Error(pawn?.ToString() + " in eternal WaitCombat without being drafted.");
-				ReadyForNextToil();
+				return "ReportStanding".Translate();
 			}
-			else
+			return base.GetReport();
+		}
+
+		// Token: 0x06005DE0 RID: 24032 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return true;
+		}
+
+		// Token: 0x06005DE1 RID: 24033 RVA: 0x001DE8D9 File Offset: 0x001DCAD9
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			Toil toil = this.job.forceSleep ? Toils_LayDown.LayDown(TargetIndex.A, false, false, true, true, PawnPosture.LayingOnGroundNormal, false) : ToilMaker.MakeToil("MakeNewToils");
+			Toil toil2 = toil;
+			toil2.initAction = (Action)Delegate.Combine(toil2.initAction, new Action(delegate()
 			{
-				if (job.forceSleep)
+				base.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.pawn.Position);
+				Pawn_PathFollower pather = this.pawn.pather;
+				if (pather != null)
 				{
-					asleep = true;
+					pather.StopDead();
 				}
-				if (GenTicks.IsTickIntervalDelta(pawn.thingIDNumber, 4, delta))
+				this.CheckForAutoAttack();
+			}));
+			Toil toil3 = toil;
+			toil3.tickIntervalAction = (Action<int>)Delegate.Combine(toil3.tickIntervalAction, new Action<int>(delegate(int delta)
+			{
+				if (this.job.expiryInterval == -1 && this.job.def == JobDefOf.Wait_Combat && !this.pawn.Drafted)
 				{
-					CheckForAutoAttack();
+					Pawn pawn = this.pawn;
+					Log.Error(((pawn != null) ? pawn.ToString() : null) + " in eternal WaitCombat without being drafted.");
+					base.ReadyForNextToil();
+					return;
 				}
+				if (this.job.forceSleep)
+				{
+					this.asleep = true;
+				}
+				if (GenTicks.IsTickIntervalDelta(this.pawn.thingIDNumber, 4, delta))
+				{
+					this.CheckForAutoAttack();
+				}
+			}));
+			this.DecorateWaitToil(toil);
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			if (this.job.overrideFacing != Rot4.Invalid)
+			{
+				toil.handlingFacing = true;
+				Toil toil4 = toil;
+				toil4.tickAction = (Action)Delegate.Combine(toil4.tickAction, new Action(delegate()
+				{
+					this.pawn.rotationTracker.FaceTarget(this.pawn.Position + this.job.overrideFacing.FacingCell);
+				}));
 			}
-		});
-		DecorateWaitToil(toil);
-		toil.defaultCompleteMode = ToilCompleteMode.Never;
-		if (job.overrideFacing != Rot4.Invalid)
-		{
-			toil.handlingFacing = true;
-			toil.tickAction = (Action)Delegate.Combine(toil.tickAction, (Action)delegate
+			else if (this.pawn.mindState != null && this.pawn.mindState.duty != null && this.pawn.mindState.duty.focus != null && this.job.def != JobDefOf.Wait_Combat)
 			{
-				pawn.rotationTracker.FaceTarget(pawn.Position + job.overrideFacing.FacingCell);
-			});
-		}
-		else if (pawn.mindState != null && pawn.mindState.duty != null && pawn.mindState.duty.focus != null && job.def != JobDefOf.Wait_Combat)
-		{
-			LocalTargetInfo focusLocal = pawn.mindState.duty.focus;
-			toil.handlingFacing = true;
-			toil.tickAction = (Action)Delegate.Combine(toil.tickAction, (Action)delegate
-			{
-				pawn.rotationTracker.FaceTarget(focusLocal);
-			});
-		}
-		yield return toil;
-	}
-
-	public virtual void DecorateWaitToil(Toil wait)
-	{
-	}
-
-	public override void Notify_StanceChanged()
-	{
-		if (pawn.stances.curStance is Stance_Mobile)
-		{
-			CheckForAutoAttack();
-		}
-	}
-
-	private void CheckForAutoAttack()
-	{
-		if (!base.pawn.kindDef.canMeleeAttack || base.pawn.Downed || base.pawn.stances.FullBodyBusy || base.pawn.IsCarryingPawn() || (!base.pawn.IsPlayerControlled && base.pawn.IsPsychologicallyInvisible()) || base.pawn.IsShambler)
-		{
-			return;
-		}
-		collideWithPawns = false;
-		bool flag = !base.pawn.WorkTagIsDisabled(WorkTags.Violent);
-		bool flag2 = base.pawn.RaceProps.ToolUser && base.pawn.Faction == Faction.OfPlayer && !base.pawn.WorkTagIsDisabled(WorkTags.Firefighting);
-		if (!(flag || flag2))
-		{
-			return;
-		}
-		Fire fire = null;
-		for (int i = 0; i < 9; i++)
-		{
-			IntVec3 c = base.pawn.Position + GenAdj.AdjacentCellsAndInside[i];
-			if (!c.InBounds(base.pawn.Map))
-			{
-				continue;
+				LocalTargetInfo focusLocal = this.pawn.mindState.duty.focus;
+				toil.handlingFacing = true;
+				Toil toil5 = toil;
+				toil5.tickAction = (Action)Delegate.Combine(toil5.tickAction, new Action(delegate()
+				{
+					this.pawn.rotationTracker.FaceTarget(focusLocal);
+				}));
 			}
-			List<Thing> thingList = c.GetThingList(base.Map);
-			for (int j = 0; j < thingList.Count; j++)
+			yield return toil;
+			yield break;
+		}
+
+		// Token: 0x06005DE2 RID: 24034 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void DecorateWaitToil(Toil wait)
+		{
+		}
+
+		// Token: 0x06005DE3 RID: 24035 RVA: 0x001DE8E9 File Offset: 0x001DCAE9
+		public override void Notify_StanceChanged()
+		{
+			if (this.pawn.stances.curStance is Stance_Mobile)
 			{
-				if (flag && base.pawn.kindDef.canMeleeAttack && thingList[j] is Pawn pawn && !pawn.ThreatDisabled(base.pawn) && base.pawn.HostileTo(pawn))
-				{
-					CompActivity comp = pawn.GetComp<CompActivity>();
-					if ((comp == null || comp.IsActive) && !base.pawn.ThreatDisabledBecauseNonAggressiveRoamer(pawn) && GenHostility.IsActiveThreatTo(pawn, base.pawn.Faction, ignoreHives: false))
-					{
-						base.pawn.meleeVerbs.TryMeleeAttack(pawn);
-						collideWithPawns = true;
-						return;
-					}
-				}
-				if (flag2 && thingList[j] is Fire fire2 && (fire == null || fire2.fireSize < fire.fireSize || i == 8) && (fire2.parent == null || fire2.parent != base.pawn))
-				{
-					fire = fire2;
-				}
+				this.CheckForAutoAttack();
 			}
 		}
-		if (fire != null && (!base.pawn.InMentalState || base.pawn.MentalState.def.allowBeatfire))
+
+		// Token: 0x06005DE4 RID: 24036 RVA: 0x001DE908 File Offset: 0x001DCB08
+		private void CheckForAutoAttack()
 		{
-			base.pawn.natives.TryBeatFire(fire);
-		}
-		else
-		{
-			if (!flag || !job.canUseRangedWeapon || job.def != JobDefOf.Wait_Combat || (base.pawn.drafter != null && !base.pawn.drafter.FireAtWill))
+			if (!this.pawn.kindDef.canMeleeAttack)
 			{
 				return;
 			}
-			Verb currentEffectiveVerb = base.pawn.CurrentEffectiveVerb;
-			if (currentEffectiveVerb != null && !currentEffectiveVerb.verbProps.IsMeleeAttack)
+			if (this.pawn.Downed)
 			{
-				TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToAll | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
-				if (currentEffectiveVerb.IsIncendiary_Ranged())
+				return;
+			}
+			if (this.pawn.stances.FullBodyBusy)
+			{
+				return;
+			}
+			if (this.pawn.IsCarryingPawn(null))
+			{
+				return;
+			}
+			if (!this.pawn.IsPlayerControlled && this.pawn.IsPsychologicallyInvisible())
+			{
+				return;
+			}
+			if (this.pawn.IsShambler)
+			{
+				return;
+			}
+			this.collideWithPawns = false;
+			bool flag = !this.pawn.WorkTagIsDisabled(WorkTags.Violent);
+			bool flag2 = this.pawn.RaceProps.ToolUser && this.pawn.Faction == Faction.OfPlayer && !this.pawn.WorkTagIsDisabled(WorkTags.Firefighting);
+			if (flag || flag2)
+			{
+				Fire fire = null;
+				for (int i = 0; i < 9; i++)
 				{
-					targetScanFlags |= TargetScanFlags.NeedNonBurning;
+					IntVec3 c = this.pawn.Position + GenAdj.AdjacentCellsAndInside[i];
+					if (c.InBounds(this.pawn.Map))
+					{
+						List<Thing> thingList = c.GetThingList(base.Map);
+						for (int j = 0; j < thingList.Count; j++)
+						{
+							if (flag && this.pawn.kindDef.canMeleeAttack)
+							{
+								Pawn pawn = thingList[j] as Pawn;
+								if (pawn != null && !pawn.ThreatDisabled(this.pawn) && this.pawn.HostileTo(pawn))
+								{
+									CompActivity comp = pawn.GetComp<CompActivity>();
+									if ((comp == null || comp.IsActive) && !this.pawn.ThreatDisabledBecauseNonAggressiveRoamer(pawn) && GenHostility.IsActiveThreatTo(pawn, this.pawn.Faction, false, false))
+									{
+										this.pawn.meleeVerbs.TryMeleeAttack(pawn, null, false);
+										this.collideWithPawns = true;
+										return;
+									}
+								}
+							}
+							if (flag2)
+							{
+								Fire fire2 = thingList[j] as Fire;
+								if (fire2 != null && (fire == null || fire2.fireSize < fire.fireSize || i == 8) && (fire2.parent == null || fire2.parent != this.pawn))
+								{
+									fire = fire2;
+								}
+							}
+						}
+					}
 				}
-				Thing thing = (Thing)AttackTargetFinder.BestShootTargetFromCurrentPosition(base.pawn, targetScanFlags);
-				if (thing != null)
+				if (fire != null && (!this.pawn.InMentalState || this.pawn.MentalState.def.allowBeatfire))
 				{
-					base.pawn.TryStartAttack(thing);
-					collideWithPawns = true;
+					this.pawn.natives.TryBeatFire(fire);
+					return;
+				}
+				if (flag && this.job.canUseRangedWeapon && this.job.def == JobDefOf.Wait_Combat && (this.pawn.drafter == null || this.pawn.drafter.FireAtWill))
+				{
+					Verb currentEffectiveVerb = this.pawn.CurrentEffectiveVerb;
+					if (currentEffectiveVerb == null || currentEffectiveVerb.verbProps.IsMeleeAttack)
+					{
+						return;
+					}
+					TargetScanFlags targetScanFlags = TargetScanFlags.NeedLOSToPawns | TargetScanFlags.NeedLOSToNonPawns | TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable;
+					if (currentEffectiveVerb.IsIncendiary_Ranged())
+					{
+						targetScanFlags |= TargetScanFlags.NeedNonBurning;
+					}
+					Thing thing = (Thing)AttackTargetFinder.BestShootTargetFromCurrentPosition(this.pawn, targetScanFlags, null, 0f, 9999f);
+					if (thing != null)
+					{
+						this.pawn.TryStartAttack(thing);
+						this.collideWithPawns = true;
+					}
 				}
 			}
 		}
+
+		// Token: 0x040043EC RID: 17388
+		private const int TargetSearchInterval = 4;
 	}
 }

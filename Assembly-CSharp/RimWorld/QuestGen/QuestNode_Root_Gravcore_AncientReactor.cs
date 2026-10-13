@@ -1,37 +1,53 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_Gravcore_AncientReactor : QuestNode_Root_Gravcore
+namespace RimWorld.QuestGen
 {
-	protected override void RunInt()
+	// Token: 0x02003B0B RID: 15115
+	public class QuestNode_Root_Gravcore_AncientReactor : QuestNode_Root_Gravcore
 	{
-		Slate slate = QuestGen.slate;
-		Quest quest = QuestGen.quest;
-		if (!TryFindSiteTile(out var tile))
+		// Token: 0x06014924 RID: 84260 RVA: 0x00622CC8 File Offset: 0x00620EC8
+		protected override void RunInt()
 		{
-			Log.Error("Could not find valid site tile for ancient reactor quest.");
-			return;
-		}
-		string text = QuestGenUtility.HardcodedSignalWithQuestID("site.MapGenerated");
-		string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
-		Site site = QuestGen_Sites.GenerateSite(new SitePartDefWithParams[1]
-		{
-			new SitePartDefWithParams(SitePartDefOf.AncientReactor, new SitePartParams
+			Slate slate = QuestGen.slate;
+			Quest quest = QuestGen.quest;
+			PlanetTile tile;
+			if (!this.TryFindSiteTile(out tile))
 			{
-				points = slate.Get("points", 0f),
-				threatPoints = slate.Get("points", 0f)
-			})
-		}, tile, null, hiddenSitePartsPossible: false, null, WorldObjectDefOf.ClaimableSite);
-		slate.Set("site", site);
-		quest.SpawnWorldObject(site);
-		QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
-		choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.Gravcore));
-		choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.GravlitePanel));
-		quest.RewardChoice().choices.Add(choice);
-		quest.Letter(LetterDefOf.NeutralEvent, text, null, null, null, useColonistsFromCaravanArg: false, QuestPart.SignalListenMode.OngoingOnly, label: "AncientReactorArrivedLetter".Translate(), text: "AncientReactorArrivedLetterText".Translate(), lookTargets: Gen.YieldSingle(site.Map));
-		quest.End(QuestEndOutcome.Success, 0, null, text);
-		quest.End(QuestEndOutcome.Unknown, 0, null, inSignal);
+				Log.Error("Could not find valid site tile for ancient reactor quest.");
+				return;
+			}
+			string text = QuestGenUtility.HardcodedSignalWithQuestID("site.MapGenerated");
+			string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
+			string inSignal2 = QuestGenUtility.HardcodedSignalWithQuestID("site.MapSettled");
+			Site site = QuestGen_Sites.GenerateSite(new SitePartDefWithParams[]
+			{
+				new SitePartDefWithParams(SitePartDefOf.AncientReactor, new SitePartParams
+				{
+					points = slate.Get<float>("points", 0f, false),
+					threatPoints = slate.Get<float>("points", 0f, false)
+				})
+			}, tile, null, false, null, WorldObjectDefOf.ClaimableSite);
+			slate.Set<Site>("site", site, false);
+			quest.SpawnWorldObject(site, null, null);
+			QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
+			choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.Gravcore));
+			choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.GravlitePanel));
+			quest.RewardChoice(null, null).choices.Add(choice);
+			Quest quest2 = quest;
+			LetterDef neutralEvent = LetterDefOf.NeutralEvent;
+			string inSignal3 = text;
+			string chosenPawnSignal = null;
+			Faction relatedFaction = null;
+			MapParent useColonistsOnMap = null;
+			bool useColonistsFromCaravanArg = false;
+			QuestPart.SignalListenMode signalListenMode = QuestPart.SignalListenMode.OngoingOnly;
+			string label = "AncientReactorArrivedLetter".Translate();
+			string text2 = "AncientReactorArrivedLetterText".Translate();
+			quest2.Letter(neutralEvent, inSignal3, chosenPawnSignal, relatedFaction, useColonistsOnMap, useColonistsFromCaravanArg, signalListenMode, Gen.YieldSingle<Map>(site.Map), false, text2, null, label, null, null);
+			quest.End(QuestEndOutcome.Success, 0, null, inSignal, QuestPart.SignalListenMode.OngoingOnly, false, false);
+			quest.End(QuestEndOutcome.Unknown, 0, null, inSignal2, QuestPart.SignalListenMode.OngoingOnly, false, false);
+		}
 	}
 }

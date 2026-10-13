@@ -1,22 +1,25 @@
-namespace RimWorld;
+﻿using System;
 
-public class ITab_Pawn_Guest : ITab_Pawn_Visitor
+namespace RimWorld
 {
-	public override bool IsVisible
+	// Token: 0x020033B4 RID: 13236
+	public class ITab_Pawn_Guest : ITab_Pawn_Visitor
 	{
-		get
+		// Token: 0x170030A8 RID: 12456
+		// (get) Token: 0x060129B4 RID: 76212 RVA: 0x00581742 File Offset: 0x0057F942
+		public override bool IsVisible
 		{
-			if (SelPawn.HostFaction == Faction.OfPlayer && !SelPawn.IsPrisoner)
+			get
 			{
-				return !SelPawn.IsSlaveOfColony;
+				return this.SelPawn.HostFaction == Faction.OfPlayer && !this.SelPawn.IsPrisoner && !this.SelPawn.IsSlaveOfColony;
 			}
-			return false;
 		}
-	}
 
-	public ITab_Pawn_Guest()
-	{
-		labelKey = "TabGuest";
-		tutorTag = "Guest";
+		// Token: 0x060129B5 RID: 76213 RVA: 0x00581773 File Offset: 0x0057F973
+		public ITab_Pawn_Guest()
+		{
+			this.labelKey = "TabGuest";
+			this.tutorTag = "Guest";
+		}
 	}
 }

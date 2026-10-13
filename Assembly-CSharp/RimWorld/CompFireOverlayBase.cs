@@ -1,29 +1,44 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class CompFireOverlayBase : ThingComp
+namespace RimWorld
 {
-	protected int startedGrowingAtTick = -1;
-
-	public CompProperties_FireOverlay Props => (CompProperties_FireOverlay)props;
-
-	public float FireSize
+	// Token: 0x02002C89 RID: 11401
+	public abstract class CompFireOverlayBase : ThingComp
 	{
-		get
+		// Token: 0x17002864 RID: 10340
+		// (get) Token: 0x0600FFE4 RID: 65508 RVA: 0x004A21E1 File Offset: 0x004A03E1
+		public CompProperties_FireOverlay Props
 		{
-			if (startedGrowingAtTick < 0)
+			get
 			{
-				return Props.fireSize;
+				return (CompProperties_FireOverlay)this.props;
 			}
-			return Mathf.Lerp(Props.fireSize, Props.finalFireSize, (float)(GenTicks.TicksAbs - startedGrowingAtTick) / Props.fireGrowthDurationTicks);
 		}
-	}
 
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Values.Look(ref startedGrowingAtTick, "startedGrowingAtTick", -1);
+		// Token: 0x17002865 RID: 10341
+		// (get) Token: 0x0600FFE5 RID: 65509 RVA: 0x004A21F0 File Offset: 0x004A03F0
+		public float FireSize
+		{
+			get
+			{
+				if (this.startedGrowingAtTick < 0)
+				{
+					return this.Props.fireSize;
+				}
+				return Mathf.Lerp(this.Props.fireSize, this.Props.finalFireSize, (float)(GenTicks.TicksAbs - this.startedGrowingAtTick) / this.Props.fireGrowthDurationTicks);
+			}
+		}
+
+		// Token: 0x0600FFE6 RID: 65510 RVA: 0x004A2246 File Offset: 0x004A0446
+		public override void PostExposeData()
+		{
+			base.PostExposeData();
+			Scribe_Values.Look<int>(ref this.startedGrowingAtTick, "startedGrowingAtTick", -1, false);
+		}
+
+		// Token: 0x0400A758 RID: 42840
+		protected int startedGrowingAtTick = -1;
 	}
 }

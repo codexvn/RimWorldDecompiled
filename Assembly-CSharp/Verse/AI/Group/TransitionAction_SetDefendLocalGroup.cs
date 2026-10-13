@@ -1,10 +1,15 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public class TransitionAction_SetDefendLocalGroup : TransitionAction
+namespace Verse.AI.Group
 {
-	public override void DoAction(Transition trans)
+	// Token: 0x020010B7 RID: 4279
+	public class TransitionAction_SetDefendLocalGroup : TransitionAction
 	{
-		LordToil_DefendPoint obj = (LordToil_DefendPoint)trans.target;
-		obj.SetDefendPoint(obj.lord.ownedPawns.RandomElement().Position);
+		// Token: 0x060068E8 RID: 26856 RVA: 0x00211F14 File Offset: 0x00210114
+		public override void DoAction(Transition trans)
+		{
+			LordToil_DefendPoint lordToil_DefendPoint = (LordToil_DefendPoint)trans.target;
+			lordToil_DefendPoint.SetDefendPoint(lordToil_DefendPoint.lord.ownedPawns.RandomElement<Pawn>().Position);
+		}
 	}
 }

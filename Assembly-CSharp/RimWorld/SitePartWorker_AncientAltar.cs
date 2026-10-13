@@ -1,49 +1,53 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class SitePartWorker_AncientAltar : SitePartWorker
+namespace RimWorld
 {
-	public override void Init(Site site, SitePart sitePart)
+	// Token: 0x0200283E RID: 10302
+	public class SitePartWorker_AncientAltar : SitePartWorker
 	{
-		base.Init(site, sitePart);
-		sitePart.relicThing = sitePart.parms.relicThing;
-	}
-
-	public bool ShouldKeepMapForRelic(SitePart sitePart)
-	{
-		if (sitePart.relicThing != null && !sitePart.relicThing.DestroyedOrNull())
+		// Token: 0x0600E16A RID: 57706 RVA: 0x004218CA File Offset: 0x0041FACA
+		public override void Init(Site site, SitePart sitePart)
 		{
-			return sitePart.relicThing.MapHeld == sitePart.site.Map;
+			base.Init(site, sitePart);
+			sitePart.relicThing = sitePart.parms.relicThing;
 		}
-		return false;
-	}
 
-	public override void Notify_SiteMapAboutToBeRemoved(SitePart sitePart)
-	{
-		base.Notify_SiteMapAboutToBeRemoved(sitePart);
-		if (ShouldKeepMapForRelic(sitePart))
+		// Token: 0x0600E16B RID: 57707 RVA: 0x004218E5 File Offset: 0x0041FAE5
+		public bool ShouldKeepMapForRelic(SitePart sitePart)
 		{
-			sitePart.relicThing.DeSpawnOrDeselect();
-			if (sitePart.relicThing.holdingOwner != null)
+			return sitePart.relicThing != null && !sitePart.relicThing.DestroyedOrNull() && sitePart.relicThing.MapHeld == sitePart.site.Map;
+		}
+
+		// Token: 0x0600E16C RID: 57708 RVA: 0x00421918 File Offset: 0x0041FB18
+		public override void Notify_SiteMapAboutToBeRemoved(SitePart sitePart)
+		{
+			base.Notify_SiteMapAboutToBeRemoved(sitePart);
+			if (this.ShouldKeepMapForRelic(sitePart))
 			{
-				sitePart.relicThing.holdingOwner.Remove(sitePart.relicThing);
+				sitePart.relicThing.DeSpawnOrDeselect(DestroyMode.Vanish);
+				if (sitePart.relicThing.holdingOwner != null)
+				{
+					sitePart.relicThing.holdingOwner.Remove(sitePart.relicThing);
+				}
+				sitePart.relicWasSpawned = false;
+				return;
 			}
-			sitePart.relicWasSpawned = false;
+			if (!sitePart.parms.relicLostSignal.NullOrEmpty())
+			{
+				Find.SignalManager.SendSignal(new Signal(sitePart.parms.relicLostSignal, false));
+			}
 		}
-		else if (!sitePart.parms.relicLostSignal.NullOrEmpty())
-		{
-			Find.SignalManager.SendSignal(new Signal(sitePart.parms.relicLostSignal));
-		}
-	}
 
-	public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
-	{
-		if (site.MainSitePartDef == def)
+		// Token: 0x0600E16D RID: 57709 RVA: 0x0042199B File Offset: 0x0041FB9B
+		public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
 		{
-			return null;
+			if (site.MainSitePartDef == this.def)
+			{
+				return null;
+			}
+			return base.GetPostProcessedThreatLabel(site, sitePart);
 		}
-		return base.GetPostProcessedThreatLabel(site, sitePart);
 	}
 }

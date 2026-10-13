@@ -1,61 +1,87 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Dialog_NamePlayerFactionAndSettlement : Dialog_GiveName
+namespace RimWorld
 {
-	private Settlement settlement;
-
-	protected override int FirstCharLimit => 64;
-
-	protected override int SecondCharLimit => 64;
-
-	public Dialog_NamePlayerFactionAndSettlement(Settlement settlement)
+	// Token: 0x0200319B RID: 12699
+	public class Dialog_NamePlayerFactionAndSettlement : Dialog_GiveName
 	{
-		this.settlement = settlement;
-		if (settlement.HasMap && settlement.Map.mapPawns.FreeColonistsSpawnedCount != 0)
+		// Token: 0x17002E70 RID: 11888
+		// (get) Token: 0x06011DE5 RID: 73189 RVA: 0x0052B3E5 File Offset: 0x005295E5
+		protected override int FirstCharLimit
 		{
-			suggestingPawn = settlement.Map.mapPawns.FreeColonistsSpawned.RandomElement();
+			get
+			{
+				return 64;
+			}
 		}
-		nameGenerator = () => NameGenerator.GenerateName(Faction.OfPlayer.def.factionNameMaker, IsValidName);
-		curName = nameGenerator();
-		nameMessageKey = "NamePlayerFactionMessage";
-		invalidNameMessageKey = "PlayerFactionNameIsInvalid";
-		useSecondName = true;
-		secondNameGenerator = () => NameGenerator.GenerateName(Faction.OfPlayer.def.settlementNameMaker, IsValidSecondName);
-		curSecondName = secondNameGenerator();
-		secondNameMessageKey = "NamePlayerFactionBaseMessage_NameFactionContinuation";
-		invalidSecondNameMessageKey = "PlayerFactionBaseNameIsInvalid";
-		gainedNameMessageKey = "PlayerFactionAndBaseGainsName";
-	}
 
-	public override void PostOpen()
-	{
-		base.PostOpen();
-		if (settlement.Map != null)
+		// Token: 0x17002E71 RID: 11889
+		// (get) Token: 0x06011DE6 RID: 73190 RVA: 0x0052B3E5 File Offset: 0x005295E5
+		protected override int SecondCharLimit
 		{
-			Current.Game.CurrentMap = settlement.Map;
+			get
+			{
+				return 64;
+			}
 		}
-	}
 
-	protected override bool IsValidName(string s)
-	{
-		return NamePlayerFactionDialogUtility.IsValidName(s);
-	}
+		// Token: 0x06011DE7 RID: 73191 RVA: 0x005303A8 File Offset: 0x0052E5A8
+		public Dialog_NamePlayerFactionAndSettlement(Settlement settlement)
+		{
+			this.settlement = settlement;
+			if (settlement.HasMap && settlement.Map.mapPawns.FreeColonistsSpawnedCount != 0)
+			{
+				this.suggestingPawn = settlement.Map.mapPawns.FreeColonistsSpawned.RandomElement<Pawn>();
+			}
+			this.nameGenerator = (() => NameGenerator.GenerateName(Faction.OfPlayer.def.factionNameMaker, new Predicate<string>(this.IsValidName), false, null, null, null));
+			this.curName = this.nameGenerator();
+			this.nameMessageKey = "NamePlayerFactionMessage";
+			this.invalidNameMessageKey = "PlayerFactionNameIsInvalid";
+			this.useSecondName = true;
+			this.secondNameGenerator = (() => NameGenerator.GenerateName(Faction.OfPlayer.def.settlementNameMaker, new Predicate<string>(this.IsValidSecondName), false, null, null, null));
+			this.curSecondName = this.secondNameGenerator();
+			this.secondNameMessageKey = "NamePlayerFactionBaseMessage_NameFactionContinuation";
+			this.invalidSecondNameMessageKey = "PlayerFactionBaseNameIsInvalid";
+			this.gainedNameMessageKey = "PlayerFactionAndBaseGainsName";
+		}
 
-	protected override bool IsValidSecondName(string s)
-	{
-		return NamePlayerSettlementDialogUtility.IsValidName(s);
-	}
+		// Token: 0x06011DE8 RID: 73192 RVA: 0x0053047B File Offset: 0x0052E67B
+		public override void PostOpen()
+		{
+			base.PostOpen();
+			if (this.settlement.Map != null)
+			{
+				Current.Game.CurrentMap = this.settlement.Map;
+			}
+		}
 
-	protected override void Named(string s)
-	{
-		NamePlayerFactionDialogUtility.Named(s);
-	}
+		// Token: 0x06011DE9 RID: 73193 RVA: 0x00530253 File Offset: 0x0052E453
+		protected override bool IsValidName(string s)
+		{
+			return NamePlayerFactionDialogUtility.IsValidName(s);
+		}
 
-	protected override void NamedSecond(string s)
-	{
-		NamePlayerSettlementDialogUtility.Named(settlement, s);
+		// Token: 0x06011DEA RID: 73194 RVA: 0x005304A5 File Offset: 0x0052E6A5
+		protected override bool IsValidSecondName(string s)
+		{
+			return NamePlayerSettlementDialogUtility.IsValidName(s);
+		}
+
+		// Token: 0x06011DEB RID: 73195 RVA: 0x0053025B File Offset: 0x0052E45B
+		protected override void Named(string s)
+		{
+			NamePlayerFactionDialogUtility.Named(s);
+		}
+
+		// Token: 0x06011DEC RID: 73196 RVA: 0x005304AD File Offset: 0x0052E6AD
+		protected override void NamedSecond(string s)
+		{
+			NamePlayerSettlementDialogUtility.Named(this.settlement, s);
+		}
+
+		// Token: 0x0400B8D0 RID: 47312
+		private Settlement settlement;
 	}
 }

@@ -1,36 +1,33 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_NoFightingSappers : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010CC RID: 4300
+	public class Trigger_NoFightingSappers : Trigger
 	{
-		if (signal.type == TriggerSignalType.PawnLost)
+		// Token: 0x06006915 RID: 26901 RVA: 0x002123F8 File Offset: 0x002105F8
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.PawnLost)
 			{
-				Pawn p = lord.ownedPawns[i];
-				if (IsFightingSapper(p))
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					return false;
+					Pawn p = lord.ownedPawns[i];
+					if (this.IsFightingSapper(p))
+					{
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
-		}
-		return false;
-	}
-
-	private bool IsFightingSapper(Pawn p)
-	{
-		if (p.Downed || p.InMentalState)
-		{
 			return false;
 		}
-		if (!SappersUtility.IsGoodSapper(p))
+
+		// Token: 0x06006916 RID: 26902 RVA: 0x0021243F File Offset: 0x0021063F
+		private bool IsFightingSapper(Pawn p)
 		{
-			return SappersUtility.IsGoodBackupSapper(p);
+			return !p.Downed && !p.InMentalState && (SappersUtility.IsGoodSapper(p) || SappersUtility.IsGoodBackupSapper(p));
 		}
-		return true;
 	}
 }

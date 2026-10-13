@@ -1,21 +1,23 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class WorkGiver_TendOther_Humanlike : WorkGiver_TendOther
+namespace RimWorld
 {
-	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	// Token: 0x02001620 RID: 5664
+	public class WorkGiver_TendOther_Humanlike : WorkGiver_TendOther
 	{
-		return pawn.Map.mapPawns.SpawnedHumanlikesWithAnyHediff;
-	}
-
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		if (t is Pawn pawn2 && !pawn2.RaceProps.Humanlike)
+		// Token: 0x06008598 RID: 34200 RVA: 0x0027E95E File Offset: 0x0027CB5E
+		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			return false;
+			return pawn.Map.mapPawns.SpawnedHumanlikesWithAnyHediff;
 		}
-		return base.HasJobOnThing(pawn, t, forced);
+
+		// Token: 0x06008599 RID: 34201 RVA: 0x0027E970 File Offset: 0x0027CB70
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			Pawn pawn2 = t as Pawn;
+			return (pawn2 == null || pawn2.RaceProps.Humanlike) && base.HasJobOnThing(pawn, t, forced);
+		}
 	}
 }

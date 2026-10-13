@@ -1,32 +1,35 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public abstract class PawnTrigger : Thing
+namespace Verse
 {
-	public string signalTag;
-
-	protected bool TriggeredBy(Thing thing)
+	// Token: 0x0200087B RID: 2171
+	public abstract class PawnTrigger : Thing
 	{
-		if (thing.def.category == ThingCategory.Pawn && thing.def.race.intelligence == Intelligence.Humanlike)
+		// Token: 0x06003711 RID: 14097 RVA: 0x00127556 File Offset: 0x00125756
+		protected bool TriggeredBy(Thing thing)
 		{
-			return thing.Faction == Faction.OfPlayer;
+			return thing.def.category == ThingCategory.Pawn && thing.def.race.intelligence == Intelligence.Humanlike && thing.Faction == Faction.OfPlayer;
 		}
-		return false;
-	}
 
-	public void ActivatedBy(Pawn p)
-	{
-		Find.SignalManager.SendSignal(new Signal(signalTag, p.Named("SUBJECT")));
-		if (!base.Destroyed)
+		// Token: 0x06003712 RID: 14098 RVA: 0x00127588 File Offset: 0x00125788
+		public void ActivatedBy(Pawn p)
 		{
-			Destroy();
+			Find.SignalManager.SendSignal(new Signal(this.signalTag, p.Named("SUBJECT")));
+			if (!base.Destroyed)
+			{
+				this.Destroy(DestroyMode.Vanish);
+			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref signalTag, "signalTag");
+		// Token: 0x06003713 RID: 14099 RVA: 0x001275B9 File Offset: 0x001257B9
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.signalTag, "signalTag", null, false);
+		}
+
+		// Token: 0x04002950 RID: 10576
+		public string signalTag;
 	}
 }

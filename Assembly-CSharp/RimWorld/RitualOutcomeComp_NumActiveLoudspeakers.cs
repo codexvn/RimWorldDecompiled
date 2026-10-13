@@ -1,85 +1,92 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualOutcomeComp_NumActiveLoudspeakers : RitualOutcomeComp_Quality
+namespace RimWorld
 {
-	public int maxDistance;
-
-	public override RitualOutcomeComp_Data MakeData()
+	// Token: 0x0200274D RID: 10061
+	public class RitualOutcomeComp_NumActiveLoudspeakers : RitualOutcomeComp_Quality
 	{
-		return new RitualOutcomeComp_DataThingPresence();
-	}
-
-	private bool LoudspeakerActive(Thing s, TargetInfo target)
-	{
-		if (s.GetRoom() == target.Cell.GetRoom(target.Map))
+		// Token: 0x0600DCB4 RID: 56500 RVA: 0x0040EC26 File Offset: 0x0040CE26
+		public override RitualOutcomeComp_Data MakeData()
 		{
-			return s.TryGetComp<CompPowerTrader>().PowerOn;
+			return new RitualOutcomeComp_DataThingPresence();
 		}
-		return false;
-	}
 
-	public override void Tick(LordJob_Ritual ritual, RitualOutcomeComp_Data data, float progressAmount)
-	{
-		base.Tick(ritual, data, progressAmount);
-		TargetInfo selectedTarget = ritual.selectedTarget;
-		if (selectedTarget.ThingDestroyed || !selectedTarget.HasThing)
+		// Token: 0x0600DCB5 RID: 56501 RVA: 0x0040F29E File Offset: 0x0040D49E
+		private bool LoudspeakerActive(Thing s, TargetInfo target)
 		{
-			return;
+			return s.GetRoom(RegionType.Set_All) == target.Cell.GetRoom(target.Map) && s.TryGetComp<CompPowerTrader>().PowerOn;
 		}
-		RitualOutcomeComp_DataThingPresence ritualOutcomeComp_DataThingPresence = (RitualOutcomeComp_DataThingPresence)data;
-		foreach (Thing item in selectedTarget.Map.listerBuldingOfDefInProximity.GetForCell(selectedTarget.Cell, maxDistance, ThingDefOf.Loudspeaker))
+
+		// Token: 0x0600DCB6 RID: 56502 RVA: 0x0040F2CC File Offset: 0x0040D4CC
+		public override void Tick(LordJob_Ritual ritual, RitualOutcomeComp_Data data, float progressAmount)
 		{
-			if (LoudspeakerActive(item, selectedTarget))
+			base.Tick(ritual, data, progressAmount);
+			TargetInfo selectedTarget = ritual.selectedTarget;
+			if (selectedTarget.ThingDestroyed || !selectedTarget.HasThing)
 			{
-				if (!ritualOutcomeComp_DataThingPresence.presentForTicks.ContainsKey(item))
+				return;
+			}
+			RitualOutcomeComp_DataThingPresence ritualOutcomeComp_DataThingPresence = (RitualOutcomeComp_DataThingPresence)data;
+			foreach (Thing thing in selectedTarget.Map.listerBuldingOfDefInProximity.GetForCell(selectedTarget.Cell, (float)this.maxDistance, ThingDefOf.Loudspeaker, null))
+			{
+				if (this.LoudspeakerActive(thing, selectedTarget))
 				{
-					ritualOutcomeComp_DataThingPresence.presentForTicks.Add(item, 0f);
+					if (!ritualOutcomeComp_DataThingPresence.presentForTicks.ContainsKey(thing))
+					{
+						ritualOutcomeComp_DataThingPresence.presentForTicks.Add(thing, 0f);
+					}
+					Dictionary<Thing, float> presentForTicks = ritualOutcomeComp_DataThingPresence.presentForTicks;
+					Thing key = thing;
+					float num = presentForTicks[key];
+					presentForTicks[key] = num + 1f;
 				}
-				ritualOutcomeComp_DataThingPresence.presentForTicks[item]++;
 			}
 		}
-	}
 
-	public override float Count(LordJob_Ritual ritual, RitualOutcomeComp_Data data)
-	{
-		int num = 0;
-		foreach (KeyValuePair<Thing, float> presentForTick in ((RitualOutcomeComp_DataThingPresence)data).presentForTicks)
+		// Token: 0x0600DCB7 RID: 56503 RVA: 0x0040F3AC File Offset: 0x0040D5AC
+		public override float Count(LordJob_Ritual ritual, RitualOutcomeComp_Data data)
 		{
-			if (presentForTick.Value >= (float)(ritual.DurationTicks / 2))
+			int num = 0;
+			foreach (KeyValuePair<Thing, float> keyValuePair in ((RitualOutcomeComp_DataThingPresence)data).presentForTicks)
 			{
-				num++;
+				if (keyValuePair.Value >= (float)(ritual.DurationTicks / 2))
+				{
+					num++;
+				}
 			}
+			return (float)((int)Math.Min((float)num, this.curve.Points[this.curve.PointsCount - 1].x));
 		}
-		return (int)Math.Min(num, curve.Points[curve.PointsCount - 1].x);
-	}
 
-	public override QualityFactor GetQualityFactor(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments, RitualOutcomeComp_Data data)
-	{
-		List<Thing> forCell = ritualTarget.Map.listerBuldingOfDefInProximity.GetForCell(ritualTarget.Cell, maxDistance, ThingDefOf.Loudspeaker);
-		int num = 0;
-		foreach (Thing item in forCell)
+		// Token: 0x0600DCB8 RID: 56504 RVA: 0x0040F444 File Offset: 0x0040D644
+		public override QualityFactor GetQualityFactor(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments, RitualOutcomeComp_Data data)
 		{
-			CompPowerTrader compPowerTrader = item.TryGetComp<CompPowerTrader>();
-			CompFlickable compFlickable = item.TryGetComp<CompFlickable>();
-			if (compPowerTrader != null && compPowerTrader.PowerNet != null && compPowerTrader.PowerNet.HasActivePowerSource && compFlickable != null && compFlickable.SwitchIsOn)
+			List<Thing> forCell = ritualTarget.Map.listerBuldingOfDefInProximity.GetForCell(ritualTarget.Cell, (float)this.maxDistance, ThingDefOf.Loudspeaker, null);
+			int num = 0;
+			foreach (Thing thing in forCell)
 			{
-				num++;
+				CompPowerTrader compPowerTrader = thing.TryGetComp<CompPowerTrader>();
+				CompFlickable compFlickable = thing.TryGetComp<CompFlickable>();
+				if (compPowerTrader != null && compPowerTrader.PowerNet != null && compPowerTrader.PowerNet.HasActivePowerSource && compFlickable != null && compFlickable.SwitchIsOn)
+				{
+					num++;
+				}
 			}
+			float quality = this.curve.Evaluate((float)num);
+			return new QualityFactor
+			{
+				label = "RitualPredictedOutcomeDescNumActiveLoudspeakers".Translate(),
+				count = Mathf.Min((float)num, base.MaxValue).ToString() + " / " + base.MaxValue.ToString(),
+				qualityChange = this.ExpectedOffsetDesc(true, quality),
+				quality = quality,
+				positive = (num > 0),
+				priority = 1f
+			};
 		}
-		float quality = curve.Evaluate(num);
-		return new QualityFactor
-		{
-			label = "RitualPredictedOutcomeDescNumActiveLoudspeakers".Translate(),
-			count = Mathf.Min(num, base.MaxValue) + " / " + base.MaxValue,
-			qualityChange = ExpectedOffsetDesc(positive: true, quality),
-			quality = quality,
-			positive = (num > 0),
-			priority = 1f
-		};
+
+		// Token: 0x040094E2 RID: 38114
+		public int maxDistance;
 	}
 }

@@ -1,54 +1,56 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_NeedBatteries : Alert
+namespace RimWorld
 {
-	public Alert_NeedBatteries()
+	// Token: 0x0200301A RID: 12314
+	public class Alert_NeedBatteries : Alert
 	{
-		defaultLabel = "NeedBatteries".Translate();
-		defaultExplanation = "NeedBatteriesDesc".Translate();
-	}
-
-	public override TaggedString GetExplanation()
-	{
-		string text = defaultExplanation + "\n\n";
-		text = ((!ResearchProjectDefOf.Batteries.IsFinished) ? ((string)(text + "NeedBatteriesNotResearchedDesc".Translate())) : ((string)(text + "NeedBatteriesResearchedDesc".Translate())));
-		return text;
-	}
-
-	public override AlertReport GetReport()
-	{
-		List<Map> maps = Find.Maps;
-		for (int i = 0; i < maps.Count; i++)
+		// Token: 0x0601152E RID: 70958 RVA: 0x004F7DF8 File Offset: 0x004F5FF8
+		public Alert_NeedBatteries()
 		{
-			if (NeedBatteries(maps[i]))
+			this.defaultLabel = "NeedBatteries".Translate();
+			this.defaultExplanation = "NeedBatteriesDesc".Translate();
+		}
+
+		// Token: 0x0601152F RID: 70959 RVA: 0x004F7E2C File Offset: 0x004F602C
+		public override TaggedString GetExplanation()
+		{
+			string text = this.defaultExplanation + "\n\n";
+			if (ResearchProjectDefOf.Batteries.IsFinished)
 			{
-				return true;
+				text += "NeedBatteriesResearchedDesc".Translate();
 			}
+			else
+			{
+				text += "NeedBatteriesNotResearchedDesc".Translate();
+			}
+			return text;
 		}
-		return false;
-	}
 
-	private bool NeedBatteries(Map map)
-	{
-		if (!map.IsPlayerHome)
+		// Token: 0x06011530 RID: 70960 RVA: 0x004F7E8C File Offset: 0x004F608C
+		public override AlertReport GetReport()
 		{
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
+			{
+				if (this.NeedBatteries(maps[i]))
+				{
+					return true;
+				}
+			}
 			return false;
 		}
-		if (map.listerBuildings.ColonistsHaveBuilding((Thing building) => building is Building_Battery))
+
+		// Token: 0x06011531 RID: 70961 RVA: 0x004F7ECC File Offset: 0x004F60CC
+		private bool NeedBatteries(Map map)
 		{
-			return false;
+			if (!map.IsPlayerHome)
+			{
+				return false;
+			}
+			return !map.listerBuildings.ColonistsHaveBuilding((Thing building) => building is Building_Battery) && (map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.SolarGenerator) || map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WindTurbine)) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.GeothermalGenerator) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WatermillGenerator);
 		}
-		if (!map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.SolarGenerator) && !map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WindTurbine))
-		{
-			return false;
-		}
-		if (map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.GeothermalGenerator) || map.listerBuildings.ColonistsHaveBuilding(ThingDefOf.WatermillGenerator))
-		{
-			return false;
-		}
-		return true;
 	}
 }

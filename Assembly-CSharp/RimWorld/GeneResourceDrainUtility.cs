@@ -1,59 +1,75 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public static class GeneResourceDrainUtility
+namespace RimWorld
 {
-	public static void TickResourceDrainInterval(IGeneResourceDrain drain, int delta)
+	// Token: 0x02003842 RID: 14402
+	public static class GeneResourceDrainUtility
 	{
-		if (drain.CanOffset && drain.Resource != null)
+		// Token: 0x06013EAA RID: 81578 RVA: 0x005E9053 File Offset: 0x005E7253
+		public static void TickResourceDrainInterval(IGeneResourceDrain drain, int delta)
 		{
-			OffsetResource(drain, (0f - drain.ResourceLossPerDay) * (float)delta / 60000f);
-		}
-	}
-
-	public static void PostResourceOffset(IGeneResourceDrain drain, float oldValue)
-	{
-		if (oldValue > 0f && drain.Resource.Value <= 0f)
-		{
-			Pawn pawn = drain.Pawn;
-			if (!pawn.health.hediffSet.HasHediff(HediffDefOf.HemogenCraving))
+			if (drain.CanOffset)
 			{
-				pawn.health.AddHediff(HediffDefOf.HemogenCraving);
+				if (drain.Resource == null)
+				{
+					return;
+				}
+				GeneResourceDrainUtility.OffsetResource(drain, -drain.ResourceLossPerDay * (float)delta / 60000f);
 			}
 		}
-	}
 
-	public static void OffsetResource(IGeneResourceDrain drain, float amnt)
-	{
-		if (drain.Resource != null)
+		// Token: 0x06013EAB RID: 81579 RVA: 0x005E907C File Offset: 0x005E727C
+		public static void PostResourceOffset(IGeneResourceDrain drain, float oldValue)
 		{
+			if (oldValue > 0f && drain.Resource.Value <= 0f)
+			{
+				Pawn pawn = drain.Pawn;
+				if (!pawn.health.hediffSet.HasHediff(HediffDefOf.HemogenCraving, false))
+				{
+					pawn.health.AddHediff(HediffDefOf.HemogenCraving, null, null, null);
+				}
+			}
+		}
+
+		// Token: 0x06013EAC RID: 81580 RVA: 0x005E90E0 File Offset: 0x005E72E0
+		public static void OffsetResource(IGeneResourceDrain drain, float amnt)
+		{
+			if (drain.Resource == null)
+			{
+				return;
+			}
 			float value = drain.Resource.Value;
 			drain.Resource.Value += amnt;
-			PostResourceOffset(drain, value);
+			GeneResourceDrainUtility.PostResourceOffset(drain, value);
 		}
-	}
 
-	public static IEnumerable<Gizmo> GetResourceDrainGizmos(IGeneResourceDrain drain)
-	{
-		if (DebugSettings.ShowDevGizmos && drain.Resource != null)
+		// Token: 0x06013EAD RID: 81581 RVA: 0x005E911C File Offset: 0x005E731C
+		public static IEnumerable<Gizmo> GetResourceDrainGizmos(IGeneResourceDrain drain)
 		{
-			Gene_Resource resource = drain.Resource;
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "DEV: " + resource.ResourceLabel + " -10";
-			command_Action.action = delegate
+			if (DebugSettings.ShowDevGizmos && drain.Resource != null)
 			{
-				OffsetResource(drain, -0.1f);
-			};
-			yield return command_Action;
-			Command_Action command_Action2 = new Command_Action();
-			command_Action2.defaultLabel = "DEV: " + resource.ResourceLabel + " +10";
-			command_Action2.action = delegate
-			{
-				OffsetResource(drain, 0.1f);
-			};
-			yield return command_Action2;
+				Gene_Resource resource = drain.Resource;
+				yield return new Command_Action
+				{
+					defaultLabel = "DEV: " + resource.ResourceLabel + " -10",
+					action = delegate()
+					{
+						GeneResourceDrainUtility.OffsetResource(drain, -0.1f);
+					}
+				};
+				yield return new Command_Action
+				{
+					defaultLabel = "DEV: " + resource.ResourceLabel + " +10",
+					action = delegate()
+					{
+						GeneResourceDrainUtility.OffsetResource(drain, 0.1f);
+					}
+				};
+				resource = null;
+			}
+			yield break;
 		}
 	}
 }

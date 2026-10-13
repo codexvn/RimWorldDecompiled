@@ -1,119 +1,143 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Building_WorkTable : Building, IBillGiver, IBillGiverWithTickAction
+namespace RimWorld
 {
-	public BillStack billStack;
-
-	private CompPowerTrader powerComp;
-
-	private CompRefuelable refuelableComp;
-
-	private CompBreakdownable breakdownableComp;
-
-	private CompMoteEmitter moteEmitterComp;
-
-	public bool CanWorkWithoutPower
+	// Token: 0x02002A72 RID: 10866
+	public class Building_WorkTable : Building, IBillGiver, IBillGiverWithTickAction
 	{
-		get
+		// Token: 0x170025CF RID: 9679
+		// (get) Token: 0x0600F1E1 RID: 61921 RVA: 0x00462AAF File Offset: 0x00460CAF
+		public bool CanWorkWithoutPower
 		{
-			if (powerComp == null)
+			get
 			{
-				return true;
+				return this.powerComp == null || this.def.building.unpoweredWorkTableWorkSpeedFactor > 0f;
 			}
-			if (def.building.unpoweredWorkTableWorkSpeedFactor > 0f)
+		}
+
+		// Token: 0x170025D0 RID: 9680
+		// (get) Token: 0x0600F1E2 RID: 61922 RVA: 0x00462AD5 File Offset: 0x00460CD5
+		public bool CanWorkWithoutFuel
+		{
+			get
 			{
-				return true;
+				return this.refuelableComp == null;
 			}
-			return false;
 		}
-	}
 
-	public bool CanWorkWithoutFuel => refuelableComp == null;
-
-	public BillStack BillStack => billStack;
-
-	public IntVec3 BillInteractionCell => InteractionCell;
-
-	public IEnumerable<IntVec3> IngredientStackCells => GenAdj.CellsOccupiedBy(this);
-
-	public Building_WorkTable()
-	{
-		billStack = new BillStack(this);
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Deep.Look(ref billStack, "billStack", this);
-	}
-
-	public override void SpawnSetup(Map map, bool respawningAfterLoad)
-	{
-		base.SpawnSetup(map, respawningAfterLoad);
-		powerComp = GetComp<CompPowerTrader>();
-		refuelableComp = GetComp<CompRefuelable>();
-		breakdownableComp = GetComp<CompBreakdownable>();
-		moteEmitterComp = GetComp<CompMoteEmitter>();
-		if (base.BeingTransportedOnGravship)
+		// Token: 0x0600F1E3 RID: 61923 RVA: 0x00462AE0 File Offset: 0x00460CE0
+		public Building_WorkTable()
 		{
-			return;
+			this.billStack = new BillStack(this);
 		}
-		foreach (Bill item in billStack)
-		{
-			item.ValidateSettings();
-		}
-	}
 
-	public virtual void UsedThisTick()
-	{
-		if (refuelableComp != null)
+		// Token: 0x0600F1E4 RID: 61924 RVA: 0x00462AF4 File Offset: 0x00460CF4
+		public override void ExposeData()
 		{
-			refuelableComp.Notify_UsedThisTick();
-		}
-		if (moteEmitterComp != null)
-		{
-			if (!moteEmitterComp.MoteLive)
+			base.ExposeData();
+			Scribe_Deep.Look<BillStack>(ref this.billStack, "billStack", new object[]
 			{
-				moteEmitterComp.Emit();
+				this
+			});
+		}
+
+		// Token: 0x0600F1E5 RID: 61925 RVA: 0x00462B18 File Offset: 0x00460D18
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
+		{
+			base.SpawnSetup(map, respawningAfterLoad);
+			this.powerComp = base.GetComp<CompPowerTrader>();
+			this.refuelableComp = base.GetComp<CompRefuelable>();
+			this.breakdownableComp = base.GetComp<CompBreakdownable>();
+			this.moteEmitterComp = base.GetComp<CompMoteEmitter>();
+			if (base.BeingTransportedOnGravship)
+			{
+				return;
 			}
-			moteEmitterComp.Maintain();
+			foreach (Bill bill in this.billStack)
+			{
+				bill.ValidateSettings();
+			}
 		}
-	}
 
-	public bool CurrentlyUsableForBills()
-	{
-		if (!UsableForBillsAfterFueling())
+		// Token: 0x0600F1E6 RID: 61926 RVA: 0x00462BA4 File Offset: 0x00460DA4
+		public virtual void UsedThisTick()
 		{
-			return false;
+			if (this.refuelableComp != null)
+			{
+				this.refuelableComp.Notify_UsedThisTick();
+			}
+			if (this.moteEmitterComp != null)
+			{
+				if (!this.moteEmitterComp.MoteLive)
+				{
+					this.moteEmitterComp.Emit();
+				}
+				this.moteEmitterComp.Maintain();
+			}
 		}
-		if (!CanWorkWithoutPower && (powerComp == null || !powerComp.PowerOn))
-		{
-			return false;
-		}
-		if (!CanWorkWithoutFuel && (refuelableComp == null || !refuelableComp.HasFuel))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public bool UsableForBillsAfterFueling()
-	{
-		if (!CanWorkWithoutPower && (powerComp == null || !powerComp.PowerOn))
+		// Token: 0x170025D1 RID: 9681
+		// (get) Token: 0x0600F1E7 RID: 61927 RVA: 0x00462BE4 File Offset: 0x00460DE4
+		public BillStack BillStack
 		{
-			return false;
+			get
+			{
+				return this.billStack;
+			}
 		}
-		if (breakdownableComp != null && breakdownableComp.BrokenDown)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public virtual void Notify_BillDeleted(Bill bill)
-	{
+		// Token: 0x170025D2 RID: 9682
+		// (get) Token: 0x0600F1E8 RID: 61928 RVA: 0x00462BEC File Offset: 0x00460DEC
+		public IntVec3 BillInteractionCell
+		{
+			get
+			{
+				return this.InteractionCell;
+			}
+		}
+
+		// Token: 0x170025D3 RID: 9683
+		// (get) Token: 0x0600F1E9 RID: 61929 RVA: 0x00462BF4 File Offset: 0x00460DF4
+		public IEnumerable<IntVec3> IngredientStackCells
+		{
+			get
+			{
+				return GenAdj.CellsOccupiedBy(this);
+			}
+		}
+
+		// Token: 0x0600F1EA RID: 61930 RVA: 0x00462BFC File Offset: 0x00460DFC
+		public bool CurrentlyUsableForBills()
+		{
+			return this.UsableForBillsAfterFueling() && (this.CanWorkWithoutPower || (this.powerComp != null && this.powerComp.PowerOn)) && (this.CanWorkWithoutFuel || (this.refuelableComp != null && this.refuelableComp.HasFuel));
+		}
+
+		// Token: 0x0600F1EB RID: 61931 RVA: 0x00462C52 File Offset: 0x00460E52
+		public bool UsableForBillsAfterFueling()
+		{
+			return (this.CanWorkWithoutPower || (this.powerComp != null && this.powerComp.PowerOn)) && (this.breakdownableComp == null || !this.breakdownableComp.BrokenDown);
+		}
+
+		// Token: 0x0600F1EC RID: 61932 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void Notify_BillDeleted(Bill bill)
+		{
+		}
+
+		// Token: 0x04009F63 RID: 40803
+		public BillStack billStack;
+
+		// Token: 0x04009F64 RID: 40804
+		private CompPowerTrader powerComp;
+
+		// Token: 0x04009F65 RID: 40805
+		private CompRefuelable refuelableComp;
+
+		// Token: 0x04009F66 RID: 40806
+		private CompBreakdownable breakdownableComp;
+
+		// Token: 0x04009F67 RID: 40807
+		private CompMoteEmitter moteEmitterComp;
 	}
 }

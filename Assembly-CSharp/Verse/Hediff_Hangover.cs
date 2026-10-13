@@ -1,18 +1,19 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class Hediff_Hangover : HediffWithComps
+namespace Verse
 {
-	public override bool Visible
+	// Token: 0x02000736 RID: 1846
+	public class Hediff_Hangover : HediffWithComps
 	{
-		get
+		// Token: 0x17000807 RID: 2055
+		// (get) Token: 0x06002CFB RID: 11515 RVA: 0x000E85AD File Offset: 0x000E67AD
+		public override bool Visible
 		{
-			if (pawn.health.hediffSet.HasHediff(HediffDefOf.AlcoholHigh))
+			get
 			{
-				return false;
+				return !this.pawn.health.hediffSet.HasHediff(HediffDefOf.AlcoholHigh, false) && base.Visible;
 			}
-			return base.Visible;
 		}
 	}
 }

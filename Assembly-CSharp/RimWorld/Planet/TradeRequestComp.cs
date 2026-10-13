@@ -1,130 +1,158 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-[StaticConstructorOnStartup]
-public class TradeRequestComp : WorldObjectComp
+namespace RimWorld.Planet
 {
-	public ThingDef requestThingDef;
-
-	public int requestCount;
-
-	public int expiration = -1;
-
-	public string outSignalFulfilled;
-
-	private static readonly Texture2D TradeCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/FulfillTradeRequest");
-
-	public bool ActiveRequest => expiration > Find.TickManager.TicksGame;
-
-	public override string CompInspectStringExtra()
+	// Token: 0x02003E38 RID: 15928
+	[StaticConstructorOnStartup]
+	public class TradeRequestComp : WorldObjectComp
 	{
-		if (ActiveRequest)
+		// Token: 0x1700365F RID: 13919
+		// (get) Token: 0x06015C3E RID: 89150 RVA: 0x0068145E File Offset: 0x0067F65E
+		public bool ActiveRequest
 		{
-			return "CaravanRequestInfo".Translate(TradeRequestUtility.RequestedThingLabel(requestThingDef, requestCount).CapitalizeFirst(), (expiration - Find.TickManager.TicksGame).ToStringTicksToDays(), (requestThingDef.GetStatValueAbstract(StatDefOf.MarketValue) * (float)requestCount).ToStringMoney());
-		}
-		return null;
-	}
-
-	public override IEnumerable<Gizmo> GetCaravanGizmos(Caravan caravan)
-	{
-		if (ActiveRequest && CaravanVisitUtility.SettlementVisitedNow(caravan) == parent)
-		{
-			yield return FulfillRequestCommand(caravan);
-		}
-	}
-
-	public void Disable()
-	{
-		expiration = -1;
-	}
-
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Defs.Look(ref requestThingDef, "requestThingDef");
-		Scribe_Values.Look(ref requestCount, "requestCount", 0);
-		Scribe_Values.Look(ref expiration, "expiration", 0);
-		BackCompatibility.PostExposeData(this);
-	}
-
-	private Command FulfillRequestCommand(Caravan caravan)
-	{
-		Command_Action command_Action = new Command_Action();
-		command_Action.defaultLabel = "CommandFulfillTradeOffer".Translate();
-		command_Action.defaultDesc = "CommandFulfillTradeOfferDesc".Translate();
-		command_Action.icon = TradeCommandTex;
-		command_Action.action = delegate
-		{
-			if (!ActiveRequest)
+			get
 			{
-				Log.Error("Attempted to fulfill an unavailable request");
+				return this.expiration > Find.TickManager.TicksGame;
 			}
-			else if (!CaravanInventoryUtility.HasThings(caravan, requestThingDef, requestCount, PlayerCanGive))
+		}
+
+		// Token: 0x06015C3F RID: 89151 RVA: 0x00681474 File Offset: 0x0067F674
+		public override string CompInspectStringExtra()
+		{
+			if (this.ActiveRequest)
 			{
-				Messages.Message("CommandFulfillTradeOfferFailInsufficient".Translate(TradeRequestUtility.RequestedThingLabel(requestThingDef, requestCount)), MessageTypeDefOf.RejectInput, historical: false);
+				return "CaravanRequestInfo".Translate(TradeRequestUtility.RequestedThingLabel(this.requestThingDef, this.requestCount).CapitalizeFirst(), (this.expiration - Find.TickManager.TicksGame).ToStringTicksToDays("F1"), (this.requestThingDef.GetStatValueAbstract(StatDefOf.MarketValue, null) * (float)this.requestCount).ToStringMoney(null));
 			}
-			else
+			return null;
+		}
+
+		// Token: 0x06015C40 RID: 89152 RVA: 0x006814F9 File Offset: 0x0067F6F9
+		public override IEnumerable<Gizmo> GetCaravanGizmos(Caravan caravan)
+		{
+			if (this.ActiveRequest && CaravanVisitUtility.SettlementVisitedNow(caravan) == this.parent)
 			{
-				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation("CommandFulfillTradeOfferConfirm".Translate(GenLabel.ThingLabel(requestThingDef, null, requestCount)), delegate
+				yield return this.FulfillRequestCommand(caravan);
+			}
+			yield break;
+		}
+
+		// Token: 0x06015C41 RID: 89153 RVA: 0x00681510 File Offset: 0x0067F710
+		public void Disable()
+		{
+			this.expiration = -1;
+		}
+
+		// Token: 0x06015C42 RID: 89154 RVA: 0x0068151C File Offset: 0x0067F71C
+		public override void PostExposeData()
+		{
+			base.PostExposeData();
+			Scribe_Defs.Look<ThingDef>(ref this.requestThingDef, "requestThingDef");
+			Scribe_Values.Look<int>(ref this.requestCount, "requestCount", 0, false);
+			Scribe_Values.Look<int>(ref this.expiration, "expiration", 0, false);
+			BackCompatibility.PostExposeData(this);
+		}
+
+		// Token: 0x06015C43 RID: 89155 RVA: 0x0068156C File Offset: 0x0067F76C
+		private Command FulfillRequestCommand(Caravan caravan)
+		{
+			Command_Action command_Action = new Command_Action();
+			command_Action.defaultLabel = "CommandFulfillTradeOffer".Translate();
+			command_Action.defaultDesc = "CommandFulfillTradeOfferDesc".Translate();
+			command_Action.icon = TradeRequestComp.TradeCommandTex;
+			Action <>9__1;
+			command_Action.action = delegate()
+			{
+				if (!this.ActiveRequest)
 				{
-					Fulfill(caravan);
-				}));
-			}
-		};
-		if (!CaravanInventoryUtility.HasThings(caravan, requestThingDef, requestCount, PlayerCanGive))
-		{
-			command_Action.Disable("CommandFulfillTradeOfferFailInsufficient".Translate(TradeRequestUtility.RequestedThingLabel(requestThingDef, requestCount)));
-		}
-		return command_Action;
-	}
-
-	private void Fulfill(Caravan caravan)
-	{
-		int remaining = requestCount;
-		List<Thing> list = CaravanInventoryUtility.TakeThings(caravan, delegate(Thing thing)
-		{
-			if (requestThingDef != thing.def)
+					Log.Error("Attempted to fulfill an unavailable request");
+					return;
+				}
+				if (!CaravanInventoryUtility.HasThings(caravan, this.requestThingDef, this.requestCount, new Func<Thing, bool>(this.PlayerCanGive)))
+				{
+					Messages.Message("CommandFulfillTradeOfferFailInsufficient".Translate(TradeRequestUtility.RequestedThingLabel(this.requestThingDef, this.requestCount)), MessageTypeDefOf.RejectInput, false);
+					return;
+				}
+				WindowStack windowStack = Find.WindowStack;
+				TaggedString text = "CommandFulfillTradeOfferConfirm".Translate(GenLabel.ThingLabel(this.requestThingDef, null, this.requestCount));
+				Action confirmedAct;
+				if ((confirmedAct = <>9__1) == null)
+				{
+					confirmedAct = (<>9__1 = delegate()
+					{
+						this.Fulfill(caravan);
+					});
+				}
+				windowStack.Add(Dialog_MessageBox.CreateConfirmation(text, confirmedAct, false, null, WindowLayer.Dialog));
+			};
+			if (!CaravanInventoryUtility.HasThings(caravan, this.requestThingDef, this.requestCount, new Func<Thing, bool>(this.PlayerCanGive)))
 			{
-				return 0;
+				command_Action.Disable("CommandFulfillTradeOfferFailInsufficient".Translate(TradeRequestUtility.RequestedThingLabel(this.requestThingDef, this.requestCount)));
 			}
-			if (!PlayerCanGive(thing))
-			{
-				return 0;
-			}
-			int num2 = Mathf.Min(remaining, thing.stackCount);
-			remaining -= num2;
-			return num2;
-		});
-		for (int num = 0; num < list.Count; num++)
-		{
-			list[num].Destroy();
+			return command_Action;
 		}
-		if (parent.Faction != null)
-		{
-			Faction.OfPlayer.TryAffectGoodwillWith(parent.Faction, 12, canSendMessage: true, canSendHostilityLetter: true, HistoryEventDefOf.QuestGoodwillReward);
-		}
-		QuestUtility.SendQuestTargetSignals(parent.questTags, "TradeRequestFulfilled", parent.Named("SUBJECT"), caravan.Named("CARAVAN"));
-		Disable();
-	}
 
-	private bool PlayerCanGive(Thing thing)
-	{
-		if (thing.GetRotStage() != RotStage.Fresh)
+		// Token: 0x06015C44 RID: 89156 RVA: 0x0068162C File Offset: 0x0067F82C
+		private void Fulfill(Caravan caravan)
 		{
-			return false;
+			int remaining = this.requestCount;
+			List<Thing> list = CaravanInventoryUtility.TakeThings(caravan, delegate(Thing thing)
+			{
+				if (this.requestThingDef != thing.def)
+				{
+					return 0;
+				}
+				if (!this.PlayerCanGive(thing))
+				{
+					return 0;
+				}
+				int num = Mathf.Min(remaining, thing.stackCount);
+				remaining -= num;
+				return num;
+			});
+			for (int i = 0; i < list.Count; i++)
+			{
+				list[i].Destroy(DestroyMode.Vanish);
+			}
+			if (this.parent.Faction != null)
+			{
+				Faction.OfPlayer.TryAffectGoodwillWith(this.parent.Faction, 12, true, true, HistoryEventDefOf.QuestGoodwillReward, null);
+			}
+			QuestUtility.SendQuestTargetSignals(this.parent.questTags, "TradeRequestFulfilled", this.parent.Named("SUBJECT"), caravan.Named("CARAVAN"));
+			this.Disable();
 		}
-		if (thing is Apparel { WornByCorpse: not false })
+
+		// Token: 0x06015C45 RID: 89157 RVA: 0x006816F0 File Offset: 0x0067F8F0
+		private bool PlayerCanGive(Thing thing)
 		{
-			return false;
+			if (thing.GetRotStage() != RotStage.Fresh)
+			{
+				return false;
+			}
+			Apparel apparel = thing as Apparel;
+			if (apparel != null && apparel.WornByCorpse)
+			{
+				return false;
+			}
+			CompQuality compQuality = thing.TryGetComp<CompQuality>();
+			return compQuality == null || compQuality.Quality >= QualityCategory.Normal;
 		}
-		CompQuality compQuality = thing.TryGetComp<CompQuality>();
-		if (compQuality != null && (int)compQuality.Quality < 2)
-		{
-			return false;
-		}
-		return true;
+
+		// Token: 0x0400F169 RID: 61801
+		public ThingDef requestThingDef;
+
+		// Token: 0x0400F16A RID: 61802
+		public int requestCount;
+
+		// Token: 0x0400F16B RID: 61803
+		public int expiration = -1;
+
+		// Token: 0x0400F16C RID: 61804
+		public string outSignalFulfilled;
+
+		// Token: 0x0400F16D RID: 61805
+		private static readonly Texture2D TradeCommandTex = ContentFinder<Texture2D>.Get("UI/Commands/FulfillTradeRequest", true);
 	}
 }

@@ -1,16 +1,20 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Message : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200396B RID: 14699
+	public class SymbolResolver_Message : SymbolResolver
 	{
-		SignalAction_Message obj = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message);
-		obj.signalTag = rp.messageSignalTag;
-		obj.message = rp.message;
-		obj.messageType = rp.messageType;
-		obj.lookTargets = rp.lookTargets;
-		GenSpawn.Spawn(obj, rp.rect.CenterCell, BaseGen.globalSettings.map);
+		// Token: 0x0601435B RID: 82779 RVA: 0x00607418 File Offset: 0x00605618
+		public override void Resolve(ResolveParams rp)
+		{
+			SignalAction_Message signalAction_Message = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message, null);
+			signalAction_Message.signalTag = rp.messageSignalTag;
+			signalAction_Message.message = rp.message;
+			signalAction_Message.messageType = rp.messageType;
+			signalAction_Message.lookTargets = rp.lookTargets;
+			GenSpawn.Spawn(signalAction_Message, rp.rect.CenterCell, BaseGen.globalSettings.map, WipeMode.Vanish);
+		}
 	}
 }

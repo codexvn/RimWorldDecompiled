@@ -1,37 +1,31 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_VoidMonolith : QuestNode
+namespace RimWorld.QuestGen
 {
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003BBB RID: 15291
+	public class QuestNode_Root_VoidMonolith : QuestNode
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x06014C42 RID: 85058 RVA: 0x00638884 File Offset: 0x00636A84
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			return ModsConfig.AnomalyActive && Find.Anomaly.GenerateMonolith && QuestGen_Get.GetMap(false, null, false) != null;
 		}
-		if (!Find.Anomaly.GenerateMonolith)
-		{
-			return false;
-		}
-		if (QuestGen_Get.GetMap() == null)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Quest quest = QuestGen.quest;
-		Slate slate = QuestGen.slate;
-		Map map = QuestGen_Get.GetMap();
-		Building_VoidMonolith monolith = slate.Get<Building_VoidMonolith>("monolith");
-		QuestUtility.AddQuestTag(questTagToAdd: QuestGenUtility.HardcodedTargetQuestTagWithQuestID("monolithMap"), questTags: ref map.Parent.questTags);
-		string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("monolithMap.Destroyed");
-		quest.AddPart(new QuestPart_MonolithPart(monolith));
-		quest.End(QuestEndOutcome.Fail, 0, null, inSignal, QuestPart.SignalListenMode.OngoingOnly, sendStandardLetter: true);
-		QuestPart_Hyperlinks part = new QuestPart_Hyperlinks();
-		quest.AddPart(part);
+		// Token: 0x06014C43 RID: 85059 RVA: 0x006388C0 File Offset: 0x00636AC0
+		protected override void RunInt()
+		{
+			Quest quest = QuestGen.quest;
+			Slate slate = QuestGen.slate;
+			Map map = QuestGen_Get.GetMap(false, null, false);
+			Building_VoidMonolith monolith = slate.Get<Building_VoidMonolith>("monolith", null, false);
+			string questTagToAdd = QuestGenUtility.HardcodedTargetQuestTagWithQuestID("monolithMap");
+			QuestUtility.AddQuestTag(ref map.Parent.questTags, questTagToAdd);
+			string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("monolithMap.Destroyed");
+			quest.AddPart(new QuestPart_MonolithPart(monolith));
+			quest.End(QuestEndOutcome.Fail, 0, null, inSignal, QuestPart.SignalListenMode.OngoingOnly, true, false);
+			QuestPart_Hyperlinks part = new QuestPart_Hyperlinks();
+			quest.AddPart(part);
+		}
 	}
 }

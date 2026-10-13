@@ -1,45 +1,55 @@
+﻿using System;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class Alert_ReimplantationAvailable : Alert
+namespace RimWorld
 {
-	private Pawn waitingPawn;
-
-	private Pawn WaitingPawn
+	// Token: 0x02002FE6 RID: 12262
+	public class Alert_ReimplantationAvailable : Alert
 	{
-		get
+		// Token: 0x17002CCB RID: 11467
+		// (get) Token: 0x0601145E RID: 70750 RVA: 0x004F2BFC File Offset: 0x004F0DFC
+		private Pawn WaitingPawn
 		{
-			foreach (Map map in Find.Maps)
+			get
 			{
-				foreach (Lord lord in map.lordManager.lords)
+				foreach (Map map in Find.Maps)
 				{
-					if (lord.CurLordToil is LordToil_ReimplantXenogerm lordToil_ReimplantXenogerm)
+					foreach (Lord lord in map.lordManager.lords)
 					{
-						waitingPawn = lordToil_ReimplantXenogerm.Data.target;
-						return waitingPawn;
+						LordToil_ReimplantXenogerm lordToil_ReimplantXenogerm = lord.CurLordToil as LordToil_ReimplantXenogerm;
+						if (lordToil_ReimplantXenogerm != null)
+						{
+							this.waitingPawn = lordToil_ReimplantXenogerm.Data.target;
+							return this.waitingPawn;
+						}
 					}
 				}
+				return null;
 			}
-			return null;
 		}
-	}
 
-	public Alert_ReimplantationAvailable()
-	{
-		defaultPriority = AlertPriority.High;
-		defaultLabel = "AlertReimplantationAvailable".Translate();
-		requireBiotech = true;
-	}
+		// Token: 0x0601145F RID: 70751 RVA: 0x004F2CB0 File Offset: 0x004F0EB0
+		public Alert_ReimplantationAvailable()
+		{
+			this.defaultPriority = AlertPriority.High;
+			this.defaultLabel = "AlertReimplantationAvailable".Translate();
+			this.requireBiotech = true;
+		}
 
-	public override TaggedString GetExplanation()
-	{
-		return "AlertReimplantationAvailableDesc".Translate(waitingPawn);
-	}
+		// Token: 0x06011460 RID: 70752 RVA: 0x004F2CDB File Offset: 0x004F0EDB
+		public override TaggedString GetExplanation()
+		{
+			return "AlertReimplantationAvailableDesc".Translate(this.waitingPawn);
+		}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritIs(WaitingPawn);
+		// Token: 0x06011461 RID: 70753 RVA: 0x004F2CF2 File Offset: 0x004F0EF2
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritIs(this.WaitingPawn);
+		}
+
+		// Token: 0x0400B31E RID: 45854
+		private Pawn waitingPawn;
 	}
 }

@@ -1,178 +1,184 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_ExtraDoor : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200391E RID: 14622
+	public class SymbolResolver_ExtraDoor : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		IntVec3 intVec = IntVec3.Invalid;
-		int num = -1;
-		foreach (Rot4 item in RotationsToUse())
+		// Token: 0x06014265 RID: 82533 RVA: 0x006010B8 File Offset: 0x005FF2B8
+		public override void Resolve(ResolveParams rp)
 		{
-			if (WallHasDoor(rp.rect, item))
+			SymbolResolver_ExtraDoor.<>c__DisplayClass0_0 CS$<>8__locals1 = new SymbolResolver_ExtraDoor.<>c__DisplayClass0_0();
+			CS$<>8__locals1.rp = rp;
+			Map map = BaseGen.globalSettings.map;
+			IntVec3 intVec = IntVec3.Invalid;
+			int num = -1;
+			foreach (Rot4 dir in CS$<>8__locals1.<Resolve>g__RotationsToUse|0())
 			{
-				continue;
-			}
-			for (int i = 0; i < 2; i++)
-			{
-				if (!TryFindRandomDoorSpawnCell(rp.rect, item, out var found))
+				if (!this.WallHasDoor(CS$<>8__locals1.rp.rect, dir))
 				{
-					continue;
-				}
-				int distanceToExistingDoors = GetDistanceToExistingDoors(found, rp.rect);
-				if (!intVec.IsValid || distanceToExistingDoors > num)
-				{
-					intVec = found;
-					num = distanceToExistingDoors;
-					if (num == int.MaxValue)
+					for (int i = 0; i < 2; i++)
 					{
-						break;
+						IntVec3 intVec2;
+						if (this.TryFindRandomDoorSpawnCell(CS$<>8__locals1.rp.rect, dir, out intVec2))
+						{
+							int distanceToExistingDoors = this.GetDistanceToExistingDoors(intVec2, CS$<>8__locals1.rp.rect);
+							if (!intVec.IsValid || distanceToExistingDoors > num)
+							{
+								intVec = intVec2;
+								num = distanceToExistingDoors;
+								if (num == 2147483647)
+								{
+									break;
+								}
+							}
+						}
 					}
 				}
 			}
-		}
-		if (intVec.IsValid)
-		{
-			ThingDef stuff = rp.wallStuff ?? BaseGenUtility.WallStuffAt(intVec, map) ?? BaseGenUtility.RandomCheapWallStuff(rp.faction);
-			Thing thing = ThingMaker.MakeThing(ThingDefOf.Door, stuff);
-			thing.SetFaction(rp.faction);
-			GenSpawn.Spawn(thing, intVec, BaseGen.globalSettings.map);
-		}
-		IEnumerable<Rot4> RotationsToUse()
-		{
-			if (rp.extraDoorEdge.HasValue)
+			if (intVec.IsValid)
 			{
-				yield return rp.extraDoorEdge.Value;
+				ThingDef thingDef;
+				if ((thingDef = CS$<>8__locals1.rp.wallStuff) == null)
+				{
+					thingDef = (BaseGenUtility.WallStuffAt(intVec, map) ?? BaseGenUtility.RandomCheapWallStuff(CS$<>8__locals1.rp.faction, false));
+				}
+				ThingDef stuff = thingDef;
+				Thing thing = ThingMaker.MakeThing(ThingDefOf.Door, stuff);
+				thing.SetFaction(CS$<>8__locals1.rp.faction, null);
+				GenSpawn.Spawn(thing, intVec, BaseGen.globalSettings.map, WipeMode.Vanish);
+			}
+		}
+
+		// Token: 0x06014266 RID: 82534 RVA: 0x006011F8 File Offset: 0x005FF3F8
+		private bool WallHasDoor(CellRect rect, Rot4 dir)
+		{
+			Map map = BaseGen.globalSettings.map;
+			using (IEnumerator<IntVec3> enumerator = rect.GetEdgeCells(dir).GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.GetDoor(map) != null)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x06014267 RID: 82535 RVA: 0x0060125C File Offset: 0x005FF45C
+		private bool TryFindRandomDoorSpawnCell(CellRect rect, Rot4 dir, out IntVec3 found)
+		{
+			Map map = BaseGen.globalSettings.map;
+			if (dir == Rot4.North)
+			{
+				if (rect.Width <= 2)
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				int newX;
+				if (!Rand.TryRangeInclusiveWhere(rect.minX + 1, rect.maxX - 1, delegate(int x)
+				{
+					IntVec3 cell = new IntVec3(x, 0, rect.maxZ + 1);
+					IntVec3 cell2 = new IntVec3(x, 0, rect.maxZ - 1);
+					return this.CanPassThrough(cell, map) && this.CanPassThrough(cell2, map);
+				}, out newX))
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				found = new IntVec3(newX, 0, rect.maxZ);
+				return true;
+			}
+			else if (dir == Rot4.South)
+			{
+				if (rect.Width <= 2)
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				int newX2;
+				if (!Rand.TryRangeInclusiveWhere(rect.minX + 1, rect.maxX - 1, delegate(int x)
+				{
+					IntVec3 cell = new IntVec3(x, 0, rect.minZ - 1);
+					IntVec3 cell2 = new IntVec3(x, 0, rect.minZ + 1);
+					return this.CanPassThrough(cell, map) && this.CanPassThrough(cell2, map);
+				}, out newX2))
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				found = new IntVec3(newX2, 0, rect.minZ);
+				return true;
+			}
+			else if (dir == Rot4.West)
+			{
+				if (rect.Height <= 2)
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				int newZ;
+				if (!Rand.TryRangeInclusiveWhere(rect.minZ + 1, rect.maxZ - 1, delegate(int z)
+				{
+					IntVec3 cell = new IntVec3(rect.minX - 1, 0, z);
+					IntVec3 cell2 = new IntVec3(rect.minX + 1, 0, z);
+					return this.CanPassThrough(cell, map) && this.CanPassThrough(cell2, map);
+				}, out newZ))
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				found = new IntVec3(rect.minX, 0, newZ);
+				return true;
 			}
 			else
 			{
-				yield return new Rot4(0);
-				yield return new Rot4(1);
-				yield return new Rot4(2);
-				yield return new Rot4(3);
-			}
-		}
-	}
-
-	private bool WallHasDoor(CellRect rect, Rot4 dir)
-	{
-		Map map = BaseGen.globalSettings.map;
-		foreach (IntVec3 edgeCell in rect.GetEdgeCells(dir))
-		{
-			if (edgeCell.GetDoor(map) != null)
-			{
+				if (rect.Height <= 2)
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				int newZ2;
+				if (!Rand.TryRangeInclusiveWhere(rect.minZ + 1, rect.maxZ - 1, delegate(int z)
+				{
+					IntVec3 cell = new IntVec3(rect.maxX + 1, 0, z);
+					IntVec3 cell2 = new IntVec3(rect.maxX - 1, 0, z);
+					return this.CanPassThrough(cell, map) && this.CanPassThrough(cell2, map);
+				}, out newZ2))
+				{
+					found = IntVec3.Invalid;
+					return false;
+				}
+				found = new IntVec3(rect.maxX, 0, newZ2);
 				return true;
 			}
 		}
-		return false;
-	}
 
-	private bool TryFindRandomDoorSpawnCell(CellRect rect, Rot4 dir, out IntVec3 found)
-	{
-		Map map = BaseGen.globalSettings.map;
-		if (dir == Rot4.North)
+		// Token: 0x06014268 RID: 82536 RVA: 0x00601478 File Offset: 0x005FF678
+		private bool CanPassThrough(IntVec3 cell, Map map)
 		{
-			if (rect.Width <= 2)
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			if (!Rand.TryRangeInclusiveWhere(rect.minX + 1, rect.maxX - 1, delegate(int x)
-			{
-				IntVec3 cell = new IntVec3(x, 0, rect.maxZ + 1);
-				IntVec3 cell2 = new IntVec3(x, 0, rect.maxZ - 1);
-				return CanPassThrough(cell, map) && CanPassThrough(cell2, map);
-			}, out var value))
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			found = new IntVec3(value, 0, rect.maxZ);
-			return true;
+			return cell.InBounds(map) && cell.Standable(map) && cell.GetEdifice(map) == null;
 		}
-		if (dir == Rot4.South)
-		{
-			if (rect.Width <= 2)
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			if (!Rand.TryRangeInclusiveWhere(rect.minX + 1, rect.maxX - 1, delegate(int x)
-			{
-				IntVec3 cell = new IntVec3(x, 0, rect.minZ - 1);
-				IntVec3 cell2 = new IntVec3(x, 0, rect.minZ + 1);
-				return CanPassThrough(cell, map) && CanPassThrough(cell2, map);
-			}, out var value2))
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			found = new IntVec3(value2, 0, rect.minZ);
-			return true;
-		}
-		if (dir == Rot4.West)
-		{
-			if (rect.Height <= 2)
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			if (!Rand.TryRangeInclusiveWhere(rect.minZ + 1, rect.maxZ - 1, delegate(int z)
-			{
-				IntVec3 cell = new IntVec3(rect.minX - 1, 0, z);
-				IntVec3 cell2 = new IntVec3(rect.minX + 1, 0, z);
-				return CanPassThrough(cell, map) && CanPassThrough(cell2, map);
-			}, out var value3))
-			{
-				found = IntVec3.Invalid;
-				return false;
-			}
-			found = new IntVec3(rect.minX, 0, value3);
-			return true;
-		}
-		if (rect.Height <= 2)
-		{
-			found = IntVec3.Invalid;
-			return false;
-		}
-		if (!Rand.TryRangeInclusiveWhere(rect.minZ + 1, rect.maxZ - 1, delegate(int z)
-		{
-			IntVec3 cell = new IntVec3(rect.maxX + 1, 0, z);
-			IntVec3 cell2 = new IntVec3(rect.maxX - 1, 0, z);
-			return CanPassThrough(cell, map) && CanPassThrough(cell2, map);
-		}, out var value4))
-		{
-			found = IntVec3.Invalid;
-			return false;
-		}
-		found = new IntVec3(rect.maxX, 0, value4);
-		return true;
-	}
 
-	private bool CanPassThrough(IntVec3 cell, Map map)
-	{
-		if (cell.InBounds(map) && cell.Standable(map))
+		// Token: 0x06014269 RID: 82537 RVA: 0x00601498 File Offset: 0x005FF698
+		private int GetDistanceToExistingDoors(IntVec3 cell, CellRect rect)
 		{
-			return cell.GetEdifice(map) == null;
-		}
-		return false;
-	}
-
-	private int GetDistanceToExistingDoors(IntVec3 cell, CellRect rect)
-	{
-		Map map = BaseGen.globalSettings.map;
-		int num = int.MaxValue;
-		foreach (IntVec3 edgeCell in rect.EdgeCells)
-		{
-			if (edgeCell.GetDoor(map) != null)
+			Map map = BaseGen.globalSettings.map;
+			int num = int.MaxValue;
+			foreach (IntVec3 intVec in rect.EdgeCells)
 			{
-				num = Mathf.Min(num, Mathf.Abs(cell.x - edgeCell.x) + Mathf.Abs(cell.z - edgeCell.z));
+				if (intVec.GetDoor(map) != null)
+				{
+					num = Mathf.Min(num, Mathf.Abs(cell.x - intVec.x) + Mathf.Abs(cell.z - intVec.z));
+				}
 			}
+			return num;
 		}
-		return num;
 	}
 }

@@ -1,123 +1,155 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class CompRechargeable : ThingComp
+namespace RimWorld
 {
-	private int ticksUntilCharged;
-
-	private Effecter progressBar;
-
-	private CompPowerTrader compPowerCached;
-
-	private CompProperties_Rechargeable Props => (CompProperties_Rechargeable)props;
-
-	public bool Charged => ticksUntilCharged == 0;
-
-	public override void Initialize(CompProperties props)
+	// Token: 0x02002DD8 RID: 11736
+	public class CompRechargeable : ThingComp
 	{
-		base.Initialize(props);
-		ticksUntilCharged = Props.ticksToRecharge;
-	}
-
-	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.WillReplace)
-	{
-		if (progressBar != null)
+		// Token: 0x17002A21 RID: 10785
+		// (get) Token: 0x0601080D RID: 67597 RVA: 0x004C2573 File Offset: 0x004C0773
+		private CompProperties_Rechargeable Props
 		{
-			progressBar.Cleanup();
-			progressBar = null;
-		}
-	}
-
-	public override void CompTick()
-	{
-		base.CompTick();
-		if (compPowerCached == null)
-		{
-			compPowerCached = parent.TryGetComp<CompPowerTrader>();
-		}
-		if (ticksUntilCharged > 0 && compPowerCached.PowerOn)
-		{
-			if (ticksUntilCharged == 1 && Props.chargedSoundDef != null)
+			get
 			{
-				Props.chargedSoundDef.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
-			}
-			ticksUntilCharged--;
-		}
-		if (!Charged && parent.Spawned)
-		{
-			if (progressBar == null)
-			{
-				progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
-			}
-			progressBar.EffectTick(parent, TargetInfo.Invalid);
-			MoteProgressBar mote = ((SubEffecter_ProgressBar)progressBar.children[0]).mote;
-			if (mote != null)
-			{
-				mote.progress = 1f - Mathf.Clamp01((float)ticksUntilCharged / (float)Props.ticksToRecharge);
-				mote.offsetZ = -0.5f;
+				return (CompProperties_Rechargeable)this.props;
 			}
 		}
-		else if (progressBar != null)
-		{
-			progressBar.Cleanup();
-			progressBar = null;
-		}
-	}
 
-	public void Discharge()
-	{
-		ticksUntilCharged = Props.ticksToRecharge;
-		if (Props.dischargeSoundDef != null)
+		// Token: 0x17002A22 RID: 10786
+		// (get) Token: 0x0601080E RID: 67598 RVA: 0x004C2580 File Offset: 0x004C0780
+		public bool Charged
 		{
-			Props.dischargeSoundDef.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
+			get
+			{
+				return this.ticksUntilCharged == 0;
+			}
 		}
-	}
 
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		if (!DebugSettings.ShowDevGizmos)
+		// Token: 0x0601080F RID: 67599 RVA: 0x004C258B File Offset: 0x004C078B
+		public override void Initialize(CompProperties props)
 		{
+			base.Initialize(props);
+			this.ticksUntilCharged = this.Props.ticksToRecharge;
+		}
+
+		// Token: 0x06010810 RID: 67600 RVA: 0x004C25A5 File Offset: 0x004C07A5
+		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.WillReplace)
+		{
+			if (this.progressBar != null)
+			{
+				this.progressBar.Cleanup();
+				this.progressBar = null;
+			}
+		}
+
+		// Token: 0x06010811 RID: 67601 RVA: 0x004C25C4 File Offset: 0x004C07C4
+		public override void CompTick()
+		{
+			base.CompTick();
+			if (this.compPowerCached == null)
+			{
+				this.compPowerCached = this.parent.TryGetComp<CompPowerTrader>();
+			}
+			if (this.ticksUntilCharged > 0 && this.compPowerCached.PowerOn)
+			{
+				if (this.ticksUntilCharged == 1 && this.Props.chargedSoundDef != null)
+				{
+					this.Props.chargedSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
+				}
+				this.ticksUntilCharged--;
+			}
+			if (!this.Charged && this.parent.Spawned)
+			{
+				if (this.progressBar == null)
+				{
+					this.progressBar = EffecterDefOf.ProgressBarAlwaysVisible.Spawn();
+				}
+				this.progressBar.EffectTick(this.parent, TargetInfo.Invalid);
+				MoteProgressBar mote = ((SubEffecter_ProgressBar)this.progressBar.children[0]).mote;
+				if (mote != null)
+				{
+					mote.progress = 1f - Mathf.Clamp01((float)this.ticksUntilCharged / (float)this.Props.ticksToRecharge);
+					mote.offsetZ = -0.5f;
+					return;
+				}
+			}
+			else if (this.progressBar != null)
+			{
+				this.progressBar.Cleanup();
+				this.progressBar = null;
+			}
+		}
+
+		// Token: 0x06010812 RID: 67602 RVA: 0x004C2714 File Offset: 0x004C0914
+		public void Discharge()
+		{
+			this.ticksUntilCharged = this.Props.ticksToRecharge;
+			if (this.Props.dischargeSoundDef != null)
+			{
+				this.Props.dischargeSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
+			}
+		}
+
+		// Token: 0x06010813 RID: 67603 RVA: 0x004C2770 File Offset: 0x004C0970
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		{
+			if (DebugSettings.ShowDevGizmos)
+			{
+				if (!this.Charged)
+				{
+					yield return new Command_Action
+					{
+						defaultLabel = "DEV: Recharge",
+						action = delegate()
+						{
+							if (this.Props.chargedSoundDef != null)
+							{
+								this.Props.chargedSoundDef.PlayOneShot(new TargetInfo(this.parent.Position, this.parent.Map, false));
+							}
+							this.ticksUntilCharged = 0;
+						}
+					};
+				}
+				else
+				{
+					yield return new Command_Action
+					{
+						defaultLabel = "DEV: Discharge",
+						action = new Action(this.Discharge)
+					};
+				}
+			}
 			yield break;
 		}
-		if (!Charged)
+
+		// Token: 0x06010814 RID: 67604 RVA: 0x004C2780 File Offset: 0x004C0980
+		public override string CompInspectStringExtra()
 		{
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "DEV: Recharge";
-			command_Action.action = delegate
+			if (this.Charged)
 			{
-				if (Props.chargedSoundDef != null)
-				{
-					Props.chargedSoundDef.PlayOneShot(new TargetInfo(parent.Position, parent.Map));
-				}
-				ticksUntilCharged = 0;
-			};
-			yield return command_Action;
+				return "RechargeableReady".Translate() + ".";
+			}
+			return "RechargeableCharging".Translate() + ": " + "DurationLeft".Translate(this.ticksUntilCharged.ToStringTicksToPeriod(true, true, true, true, false)) + ".";
 		}
-		else
-		{
-			Command_Action command_Action2 = new Command_Action();
-			command_Action2.defaultLabel = "DEV: Discharge";
-			command_Action2.action = Discharge;
-			yield return command_Action2;
-		}
-	}
 
-	public override string CompInspectStringExtra()
-	{
-		if (Charged)
+		// Token: 0x06010815 RID: 67605 RVA: 0x004C27F6 File Offset: 0x004C09F6
+		public override void PostExposeData()
 		{
-			return "RechargeableReady".Translate() + ".";
+			base.PostExposeData();
+			Scribe_Values.Look<int>(ref this.ticksUntilCharged, "ticksUntilCharged", 0, false);
 		}
-		return "RechargeableCharging".Translate() + ": " + "DurationLeft".Translate(ticksUntilCharged.ToStringTicksToPeriod(allowSeconds: true, shortForm: true)) + ".";
-	}
 
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Values.Look(ref ticksUntilCharged, "ticksUntilCharged", 0);
+		// Token: 0x0400AC1E RID: 44062
+		private int ticksUntilCharged;
+
+		// Token: 0x0400AC1F RID: 44063
+		private Effecter progressBar;
+
+		// Token: 0x0400AC20 RID: 44064
+		private CompPowerTrader compPowerCached;
 	}
 }

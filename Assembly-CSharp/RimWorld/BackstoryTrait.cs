@@ -1,24 +1,28 @@
+﻿using System;
 using System.Xml;
 using Verse;
 
-namespace RimWorld;
-
-public class BackstoryTrait
+namespace RimWorld
 {
-	public TraitDef def;
-
-	public int degree;
-
-	public void LoadDataFromXmlCustom(XmlNode xmlRoot)
+	// Token: 0x020019EB RID: 6635
+	public class BackstoryTrait
 	{
-		DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "def", xmlRoot.Name);
-		if (xmlRoot.HasChildNodes)
+		// Token: 0x060095D2 RID: 38354 RVA: 0x002BDEBD File Offset: 0x002BC0BD
+		public void LoadDataFromXmlCustom(XmlNode xmlRoot)
 		{
-			degree = ParseHelper.FromString<int>(xmlRoot.FirstChild.Value);
+			DirectXmlCrossRefLoader.RegisterObjectWantsCrossRef(this, "def", xmlRoot.Name, null, null, null);
+			if (xmlRoot.HasChildNodes)
+			{
+				this.degree = ParseHelper.FromString<int>(xmlRoot.FirstChild.Value);
+				return;
+			}
+			this.degree = 0;
 		}
-		else
-		{
-			degree = 0;
-		}
+
+		// Token: 0x040061DB RID: 25051
+		public TraitDef def;
+
+		// Token: 0x040061DC RID: 25052
+		public int degree;
 	}
 }

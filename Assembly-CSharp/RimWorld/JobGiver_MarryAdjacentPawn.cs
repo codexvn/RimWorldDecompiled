@@ -1,37 +1,46 @@
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_MarryAdjacentPawn : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x02001449 RID: 5193
+	public class JobGiver_MarryAdjacentPawn : ThinkNode_JobGiver
 	{
-		if (!pawn.RaceProps.IsFlesh)
+		// Token: 0x06007DC7 RID: 32199 RVA: 0x0025E264 File Offset: 0x0025C464
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
-		}
-		for (int i = 0; i < 4; i++)
-		{
-			IntVec3 c = pawn.Position + GenAdj.CardinalDirections[i];
-			if (c.InBounds(pawn.Map))
+			if (!pawn.RaceProps.IsFlesh)
 			{
-				Thing thing = c.GetThingList(pawn.Map).Find((Thing x) => x is Pawn && CanMarry(pawn, (Pawn)x));
-				if (thing != null)
+				return null;
+			}
+			Predicate<Thing> <>9__0;
+			for (int i = 0; i < 4; i++)
+			{
+				IntVec3 c = pawn.Position + GenAdj.CardinalDirections[i];
+				if (c.InBounds(pawn.Map))
 				{
-					return JobMaker.MakeJob(JobDefOf.MarryAdjacentPawn, thing);
+					List<Thing> thingList = c.GetThingList(pawn.Map);
+					Predicate<Thing> match;
+					if ((match = <>9__0) == null)
+					{
+						match = (<>9__0 = ((Thing x) => x is Pawn && this.CanMarry(pawn, (Pawn)x)));
+					}
+					Thing thing = thingList.Find(match);
+					if (thing != null)
+					{
+						return JobMaker.MakeJob(JobDefOf.MarryAdjacentPawn, thing);
+					}
 				}
 			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool CanMarry(Pawn pawn, Pawn toMarry)
-	{
-		if (!toMarry.Drafted)
+		// Token: 0x06007DC8 RID: 32200 RVA: 0x0025E324 File Offset: 0x0025C524
+		private bool CanMarry(Pawn pawn, Pawn toMarry)
 		{
-			return pawn.relations.DirectRelationExists(PawnRelationDefOf.Fiance, toMarry);
+			return !toMarry.Drafted && pawn.relations.DirectRelationExists(PawnRelationDefOf.Fiance, toMarry);
 		}
-		return false;
 	}
 }

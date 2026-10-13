@@ -1,55 +1,54 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_IsOfFaction : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<Thing> thing;
-
-	public SlateRef<Faction> faction;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A9C RID: 15004
+	public class QuestNode_IsOfFaction : QuestNode
 	{
-		if (IsOfFaction(slate))
+		// Token: 0x060147BD RID: 83901 RVA: 0x0061DDC9 File Offset: 0x0061BFC9
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.IsOfFaction(slate))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		if (IsOfFaction(QuestGen.slate))
+		// Token: 0x060147BE RID: 83902 RVA: 0x0061DE01 File Offset: 0x0061C001
+		protected override void RunInt()
 		{
-			if (node != null)
+			if (this.IsOfFaction(QuestGen.slate))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
-	}
 
-	private bool IsOfFaction(Slate slate)
-	{
-		if (thing.GetValue(slate) != null)
+		// Token: 0x060147BF RID: 83903 RVA: 0x0061DE37 File Offset: 0x0061C037
+		private bool IsOfFaction(Slate slate)
 		{
-			return thing.GetValue(slate).Faction == faction.GetValue(slate);
+			return this.thing.GetValue(slate) != null && this.thing.GetValue(slate).Faction == this.faction.GetValue(slate);
 		}
-		return false;
+
+		// Token: 0x0400E2D9 RID: 58073
+		public SlateRef<Thing> thing;
+
+		// Token: 0x0400E2DA RID: 58074
+		public SlateRef<Faction> faction;
+
+		// Token: 0x0400E2DB RID: 58075
+		public QuestNode node;
+
+		// Token: 0x0400E2DC RID: 58076
+		public QuestNode elseNode;
 	}
 }

@@ -1,32 +1,34 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class StockGenerator_BuySlaves : StockGenerator
+namespace RimWorld
 {
-	public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
+	// Token: 0x02002F7E RID: 12158
+	public class StockGenerator_BuySlaves : StockGenerator
 	{
-		return Enumerable.Empty<Thing>();
-	}
-
-	public override bool HandlesThingDef(ThingDef thingDef)
-	{
-		if (thingDef.category == ThingCategory.Pawn && thingDef.race.Humanlike)
+		// Token: 0x060111FE RID: 70142 RVA: 0x00419816 File Offset: 0x00417A16
+		public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
 		{
-			return thingDef.tradeability != Tradeability.None;
+			return Enumerable.Empty<Thing>();
 		}
-		return false;
-	}
 
-	public override Tradeability TradeabilityFor(ThingDef thingDef)
-	{
-		if (!HandlesThingDef(thingDef))
+		// Token: 0x060111FF RID: 70143 RVA: 0x004E9A83 File Offset: 0x004E7C83
+		public override bool HandlesThingDef(ThingDef thingDef)
 		{
-			return Tradeability.None;
+			return thingDef.category == ThingCategory.Pawn && thingDef.race.Humanlike && thingDef.tradeability > Tradeability.None;
 		}
-		return Tradeability.Sellable;
+
+		// Token: 0x06011200 RID: 70144 RVA: 0x004E9AA6 File Offset: 0x004E7CA6
+		public override Tradeability TradeabilityFor(ThingDef thingDef)
+		{
+			if (!this.HandlesThingDef(thingDef))
+			{
+				return Tradeability.None;
+			}
+			return Tradeability.Sellable;
+		}
 	}
 }

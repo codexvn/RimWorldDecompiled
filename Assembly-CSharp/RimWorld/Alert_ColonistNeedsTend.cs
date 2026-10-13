@@ -1,58 +1,68 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 using Verse.Steam;
 
-namespace RimWorld;
-
-public class Alert_ColonistNeedsTend : Alert
+namespace RimWorld
 {
-	private List<Pawn> needingColonistsResult = new List<Pawn>();
-
-	private StringBuilder sb = new StringBuilder();
-
-	private List<Pawn> NeedingColonists
+	// Token: 0x02002FFC RID: 12284
+	public class Alert_ColonistNeedsTend : Alert
 	{
-		get
+		// Token: 0x060114B6 RID: 70838 RVA: 0x004F51B4 File Offset: 0x004F33B4
+		public Alert_ColonistNeedsTend()
 		{
-			needingColonistsResult.Clear();
-			foreach (Pawn item in PawnsFinder.AllMaps_FreeColonistsSpawned)
+			this.defaultLabel = "ColonistNeedsTreatment".Translate();
+			this.defaultPriority = AlertPriority.High;
+		}
+
+		// Token: 0x17002CCF RID: 11471
+		// (get) Token: 0x060114B7 RID: 70839 RVA: 0x004F51F0 File Offset: 0x004F33F0
+		private List<Pawn> NeedingColonists
+		{
+			get
 			{
-				if ((item.Spawned || item.BrieflyDespawned()) && item.health.HasHediffsNeedingTendByPlayer(forAlert: true))
+				this.needingColonistsResult.Clear();
+				foreach (Pawn pawn in PawnsFinder.AllMaps_FreeColonistsSpawned)
 				{
-					Building_Bed building_Bed = item.CurrentBed();
-					if ((building_Bed == null || !building_Bed.Medical) && !Alert_ColonistNeedsRescuing.NeedsRescue(item) && !ChildcareUtility.BabyBeingPlayedWith(item))
+					if ((pawn.Spawned || pawn.BrieflyDespawned()) && pawn.health.HasHediffsNeedingTendByPlayer(true))
 					{
-						needingColonistsResult.Add(item);
+						Building_Bed building_Bed = pawn.CurrentBed();
+						if ((building_Bed == null || !building_Bed.Medical) && !Alert_ColonistNeedsRescuing.NeedsRescue(pawn) && !ChildcareUtility.BabyBeingPlayedWith(pawn))
+						{
+							this.needingColonistsResult.Add(pawn);
+						}
 					}
 				}
+				return this.needingColonistsResult;
 			}
-			return needingColonistsResult;
 		}
-	}
 
-	public Alert_ColonistNeedsTend()
-	{
-		defaultLabel = "ColonistNeedsTreatment".Translate();
-		defaultPriority = AlertPriority.High;
-	}
-
-	public override TaggedString GetExplanation()
-	{
-		sb.Length = 0;
-		foreach (Pawn item in needingColonistsResult)
+		// Token: 0x060114B8 RID: 70840 RVA: 0x004F5298 File Offset: 0x004F3498
+		public override TaggedString GetExplanation()
 		{
-			sb.AppendLine("  - " + item.NameShortColored.Resolve());
+			this.sb.Length = 0;
+			foreach (Pawn pawn in this.needingColonistsResult)
+			{
+				this.sb.AppendLine("  - " + pawn.NameShortColored.Resolve());
+			}
+			if (SteamDeck.IsSteamDeckInNonKeyboardMode)
+			{
+				return "ColonistNeedsTreatmentDescController".Translate(this.sb.ToString().TrimEndNewlines());
+			}
+			return "ColonistNeedsTreatmentDesc".Translate(this.sb.ToString().TrimEndNewlines());
 		}
-		if (SteamDeck.IsSteamDeckInNonKeyboardMode)
-		{
-			return "ColonistNeedsTreatmentDescController".Translate(sb.ToString().TrimEndNewlines());
-		}
-		return "ColonistNeedsTreatmentDesc".Translate(sb.ToString().TrimEndNewlines());
-	}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(NeedingColonists);
+		// Token: 0x060114B9 RID: 70841 RVA: 0x004F535C File Offset: 0x004F355C
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.NeedingColonists);
+		}
+
+		// Token: 0x0400B34A RID: 45898
+		private List<Pawn> needingColonistsResult = new List<Pawn>();
+
+		// Token: 0x0400B34B RID: 45899
+		private StringBuilder sb = new StringBuilder();
 	}
 }

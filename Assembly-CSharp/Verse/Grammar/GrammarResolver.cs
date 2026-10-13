@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,519 +6,597 @@ using System.Text.RegularExpressions;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse.Grammar;
-
-public static class GrammarResolver
+namespace Verse.Grammar
 {
-	private class RuleEntry
+	// Token: 0x02000DD9 RID: 3545
+	public static class GrammarResolver
 	{
-		public Rule rule;
-
-		public bool knownUnresolvable;
-
-		public bool constantConstraintsChecked;
-
-		public bool constantConstraintsValid;
-
-		public int uses;
-
-		public float SelectionWeight => rule.BaseSelectionWeight * 100000f / (float)((uses + 1) * 1000);
-
-		public float Priority => rule.Priority;
-
-		public RuleEntry(Rule rule)
+		// Token: 0x06005A40 RID: 23104 RVA: 0x001CE278 File Offset: 0x001CC478
+		public static string Resolve(string rootKeyword, GrammarRequest request, string debugLabel = null, bool forceLog = false, string untranslatedRootKeyword = null, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
 		{
-			this.rule = rule;
-			knownUnresolvable = false;
-		}
-
-		public void MarkKnownUnresolvable()
-		{
-			knownUnresolvable = true;
-		}
-
-		public bool ValidateConstantConstraints(Dictionary<string, string> constraints)
-		{
-			if (!constantConstraintsChecked)
+			if (LanguageDatabase.activeLanguage == LanguageDatabase.defaultLanguage)
 			{
-				constantConstraintsValid = true;
-				if (rule.constantConstraints != null)
-				{
-					constantConstraintsValid = rule.ValidateConstraints(constraints);
-				}
-				constantConstraintsChecked = true;
+				return GrammarResolver.ResolveUnsafe(rootKeyword, request, debugLabel, forceLog, false, extraTags, outTags, capitalizeFirstSentence);
 			}
-			return constantConstraintsValid;
-		}
-
-		public bool ValidateRequiredTag(List<string> extraTags, List<string> resolvedTags)
-		{
-			if (rule.requiredTag.NullOrEmpty())
+			bool flag;
+			string text;
+			Exception ex;
+			try
 			{
-				return true;
+				text = GrammarResolver.ResolveUnsafe(rootKeyword, request, out flag, debugLabel, forceLog, false, extraTags, outTags, capitalizeFirstSentence);
+				ex = null;
 			}
-			if (extraTags != null && extraTags.Contains(rule.requiredTag))
+			catch (Exception ex2)
 			{
-				return true;
-			}
-			return resolvedTags.Contains(rule.requiredTag);
-		}
-
-		public bool ValidateTimesUsed()
-		{
-			if (!rule.usesLimit.HasValue)
-			{
-				return true;
-			}
-			return uses < rule.usesLimit.Value;
-		}
-
-		public override string ToString()
-		{
-			return rule.ToString();
-		}
-	}
-
-	private static SimpleLinearPool<List<RuleEntry>> rulePool = new SimpleLinearPool<List<RuleEntry>>();
-
-	private static Dictionary<string, List<RuleEntry>> rules = new Dictionary<string, List<RuleEntry>>();
-
-	private static int loopCount;
-
-	private static StringBuilder logSbTrace;
-
-	private static StringBuilder logSbMid;
-
-	private static StringBuilder logSbRules;
-
-	private const int DepthLimit = 50;
-
-	private const int LoopsLimit = 1000;
-
-	private static Regex Spaces = new Regex(" +([,.])");
-
-	private static Regex FunctionCall = new Regex("{\\s*(\\w+)\\s*\\:\\s*([^}]* ?)\\s*}");
-
-	private static Regex GenderCall = new Regex("{\\s*(\\w+)_gender\\s*\\?\\s*([^}]* ?)\\s*}");
-
-	public const char SymbolStartChar = '[';
-
-	public const char SymbolEndChar = ']';
-
-	private static readonly char[] SpecialChars = new char[4] { '[', ']', '{', '}' };
-
-	public static string Resolve(string rootKeyword, GrammarRequest request, string debugLabel = null, bool forceLog = false, string untranslatedRootKeyword = null, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
-	{
-		if (LanguageDatabase.activeLanguage == LanguageDatabase.defaultLanguage)
-		{
-			return ResolveUnsafe(rootKeyword, request, debugLabel, forceLog, useUntranslatedRules: false, extraTags, outTags, capitalizeFirstSentence);
-		}
-		string text;
-		bool success;
-		Exception ex;
-		try
-		{
-			text = ResolveUnsafe(rootKeyword, request, out success, debugLabel, forceLog, useUntranslatedRules: false, extraTags, outTags, capitalizeFirstSentence);
-			ex = null;
-		}
-		catch (Exception ex2)
-		{
-			success = false;
-			text = "";
-			ex = ex2;
-		}
-		if (success)
-		{
-			return text;
-		}
-		string text2 = "Failed to resolve text. Trying again with English.";
-		if (ex != null)
-		{
-			text2 = text2 + " Exception: " + ex;
-		}
-		Log.ErrorOnce(text2, text.GetHashCode());
-		outTags?.Clear();
-		return ResolveUnsafe(untranslatedRootKeyword ?? rootKeyword, request, out success, debugLabel, forceLog, useUntranslatedRules: true, extraTags, outTags, capitalizeFirstSentence);
-	}
-
-	public static string ResolveUnsafe(string rootKeyword, GrammarRequest request, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
-	{
-		bool success;
-		return ResolveUnsafe(rootKeyword, request, out success, debugLabel, forceLog, useUntranslatedRules, extraTags, outTags, capitalizeFirstSentence);
-	}
-
-	public static string ResolveUnsafe(string rootKeyword, GrammarRequest request, out bool success, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
-	{
-		bool flag = forceLog || DebugViewSettings.logGrammarResolution;
-		rules.Clear();
-		rulePool.Clear();
-		if (flag)
-		{
-			logSbTrace = new StringBuilder();
-			logSbMid = new StringBuilder();
-			logSbRules = new StringBuilder();
-		}
-		List<Rule> rulesAllowNull = request.RulesAllowNull;
-		if (rulesAllowNull != null)
-		{
-			if (flag)
-			{
-				logSbRules.AppendLine("CUSTOM RULES");
-			}
-			for (int i = 0; i < rulesAllowNull.Count; i++)
-			{
-				AddRule(rulesAllowNull[i]);
-				if (flag)
-				{
-					logSbRules.AppendLine("■" + rulesAllowNull[i].ToString());
-				}
+				flag = false;
+				text = "";
+				ex = ex2;
 			}
 			if (flag)
 			{
-				logSbRules.AppendLine();
+				return text;
 			}
-		}
-		List<RulePackDef> includesAllowNull = request.IncludesAllowNull;
-		if (includesAllowNull != null)
-		{
-			HashSet<RulePackDef> hashSet = new HashSet<RulePackDef>();
-			List<RulePackDef> list = new List<RulePackDef>(includesAllowNull);
-			if (flag)
+			string text2 = "Failed to resolve text. Trying again with English.";
+			if (ex != null)
 			{
-				logSbMid.AppendLine("INCLUDES");
+				string str = text2;
+				string str2 = " Exception: ";
+				Exception ex3 = ex;
+				text2 = str + str2 + ((ex3 != null) ? ex3.ToString() : null);
 			}
-			while (list.Count > 0)
-			{
-				RulePackDef rulePackDef = list[list.Count - 1];
-				list.RemoveLast();
-				if (hashSet.Contains(rulePackDef))
-				{
-					continue;
-				}
-				if (flag)
-				{
-					logSbMid.AppendLine($"{rulePackDef.defName}");
-				}
-				hashSet.Add(rulePackDef);
-				List<Rule> list2 = (useUntranslatedRules ? rulePackDef.UntranslatedRulesImmediate : rulePackDef.RulesImmediate);
-				if (list2 != null)
-				{
-					foreach (Rule item in list2)
-					{
-						AddRule(item);
-					}
-				}
-				if (!rulePackDef.include.NullOrEmpty())
-				{
-					list.AddRange(rulePackDef.include);
-				}
-			}
-		}
-		List<RulePack> includesBareAllowNull = request.IncludesBareAllowNull;
-		if (includesBareAllowNull != null)
-		{
-			if (flag)
-			{
-				logSbMid.AppendLine();
-				logSbMid.AppendLine("BARE INCLUDES");
-			}
-			for (int j = 0; j < includesBareAllowNull.Count; j++)
-			{
-				List<Rule> list3 = (useUntranslatedRules ? includesBareAllowNull[j].UntranslatedRules : includesBareAllowNull[j].Rules);
-				for (int k = 0; k < list3.Count; k++)
-				{
-					AddRule(list3[k]);
-					if (flag)
-					{
-						logSbMid.AppendLine("  " + list3[k].ToString());
-					}
-				}
-			}
-		}
-		if (flag && !extraTags.NullOrEmpty())
-		{
-			logSbMid.AppendLine();
-			logSbMid.AppendLine("EXTRA TAGS");
-			for (int l = 0; l < extraTags.Count; l++)
-			{
-				logSbMid.AppendLine("  " + extraTags[l]);
-			}
-		}
-		List<Rule> list4 = (useUntranslatedRules ? RulePackDefOf.GlobalUtility.UntranslatedRulesPlusIncludes : RulePackDefOf.GlobalUtility.RulesPlusIncludes);
-		for (int m = 0; m < list4.Count; m++)
-		{
-			AddRule(list4[m]);
-		}
-		loopCount = 0;
-		Dictionary<string, string> constantsAllowNull = request.ConstantsAllowNull;
-		if (flag && constantsAllowNull != null)
-		{
-			logSbMid.AppendLine("CONSTANTS");
-			foreach (KeyValuePair<string, string> item2 in constantsAllowNull)
-			{
-				logSbMid.AppendLine(item2.Key.PadRight(38) + " " + item2.Value);
-			}
-		}
-		if (flag)
-		{
-			logSbTrace.Append("GRAMMAR RESOLUTION TRACE");
-		}
-		string output = "err";
-		bool flag2 = false;
-		List<string> list5 = new List<string>();
-		if (TryResolveRecursive(new RuleEntry(new Rule_String("", "[" + rootKeyword + "]")), 0, constantsAllowNull, out output, flag, extraTags, list5, request.customizer))
-		{
+			Log.ErrorOnce(text2, text.GetHashCode());
 			if (outTags != null)
 			{
 				outTags.Clear();
-				outTags.AddRange(list5);
 			}
+			return GrammarResolver.ResolveUnsafe(untranslatedRootKeyword ?? rootKeyword, request, out flag, debugLabel, forceLog, true, extraTags, outTags, capitalizeFirstSentence);
 		}
-		else
+
+		// Token: 0x06005A41 RID: 23105 RVA: 0x001CE32C File Offset: 0x001CC52C
+		public static string ResolveUnsafe(string rootKeyword, GrammarRequest request, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
 		{
-			flag2 = true;
-			output = ((!request.Rules.NullOrEmpty()) ? ("ERR: " + request.Rules[0].Generate()) : "ERR");
+			bool flag;
+			return GrammarResolver.ResolveUnsafe(rootKeyword, request, out flag, debugLabel, forceLog, useUntranslatedRules, extraTags, outTags, capitalizeFirstSentence);
+		}
+
+		// Token: 0x06005A42 RID: 23106 RVA: 0x001CE34C File Offset: 0x001CC54C
+		public static string ResolveUnsafe(string rootKeyword, GrammarRequest request, out bool success, string debugLabel = null, bool forceLog = false, bool useUntranslatedRules = false, List<string> extraTags = null, List<string> outTags = null, bool capitalizeFirstSentence = true)
+		{
+			bool flag = forceLog || DebugViewSettings.logGrammarResolution;
+			GrammarResolver.rules.Clear();
+			GrammarResolver.rulePool.Clear();
 			if (flag)
 			{
-				logSbTrace.Insert(0, "Grammar unresolvable. Root '" + rootKeyword + "'\n\n");
+				GrammarResolver.logSbTrace = new StringBuilder();
+				GrammarResolver.logSbMid = new StringBuilder();
+				GrammarResolver.logSbRules = new StringBuilder();
+			}
+			List<Rule> rulesAllowNull = request.RulesAllowNull;
+			if (rulesAllowNull != null)
+			{
+				if (flag)
+				{
+					GrammarResolver.logSbRules.AppendLine("CUSTOM RULES");
+				}
+				for (int i = 0; i < rulesAllowNull.Count; i++)
+				{
+					GrammarResolver.AddRule(rulesAllowNull[i]);
+					if (flag)
+					{
+						GrammarResolver.logSbRules.AppendLine("■" + rulesAllowNull[i].ToString());
+					}
+				}
+				if (flag)
+				{
+					GrammarResolver.logSbRules.AppendLine();
+				}
+			}
+			List<RulePackDef> includesAllowNull = request.IncludesAllowNull;
+			if (includesAllowNull != null)
+			{
+				HashSet<RulePackDef> hashSet = new HashSet<RulePackDef>();
+				List<RulePackDef> list = new List<RulePackDef>(includesAllowNull);
+				if (flag)
+				{
+					GrammarResolver.logSbMid.AppendLine("INCLUDES");
+				}
+				while (list.Count > 0)
+				{
+					RulePackDef rulePackDef = list[list.Count - 1];
+					list.RemoveLast<RulePackDef>();
+					if (!hashSet.Contains(rulePackDef))
+					{
+						if (flag)
+						{
+							GrammarResolver.logSbMid.AppendLine(string.Format("{0}", rulePackDef.defName));
+						}
+						hashSet.Add(rulePackDef);
+						List<Rule> list2 = useUntranslatedRules ? rulePackDef.UntranslatedRulesImmediate : rulePackDef.RulesImmediate;
+						if (list2 != null)
+						{
+							foreach (Rule rule in list2)
+							{
+								GrammarResolver.AddRule(rule);
+							}
+						}
+						if (!rulePackDef.include.NullOrEmpty<RulePackDef>())
+						{
+							list.AddRange(rulePackDef.include);
+						}
+					}
+				}
+			}
+			List<RulePack> includesBareAllowNull = request.IncludesBareAllowNull;
+			if (includesBareAllowNull != null)
+			{
+				if (flag)
+				{
+					GrammarResolver.logSbMid.AppendLine();
+					GrammarResolver.logSbMid.AppendLine("BARE INCLUDES");
+				}
+				for (int j = 0; j < includesBareAllowNull.Count; j++)
+				{
+					List<Rule> list3 = useUntranslatedRules ? includesBareAllowNull[j].UntranslatedRules : includesBareAllowNull[j].Rules;
+					for (int k = 0; k < list3.Count; k++)
+					{
+						GrammarResolver.AddRule(list3[k]);
+						if (flag)
+						{
+							GrammarResolver.logSbMid.AppendLine("  " + list3[k].ToString());
+						}
+					}
+				}
+			}
+			if (flag && !extraTags.NullOrEmpty<string>())
+			{
+				GrammarResolver.logSbMid.AppendLine();
+				GrammarResolver.logSbMid.AppendLine("EXTRA TAGS");
+				for (int l = 0; l < extraTags.Count; l++)
+				{
+					GrammarResolver.logSbMid.AppendLine("  " + extraTags[l]);
+				}
+			}
+			List<Rule> list4 = useUntranslatedRules ? RulePackDefOf.GlobalUtility.UntranslatedRulesPlusIncludes : RulePackDefOf.GlobalUtility.RulesPlusIncludes;
+			for (int m = 0; m < list4.Count; m++)
+			{
+				GrammarResolver.AddRule(list4[m]);
+			}
+			GrammarResolver.loopCount = 0;
+			Dictionary<string, string> constantsAllowNull = request.ConstantsAllowNull;
+			if (flag && constantsAllowNull != null)
+			{
+				GrammarResolver.logSbMid.AppendLine("CONSTANTS");
+				foreach (KeyValuePair<string, string> keyValuePair in constantsAllowNull)
+				{
+					GrammarResolver.logSbMid.AppendLine(keyValuePair.Key.PadRight(38) + " " + keyValuePair.Value);
+				}
+			}
+			if (flag)
+			{
+				GrammarResolver.logSbTrace.Append("GRAMMAR RESOLUTION TRACE");
+			}
+			string text = "err";
+			bool flag2 = false;
+			List<string> list5 = new List<string>();
+			if (GrammarResolver.TryResolveRecursive(new GrammarResolver.RuleEntry(new Rule_String("", "[" + rootKeyword + "]")), 0, constantsAllowNull, out text, flag, extraTags, list5, request.customizer))
+			{
+				if (outTags != null)
+				{
+					outTags.Clear();
+					outTags.AddRange(list5);
+				}
 			}
 			else
 			{
-				ResolveUnsafe(rootKeyword, request, debugLabel, forceLog: true, useUntranslatedRules, extraTags);
-			}
-		}
-		output = ResolveAllFunctions(output, constantsAllowNull);
-		output = GenText.CapitalizeSentences(Find.ActiveLanguageWorker.PostProcessed(output), capitalizeFirstSentence);
-		output = Spaces.Replace(output, (Match match) => match.Groups[1].Value);
-		output = output.Trim();
-		if (flag)
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(logSbTrace.ToString().TrimEndNewlines());
-			stringBuilder.AppendLine();
-			stringBuilder.AppendLine();
-			stringBuilder.Append(logSbMid.ToString().TrimEndNewlines());
-			stringBuilder.AppendLine();
-			stringBuilder.AppendLine();
-			stringBuilder.Append(logSbRules.ToString().TrimEndNewlines());
-			if (flag2)
-			{
-				if (DebugViewSettings.logGrammarResolution)
+				flag2 = true;
+				if (request.Rules.NullOrEmpty<Rule>())
 				{
-					Log.Error(stringBuilder.ToString().Trim() + "\n");
+					text = "ERR";
 				}
 				else
 				{
-					Log.ErrorOnce(stringBuilder.ToString().Trim() + "\n", stringBuilder.ToString().Trim().GetHashCode());
+					text = "ERR: " + request.Rules[0].Generate();
 				}
-			}
-			else
-			{
-				Log.Message(stringBuilder.ToString().Trim() + "\n");
-			}
-			logSbTrace = null;
-			logSbMid = null;
-			logSbRules = null;
-		}
-		success = !flag2;
-		return output;
-	}
-
-	public static string ResolveAllFunctions(string input, Dictionary<string, string> constants)
-	{
-		if (input.Contains("%%"))
-		{
-			return input;
-		}
-		string text = input;
-		MatchCollection matchCollection = FunctionCall.Matches(text);
-		for (int num = matchCollection.Count - 1; num >= 0; num--)
-		{
-			Match match = matchCollection[num];
-			string value = match.Groups[1].Value;
-			string args = match.Groups[2].Value.Trim();
-			if (value == "lookup" || value == "replace")
-			{
-				string value2 = GrammarResolverSimple.ResolveFunction(value, args, match.Value);
-				text = text.Remove(match.Index, match.Length);
-				text = text.Insert(match.Index, value2);
-			}
-			else
-			{
-				Log.Warning("Unknown grammar function name: " + value + ". Supported functions: lookup, replace.");
-			}
-		}
-		MatchCollection matchCollection2 = GenderCall.Matches(text);
-		for (int num2 = matchCollection2.Count - 1; num2 >= 0; num2--)
-		{
-			Match match2 = matchCollection2[num2];
-			string value3 = match2.Groups[1].Value;
-			string args2 = match2.Groups[2].Value.Trim();
-			if (constants.TryGetValue(value3 + "_gender", out var value4))
-			{
-				if (Enum.TryParse<Gender>(value4, out var result))
+				if (flag)
 				{
-					string value5 = GrammarResolverSimple.ResolveGenderSymbol(result, animal: false, args2, match2.Value);
-					text = text.Remove(match2.Index, match2.Length);
-					text = text.Insert(match2.Index, value5);
+					GrammarResolver.logSbTrace.Insert(0, "Grammar unresolvable. Root '" + rootKeyword + "'\n\n");
 				}
 				else
 				{
-					Log.Warning("Unknown gender: " + value4 + ".");
+					GrammarResolver.ResolveUnsafe(rootKeyword, request, debugLabel, true, useUntranslatedRules, extraTags, null, true);
 				}
 			}
-			else
+			text = GrammarResolver.ResolveAllFunctions(text, constantsAllowNull);
+			text = GenText.CapitalizeSentences(Find.ActiveLanguageWorker.PostProcessed(text), capitalizeFirstSentence);
+			text = GrammarResolver.Spaces.Replace(text, (Match match) => match.Groups[1].Value);
+			text = text.Trim();
+			if (flag)
 			{
-				Log.Warning("Cannot find rules for pawn symbol " + value3 + ".");
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append(GrammarResolver.logSbTrace.ToString().TrimEndNewlines());
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine();
+				stringBuilder.Append(GrammarResolver.logSbMid.ToString().TrimEndNewlines());
+				stringBuilder.AppendLine();
+				stringBuilder.AppendLine();
+				stringBuilder.Append(GrammarResolver.logSbRules.ToString().TrimEndNewlines());
+				if (flag2)
+				{
+					if (DebugViewSettings.logGrammarResolution)
+					{
+						Log.Error(stringBuilder.ToString().Trim() + "\n");
+					}
+					else
+					{
+						Log.ErrorOnce(stringBuilder.ToString().Trim() + "\n", stringBuilder.ToString().Trim().GetHashCode());
+					}
+				}
+				else
+				{
+					Log.Message(stringBuilder.ToString().Trim() + "\n");
+				}
+				GrammarResolver.logSbTrace = null;
+				GrammarResolver.logSbMid = null;
+				GrammarResolver.logSbRules = null;
 			}
+			success = !flag2;
+			return text;
 		}
-		return text;
-	}
 
-	private static void AddRule(Rule rule)
-	{
-		List<RuleEntry> value = null;
-		if (!rules.TryGetValue(rule.keyword, out value))
+		// Token: 0x06005A43 RID: 23107 RVA: 0x001CE910 File Offset: 0x001CCB10
+		public static string ResolveAllFunctions(string input, Dictionary<string, string> constants)
 		{
-			value = rulePool.Get();
-			value.Clear();
-			rules[rule.keyword] = value;
+			if (input.Contains("%%"))
+			{
+				return input;
+			}
+			string text = input;
+			MatchCollection matchCollection = GrammarResolver.FunctionCall.Matches(text);
+			for (int i = matchCollection.Count - 1; i >= 0; i--)
+			{
+				Match match = matchCollection[i];
+				string value = match.Groups[1].Value;
+				string args = match.Groups[2].Value.Trim();
+				if (value == "lookup" || value == "replace")
+				{
+					string value2 = GrammarResolverSimple.ResolveFunction(value, args, match.Value);
+					text = text.Remove(match.Index, match.Length);
+					text = text.Insert(match.Index, value2);
+				}
+				else
+				{
+					Log.Warning("Unknown grammar function name: " + value + ". Supported functions: lookup, replace.");
+				}
+			}
+			MatchCollection matchCollection2 = GrammarResolver.GenderCall.Matches(text);
+			for (int j = matchCollection2.Count - 1; j >= 0; j--)
+			{
+				Match match2 = matchCollection2[j];
+				string value3 = match2.Groups[1].Value;
+				string args2 = match2.Groups[2].Value.Trim();
+				string text2;
+				if (constants.TryGetValue(value3 + "_gender", out text2))
+				{
+					Gender gender;
+					if (Enum.TryParse<Gender>(text2, out gender))
+					{
+						string value4 = GrammarResolverSimple.ResolveGenderSymbol(gender, false, args2, match2.Value);
+						text = text.Remove(match2.Index, match2.Length);
+						text = text.Insert(match2.Index, value4);
+					}
+					else
+					{
+						Log.Warning("Unknown gender: " + text2 + ".");
+					}
+				}
+				else
+				{
+					Log.Warning("Cannot find rules for pawn symbol " + value3 + ".");
+				}
+			}
+			return text;
 		}
-		value.Add(new RuleEntry(rule));
-	}
 
-	private static bool TryResolveRecursive(RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags, GrammarRequest.ICustomizer customizer)
-	{
-		string text = "";
-		for (int i = 0; i < depth; i++)
+		// Token: 0x06005A44 RID: 23108 RVA: 0x001CEAE0 File Offset: 0x001CCCE0
+		private static void AddRule(Rule rule)
 		{
-			text += "  ";
-		}
-		if (log && depth > 0)
-		{
-			logSbTrace.AppendLine();
-			logSbTrace.Append(depth.ToStringCached().PadRight(3));
-			logSbTrace.Append(text + entry);
-		}
-		text += "     ";
-		loopCount++;
-		if (loopCount > 1000)
-		{
-			Log.Error("Hit loops limit resolving grammar.");
-			output = "HIT_LOOPS_LIMIT";
-			if (log)
+			List<GrammarResolver.RuleEntry> list = null;
+			if (!GrammarResolver.rules.TryGetValue(rule.keyword, out list))
 			{
-				logSbTrace.Append("\n" + text + "UNRESOLVABLE: Hit loops limit");
+				list = GrammarResolver.rulePool.Get();
+				list.Clear();
+				GrammarResolver.rules[rule.keyword] = list;
 			}
-			return false;
+			list.Add(new GrammarResolver.RuleEntry(rule));
 		}
-		if (depth > 50)
+
+		// Token: 0x06005A45 RID: 23109 RVA: 0x001CEB34 File Offset: 0x001CCD34
+		private static bool TryResolveRecursive(GrammarResolver.RuleEntry entry, int depth, Dictionary<string, string> constants, out string output, bool log, List<string> extraTags, List<string> resolvedTags, GrammarRequest.ICustomizer customizer)
 		{
-			Log.Error("Grammar recurred too deep while resolving keyword (>" + 50 + " deep)");
-			output = "DEPTH_LIMIT_REACHED";
-			if (log)
+			string text = "";
+			for (int i = 0; i < depth; i++)
 			{
-				logSbTrace.Append("\n" + text + "UNRESOLVABLE: Depth limit reached");
+				text += "  ";
 			}
-			return false;
-		}
-		string text2 = entry.rule.Generate();
-		bool flag = false;
-		int num = -1;
-		for (int j = 0; j < text2.Length; j++)
-		{
-			char num2 = text2[j];
-			if (num2 == '[')
+			if (log && depth > 0)
 			{
-				num = j;
+				GrammarResolver.logSbTrace.AppendLine();
+				GrammarResolver.logSbTrace.Append(depth.ToStringCached().PadRight(3));
+				GrammarResolver.logSbTrace.Append(text + ((entry != null) ? entry.ToString() : null));
 			}
-			if (num2 != ']')
+			text += "     ";
+			GrammarResolver.loopCount++;
+			if (GrammarResolver.loopCount > 1000)
 			{
-				continue;
-			}
-			if (num == -1)
-			{
-				Log.Error("Could not resolve rule because of mismatched brackets: " + text2);
-				output = "MISMATCHED_BRACKETS";
+				Log.Error("Hit loops limit resolving grammar.");
+				output = "HIT_LOOPS_LIMIT";
 				if (log)
 				{
-					logSbTrace.Append("\n" + text + "UNRESOLVABLE: Mismatched brackets");
+					GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Hit loops limit");
 				}
-				flag = true;
-				continue;
+				return false;
 			}
-			string text3 = text2.Substring(num + 1, j - num - 1);
-			while (true)
+			if (depth > 50)
 			{
-				RuleEntry ruleEntry = RandomPossiblyResolvableEntry(text3, constants, extraTags, resolvedTags, customizer);
-				if (ruleEntry == null)
+				Log.Error("Grammar recurred too deep while resolving keyword (>" + 50.ToString() + " deep)");
+				output = "DEPTH_LIMIT_REACHED";
+				if (log)
 				{
-					entry.MarkKnownUnresolvable();
-					output = "CANNOT_RESOLVE_SUBSYMBOL:" + text3;
-					if (log)
-					{
-						logSbTrace.Append("\n" + text + text3 + " → UNRESOLVABLE");
-					}
-					flag = true;
-					break;
+					GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Depth limit reached");
 				}
-				ruleEntry.uses++;
-				List<string> list = resolvedTags.ToList();
-				if (TryResolveRecursive(ruleEntry, depth + 1, constants, out var output2, log, extraTags, list, customizer))
-				{
-					text2 = text2.Substring(0, num) + output2 + text2.Substring(j + 1);
-					j = num;
-					resolvedTags.Clear();
-					resolvedTags.AddRange(list);
-					if (!ruleEntry.rule.tag.NullOrEmpty() && !resolvedTags.Contains(ruleEntry.rule.tag))
-					{
-						resolvedTags.Add(ruleEntry.rule.tag);
-					}
-					customizer?.Notify_RuleUsed(ruleEntry.rule);
-					break;
-				}
-				ruleEntry.MarkKnownUnresolvable();
+				return false;
 			}
-		}
-		output = text2;
-		return !flag;
-	}
-
-	private static RuleEntry RandomPossiblyResolvableEntry(string keyword, Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags, GrammarRequest.ICustomizer customizer)
-	{
-		List<RuleEntry> list = rules.TryGetValue(keyword);
-		if (list == null)
-		{
-			return null;
-		}
-		float maxPriority = float.MinValue;
-		int maxBucket = 0;
-		for (int i = 0; i < list.Count; i++)
-		{
-			RuleEntry ruleEntry = list[i];
-			if (ValidateRule(constants, extraTags, resolvedTags, ruleEntry, customizer) && ruleEntry.SelectionWeight != 0f)
+			string text2 = entry.rule.Generate();
+			bool flag = false;
+			int num = -1;
+			for (int j = 0; j < text2.Length; j++)
 			{
-				maxPriority = Mathf.Max(maxPriority, ruleEntry.Priority);
-				if (customizer != null)
+				char c = text2[j];
+				if (c == '[')
 				{
-					maxBucket = Mathf.Max(maxBucket, customizer.PriorityBucket(ruleEntry.rule));
+					num = j;
+				}
+				if (c == ']')
+				{
+					if (num == -1)
+					{
+						Log.Error("Could not resolve rule because of mismatched brackets: " + text2);
+						output = "MISMATCHED_BRACKETS";
+						if (log)
+						{
+							GrammarResolver.logSbTrace.Append("\n" + text + "UNRESOLVABLE: Mismatched brackets");
+						}
+						flag = true;
+					}
+					else
+					{
+						string text3 = text2.Substring(num + 1, j - num - 1);
+						GrammarResolver.RuleEntry ruleEntry;
+						List<string> list;
+						string str;
+						for (;;)
+						{
+							ruleEntry = GrammarResolver.RandomPossiblyResolvableEntry(text3, constants, extraTags, resolvedTags, customizer);
+							if (ruleEntry == null)
+							{
+								break;
+							}
+							ruleEntry.uses++;
+							list = resolvedTags.ToList<string>();
+							if (GrammarResolver.TryResolveRecursive(ruleEntry, depth + 1, constants, out str, log, extraTags, list, customizer))
+							{
+								goto Block_15;
+							}
+							ruleEntry.MarkKnownUnresolvable();
+						}
+						entry.MarkKnownUnresolvable();
+						output = "CANNOT_RESOLVE_SUBSYMBOL:" + text3;
+						if (log)
+						{
+							GrammarResolver.logSbTrace.Append("\n" + text + text3 + " → UNRESOLVABLE");
+						}
+						flag = true;
+						goto IL_294;
+						Block_15:
+						text2 = text2.Substring(0, num) + str + text2.Substring(j + 1);
+						j = num;
+						resolvedTags.Clear();
+						resolvedTags.AddRange(list);
+						if (!ruleEntry.rule.tag.NullOrEmpty() && !resolvedTags.Contains(ruleEntry.rule.tag))
+						{
+							resolvedTags.Add(ruleEntry.rule.tag);
+						}
+						if (customizer != null)
+						{
+							customizer.Notify_RuleUsed(ruleEntry.rule);
+						}
+					}
+				}
+				IL_294:;
+			}
+			output = text2;
+			return !flag;
+		}
+
+		// Token: 0x06005A46 RID: 23110 RVA: 0x001CEDF0 File Offset: 0x001CCFF0
+		private static GrammarResolver.RuleEntry RandomPossiblyResolvableEntry(string keyword, Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags, GrammarRequest.ICustomizer customizer)
+		{
+			List<GrammarResolver.RuleEntry> list = GrammarResolver.rules.TryGetValue(keyword, null);
+			if (list == null)
+			{
+				return null;
+			}
+			float maxPriority = float.MinValue;
+			int maxBucket = 0;
+			for (int i = 0; i < list.Count; i++)
+			{
+				GrammarResolver.RuleEntry ruleEntry = list[i];
+				if (GrammarResolver.ValidateRule(constants, extraTags, resolvedTags, ruleEntry, customizer) && ruleEntry.SelectionWeight != 0f)
+				{
+					maxPriority = Mathf.Max(maxPriority, ruleEntry.Priority);
+					if (customizer != null)
+					{
+						maxBucket = Mathf.Max(maxBucket, customizer.PriorityBucket(ruleEntry.rule));
+					}
 				}
 			}
+			return list.RandomElementByWeightWithFallback(delegate(GrammarResolver.RuleEntry rule)
+			{
+				if (GrammarResolver.ValidateRule(constants, extraTags, resolvedTags, rule, customizer) && rule.Priority == maxPriority)
+				{
+					GrammarRequest.ICustomizer customizer2 = customizer;
+					if (((customizer2 != null) ? customizer2.PriorityBucket(rule.rule) : 0) == maxBucket)
+					{
+						return rule.SelectionWeight;
+					}
+				}
+				return 0f;
+			}, null);
 		}
-		return list.RandomElementByWeightWithFallback((RuleEntry rule) => (!ValidateRule(constants, extraTags, resolvedTags, rule, customizer) || rule.Priority != maxPriority || (customizer?.PriorityBucket(rule.rule) ?? 0) != maxBucket) ? 0f : rule.SelectionWeight);
-	}
 
-	private static bool ValidateRule(Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags, RuleEntry rule, GrammarRequest.ICustomizer customizer)
-	{
-		if (!rule.knownUnresolvable && rule.ValidateConstantConstraints(constants) && rule.ValidateRequiredTag(extraTags, resolvedTags) && rule.ValidateTimesUsed())
+		// Token: 0x06005A47 RID: 23111 RVA: 0x001CEEE1 File Offset: 0x001CD0E1
+		private static bool ValidateRule(Dictionary<string, string> constants, List<string> extraTags, List<string> resolvedTags, GrammarResolver.RuleEntry rule, GrammarRequest.ICustomizer customizer)
 		{
-			return customizer?.ValidateRule(rule.rule) ?? true;
+			return !rule.knownUnresolvable && rule.ValidateConstantConstraints(constants) && rule.ValidateRequiredTag(extraTags, resolvedTags) && rule.ValidateTimesUsed() && (customizer == null || customizer.ValidateRule(rule.rule));
 		}
-		return false;
-	}
 
-	public static bool ContainsSpecialChars(string str)
-	{
-		return str.IndexOfAny(SpecialChars) >= 0;
+		// Token: 0x06005A48 RID: 23112 RVA: 0x001CEF1B File Offset: 0x001CD11B
+		public static bool ContainsSpecialChars(string str)
+		{
+			return str.IndexOfAny(GrammarResolver.SpecialChars) >= 0;
+		}
+
+		// Token: 0x0400410B RID: 16651
+		private static SimpleLinearPool<List<GrammarResolver.RuleEntry>> rulePool = new SimpleLinearPool<List<GrammarResolver.RuleEntry>>();
+
+		// Token: 0x0400410C RID: 16652
+		private static Dictionary<string, List<GrammarResolver.RuleEntry>> rules = new Dictionary<string, List<GrammarResolver.RuleEntry>>();
+
+		// Token: 0x0400410D RID: 16653
+		private static int loopCount;
+
+		// Token: 0x0400410E RID: 16654
+		private static StringBuilder logSbTrace;
+
+		// Token: 0x0400410F RID: 16655
+		private static StringBuilder logSbMid;
+
+		// Token: 0x04004110 RID: 16656
+		private static StringBuilder logSbRules;
+
+		// Token: 0x04004111 RID: 16657
+		private const int DepthLimit = 50;
+
+		// Token: 0x04004112 RID: 16658
+		private const int LoopsLimit = 1000;
+
+		// Token: 0x04004113 RID: 16659
+		private static Regex Spaces = new Regex(" +([,.])");
+
+		// Token: 0x04004114 RID: 16660
+		private static Regex FunctionCall = new Regex("{\\s*(\\w+)\\s*\\:\\s*([^}]* ?)\\s*}");
+
+		// Token: 0x04004115 RID: 16661
+		private static Regex GenderCall = new Regex("{\\s*(\\w+)_gender\\s*\\?\\s*([^}]* ?)\\s*}");
+
+		// Token: 0x04004116 RID: 16662
+		public const char SymbolStartChar = '[';
+
+		// Token: 0x04004117 RID: 16663
+		public const char SymbolEndChar = ']';
+
+		// Token: 0x04004118 RID: 16664
+		private static readonly char[] SpecialChars = new char[]
+		{
+			'[',
+			']',
+			'{',
+			'}'
+		};
+
+		// Token: 0x02000DDA RID: 3546
+		private class RuleEntry
+		{
+			// Token: 0x17000E62 RID: 3682
+			// (get) Token: 0x06005A4A RID: 23114 RVA: 0x001CEF94 File Offset: 0x001CD194
+			public float SelectionWeight
+			{
+				get
+				{
+					return this.rule.BaseSelectionWeight * 100000f / (float)((this.uses + 1) * 1000);
+				}
+			}
+
+			// Token: 0x17000E63 RID: 3683
+			// (get) Token: 0x06005A4B RID: 23115 RVA: 0x001CEFB7 File Offset: 0x001CD1B7
+			public float Priority
+			{
+				get
+				{
+					return this.rule.Priority;
+				}
+			}
+
+			// Token: 0x06005A4C RID: 23116 RVA: 0x001CEFC4 File Offset: 0x001CD1C4
+			public RuleEntry(Rule rule)
+			{
+				this.rule = rule;
+				this.knownUnresolvable = false;
+			}
+
+			// Token: 0x06005A4D RID: 23117 RVA: 0x001CEFDA File Offset: 0x001CD1DA
+			public void MarkKnownUnresolvable()
+			{
+				this.knownUnresolvable = true;
+			}
+
+			// Token: 0x06005A4E RID: 23118 RVA: 0x001CEFE3 File Offset: 0x001CD1E3
+			public bool ValidateConstantConstraints(Dictionary<string, string> constraints)
+			{
+				if (!this.constantConstraintsChecked)
+				{
+					this.constantConstraintsValid = true;
+					if (this.rule.constantConstraints != null)
+					{
+						this.constantConstraintsValid = this.rule.ValidateConstraints(constraints);
+					}
+					this.constantConstraintsChecked = true;
+				}
+				return this.constantConstraintsValid;
+			}
+
+			// Token: 0x06005A4F RID: 23119 RVA: 0x001CF020 File Offset: 0x001CD220
+			public bool ValidateRequiredTag(List<string> extraTags, List<string> resolvedTags)
+			{
+				return this.rule.requiredTag.NullOrEmpty() || (extraTags != null && extraTags.Contains(this.rule.requiredTag)) || resolvedTags.Contains(this.rule.requiredTag);
+			}
+
+			// Token: 0x06005A50 RID: 23120 RVA: 0x001CF05F File Offset: 0x001CD25F
+			public bool ValidateTimesUsed()
+			{
+				return this.rule.usesLimit == null || this.uses < this.rule.usesLimit.Value;
+			}
+
+			// Token: 0x06005A51 RID: 23121 RVA: 0x001CF08D File Offset: 0x001CD28D
+			public override string ToString()
+			{
+				return this.rule.ToString();
+			}
+
+			// Token: 0x04004119 RID: 16665
+			public Rule rule;
+
+			// Token: 0x0400411A RID: 16666
+			public bool knownUnresolvable;
+
+			// Token: 0x0400411B RID: 16667
+			public bool constantConstraintsChecked;
+
+			// Token: 0x0400411C RID: 16668
+			public bool constantConstraintsValid;
+
+			// Token: 0x0400411D RID: 16669
+			public int uses;
+		}
 	}
 }

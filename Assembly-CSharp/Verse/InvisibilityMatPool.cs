@@ -1,30 +1,38 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse;
-
-public static class InvisibilityMatPool
+namespace Verse
 {
-	private static readonly Dictionary<Material, Material> materials = new Dictionary<Material, Material>();
-
-	private static readonly Color color = new Color(0.75f, 0.93f, 0.98f, 0.5f);
-
-	private static readonly int NoiseTex = Shader.PropertyToID("_NoiseTex");
-
-	public static Material GetInvisibleMat(Material baseMat)
+	// Token: 0x020005FE RID: 1534
+	public static class InvisibilityMatPool
 	{
-		if (baseMat == null)
+		// Token: 0x06002750 RID: 10064 RVA: 0x000D1774 File Offset: 0x000CF974
+		public static Material GetInvisibleMat(Material baseMat)
 		{
-			return null;
+			if (baseMat == null)
+			{
+				return null;
+			}
+			Material material;
+			if (!InvisibilityMatPool.materials.TryGetValue(baseMat, out material))
+			{
+				material = MaterialAllocator.Create(baseMat);
+				material.shader = ShaderDatabase.Invisible;
+				material.SetTexture(InvisibilityMatPool.NoiseTex, TexGame.InvisDistortion);
+				material.color = InvisibilityMatPool.color;
+				InvisibilityMatPool.materials.Add(baseMat, material);
+			}
+			return material;
 		}
-		if (!materials.TryGetValue(baseMat, out var value))
-		{
-			value = MaterialAllocator.Create(baseMat);
-			value.shader = ShaderDatabase.Invisible;
-			value.SetTexture(NoiseTex, TexGame.InvisDistortion);
-			value.color = color;
-			materials.Add(baseMat, value);
-		}
-		return value;
+
+		// Token: 0x040020A5 RID: 8357
+		private static readonly Dictionary<Material, Material> materials = new Dictionary<Material, Material>();
+
+		// Token: 0x040020A6 RID: 8358
+		private static readonly Color color = new Color(0.75f, 0.93f, 0.98f, 0.5f);
+
+		// Token: 0x040020A7 RID: 8359
+		private static readonly int NoiseTex = Shader.PropertyToID("_NoiseTex");
 	}
 }

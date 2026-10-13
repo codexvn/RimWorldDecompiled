@@ -1,25 +1,35 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_NeedJoy : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001845 RID: 6213
+	public class ThoughtWorker_NeedJoy : ThoughtWorker
 	{
-		if (p.needs.joy == null)
+		// Token: 0x06008F6B RID: 36715 RVA: 0x002A5C0C File Offset: 0x002A3E0C
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (p.needs.joy == null)
+			{
+				return ThoughtState.Inactive;
+			}
+			switch (p.needs.joy.CurCategory)
+			{
+			case JoyCategory.Empty:
+				return ThoughtState.ActiveAtStage(0);
+			case JoyCategory.VeryLow:
+				return ThoughtState.ActiveAtStage(1);
+			case JoyCategory.Low:
+				return ThoughtState.ActiveAtStage(2);
+			case JoyCategory.Satisfied:
+				return ThoughtState.Inactive;
+			case JoyCategory.High:
+				return ThoughtState.ActiveAtStage(3);
+			case JoyCategory.Extreme:
+				return ThoughtState.ActiveAtStage(4);
+			default:
+				throw new NotImplementedException();
+			}
 		}
-		return p.needs.joy.CurCategory switch
-		{
-			JoyCategory.Empty => ThoughtState.ActiveAtStage(0), 
-			JoyCategory.VeryLow => ThoughtState.ActiveAtStage(1), 
-			JoyCategory.Low => ThoughtState.ActiveAtStage(2), 
-			JoyCategory.Satisfied => ThoughtState.Inactive, 
-			JoyCategory.High => ThoughtState.ActiveAtStage(3), 
-			JoyCategory.Extreme => ThoughtState.ActiveAtStage(4), 
-			_ => throw new NotImplementedException(), 
-		};
 	}
 }

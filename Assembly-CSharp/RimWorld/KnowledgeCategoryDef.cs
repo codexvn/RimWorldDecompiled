@@ -1,39 +1,31 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class KnowledgeCategoryDef : Def
+namespace RimWorld
 {
-	public KnowledgeCategoryDef overflowCategory;
-
-	public Color color;
-
-	[NoTranslate]
-	public string texPath;
-
-	[Unsaved(false)]
-	private Texture2D texInt;
-
-	public Texture2D Tex => texInt;
-
-	public override IEnumerable<string> ConfigErrors()
+	// Token: 0x02001A60 RID: 6752
+	public class KnowledgeCategoryDef : Def
 	{
-		if (overflowCategory == this)
+		// Token: 0x060097B8 RID: 38840 RVA: 0x002C4E6F File Offset: 0x002C306F
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return "overflowCategory is this category.";
-		}
-	}
-
-	public override void PostLoad()
-	{
-		if (!texPath.NullOrEmpty())
-		{
-			LongEventHandler.ExecuteWhenFinished(delegate
+			if (this.overflowCategory == this)
 			{
-				texInt = ContentFinder<Texture2D>.Get(texPath);
-			});
+				yield return "overflowCategory is this category.";
+			}
+			yield break;
 		}
+
+		// Token: 0x04006514 RID: 25876
+		public KnowledgeCategoryDef overflowCategory;
+
+		// Token: 0x04006515 RID: 25877
+		public Color color;
+
+		// Token: 0x04006516 RID: 25878
+		[NoTranslate]
+		public string texPath;
 	}
 }

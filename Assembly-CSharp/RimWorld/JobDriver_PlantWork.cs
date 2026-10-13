@@ -1,147 +1,186 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public abstract class JobDriver_PlantWork : JobDriver
+namespace RimWorld
 {
-	private float workDone;
-
-	protected float xpPerTick;
-
-	protected const TargetIndex PlantInd = TargetIndex.A;
-
-	protected Plant Plant => (Plant)job.targetA.Thing;
-
-	protected virtual DesignationDef RequiredDesignation => null;
-
-	protected virtual PlantDestructionMode PlantDestructionMode => PlantDestructionMode.Smash;
-
-	public static float WorkDonePerTick(Pawn actor, Plant plant)
+	// Token: 0x02001360 RID: 4960
+	public abstract class JobDriver_PlantWork : JobDriver
 	{
-		return actor.GetStatValue(StatDefOf.PlantWorkSpeed) * Mathf.Lerp(3.3f, 1f, plant.Growth);
-	}
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
-	{
-		LocalTargetInfo target = job.GetTarget(TargetIndex.A);
-		if (target.IsValid && !pawn.Reserve(target, job, 1, -1, null, errorOnFailed))
+		// Token: 0x17001331 RID: 4913
+		// (get) Token: 0x060079B6 RID: 31158 RVA: 0x0024BC57 File Offset: 0x00249E57
+		protected Plant Plant
 		{
-			return false;
-		}
-		pawn.ReserveAsManyAsPossible(job.GetTargetQueue(TargetIndex.A), job);
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		Init();
-		yield return Toils_JobTransforms.MoveCurrentTargetIntoQueue(TargetIndex.A);
-		Toil initExtractTargetFromQueue = Toils_JobTransforms.ClearDespawnedNullOrForbiddenQueuedTargets(TargetIndex.A, (RequiredDesignation != null) ? ((Func<Thing, bool>)((Thing t) => base.Map.designationManager.DesignationOn(t, RequiredDesignation) != null)) : null);
-		yield return initExtractTargetFromQueue;
-		yield return Toils_JobTransforms.SucceedOnNoTargetInQueue(TargetIndex.A);
-		yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A);
-		Toil toil = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, initExtractTargetFromQueue);
-		if (RequiredDesignation != null)
-		{
-			toil.FailOnThingMissingDesignation(TargetIndex.A, RequiredDesignation);
-		}
-		yield return toil;
-		Toil cut = ToilMaker.MakeToil("MakeNewToils");
-		cut.tickIntervalAction = delegate(int delta)
-		{
-			Pawn actor = cut.actor;
-			if (actor.skills != null)
+			get
 			{
-				actor.skills.Learn(SkillDefOf.Plants, xpPerTick * (float)delta);
+				return (Plant)this.job.targetA.Thing;
 			}
-			Plant plant = Plant;
-			workDone += WorkDonePerTick(actor, plant) * (float)delta;
-			if (!(workDone < plant.def.plant.harvestWork))
+		}
+
+		// Token: 0x17001332 RID: 4914
+		// (get) Token: 0x060079B7 RID: 31159 RVA: 0x00002C42 File Offset: 0x00000E42
+		protected virtual DesignationDef RequiredDesignation
+		{
+			get
 			{
-				if (plant.def.plant.harvestedThingDef != null)
+				return null;
+			}
+		}
+
+		// Token: 0x17001333 RID: 4915
+		// (get) Token: 0x060079B8 RID: 31160 RVA: 0x00002501 File Offset: 0x00000701
+		protected virtual PlantDestructionMode PlantDestructionMode
+		{
+			get
+			{
+				return PlantDestructionMode.Smash;
+			}
+		}
+
+		// Token: 0x060079B9 RID: 31161 RVA: 0x0024BC6E File Offset: 0x00249E6E
+		public static float WorkDonePerTick(Pawn actor, Plant plant)
+		{
+			return actor.GetStatValue(StatDefOf.PlantWorkSpeed, true, -1) * Mathf.Lerp(3.3f, 1f, plant.Growth);
+		}
+
+		// Token: 0x060079BA RID: 31162 RVA: 0x0024BC94 File Offset: 0x00249E94
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			LocalTargetInfo target = this.job.GetTarget(TargetIndex.A);
+			if (target.IsValid && !this.pawn.Reserve(target, this.job, 1, -1, null, errorOnFailed, false))
+			{
+				return false;
+			}
+			this.pawn.ReserveAsManyAsPossible(this.job.GetTargetQueue(TargetIndex.A), this.job, 1, -1, null);
+			return true;
+		}
+
+		// Token: 0x060079BB RID: 31163 RVA: 0x0024BCF3 File Offset: 0x00249EF3
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			this.Init();
+			yield return Toils_JobTransforms.MoveCurrentTargetIntoQueue(TargetIndex.A);
+			Toil initExtractTargetFromQueue = Toils_JobTransforms.ClearDespawnedNullOrForbiddenQueuedTargets(TargetIndex.A, (this.RequiredDesignation != null) ? ((Thing t) => this.Map.designationManager.DesignationOn(t, this.RequiredDesignation) != null) : null);
+			yield return initExtractTargetFromQueue;
+			yield return Toils_JobTransforms.SucceedOnNoTargetInQueue(TargetIndex.A);
+			yield return Toils_JobTransforms.ExtractNextTargetFromQueue(TargetIndex.A, true);
+			Toil toil = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).JumpIfDespawnedOrNullOrForbidden(TargetIndex.A, initExtractTargetFromQueue);
+			if (this.RequiredDesignation != null)
+			{
+				toil.FailOnThingMissingDesignation(TargetIndex.A, this.RequiredDesignation);
+			}
+			yield return toil;
+			Toil cut = ToilMaker.MakeToil("MakeNewToils");
+			cut.tickIntervalAction = delegate(int delta)
+			{
+				Pawn actor = cut.actor;
+				if (actor.skills != null)
 				{
-					StatDef stat = ((plant.def.plant.harvestedThingDef.IsDrug || plant.def.plant.drugForHarvestPurposes) ? StatDefOf.DrugHarvestYield : StatDefOf.PlantHarvestYield);
-					float statValue = actor.GetStatValue(stat);
-					if (actor.RaceProps.Humanlike && plant.def.plant.harvestFailable && !plant.Blighted && Rand.Value > statValue)
+					actor.skills.Learn(SkillDefOf.Plants, this.xpPerTick * (float)delta, false, false);
+				}
+				Plant plant2 = this.Plant;
+				this.workDone += JobDriver_PlantWork.WorkDonePerTick(actor, plant2) * (float)delta;
+				if (this.workDone < plant2.def.plant.harvestWork)
+				{
+					return;
+				}
+				if (plant2.def.plant.harvestedThingDef != null)
+				{
+					StatDef stat = (plant2.def.plant.harvestedThingDef.IsDrug || plant2.def.plant.drugForHarvestPurposes) ? StatDefOf.DrugHarvestYield : StatDefOf.PlantHarvestYield;
+					float statValue = actor.GetStatValue(stat, true, -1);
+					if (actor.RaceProps.Humanlike && plant2.def.plant.harvestFailable && !plant2.Blighted && Rand.Value > statValue)
 					{
-						MoteMaker.ThrowText((pawn.DrawPos + plant.DrawPos) / 2f, base.Map, "TextMote_HarvestFailed".Translate(), 3.65f);
+						MoteMaker.ThrowText((this.pawn.DrawPos + plant2.DrawPos) / 2f, this.Map, "TextMote_HarvestFailed".Translate(), 3.65f);
 					}
 					else
 					{
-						int num = plant.YieldNow();
+						int num = plant2.YieldNow();
 						if (statValue > 1f)
 						{
 							num = GenMath.RoundRandom((float)num * statValue);
 						}
 						if (num > 0)
 						{
-							Thing thing = ThingMaker.MakeThing(plant.def.plant.harvestedThingDef);
+							Thing thing = ThingMaker.MakeThing(plant2.def.plant.harvestedThingDef, null);
 							thing.stackCount = num;
 							if (actor.Faction != Faction.OfPlayer)
 							{
-								thing.SetForbidden(value: true);
+								thing.SetForbidden(true, true);
 							}
 							Find.QuestManager.Notify_PlantHarvested(actor, thing);
-							GenPlace.TryPlaceThing(thing, actor.Position, base.Map, ThingPlaceMode.Near);
+							GenPlace.TryPlaceThing(thing, actor.Position, this.Map, ThingPlaceMode.Near, null, null, null, 1);
 							actor.records.Increment(RecordDefOf.PlantsHarvested);
 						}
-						if (plant.HarvestableNow)
+						if (plant2.HarvestableNow)
 						{
-							foreach (ThingComp allComp in plant.AllComps)
+							foreach (ThingComp thingComp in plant2.AllComps)
 							{
-								foreach (ThingDefCountClass item in allComp.GetAdditionalHarvestYield())
+								foreach (ThingDefCountClass thingDefCountClass in thingComp.GetAdditionalHarvestYield())
 								{
-									Thing thing2 = ThingMaker.MakeThing(item.thingDef);
-									thing2.stackCount = item.count;
-									GenPlace.TryPlaceThing(thing2, actor.Position, base.Map, ThingPlaceMode.Near);
+									Thing thing2 = ThingMaker.MakeThing(thingDefCountClass.thingDef, null);
+									thing2.stackCount = thingDefCountClass.count;
+									GenPlace.TryPlaceThing(thing2, actor.Position, this.Map, ThingPlaceMode.Near, null, null, null, 1);
 								}
 							}
 						}
 					}
 				}
-				plant.def.plant.soundHarvestFinish.PlayOneShot(actor);
-				plant.PlantCollected(pawn, PlantDestructionMode);
-				workDone = 0f;
-				ReadyForNextToil();
+				plant2.def.plant.soundHarvestFinish.PlayOneShot(actor);
+				plant2.PlantCollected(this.pawn, this.PlantDestructionMode);
+				this.workDone = 0f;
+				this.ReadyForNextToil();
+			};
+			cut.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+			if (this.RequiredDesignation != null)
+			{
+				cut.FailOnThingMissingDesignation(TargetIndex.A, this.RequiredDesignation);
 			}
-		};
-		cut.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-		if (RequiredDesignation != null)
-		{
-			cut.FailOnThingMissingDesignation(TargetIndex.A, RequiredDesignation);
+			cut.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+			cut.defaultCompleteMode = ToilCompleteMode.Never;
+			Toil cut2 = cut;
+			Plant plant = this.Plant;
+			cut2.WithEffect((plant != null && plant.def.plant.IsTree) ? EffecterDefOf.Harvest_Tree : EffecterDefOf.Harvest_Plant, TargetIndex.A, null);
+			cut.WithProgressBar(TargetIndex.A, () => this.workDone / this.Plant.def.plant.harvestWork, true, -0.5f, false);
+			cut.PlaySustainerOrSound(() => this.Plant.def.plant.soundHarvesting, 1f);
+			cut.activeSkill = (() => SkillDefOf.Plants);
+			yield return cut;
+			Toil toil2 = this.PlantWorkDoneToil();
+			if (toil2 != null)
+			{
+				yield return toil2;
+			}
+			yield return Toils_Jump.Jump(initExtractTargetFromQueue);
+			yield break;
 		}
-		cut.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-		cut.defaultCompleteMode = ToilCompleteMode.Never;
-		cut.WithEffect((Plant?.def.plant.IsTree ?? false) ? EffecterDefOf.Harvest_Tree : EffecterDefOf.Harvest_Plant, TargetIndex.A);
-		cut.WithProgressBar(TargetIndex.A, () => workDone / Plant.def.plant.harvestWork, interpolateBetweenActorAndTarget: true);
-		cut.PlaySustainerOrSound(() => Plant.def.plant.soundHarvesting);
-		cut.activeSkill = () => SkillDefOf.Plants;
-		yield return cut;
-		Toil toil2 = PlantWorkDoneToil();
-		if (toil2 != null)
+
+		// Token: 0x060079BC RID: 31164 RVA: 0x0024BD03 File Offset: 0x00249F03
+		public override void ExposeData()
 		{
-			yield return toil2;
+			base.ExposeData();
+			Scribe_Values.Look<float>(ref this.workDone, "workDone", 0f, false);
 		}
-		yield return Toils_Jump.Jump(initExtractTargetFromQueue);
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref workDone, "workDone", 0f);
-	}
+		// Token: 0x060079BD RID: 31165 RVA: 0x000026EA File Offset: 0x000008EA
+		protected virtual void Init()
+		{
+		}
 
-	protected virtual void Init()
-	{
-	}
+		// Token: 0x060079BE RID: 31166 RVA: 0x00002C42 File Offset: 0x00000E42
+		protected virtual Toil PlantWorkDoneToil()
+		{
+			return null;
+		}
 
-	protected virtual Toil PlantWorkDoneToil()
-	{
-		return null;
+		// Token: 0x04005283 RID: 21123
+		private float workDone;
+
+		// Token: 0x04005284 RID: 21124
+		protected float xpPerTick;
+
+		// Token: 0x04005285 RID: 21125
+		protected const TargetIndex PlantInd = TargetIndex.A;
 	}
 }

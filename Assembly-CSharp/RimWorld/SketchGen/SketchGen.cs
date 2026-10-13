@@ -1,33 +1,41 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public static class SketchGen
+namespace RimWorld.SketchGen
 {
-	private static bool working;
-
-	public static Sketch Generate(SketchResolverDef root, SketchResolveParams parms)
+	// Token: 0x0200389C RID: 14492
+	public static class SketchGen
 	{
-		if (working)
+		// Token: 0x0601405E RID: 82014 RVA: 0x005F24C8 File Offset: 0x005F06C8
+		public static Sketch Generate(SketchResolverDef root, SketchResolveParams parms)
 		{
-			Log.Error("Cannot call Generate() while already generating. Nested calls are not allowed.");
-			return parms.sketch;
+			if (SketchGen.working)
+			{
+				Log.Error("Cannot call Generate() while already generating. Nested calls are not allowed.");
+				return parms.sketch;
+			}
+			SketchGen.working = true;
+			Sketch sketch;
+			try
+			{
+				root.Resolve(parms);
+				sketch = parms.sketch;
+			}
+			catch (Exception ex)
+			{
+				string str = "Error in SketchGen: ";
+				Exception ex2 = ex;
+				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
+				sketch = parms.sketch;
+			}
+			finally
+			{
+				SketchGen.working = false;
+			}
+			return sketch;
 		}
-		working = true;
-		try
-		{
-			root.Resolve(parms);
-			return parms.sketch;
-		}
-		catch (Exception ex)
-		{
-			Log.Error("Error in SketchGen: " + ex);
-			return parms.sketch;
-		}
-		finally
-		{
-			working = false;
-		}
+
+		// Token: 0x0400DD2E RID: 56622
+		private static bool working;
 	}
 }

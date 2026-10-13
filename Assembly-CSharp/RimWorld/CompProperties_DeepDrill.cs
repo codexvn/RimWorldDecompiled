@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_DeepDrill : CompProperties
+namespace RimWorld
 {
-	public CompProperties_DeepDrill()
+	// Token: 0x02002C4F RID: 11343
+	public class CompProperties_DeepDrill : CompProperties
 	{
-		compClass = typeof(CompDeepDrill);
+		// Token: 0x0600FE5A RID: 65114 RVA: 0x0049BEDE File Offset: 0x0049A0DE
+		public CompProperties_DeepDrill()
+		{
+			this.compClass = typeof(CompDeepDrill);
+		}
 	}
 }

@@ -1,13 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class MentalStateWorker_RitualBlinding : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000FAB RID: 4011
+	public class MentalStateWorker_RitualBlinding : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x060062A0 RID: 25248 RVA: 0x001F15FD File Offset: 0x001EF7FD
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			return base.StateCanOccur(pawn) && RitualBlindingMentalStateUtility.FindPawnToBlind(pawn) != null;
 		}
-		return RitualBlindingMentalStateUtility.FindPawnToBlind(pawn) != null;
 	}
 }

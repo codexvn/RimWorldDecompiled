@@ -1,37 +1,41 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_EdgeStreet : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003958 RID: 14680
+	public class SymbolResolver_EdgeStreet : SymbolResolver
 	{
-		TerrainDef floorDef = rp.floorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction);
-		ResolveParams resolveParams = rp;
-		resolveParams.rect = new CellRect(rp.rect.minX, rp.rect.minZ, rp.rect.Width, 1);
-		resolveParams.floorDef = floorDef;
-		resolveParams.streetHorizontal = true;
-		BaseGen.symbolStack.Push("street", resolveParams);
-		if (rp.rect.Height > 1)
+		// Token: 0x0601431D RID: 82717 RVA: 0x0060609C File Offset: 0x0060429C
+		public override void Resolve(ResolveParams rp)
 		{
-			ResolveParams resolveParams2 = rp;
-			resolveParams2.rect = new CellRect(rp.rect.minX, rp.rect.maxZ, rp.rect.Width, 1);
-			resolveParams2.floorDef = floorDef;
-			resolveParams2.streetHorizontal = true;
-			BaseGen.symbolStack.Push("street", resolveParams2);
-		}
-		ResolveParams resolveParams3 = rp;
-		resolveParams3.rect = new CellRect(rp.rect.minX, rp.rect.minZ, 1, rp.rect.Height);
-		resolveParams3.floorDef = floorDef;
-		resolveParams3.streetHorizontal = false;
-		BaseGen.symbolStack.Push("street", resolveParams3);
-		if (rp.rect.Width > 1)
-		{
-			ResolveParams resolveParams4 = rp;
-			resolveParams4.rect = new CellRect(rp.rect.maxX, rp.rect.minZ, 1, rp.rect.Height);
-			resolveParams4.floorDef = floorDef;
-			resolveParams4.streetHorizontal = false;
-			BaseGen.symbolStack.Push("street", resolveParams4);
+			TerrainDef floorDef = rp.floorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction, false);
+			ResolveParams resolveParams = rp;
+			resolveParams.rect = new CellRect(rp.rect.minX, rp.rect.minZ, rp.rect.Width, 1);
+			resolveParams.floorDef = floorDef;
+			resolveParams.streetHorizontal = new bool?(true);
+			BaseGen.symbolStack.Push("street", resolveParams, null);
+			if (rp.rect.Height > 1)
+			{
+				ResolveParams resolveParams2 = rp;
+				resolveParams2.rect = new CellRect(rp.rect.minX, rp.rect.maxZ, rp.rect.Width, 1);
+				resolveParams2.floorDef = floorDef;
+				resolveParams2.streetHorizontal = new bool?(true);
+				BaseGen.symbolStack.Push("street", resolveParams2, null);
+			}
+			ResolveParams resolveParams3 = rp;
+			resolveParams3.rect = new CellRect(rp.rect.minX, rp.rect.minZ, 1, rp.rect.Height);
+			resolveParams3.floorDef = floorDef;
+			resolveParams3.streetHorizontal = new bool?(false);
+			BaseGen.symbolStack.Push("street", resolveParams3, null);
+			if (rp.rect.Width > 1)
+			{
+				ResolveParams resolveParams4 = rp;
+				resolveParams4.rect = new CellRect(rp.rect.maxX, rp.rect.minZ, 1, rp.rect.Height);
+				resolveParams4.floorDef = floorDef;
+				resolveParams4.streetHorizontal = new bool?(false);
+				BaseGen.symbolStack.Push("street", resolveParams4, null);
+			}
 		}
 	}
 }

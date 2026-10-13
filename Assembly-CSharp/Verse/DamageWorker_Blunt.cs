@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using LudeonTK;
@@ -6,121 +6,136 @@ using RimWorld;
 using RimWorld.Planet;
 using UnityEngine;
 
-namespace Verse;
-
-public class DamageWorker_Blunt : DamageWorker_AddInjury
+namespace Verse
 {
-	protected override BodyPartRecord ChooseHitPart(DamageInfo dinfo, Pawn pawn)
+	// Token: 0x02000667 RID: 1639
+	public class DamageWorker_Blunt : DamageWorker_AddInjury
 	{
-		return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside);
-	}
+		// Token: 0x06002948 RID: 10568 RVA: 0x000D999A File Offset: 0x000D7B9A
+		protected override BodyPartRecord ChooseHitPart(DamageInfo dinfo, Pawn pawn)
+		{
+			return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside, null);
+		}
 
-	protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageResult result)
-	{
-		bool flag = Rand.Chance(def.bluntInnerHitChance);
-		float num = (flag ? def.bluntInnerHitDamageFractionToConvert.RandomInRange : 0f);
-		float num2 = totalDamage * (1f - num);
-		DamageInfo lastInfo = dinfo;
-		while (true)
+		// Token: 0x06002949 RID: 10569 RVA: 0x000D99C4 File Offset: 0x000D7BC4
+		protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageWorker.DamageResult result)
 		{
-			num2 -= FinalizeAndAddInjury(pawn, num2, lastInfo, result);
-			if (!pawn.health.hediffSet.PartIsMissing(lastInfo.HitPart) || num2 <= 1f)
+			bool flag = Rand.Chance(this.def.bluntInnerHitChance);
+			float num = flag ? this.def.bluntInnerHitDamageFractionToConvert.RandomInRange : 0f;
+			float num2 = totalDamage * (1f - num);
+			DamageInfo lastInfo = dinfo;
+			for (;;)
 			{
-				break;
-			}
-			BodyPartRecord parent = lastInfo.HitPart.parent;
-			if (parent == null)
-			{
-				break;
-			}
-			lastInfo.SetHitPart(parent);
-		}
-		if (flag && !lastInfo.HitPart.def.IsSolid(lastInfo.HitPart, pawn.health.hediffSet.hediffs) && lastInfo.HitPart.depth == BodyPartDepth.Outside && (from bodyPartRecord in pawn.health.hediffSet.GetNotMissingParts()
-			where bodyPartRecord.parent == lastInfo.HitPart && bodyPartRecord.def.IsSolid(bodyPartRecord, pawn.health.hediffSet.hediffs) && bodyPartRecord.depth == BodyPartDepth.Inside
-			select bodyPartRecord).TryRandomElementByWeight((BodyPartRecord bodyPartRecord) => bodyPartRecord.coverageAbs, out var result2))
-		{
-			DamageInfo dinfo2 = lastInfo;
-			dinfo2.SetHitPart(result2);
-			float totalDamage2 = totalDamage * num + totalDamage * def.bluntInnerHitDamageFractionToAdd.RandomInRange;
-			FinalizeAndAddInjury(pawn, totalDamage2, dinfo2, result);
-		}
-		if (pawn.Dead)
-		{
-			return;
-		}
-		SimpleCurve simpleCurve = null;
-		if (lastInfo.HitPart.parent == null)
-		{
-			simpleCurve = def.bluntStunChancePerDamagePctOfCorePartToBodyCurve;
-		}
-		else
-		{
-			foreach (BodyPartRecord item in pawn.RaceProps.body.GetPartsWithTag(BodyPartTagDefOf.ConsciousnessSource))
-			{
-				if (InSameBranch(item, lastInfo.HitPart))
+				num2 -= base.FinalizeAndAddInjury(pawn, num2, lastInfo, result);
+				if (!pawn.health.hediffSet.PartIsMissing(lastInfo.HitPart) || num2 <= 1f)
 				{
-					simpleCurve = def.bluntStunChancePerDamagePctOfCorePartToHeadCurve;
 					break;
+				}
+				BodyPartRecord parent = lastInfo.HitPart.parent;
+				if (parent == null)
+				{
+					break;
+				}
+				lastInfo.SetHitPart(parent);
+			}
+			if (flag && !lastInfo.HitPart.def.IsSolid(lastInfo.HitPart, pawn.health.hediffSet.hediffs) && lastInfo.HitPart.depth == BodyPartDepth.Outside)
+			{
+				BodyPartRecord hitPart;
+				if ((from x in pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null)
+				where x.parent == lastInfo.HitPart && x.def.IsSolid(x, pawn.health.hediffSet.hediffs) && x.depth == BodyPartDepth.Inside
+				select x).TryRandomElementByWeight((BodyPartRecord x) => x.coverageAbs, out hitPart))
+				{
+					DamageInfo lastInfo2 = lastInfo;
+					lastInfo2.SetHitPart(hitPart);
+					float totalDamage2 = totalDamage * num + totalDamage * this.def.bluntInnerHitDamageFractionToAdd.RandomInRange;
+					base.FinalizeAndAddInjury(pawn, totalDamage2, lastInfo2, result);
+				}
+			}
+			if (!pawn.Dead)
+			{
+				SimpleCurve simpleCurve = null;
+				if (lastInfo.HitPart.parent == null)
+				{
+					simpleCurve = this.def.bluntStunChancePerDamagePctOfCorePartToBodyCurve;
+				}
+				else
+				{
+					foreach (BodyPartRecord lhs in pawn.RaceProps.body.GetPartsWithTag(BodyPartTagDefOf.ConsciousnessSource))
+					{
+						if (this.InSameBranch(lhs, lastInfo.HitPart))
+						{
+							simpleCurve = this.def.bluntStunChancePerDamagePctOfCorePartToHeadCurve;
+							break;
+						}
+					}
+				}
+				if (simpleCurve != null)
+				{
+					float x2 = totalDamage / pawn.def.race.body.corePart.def.GetMaxHealth(pawn);
+					if (Rand.Chance(simpleCurve.Evaluate(x2)))
+					{
+						DamageInfo dinfo2 = dinfo;
+						dinfo2.Def = DamageDefOf.Stun;
+						dinfo2.SetAmount((float)this.def.bluntStunDuration.SecondsToTicks() / 30f);
+						pawn.TakeDamage(dinfo2);
+					}
 				}
 			}
 		}
-		if (simpleCurve != null)
+
+		// Token: 0x0600294A RID: 10570 RVA: 0x000D9C90 File Offset: 0x000D7E90
+		[DebugOutput]
+		public static void StunChances()
 		{
-			float x = totalDamage / pawn.def.race.body.corePart.def.GetMaxHealth(pawn);
-			if (Rand.Chance(simpleCurve.Evaluate(x)))
+			Func<ThingDef, float, bool, string> bluntBodyStunChance = delegate(ThingDef d, float dam, bool onHead)
 			{
-				DamageInfo dinfo3 = dinfo;
-				dinfo3.Def = DamageDefOf.Stun;
-				dinfo3.SetAmount((float)def.bluntStunDuration.SecondsToTicks() / 30f);
-				pawn.TakeDamage(dinfo3);
+				SimpleCurve simpleCurve = onHead ? DamageDefOf.Blunt.bluntStunChancePerDamagePctOfCorePartToHeadCurve : DamageDefOf.Blunt.bluntStunChancePerDamagePctOfCorePartToBodyCurve;
+				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(d.race.AnyPawnKind, Find.FactionManager.FirstFactionOfDef(d.race.AnyPawnKind.defaultFactionDef), PawnGenerationContext.NonPlayer, null, true, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
+				float x = dam / d.race.body.corePart.def.GetMaxHealth(pawn);
+				Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
+				return Mathf.Clamp01(simpleCurve.Evaluate(x)).ToStringPercent();
+			};
+			List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
+			list.Add(new TableDataGetter<ThingDef>("defName", (ThingDef d) => d.defName));
+			list.Add(new TableDataGetter<ThingDef>("body size", (ThingDef d) => d.race.baseBodySize.ToString("F2")));
+			list.Add(new TableDataGetter<ThingDef>("health scale", (ThingDef d) => d.race.baseHealthScale.ToString("F2")));
+			list.Add(new TableDataGetter<ThingDef>("body size\n* health scale", (ThingDef d) => (d.race.baseHealthScale * d.race.baseBodySize).ToString("F2")));
+			list.Add(new TableDataGetter<ThingDef>("core part\nhealth", delegate(ThingDef d)
+			{
+				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(d.race.AnyPawnKind, Find.FactionManager.FirstFactionOfDef(d.race.AnyPawnKind.defaultFactionDef), PawnGenerationContext.NonPlayer, null, true, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
+				float maxHealth = d.race.body.corePart.def.GetMaxHealth(pawn);
+				Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
+				return maxHealth;
+			}));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n5", (ThingDef d) => bluntBodyStunChance(d, 5f, false)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n10", (ThingDef d) => bluntBodyStunChance(d, 10f, false)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n15", (ThingDef d) => bluntBodyStunChance(d, 15f, false)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n20", (ThingDef d) => bluntBodyStunChance(d, 20f, false)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n5", (ThingDef d) => bluntBodyStunChance(d, 5f, true)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n10", (ThingDef d) => bluntBodyStunChance(d, 10f, true)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n15", (ThingDef d) => bluntBodyStunChance(d, 15f, true)));
+			list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n20", (ThingDef d) => bluntBodyStunChance(d, 20f, true)));
+			DebugTables.MakeTablesDialog<ThingDef>(from d in DefDatabase<ThingDef>.AllDefs
+			where d.category == ThingCategory.Pawn
+			select d, list.ToArray());
+		}
+
+		// Token: 0x0600294B RID: 10571 RVA: 0x000D9ED0 File Offset: 0x000D80D0
+		private bool InSameBranch(BodyPartRecord lhs, BodyPartRecord rhs)
+		{
+			while (lhs.parent != null)
+			{
+				if (lhs.parent.parent == null)
+				{
+					break;
+				}
+				lhs = lhs.parent;
 			}
+			while (rhs.parent != null && rhs.parent.parent != null)
+			{
+				rhs = rhs.parent;
+			}
+			return lhs == rhs;
 		}
-	}
-
-	[DebugOutput]
-	public static void StunChances()
-	{
-		Func<ThingDef, float, bool, string> bluntBodyStunChance = delegate(ThingDef d, float dam, bool onHead)
-		{
-			SimpleCurve obj = (onHead ? DamageDefOf.Blunt.bluntStunChancePerDamagePctOfCorePartToHeadCurve : DamageDefOf.Blunt.bluntStunChancePerDamagePctOfCorePartToBodyCurve);
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(d.race.AnyPawnKind, Find.FactionManager.FirstFactionOfDef(d.race.AnyPawnKind.defaultFactionDef), PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: true));
-			float x = dam / d.race.body.corePart.def.GetMaxHealth(pawn);
-			Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
-			return Mathf.Clamp01(obj.Evaluate(x)).ToStringPercent();
-		};
-		List<TableDataGetter<ThingDef>> list = new List<TableDataGetter<ThingDef>>();
-		list.Add(new TableDataGetter<ThingDef>("defName", (ThingDef d) => d.defName));
-		list.Add(new TableDataGetter<ThingDef>("body size", (ThingDef d) => d.race.baseBodySize.ToString("F2")));
-		list.Add(new TableDataGetter<ThingDef>("health scale", (ThingDef d) => d.race.baseHealthScale.ToString("F2")));
-		list.Add(new TableDataGetter<ThingDef>("body size\n* health scale", (ThingDef d) => (d.race.baseHealthScale * d.race.baseBodySize).ToString("F2")));
-		list.Add(new TableDataGetter<ThingDef>("core part\nhealth", delegate(ThingDef d)
-		{
-			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(d.race.AnyPawnKind, Find.FactionManager.FirstFactionOfDef(d.race.AnyPawnKind.defaultFactionDef), PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: true));
-			float maxHealth = d.race.body.corePart.def.GetMaxHealth(pawn);
-			Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Discard);
-			return maxHealth;
-		}));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n5", (ThingDef d) => bluntBodyStunChance(d, 5f, arg3: false)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n10", (ThingDef d) => bluntBodyStunChance(d, 10f, arg3: false)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n15", (ThingDef d) => bluntBodyStunChance(d, 15f, arg3: false)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nbody\n20", (ThingDef d) => bluntBodyStunChance(d, 20f, arg3: false)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n5", (ThingDef d) => bluntBodyStunChance(d, 5f, arg3: true)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n10", (ThingDef d) => bluntBodyStunChance(d, 10f, arg3: true)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n15", (ThingDef d) => bluntBodyStunChance(d, 15f, arg3: true)));
-		list.Add(new TableDataGetter<ThingDef>("stun\nchance\nhead\n20", (ThingDef d) => bluntBodyStunChance(d, 20f, arg3: true)));
-		DebugTables.MakeTablesDialog(DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.category == ThingCategory.Pawn), list.ToArray());
-	}
-
-	private bool InSameBranch(BodyPartRecord lhs, BodyPartRecord rhs)
-	{
-		while (lhs.parent != null && lhs.parent.parent != null)
-		{
-			lhs = lhs.parent;
-		}
-		while (rhs.parent != null && rhs.parent.parent != null)
-		{
-			rhs = rhs.parent;
-		}
-		return lhs == rhs;
 	}
 }

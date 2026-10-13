@@ -1,34 +1,40 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class IdeoSymbolPartDef : Def
+namespace RimWorld
 {
-	public List<MemeDef> memes;
-
-	public List<CultureDef> cultures;
-
-	public bool CanBeChosenForIdeo(Ideo ideo)
+	// Token: 0x02001A4C RID: 6732
+	public class IdeoSymbolPartDef : Def
 	{
-		if (memes == null && cultures == null)
+		// Token: 0x0600976C RID: 38764 RVA: 0x002C36B8 File Offset: 0x002C18B8
+		public bool CanBeChosenForIdeo(Ideo ideo)
 		{
-			return true;
-		}
-		if (cultures != null && cultures.Contains(ideo.culture))
-		{
-			return true;
-		}
-		if (memes != null)
-		{
-			for (int i = 0; i < ideo.memes.Count; i++)
+			if (this.memes == null && this.cultures == null)
 			{
-				if (memes.Contains(ideo.memes[i]))
+				return true;
+			}
+			if (this.cultures != null && this.cultures.Contains(ideo.culture))
+			{
+				return true;
+			}
+			if (this.memes != null)
+			{
+				for (int i = 0; i < ideo.memes.Count; i++)
 				{
-					return true;
+					if (this.memes.Contains(ideo.memes[i]))
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04006479 RID: 25721
+		public List<MemeDef> memes;
+
+		// Token: 0x0400647A RID: 25722
+		public List<CultureDef> cultures;
 	}
 }

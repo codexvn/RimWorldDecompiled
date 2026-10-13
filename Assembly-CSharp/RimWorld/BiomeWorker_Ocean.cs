@@ -1,15 +1,19 @@
+﻿using System;
 using RimWorld.Planet;
 
-namespace RimWorld;
-
-public class BiomeWorker_Ocean : BiomeWorker
+namespace RimWorld
 {
-	public override float GetScore(BiomeDef biome, Tile tile, PlanetTile planetTile)
+	// Token: 0x02002565 RID: 9573
+	public class BiomeWorker_Ocean : BiomeWorker
 	{
-		if (!tile.WaterCovered)
+		// Token: 0x0600D18A RID: 53642 RVA: 0x003D9EEF File Offset: 0x003D80EF
+		public override float GetScore(BiomeDef biome, Tile tile, PlanetTile planetTile)
 		{
-			return -100f;
+			if (!tile.WaterCovered)
+			{
+				return -100f;
+			}
+			return 0f;
 		}
-		return 0f;
 	}
 }

@@ -1,73 +1,88 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_HaulToAtomizer : WorkGiver_Scanner
+namespace RimWorld
 {
-	private const float MaxFillPercent = 0.5f;
-
-	public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup(ThingRequestGroup.Atomizer);
-
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	// Token: 0x020015DC RID: 5596
+	public class WorkGiver_HaulToAtomizer : WorkGiver_Scanner
 	{
-		if (!ModLister.CheckBiotech("Haul to atomizer"))
+		// Token: 0x1700143C RID: 5180
+		// (get) Token: 0x06008423 RID: 33827 RVA: 0x00279FE7 File Offset: 0x002781E7
+		public override ThingRequest PotentialWorkThingRequest
 		{
-			return false;
+			get
+			{
+				return ThingRequest.ForGroup(ThingRequestGroup.Atomizer);
+			}
 		}
-		if (!pawn.CanReserve(t, 1, -1, null, forced))
-		{
-			return false;
-		}
-		CompAtomizer compAtomizer = t.TryGetComp<CompAtomizer>();
-		if (compAtomizer.Full)
-		{
-			JobFailReason.Is(HaulAIUtility.ContainerFullLowerTrans);
-			return false;
-		}
-		if (!forced && !compAtomizer.AutoLoad)
-		{
-			return false;
-		}
-		if (!forced && compAtomizer.FillPercent > 0.5f)
-		{
-			return false;
-		}
-		if (HaulAIUtility.FindFixedIngredientCount(pawn, compAtomizer.Props.thingDef, compAtomizer.SpaceLeft).NullOrEmpty())
-		{
-			JobFailReason.Is("NoIngredient".Translate(compAtomizer.Props.thingDef));
-			return false;
-		}
-		return true;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		CompAtomizer compAtomizer = t.TryGetComp<CompAtomizer>();
-		if (compAtomizer == null)
+		// Token: 0x06008424 RID: 33828 RVA: 0x00279FF0 File Offset: 0x002781F0
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return null;
+			if (!ModLister.CheckBiotech("Haul to atomizer"))
+			{
+				return false;
+			}
+			if (!pawn.CanReserve(t, 1, -1, null, forced))
+			{
+				return false;
+			}
+			CompAtomizer compAtomizer = t.TryGetComp<CompAtomizer>();
+			if (compAtomizer.Full)
+			{
+				JobFailReason.Is(HaulAIUtility.ContainerFullLowerTrans, null);
+				return false;
+			}
+			if (!forced && !compAtomizer.AutoLoad)
+			{
+				return false;
+			}
+			if (!forced && compAtomizer.FillPercent > 0.5f)
+			{
+				return false;
+			}
+			if (HaulAIUtility.FindFixedIngredientCount(pawn, compAtomizer.Props.thingDef, compAtomizer.SpaceLeft).NullOrEmpty<Thing>())
+			{
+				JobFailReason.Is("NoIngredient".Translate(compAtomizer.Props.thingDef), null);
+				return false;
+			}
+			return true;
 		}
-		if (compAtomizer.Full)
+
+		// Token: 0x06008425 RID: 33829 RVA: 0x0027A0A0 File Offset: 0x002782A0
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			JobFailReason.Is(HaulAIUtility.ContainerFullLowerTrans);
-			return null;
+			CompAtomizer compAtomizer = t.TryGetComp<CompAtomizer>();
+			if (compAtomizer == null)
+			{
+				return null;
+			}
+			if (compAtomizer.Full)
+			{
+				JobFailReason.Is(HaulAIUtility.ContainerFullLowerTrans, null);
+				return null;
+			}
+			if (!forced && !compAtomizer.AutoLoad)
+			{
+				return null;
+			}
+			List<Thing> list = HaulAIUtility.FindFixedIngredientCount(pawn, compAtomizer.Props.thingDef, compAtomizer.SpaceLeft);
+			if (list.NullOrEmpty<Thing>())
+			{
+				JobFailReason.Is("NoIngredient".Translate(compAtomizer.Props.thingDef), null);
+				return null;
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.HaulToAtomizer, t);
+			job.targetQueueB = (from f in list
+			select new LocalTargetInfo(f)).ToList<LocalTargetInfo>();
+			job.count = compAtomizer.SpaceLeft;
+			return job;
 		}
-		if (!forced && !compAtomizer.AutoLoad)
-		{
-			return null;
-		}
-		List<Thing> list = HaulAIUtility.FindFixedIngredientCount(pawn, compAtomizer.Props.thingDef, compAtomizer.SpaceLeft);
-		if (list.NullOrEmpty())
-		{
-			JobFailReason.Is("NoIngredient".Translate(compAtomizer.Props.thingDef));
-			return null;
-		}
-		Job job = JobMaker.MakeJob(JobDefOf.HaulToAtomizer, t);
-		job.targetQueueB = list.Select((Thing f) => new LocalTargetInfo(f)).ToList();
-		job.count = compAtomizer.SpaceLeft;
-		return job;
+
+		// Token: 0x0400570F RID: 22287
+		private const float MaxFillPercent = 0.5f;
 	}
 }

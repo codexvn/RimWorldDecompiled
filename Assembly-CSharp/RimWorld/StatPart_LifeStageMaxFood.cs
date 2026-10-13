@@ -1,23 +1,36 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_LifeStageMaxFood : StatPart
+namespace RimWorld
 {
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x020036E7 RID: 14055
+	public class StatPart_LifeStageMaxFood : StatPart
 	{
-		if (req.HasThing && req.Thing is Pawn pawn)
+		// Token: 0x060137FB RID: 79867 RVA: 0x005C9B68 File Offset: 0x005C7D68
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val *= pawn.ageTracker.CurLifeStage.foodMaxFactor;
+			if (req.HasThing)
+			{
+				Pawn pawn = req.Thing as Pawn;
+				if (pawn != null)
+				{
+					val *= pawn.ageTracker.CurLifeStage.foodMaxFactor;
+				}
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.HasThing && req.Thing is Pawn pawn)
+		// Token: 0x060137FC RID: 79868 RVA: 0x005C9BA4 File Offset: 0x005C7DA4
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "LifeStageMaxFood".Translate() + ": x" + pawn.ageTracker.CurLifeStage.foodMaxFactor.ToStringPercent();
+			if (req.HasThing)
+			{
+				Pawn pawn = req.Thing as Pawn;
+				if (pawn != null)
+				{
+					return "LifeStageMaxFood".Translate() + ": x" + pawn.ageTracker.CurLifeStage.foodMaxFactor.ToStringPercent();
+				}
+			}
+			return null;
 		}
-		return null;
 	}
 }

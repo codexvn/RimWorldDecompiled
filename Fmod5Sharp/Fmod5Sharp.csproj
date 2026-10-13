@@ -1,0 +1,26 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Fmod5Sharp</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <RootNamespace />
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Fmod5Sharp.Util.vorbis_headers_converted.json" />
+    <EmbeddedResource Include="Fmod5Sharp.Util.vorbis_headers_converted.json" LogicalName="Fmod5Sharp.Util.vorbis_headers_converted.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="NAudio.Core">
+      <HintPath>NAudio.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="OggVorbisEncoder">
+      <HintPath>OggVorbisEncoder.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

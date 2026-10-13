@@ -1,42 +1,48 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_AnimalPenNotEnclosed : Alert
+namespace RimWorld
 {
-	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
-
-	public Alert_AnimalPenNotEnclosed()
+	// Token: 0x0200302F RID: 12335
+	public class Alert_AnimalPenNotEnclosed : Alert
 	{
-		defaultLabel = "AlertAnimalPenNotEnclosed".Translate();
-		defaultExplanation = "AlertAnimalPenNotEnclosedDesc".Translate();
-	}
-
-	private void CalculateTargets()
-	{
-		targets.Clear();
-		foreach (Map map in Find.Maps)
+		// Token: 0x0601157A RID: 71034 RVA: 0x004F9799 File Offset: 0x004F7999
+		public Alert_AnimalPenNotEnclosed()
 		{
-			if (!map.IsPlayerHome)
+			this.defaultLabel = "AlertAnimalPenNotEnclosed".Translate();
+			this.defaultExplanation = "AlertAnimalPenNotEnclosedDesc".Translate();
+		}
+
+		// Token: 0x0601157B RID: 71035 RVA: 0x004F97D8 File Offset: 0x004F79D8
+		private void CalculateTargets()
+		{
+			this.targets.Clear();
+			foreach (Map map in Find.Maps)
 			{
-				continue;
-			}
-			foreach (Building allBuildingsAnimalPenMarker in map.listerBuildings.allBuildingsAnimalPenMarkers)
-			{
-				CompAnimalPenMarker compAnimalPenMarker = allBuildingsAnimalPenMarker.TryGetComp<CompAnimalPenMarker>();
-				if (!allBuildingsAnimalPenMarker.IsForbidden(Faction.OfPlayer) && compAnimalPenMarker.PenState.Unenclosed)
+				if (map.IsPlayerHome)
 				{
-					targets.Add(allBuildingsAnimalPenMarker);
+					foreach (Building building in map.listerBuildings.allBuildingsAnimalPenMarkers)
+					{
+						CompAnimalPenMarker compAnimalPenMarker = building.TryGetComp<CompAnimalPenMarker>();
+						if (!building.IsForbidden(Faction.OfPlayer) && compAnimalPenMarker.PenState.Unenclosed)
+						{
+							this.targets.Add(building);
+						}
+					}
 				}
 			}
 		}
-	}
 
-	public override AlertReport GetReport()
-	{
-		CalculateTargets();
-		return AlertReport.CulpritsAre(targets);
+		// Token: 0x0601157C RID: 71036 RVA: 0x004F98B0 File Offset: 0x004F7AB0
+		public override AlertReport GetReport()
+		{
+			this.CalculateTargets();
+			return AlertReport.CulpritsAre(this.targets);
+		}
+
+		// Token: 0x0400B39F RID: 45983
+		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
 	}
 }

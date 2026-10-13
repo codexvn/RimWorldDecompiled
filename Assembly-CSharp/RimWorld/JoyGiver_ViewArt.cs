@@ -1,60 +1,71 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_ViewArt : JoyGiver
+namespace RimWorld
 {
-	private static readonly List<Thing> candidates = new List<Thing>();
-
-	public override Job TryGiveJob(Pawn pawn)
+	// Token: 0x020014FA RID: 5370
+	public class JoyGiver_ViewArt : JoyGiver
 	{
-		bool allowedOutside = JoyUtility.EnjoyableOutsideNow(pawn);
-		try
+		// Token: 0x06008007 RID: 32775 RVA: 0x00268B9C File Offset: 0x00266D9C
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			candidates.AddRange(pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.Art).Where(delegate(Thing thing)
+			bool allowedOutside = JoyUtility.EnjoyableOutsideNow(pawn, null);
+			Job result;
+			try
 			{
-				if (!Validator(thing))
+				JoyGiver_ViewArt.candidates.AddRange(pawn.Map.listerThings.ThingsInGroup(ThingRequestGroup.Art).Where(delegate(Thing thing)
 				{
-					return false;
-				}
-				CompArt compArt = thing.TryGetComp<CompArt>();
-				if (compArt == null)
+					if (!base.<TryGiveJob>g__Validator|0(thing))
+					{
+						return false;
+					}
+					CompArt compArt = thing.TryGetComp<CompArt>();
+					if (compArt == null)
+					{
+						Log.Error(string.Format("No CompArt on thing being considered for viewing: {0}", thing));
+						return false;
+					}
+					if (!compArt.CanShowArt || !compArt.Props.canBeEnjoyedAsArt)
+					{
+						return false;
+					}
+					Room room = thing.GetRoom(RegionType.Set_All);
+					if (room == null)
+					{
+						return false;
+					}
+					if (room.Role.avoidViewingArtIfUnowned)
+					{
+						Pawn_Ownership ownership = pawn.ownership;
+						if (((ownership != null) ? ownership.OwnedRoom : null) == null || pawn.ownership.OwnedRoom != room)
+						{
+							return false;
+						}
+					}
+					return true;
+				}));
+				Thing t;
+				if (!JoyGiver_ViewArt.candidates.TryRandomElementByWeight((Thing target) => Mathf.Max(target.GetStatValue(StatDefOf.Beauty, true, -1), 0.5f), out t))
 				{
-					Log.Error($"No CompArt on thing being considered for viewing: {thing}");
-					return false;
+					result = null;
 				}
-				if (!compArt.CanShowArt || !compArt.Props.canBeEnjoyedAsArt)
+				else
 				{
-					return false;
+					result = JobMaker.MakeJob(this.def.jobDef, t);
 				}
-				Room room = thing.GetRoom();
-				if (room == null)
-				{
-					return false;
-				}
-				return (!room.Role.avoidViewingArtIfUnowned || (pawn.ownership?.OwnedRoom != null && pawn.ownership.OwnedRoom == room)) ? true : false;
-			}));
-			if (!candidates.TryRandomElementByWeight((Thing target) => Mathf.Max(target.GetStatValue(StatDefOf.Beauty), 0.5f), out var result))
-			{
-				return null;
 			}
-			return JobMaker.MakeJob(def.jobDef, result);
-		}
-		finally
-		{
-			candidates.Clear();
-		}
-		bool Validator(Thing thing)
-		{
-			if (thing.Faction == Faction.OfPlayer && (allowedOutside || thing.Position.Roofed(thing.Map)) && !thing.Fogged() && !thing.VacuumConcernTo(pawn) && thing.IsPoliticallyProper(pawn) && pawn.CanReserveAndReach(thing, PathEndMode.Touch, Danger.None))
+			finally
 			{
-				return !thing.IsForbidden(pawn);
+				JoyGiver_ViewArt.candidates.Clear();
 			}
-			return false;
+			return result;
 		}
+
+		// Token: 0x0400559B RID: 21915
+		private static readonly List<Thing> candidates = new List<Thing>();
 	}
 }

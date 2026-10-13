@@ -1,74 +1,87 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_IdeoChange : MentalState
+namespace Verse.AI
 {
-	private Ideo oldIdeo;
-
-	private Ideo newIdeo;
-
-	private Precept_Role oldRole;
-
-	private bool changedIdeo;
-
-	private float newCertainty;
-
-	private const float ConversionCertaintyReduction = 0.5f;
-
-	public override void PreStart()
+	// Token: 0x02000F8C RID: 3980
+	public class MentalState_IdeoChange : MentalState
 	{
-		base.PreStart();
-		oldIdeo = pawn.Ideo;
-		oldRole = oldIdeo.GetRole(pawn);
-		newIdeo = Find.IdeoManager.IdeosListForReading.RandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(pawn, x));
-		if (pawn.ideo.IdeoConversionAttempt(0.5f, newIdeo, applyCertaintyFactor: false))
+		// Token: 0x06006231 RID: 25137 RVA: 0x001F03EC File Offset: 0x001EE5EC
+		public override void PreStart()
 		{
-			changedIdeo = true;
+			base.PreStart();
+			this.oldIdeo = this.pawn.Ideo;
+			this.oldRole = this.oldIdeo.GetRole(this.pawn);
+			this.newIdeo = Find.IdeoManager.IdeosListForReading.RandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(this.pawn, x));
+			if (this.pawn.ideo.IdeoConversionAttempt(0.5f, this.newIdeo, false))
+			{
+				this.changedIdeo = true;
+			}
+			this.newCertainty = this.pawn.ideo.Certainty;
 		}
-		newCertainty = pawn.ideo.Certainty;
-	}
 
-	public override TaggedString GetBeginLetterText()
-	{
-		TaggedString result = def.beginLetter.Formatted(pawn.LabelShort, pawn.Named("PAWN"), pawn.Ideo.Named("NEWIDEO"), oldIdeo.Named("OLDIDEO")).CapitalizeFirst() + "\n\n";
-		if (changedIdeo)
+		// Token: 0x06006232 RID: 25138 RVA: 0x001F0484 File Offset: 0x001EE684
+		public override TaggedString GetBeginLetterText()
 		{
-			result += "LetterIdeoChangeConverted".Translate(pawn.Named("PAWN"), newIdeo.Named("NEWIDEO"), oldIdeo.Named("OLDIDEO")).CapitalizeFirst();
+			TaggedString taggedString = this.def.beginLetter.Formatted(this.pawn.LabelShort, this.pawn.Named("PAWN"), this.pawn.Ideo.Named("NEWIDEO"), this.oldIdeo.Named("OLDIDEO")).CapitalizeFirst() + "\n\n";
+			if (this.changedIdeo)
+			{
+				taggedString += "LetterIdeoChangeConverted".Translate(this.pawn.Named("PAWN"), this.newIdeo.Named("NEWIDEO"), this.oldIdeo.Named("OLDIDEO")).CapitalizeFirst();
+			}
+			else
+			{
+				taggedString += "LetterIdeoChangeNotConverted".Translate(this.pawn.Named("PAWN"), this.oldIdeo.Named("OLDIDEO"), this.newCertainty.ToStringPercent().Named("NEWCERTAINTY")).CapitalizeFirst();
+			}
+			MentalStateDef wanderToOwnRoomStateOrFallback = MentalStateUtility.GetWanderToOwnRoomStateOrFallback(this.pawn);
+			if (wanderToOwnRoomStateOrFallback == MentalStateDefOf.Wander_OwnRoom)
+			{
+				taggedString += "\n\n" + "LetterIdeoChangedWanderOwnRoom".Translate(this.pawn.Named("PAWN"));
+			}
+			else if (wanderToOwnRoomStateOrFallback == MentalStateDefOf.Wander_Sad)
+			{
+				taggedString += "\n\n" + "LetterIdeoChangedSadWander".Translate(this.pawn.Named("PAWN"));
+			}
+			if (this.changedIdeo && this.oldRole != null)
+			{
+				taggedString += "\n\n" + "LetterRoleLostLetterIdeoChangedPostfix".Translate(this.pawn.Named("PAWN"), this.oldRole.Named("ROLE"), this.oldIdeo.Named("OLDIDEO"));
+			}
+			return taggedString;
 		}
-		else
-		{
-			result += "LetterIdeoChangeNotConverted".Translate(pawn.Named("PAWN"), oldIdeo.Named("OLDIDEO"), newCertainty.ToStringPercent().Named("NEWCERTAINTY")).CapitalizeFirst();
-		}
-		MentalStateDef wanderToOwnRoomStateOrFallback = MentalStateUtility.GetWanderToOwnRoomStateOrFallback(pawn);
-		if (wanderToOwnRoomStateOrFallback == MentalStateDefOf.Wander_OwnRoom)
-		{
-			result += "\n\n" + "LetterIdeoChangedWanderOwnRoom".Translate(pawn.Named("PAWN"));
-		}
-		else if (wanderToOwnRoomStateOrFallback == MentalStateDefOf.Wander_Sad)
-		{
-			result += "\n\n" + "LetterIdeoChangedSadWander".Translate(pawn.Named("PAWN"));
-		}
-		if (changedIdeo && oldRole != null)
-		{
-			result += "\n\n" + "LetterRoleLostLetterIdeoChangedPostfix".Translate(pawn.Named("PAWN"), oldRole.Named("ROLE"), oldIdeo.Named("OLDIDEO"));
-		}
-		return result;
-	}
 
-	public override void PostStart(string reason)
-	{
-		base.PostStart(reason);
-		MentalStateUtility.TryTransitionToWanderOwnRoom(this);
-	}
+		// Token: 0x06006233 RID: 25139 RVA: 0x001F066A File Offset: 0x001EE86A
+		public override void PostStart(string reason)
+		{
+			base.PostStart(reason);
+			MentalStateUtility.TryTransitionToWanderOwnRoom(this);
+		}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_References.Look(ref oldIdeo, "oldIdeo");
-		Scribe_References.Look(ref newIdeo, "newIdeo");
-		Scribe_References.Look(ref oldRole, "oldRole");
-		Scribe_Values.Look(ref changedIdeo, "changedIdeo", defaultValue: false);
-		Scribe_Values.Look(ref newCertainty, "newCertainty", 0f);
+		// Token: 0x06006234 RID: 25140 RVA: 0x001F067C File Offset: 0x001EE87C
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_References.Look<Ideo>(ref this.oldIdeo, "oldIdeo", false);
+			Scribe_References.Look<Ideo>(ref this.newIdeo, "newIdeo", false);
+			Scribe_References.Look<Precept_Role>(ref this.oldRole, "oldRole", false);
+			Scribe_Values.Look<bool>(ref this.changedIdeo, "changedIdeo", false, false);
+			Scribe_Values.Look<float>(ref this.newCertainty, "newCertainty", 0f, false);
+		}
+
+		// Token: 0x04004663 RID: 18019
+		private Ideo oldIdeo;
+
+		// Token: 0x04004664 RID: 18020
+		private Ideo newIdeo;
+
+		// Token: 0x04004665 RID: 18021
+		private Precept_Role oldRole;
+
+		// Token: 0x04004666 RID: 18022
+		private bool changedIdeo;
+
+		// Token: 0x04004667 RID: 18023
+		private float newCertainty;
+
+		// Token: 0x04004668 RID: 18024
+		private const float ConversionCertaintyReduction = 0.5f;
 	}
 }

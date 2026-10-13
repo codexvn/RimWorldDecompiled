@@ -1,21 +1,26 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class MainTabWindowUtility
+namespace RimWorld
 {
-	public static void NotifyAllPawnTables_PawnsChanged()
+	// Token: 0x02001A89 RID: 6793
+	public static class MainTabWindowUtility
 	{
-		if (Find.WindowStack == null || !UnityData.IsInMainThread)
+		// Token: 0x06009858 RID: 39000 RVA: 0x002C7104 File Offset: 0x002C5304
+		public static void NotifyAllPawnTables_PawnsChanged()
 		{
-			return;
-		}
-		WindowStack windowStack = Find.WindowStack;
-		for (int i = 0; i < windowStack.Count; i++)
-		{
-			if (windowStack[i] is MainTabWindow_PawnTable mainTabWindow_PawnTable)
+			if (Find.WindowStack == null || !UnityData.IsInMainThread)
 			{
-				mainTabWindow_PawnTable.Notify_PawnsChanged();
+				return;
+			}
+			WindowStack windowStack = Find.WindowStack;
+			for (int i = 0; i < windowStack.Count; i++)
+			{
+				MainTabWindow_PawnTable mainTabWindow_PawnTable = windowStack[i] as MainTabWindow_PawnTable;
+				if (mainTabWindow_PawnTable != null)
+				{
+					mainTabWindow_PawnTable.Notify_PawnsChanged();
+				}
 			}
 		}
 	}

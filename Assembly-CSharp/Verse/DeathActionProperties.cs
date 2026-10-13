@@ -1,29 +1,36 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class DeathActionProperties
+namespace Verse
 {
-	public Type workerClass = typeof(DeathActionWorker_Simple);
-
-	private DeathActionWorker workerInt;
-
-	public DeathActionWorker Worker
+	// Token: 0x0200018D RID: 397
+	public class DeathActionProperties
 	{
-		get
+		// Token: 0x170001BA RID: 442
+		// (get) Token: 0x06000B49 RID: 2889 RVA: 0x00035C8B File Offset: 0x00033E8B
+		public DeathActionWorker Worker
 		{
-			if (workerInt == null)
+			get
 			{
-				workerInt = Activator.CreateInstance(workerClass) as DeathActionWorker;
-				workerInt.props = this;
+				if (this.workerInt == null)
+				{
+					this.workerInt = (Activator.CreateInstance(this.workerClass) as DeathActionWorker);
+					this.workerInt.props = this;
+				}
+				return this.workerInt;
 			}
-			return workerInt;
 		}
-	}
 
-	public virtual IEnumerable<string> ConfigErrors()
-	{
-		yield break;
+		// Token: 0x06000B4A RID: 2890 RVA: 0x00035CBD File Offset: 0x00033EBD
+		public virtual IEnumerable<string> ConfigErrors()
+		{
+			yield break;
+		}
+
+		// Token: 0x0400067A RID: 1658
+		public Type workerClass = typeof(DeathActionWorker_Simple);
+
+		// Token: 0x0400067B RID: 1659
+		private DeathActionWorker workerInt;
 	}
 }

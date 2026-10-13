@@ -1,55 +1,58 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetColonistCountFromColonyPercentage : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<float> colonyPercentage;
-
-	public SlateRef<int> mustHaveFreeColonistsAvailableCount;
-
-	public SlateRef<float?> minAge;
-
-	protected override void RunInt()
+	// Token: 0x02003A3A RID: 14906
+	public class QuestNode_GetColonistCountFromColonyPercentage : QuestNode
 	{
-		SetVars(QuestGen.slate);
-	}
-
-	private void SetVars(Slate slate)
-	{
-		string value = storeAs.GetValue(slate);
-		float minAgeResolved = minAge.GetValue(slate).GetValueOrDefault();
-		int num = PawnsFinder.AllMaps_FreeColonistsSpawned.Count((Pawn c) => ColonistCounts(c, minAgeResolved));
-		int var = Mathf.Clamp((int)((float)num * colonyPercentage.GetValue(slate)), 1, num - 1);
-		slate.Set(value, var);
-	}
-
-	protected override bool TestRunInt(Slate slate)
-	{
-		SetVars(slate);
-		float num = mustHaveFreeColonistsAvailableCount.GetValue(slate);
-		if (num > 0f)
+		// Token: 0x06014666 RID: 83558 RVA: 0x006183B0 File Offset: 0x006165B0
+		protected override void RunInt()
 		{
-			float minAgeResolved = minAge.GetValue(slate).GetValueOrDefault();
-			return (float)PawnsFinder.AllMaps_FreeColonistsSpawned.Count((Pawn c) => ColonistCounts(c, minAgeResolved)) >= num;
+			this.SetVars(QuestGen.slate);
 		}
-		return true;
-	}
 
-	private bool ColonistCounts(Pawn pawn, float minAge)
-	{
-		if (pawn.IsQuestLodger())
+		// Token: 0x06014667 RID: 83559 RVA: 0x006183C0 File Offset: 0x006165C0
+		private void SetVars(Slate slate)
 		{
-			return false;
+			string value = this.storeAs.GetValue(slate);
+			float minAgeResolved = this.minAge.GetValue(slate).GetValueOrDefault();
+			int num = PawnsFinder.AllMaps_FreeColonistsSpawned.Count((Pawn c) => this.ColonistCounts(c, minAgeResolved));
+			int var = Mathf.Clamp((int)((float)num * this.colonyPercentage.GetValue(slate)), 1, num - 1);
+			slate.Set<int>(value, var, false);
 		}
-		if (pawn.ageTracker.AgeBiologicalYearsFloat < minAge)
+
+		// Token: 0x06014668 RID: 83560 RVA: 0x0061843C File Offset: 0x0061663C
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			this.SetVars(slate);
+			float num = (float)this.mustHaveFreeColonistsAvailableCount.GetValue(slate);
+			if (num > 0f)
+			{
+				float minAgeResolved = this.minAge.GetValue(slate).GetValueOrDefault();
+				return (float)PawnsFinder.AllMaps_FreeColonistsSpawned.Count((Pawn c) => this.ColonistCounts(c, minAgeResolved)) >= num;
+			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x06014669 RID: 83561 RVA: 0x006184AC File Offset: 0x006166AC
+		private bool ColonistCounts(Pawn pawn, float minAge)
+		{
+			return !pawn.IsQuestLodger() && pawn.ageTracker.AgeBiologicalYearsFloat >= minAge;
+		}
+
+		// Token: 0x0400E17B RID: 57723
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E17C RID: 57724
+		public SlateRef<float> colonyPercentage;
+
+		// Token: 0x0400E17D RID: 57725
+		public SlateRef<int> mustHaveFreeColonistsAvailableCount;
+
+		// Token: 0x0400E17E RID: 57726
+		public SlateRef<float?> minAge;
 	}
 }

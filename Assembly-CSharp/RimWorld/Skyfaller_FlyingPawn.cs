@@ -1,49 +1,69 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class Skyfaller_FlyingPawn : Skyfaller
+namespace RimWorld
 {
-	public Pawn Pawn => (Pawn)innerContainer[0];
-
-	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	// Token: 0x02002B58 RID: 11096
+	public class Skyfaller_FlyingPawn : Skyfaller
 	{
-		base.SpawnSetup(map, respawningAfterLoad);
-		AnimationDef bestFlyAnimation = Pawn_FlightTracker.GetBestFlyAnimation(Pawn, Rot4.FromAngleFlat(angle));
-		if (bestFlyAnimation != null)
+		// Token: 0x170026F2 RID: 9970
+		// (get) Token: 0x0600F825 RID: 63525 RVA: 0x00482F94 File Offset: 0x00481194
+		public Pawn Pawn
 		{
-			Pawn.Drawer.renderer.SetAnimation(bestFlyAnimation);
+			get
+			{
+				return (Pawn)this.innerContainer[0];
+			}
 		}
-	}
 
-	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-	{
-		GetDrawPositionAndRotation(ref drawLoc, out var _);
-		Pawn?.DrawNowAt(drawLoc, flip);
-		DrawDropSpotShadow();
-	}
-
-	protected override void SpawnThings()
-	{
-		Pawn pawn = Pawn;
-		if (pawn != null)
+		// Token: 0x0600F826 RID: 63526 RVA: 0x00482FA8 File Offset: 0x004811A8
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
-			GenSpawn.Spawn(pawn, base.Position, base.Map);
-			pawn.Rotation = Rot4.East;
-			pawn.Drawer.renderer.SetAnimation(null);
+			base.SpawnSetup(map, respawningAfterLoad);
+			AnimationDef bestFlyAnimation = Pawn_FlightTracker.GetBestFlyAnimation(this.Pawn, new Rot4?(Rot4.FromAngleFlat(this.angle)));
+			if (bestFlyAnimation != null)
+			{
+				this.Pawn.Drawer.renderer.SetAnimation(bestFlyAnimation);
+			}
 		}
-	}
 
-	protected override void DrawDropSpotShadow()
-	{
-		Material shadowMaterial = base.ShadowMaterial;
-		if (shadowMaterial != null)
+		// Token: 0x0600F827 RID: 63527 RVA: 0x00482FF4 File Offset: 0x004811F4
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			Vector3 drawPos = DrawPos;
-			drawPos.y = AltitudeLayer.Shadows.AltitudeFor();
-			drawPos.z = base.Position.ToVector3Shifted().z;
-			Skyfaller.DrawDropSpotShadow(drawPos, base.Rotation, shadowMaterial, def.skyfaller.shadowSize, ticksToImpact);
+			float num;
+			this.GetDrawPositionAndRotation(ref drawLoc, out num);
+			Pawn pawn = this.Pawn;
+			if (pawn != null)
+			{
+				pawn.DrawNowAt(drawLoc, flip);
+			}
+			this.DrawDropSpotShadow();
+		}
+
+		// Token: 0x0600F828 RID: 63528 RVA: 0x00483024 File Offset: 0x00481224
+		protected override void SpawnThings()
+		{
+			Pawn pawn = this.Pawn;
+			if (pawn != null)
+			{
+				GenSpawn.Spawn(pawn, base.Position, base.Map, WipeMode.Vanish);
+				pawn.Rotation = Rot4.East;
+				pawn.Drawer.renderer.SetAnimation(null);
+			}
+		}
+
+		// Token: 0x0600F829 RID: 63529 RVA: 0x0048306C File Offset: 0x0048126C
+		protected override void DrawDropSpotShadow()
+		{
+			Material shadowMaterial = base.ShadowMaterial;
+			if (shadowMaterial != null)
+			{
+				Vector3 drawPos = this.DrawPos;
+				drawPos.y = AltitudeLayer.Shadows.AltitudeFor();
+				drawPos.z = base.Position.ToVector3Shifted().z;
+				Skyfaller.DrawDropSpotShadow(drawPos, base.Rotation, shadowMaterial, this.def.skyfaller.shadowSize, this.ticksToImpact);
+			}
 		}
 	}
 }

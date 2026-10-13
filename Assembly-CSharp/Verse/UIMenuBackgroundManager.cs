@@ -1,6 +1,11 @@
-namespace Verse;
+﻿using System;
 
-public static class UIMenuBackgroundManager
+namespace Verse
 {
-	public static UIMenuBackground background;
+	// Token: 0x02000B70 RID: 2928
+	public static class UIMenuBackgroundManager
+	{
+		// Token: 0x04003576 RID: 13686
+		public static UIMenuBackground background;
+	}
 }

@@ -1,6 +1,8 @@
-using System;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using RimWorld.Planet;
@@ -8,863 +10,813 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public class MainTabWindow_Quests : MainTabWindow
+namespace RimWorld
 {
-	private enum QuestsTab : byte
+	// Token: 0x02003405 RID: 13317
+	[StaticConstructorOnStartup]
+	public class MainTabWindow_Quests : MainTabWindow
 	{
-		Available,
-		Active,
-		Historical
-	}
-
-	private Quest selected;
-
-	private QuestsTab curTab;
-
-	private List<TabRecord> tabs = new List<TabRecord>();
-
-	private Vector2 scrollPosition_available;
-
-	private Vector2 scrollPosition_active;
-
-	private Vector2 scrollPosition_historical;
-
-	private Vector2 selectedQuestScrollPosition;
-
-	private float selectedQuestLastHeight;
-
-	private bool showDebugInfo;
-
-	private List<QuestPart> tmpQuestParts = new List<QuestPart>();
-
-	private string debugSendSignalTextField;
-
-	private bool showAll;
-
-	private QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
-
-	private const float LeftRectWidthFraction = 0.36f;
-
-	private const float RowHeight = 32f;
-
-	private const float CheckBoxHeight = 24f;
-
-	private const float ShowDebugInfoToggleWidth = 110f;
-
-	private const float DismisIconWidth = 32f;
-
-	private const float TimeInfoWidth = 35f;
-
-	private const float CharityIconWidth = 32f;
-
-	private static readonly Color TimeLimitColor = new Color(1f, 1f, 1f, 0.7f);
-
-	private static readonly Color AcceptanceRequirementsColor = new Color(1f, 0.25f, 0.25f);
-
-	private static readonly Color AcceptanceRequirementsBoxColor = new Color(0.62f, 0.18f, 0.18f);
-
-	private static readonly Color acceptanceRequirementsBoxBgColor = new Color(0.13f, 0.13f, 0.13f);
-
-	private static readonly Color IdeoCharityTextColor = new Color32(byte.MaxValue, 237, 38, byte.MaxValue);
-
-	private static readonly Color IdeoCharityBoxBorderColor = new Color32(205, 207, 18, byte.MaxValue);
-
-	private static readonly Color IdeoCharityBoxBackgroundColor = new Color(0.13f, 0.13f, 0.13f);
-
-	private static readonly Color QuestCompletedColor = GenColor.FromHex("1e591a");
-
-	private static readonly Color QuestFailedColor = GenColor.FromHex("5e2f2f");
-
-	private static readonly Color QuestExpiredColor = GenColor.FromHex("916e2d");
-
-	private const int RowIconSize = 15;
-
-	private const float RatingWidth = 60f;
-
-	private const float RewardsConfigButtonHeight = 40f;
-
-	private static Texture2D RatingIcon = null;
-
-	private static readonly Texture2D DismissIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Dismiss");
-
-	private static readonly Texture2D ResumeQuestIcon = ContentFinder<Texture2D>.Get("UI/Buttons/UnDismiss");
-
-	private static readonly Texture2D QuestDismissedIcon = ContentFinder<Texture2D>.Get("UI/Icons/DismissedQuestIcon");
-
-	private static readonly Texture2D CharityQuestIcon = ContentFinder<Texture2D>.Get("UI/Icons/CharityQuestIcon");
-
-	private const float IndentWidth = 10f;
-
-	private const float SearchBoxHeight = 24f;
-
-	private static List<Quest> tmpQuestsToShow = new List<Quest>();
-
-	private static HashSet<Quest> tmpQuestsVisited = new HashSet<Quest>();
-
-	private static List<Thing> tmpColonistsForIdeo = new List<Thing>();
-
-	private static readonly HashSet<string> uniqueEntries = new HashSet<string>();
-
-	private static List<GenUI.AnonymousStackElement> tmpStackElements = new List<GenUI.AnonymousStackElement>();
-
-	private static List<QuestPart> tmpRemainingQuestParts = new List<QuestPart>();
-
-	private static List<GlobalTargetInfo> tmpLookTargets = new List<GlobalTargetInfo>();
-
-	private static List<GlobalTargetInfo> tmpSelectTargets = new List<GlobalTargetInfo>();
-
-	public override Vector2 RequestedTabSize => new Vector2(1010f, 640f);
-
-	public override void PreOpen()
-	{
-		base.PreOpen();
-		quickSearchWidget.Reset();
-		if (RatingIcon == null)
+		// Token: 0x1700311D RID: 12573
+		// (get) Token: 0x06012BB3 RID: 76723 RVA: 0x00589E1F File Offset: 0x0058801F
+		public override Vector2 RequestedTabSize
 		{
-			RatingIcon = ContentFinder<Texture2D>.Get("UI/Icons/ChallengeRatingIcon");
-		}
-		tabs.Clear();
-		tabs.Add(new TabRecord("AvailableQuests".Translate(), delegate
-		{
-			curTab = QuestsTab.Available;
-			selected = null;
-		}, () => curTab == QuestsTab.Available));
-		tabs.Add(new TabRecord("ActiveQuests".Translate(), delegate
-		{
-			curTab = QuestsTab.Active;
-			selected = null;
-		}, () => curTab == QuestsTab.Active));
-		tabs.Add(new TabRecord("HistoricalQuests".Translate(), delegate
-		{
-			curTab = QuestsTab.Historical;
-			selected = null;
-		}, () => curTab == QuestsTab.Historical));
-		Select(selected);
-	}
-
-	public override void DoWindowContents(Rect rect)
-	{
-		Rect rect2 = rect;
-		rect2.yMin += 4f;
-		rect2.xMax = rect2.width * 0.36f;
-		rect2.yMax -= DoRewardsPrefsButton(rect2).height + 4f;
-		DoQuestsList(rect2);
-		Rect rect3 = rect;
-		rect3.yMin += 4f;
-		rect3.xMin = rect2.xMax + 17f;
-		DoSelectedQuestInfo(rect3);
-	}
-
-	public Rect DoRewardsPrefsButton(Rect rect)
-	{
-		rect.yMin = rect.yMax - 40f;
-		Text.Font = GameFont.Small;
-		if (Widgets.ButtonText(rect, "ChooseRewards".Translate()))
-		{
-			Find.WindowStack.Add(new Dialog_RewardPrefsConfig());
-		}
-		return rect;
-	}
-
-	public void Select(Quest quest)
-	{
-		if (quest != selected)
-		{
-			selected = quest;
-			selectedQuestScrollPosition = default(Vector2);
-			selectedQuestLastHeight = 300f;
-		}
-		if (quest != null)
-		{
-			if (quest.dismissed)
+			get
 			{
-				curTab = QuestsTab.Historical;
+				return new Vector2(1010f, 640f);
 			}
-			else if (quest.State == QuestState.NotYetAccepted)
+		}
+
+		// Token: 0x06012BB4 RID: 76724 RVA: 0x0058BD78 File Offset: 0x00589F78
+		public override void PreOpen()
+		{
+			base.PreOpen();
+			this.quickSearchWidget.Reset();
+			if (MainTabWindow_Quests.RatingIcon == null)
 			{
-				curTab = QuestsTab.Available;
+				MainTabWindow_Quests.RatingIcon = ContentFinder<Texture2D>.Get("UI/Icons/ChallengeRatingIcon", true);
 			}
-			else if (quest.State == QuestState.Ongoing)
+			this.tabs.Clear();
+			this.tabs.Add(new TabRecord("AvailableQuests".Translate(), delegate()
 			{
-				curTab = QuestsTab.Active;
+				this.curTab = MainTabWindow_Quests.QuestsTab.Available;
+				this.selected = null;
+			}, () => this.curTab == MainTabWindow_Quests.QuestsTab.Available));
+			this.tabs.Add(new TabRecord("ActiveQuests".Translate(), delegate()
+			{
+				this.curTab = MainTabWindow_Quests.QuestsTab.Active;
+				this.selected = null;
+			}, () => this.curTab == MainTabWindow_Quests.QuestsTab.Active));
+			this.tabs.Add(new TabRecord("HistoricalQuests".Translate(), delegate()
+			{
+				this.curTab = MainTabWindow_Quests.QuestsTab.Historical;
+				this.selected = null;
+			}, () => this.curTab == MainTabWindow_Quests.QuestsTab.Historical));
+			this.Select(this.selected);
+		}
+
+		// Token: 0x06012BB5 RID: 76725 RVA: 0x0058BE70 File Offset: 0x0058A070
+		public override void DoWindowContents(Rect rect)
+		{
+			Rect rect2 = rect;
+			rect2.yMin += 4f;
+			rect2.xMax = rect2.width * 0.36f;
+			rect2.yMax -= this.DoRewardsPrefsButton(rect2).height + 4f;
+			this.DoQuestsList(rect2);
+			Rect rect3 = rect;
+			rect3.yMin += 4f;
+			rect3.xMin = rect2.xMax + 17f;
+			this.DoSelectedQuestInfo(rect3);
+		}
+
+		// Token: 0x06012BB6 RID: 76726 RVA: 0x0058BF00 File Offset: 0x0058A100
+		public Rect DoRewardsPrefsButton(Rect rect)
+		{
+			rect.yMin = rect.yMax - 40f;
+			Text.Font = GameFont.Small;
+			if (Widgets.ButtonText(rect, "ChooseRewards".Translate(), true, true, true, null))
+			{
+				Find.WindowStack.Add(new Dialog_RewardPrefsConfig());
+			}
+			return rect;
+		}
+
+		// Token: 0x06012BB7 RID: 76727 RVA: 0x0058BF5C File Offset: 0x0058A15C
+		public void Select(Quest quest)
+		{
+			if (quest != this.selected)
+			{
+				this.selected = quest;
+				this.selectedQuestScrollPosition = default(Vector2);
+				this.selectedQuestLastHeight = 300f;
+			}
+			if (quest != null)
+			{
+				if (quest.dismissed)
+				{
+					this.curTab = MainTabWindow_Quests.QuestsTab.Historical;
+					return;
+				}
+				if (quest.State == QuestState.NotYetAccepted)
+				{
+					this.curTab = MainTabWindow_Quests.QuestsTab.Available;
+					return;
+				}
+				if (quest.State == QuestState.Ongoing)
+				{
+					this.curTab = MainTabWindow_Quests.QuestsTab.Active;
+					return;
+				}
+				this.curTab = MainTabWindow_Quests.QuestsTab.Historical;
+			}
+		}
+
+		// Token: 0x06012BB8 RID: 76728 RVA: 0x0058BFCC File Offset: 0x0058A1CC
+		private void DoQuestsList(Rect rect)
+		{
+			Rect rect2 = rect;
+			rect2.yMin += 32f;
+			Rect rect3 = new Rect(0f, rect2.yMax - 24f, rect2.width, 24f);
+			this.quickSearchWidget.OnGUI(rect3, null, null);
+			rect2.yMax -= 28f;
+			Widgets.DrawMenuSection(rect2);
+			TabDrawer.DrawTabs<TabRecord>(rect2, this.tabs, 200f);
+			if (DebugSettings.godMode)
+			{
+				this.showAll = true;
+			}
+			else if (Prefs.DevMode)
+			{
+				Widgets.CheckboxLabeled(new Rect(rect.width - 135f, rect2.yMax - 24f, 120f, 24f), "DEV: Show all", ref this.showAll, false, null, null, false, false);
 			}
 			else
 			{
-				curTab = QuestsTab.Historical;
+				this.showAll = false;
 			}
-		}
-	}
-
-	private void DoQuestsList(Rect rect)
-	{
-		Rect rect2 = rect;
-		rect2.yMin += 32f;
-		Rect rect3 = new Rect(0f, rect2.yMax - 24f, rect2.width, 24f);
-		quickSearchWidget.OnGUI(rect3);
-		rect2.yMax -= 28f;
-		Widgets.DrawMenuSection(rect2);
-		TabDrawer.DrawTabs(rect2, tabs);
-		if (DebugSettings.godMode)
-		{
-			showAll = true;
-		}
-		else if (Prefs.DevMode)
-		{
-			Widgets.CheckboxLabeled(new Rect(rect.width - 135f, rect2.yMax - 24f, 120f, 24f), "DEV: Show all", ref showAll);
-		}
-		else
-		{
-			showAll = false;
-		}
-		SortQuestsByTab();
-		Rect scrollOutRect;
-		Rect scrollViewRect;
-		Vector2 scrollPosition;
-		float curY;
-		if (tmpQuestsToShow.Count != 0)
-		{
-			scrollOutRect = rect2;
-			scrollOutRect = scrollOutRect.ContractedBy(10f);
-			scrollOutRect.xMax += 6f;
-			scrollViewRect = new Rect(0f, 0f, scrollOutRect.width - 16f, (float)tmpQuestsToShow.Count * 32f);
-			scrollPosition = default(Vector2);
-			switch (curTab)
+			this.SortQuestsByTab();
+			if (MainTabWindow_Quests.tmpQuestsToShow.Count != 0)
 			{
-			case QuestsTab.Available:
-				Widgets.BeginScrollView(scrollOutRect, ref scrollPosition_available, scrollViewRect);
-				scrollPosition = scrollPosition_available;
-				break;
-			case QuestsTab.Active:
-				Widgets.BeginScrollView(scrollOutRect, ref scrollPosition_active, scrollViewRect);
-				scrollPosition = scrollPosition_active;
-				break;
-			case QuestsTab.Historical:
-				Widgets.BeginScrollView(scrollOutRect, ref scrollPosition_historical, scrollViewRect);
-				scrollPosition = scrollPosition_historical;
-				break;
-			}
-			curY = 0f;
-			foreach (Quest item in tmpQuestsToShow)
-			{
-				DrawQuest(item);
-			}
-			tmpQuestsVisited.Clear();
-			tmpQuestsToShow.Clear();
-			Widgets.EndScrollView();
-		}
-		else
-		{
-			Widgets.NoneLabel(rect2.y + 17f, rect2.width);
-		}
-		void DrawQuest(Quest quest, int indent = 0)
-		{
-			if (tmpQuestsVisited.Contains(quest) || (quest.parent != null && tmpQuestsToShow.Contains(quest.parent) && !tmpQuestsVisited.Contains(quest.parent)))
-			{
+				MainTabWindow_Quests.<>c__DisplayClass49_0 CS$<>8__locals1;
+				CS$<>8__locals1.scrollOutRect = rect2;
+				CS$<>8__locals1.scrollOutRect = CS$<>8__locals1.scrollOutRect.ContractedBy(10f);
+				CS$<>8__locals1.scrollOutRect.xMax = CS$<>8__locals1.scrollOutRect.xMax + 6f;
+				CS$<>8__locals1.scrollViewRect = new Rect(0f, 0f, CS$<>8__locals1.scrollOutRect.width - 16f, (float)MainTabWindow_Quests.tmpQuestsToShow.Count * 32f);
+				CS$<>8__locals1.scrollPosition = default(Vector2);
+				switch (this.curTab)
+				{
+				case MainTabWindow_Quests.QuestsTab.Available:
+					Widgets.BeginScrollView(CS$<>8__locals1.scrollOutRect, ref this.scrollPosition_available, CS$<>8__locals1.scrollViewRect, true);
+					CS$<>8__locals1.scrollPosition = this.scrollPosition_available;
+					break;
+				case MainTabWindow_Quests.QuestsTab.Active:
+					Widgets.BeginScrollView(CS$<>8__locals1.scrollOutRect, ref this.scrollPosition_active, CS$<>8__locals1.scrollViewRect, true);
+					CS$<>8__locals1.scrollPosition = this.scrollPosition_active;
+					break;
+				case MainTabWindow_Quests.QuestsTab.Historical:
+					Widgets.BeginScrollView(CS$<>8__locals1.scrollOutRect, ref this.scrollPosition_historical, CS$<>8__locals1.scrollViewRect, true);
+					CS$<>8__locals1.scrollPosition = this.scrollPosition_historical;
+					break;
+				}
+				CS$<>8__locals1.curY = 0f;
+				foreach (Quest quest in MainTabWindow_Quests.tmpQuestsToShow)
+				{
+					this.<DoQuestsList>g__DrawQuest|49_0(quest, 0, ref CS$<>8__locals1);
+				}
+				MainTabWindow_Quests.tmpQuestsVisited.Clear();
+				MainTabWindow_Quests.tmpQuestsToShow.Clear();
+				Widgets.EndScrollView();
 				return;
 			}
-			float num = scrollPosition.y - 32f;
-			float num2 = scrollPosition.y + scrollOutRect.height;
-			if (curY > num && curY < num2)
+			Widgets.NoneLabel(rect2.y + 17f, rect2.width, null);
+		}
+
+		// Token: 0x06012BB9 RID: 76729 RVA: 0x0058C258 File Offset: 0x0058A458
+		private void SortQuestsByTab()
+		{
+			List<Quest> questsInDisplayOrder = Find.QuestManager.questsInDisplayOrder;
+			MainTabWindow_Quests.tmpQuestsToShow.Clear();
+			for (int i = 0; i < questsInDisplayOrder.Count; i++)
 			{
-				float num3 = (float)indent * 10f;
-				DoRow(new Rect(num3, curY, scrollViewRect.width - 4f - num3, 32f), quest);
-			}
-			curY += 32f;
-			tmpQuestsVisited.Add(quest);
-			indent++;
-			foreach (Quest subquest in quest.GetSubquests())
-			{
-				if (tmpQuestsToShow.Contains(subquest))
+				if (this.ShouldListNow(questsInDisplayOrder[i]) && this.quickSearchWidget.filter.Matches(questsInDisplayOrder[i].name))
 				{
-					DrawQuest(subquest, indent);
+					MainTabWindow_Quests.tmpQuestsToShow.Add(questsInDisplayOrder[i]);
 				}
 			}
-		}
-	}
-
-	private void SortQuestsByTab()
-	{
-		List<Quest> questsInDisplayOrder = Find.QuestManager.questsInDisplayOrder;
-		tmpQuestsToShow.Clear();
-		for (int i = 0; i < questsInDisplayOrder.Count; i++)
-		{
-			if (ShouldListNow(questsInDisplayOrder[i]) && quickSearchWidget.filter.Matches(questsInDisplayOrder[i].name))
+			switch (this.curTab)
 			{
-				tmpQuestsToShow.Add(questsInDisplayOrder[i]);
-			}
-		}
-		switch (curTab)
-		{
-		case QuestsTab.Available:
-			tmpQuestsToShow.SortBy((Quest q) => q.TicksUntilExpiry);
-			break;
-		case QuestsTab.Active:
-			tmpQuestsToShow.SortBy((Quest q) => q.TicksSinceAccepted);
-			break;
-		case QuestsTab.Historical:
-			tmpQuestsToShow.SortBy((Quest q) => q.TicksSinceCleanup);
-			break;
-		}
-	}
-
-	private void DoRow(Rect rect, Quest quest)
-	{
-		Rect rect2 = rect;
-		rect2.width -= 95f;
-		Rect rect3 = rect;
-		rect3.xMax -= 4f;
-		rect3.xMin = rect3.xMax - 35f;
-		Rect rect4 = rect;
-		rect4.xMax = rect3.xMin;
-		rect4.xMin = rect4.xMax - 60f;
-		if (quest.Historical)
-		{
-			Rect position = rect.ContractedBy(2f);
-			switch (quest.State)
-			{
-			case QuestState.EndedSuccess:
-				Widgets.DrawRectFast(position, QuestCompletedColor);
-				break;
-			case QuestState.EndedFailed:
-				Widgets.DrawRectFast(position, QuestFailedColor);
-				break;
+			case MainTabWindow_Quests.QuestsTab.Available:
+				MainTabWindow_Quests.tmpQuestsToShow.SortBy((Quest q) => q.TicksUntilExpiry);
+				return;
+			case MainTabWindow_Quests.QuestsTab.Active:
+				MainTabWindow_Quests.tmpQuestsToShow.SortBy((Quest q) => q.TicksSinceAccepted);
+				return;
+			case MainTabWindow_Quests.QuestsTab.Historical:
+				MainTabWindow_Quests.tmpQuestsToShow.SortBy((Quest q) => q.TicksSinceCleanup);
+				return;
 			default:
-				Widgets.DrawRectFast(position, QuestExpiredColor);
-				break;
+				return;
 			}
 		}
-		if (selected == quest)
-		{
-			Widgets.DrawHighlightSelected(rect);
-		}
-		Text.Anchor = TextAnchor.MiddleLeft;
-		Rect rect5 = new Rect(rect2.x + 4f, rect2.y, rect2.width - 4f, rect2.height);
-		Widgets.Label(rect5, quest.name.Truncate(rect5.width));
-		string timeTip;
-		Color color;
-		string shortTimeInfo = GetShortTimeInfo(quest, out timeTip, out color);
-		if (!shortTimeInfo.NullOrEmpty())
-		{
-			GUI.color = color;
-			Text.Anchor = TextAnchor.MiddleRight;
-			Widgets.Label(rect3, shortTimeInfo);
-			GUI.color = Color.white;
-			if (Mouse.IsOver(rect3))
-			{
-				TooltipHandler.TipRegion(rect3, () => quest.name + (timeTip.NullOrEmpty() ? "" : ("\n" + timeTip)), quest.id ^ 0x343115E2);
-				Widgets.DrawHighlight(rect3);
-			}
-		}
-		if (quest.dismissed && !quest.Historical)
-		{
-			rect4.x -= 25f;
-			Rect rect6 = new Rect(rect4.xMax + 5f, rect4.y + rect4.height / 2f - 7f, 15f, 15f);
-			GUI.DrawTexture(rect6, QuestDismissedIcon);
-			rect6.height = rect5.height;
-			rect6.y = rect5.y;
-			if (Mouse.IsOver(rect6))
-			{
-				TooltipHandler.TipRegion(rect6, "QuestDismissed".Translate());
-				Widgets.DrawHighlight(rect6);
-			}
-		}
-		if (ModsConfig.IdeologyActive && quest.charity && !quest.Historical && !quest.dismissed)
-		{
-			Rect rect7 = new Rect(rect4.x - 15f, rect4.y + rect4.height / 2f - 7f, 15f, 15f);
-			GUI.DrawTexture(rect7, CharityQuestIcon);
-			rect7.height = rect5.height;
-			rect7.y = rect5.y;
-			if (Mouse.IsOver(rect7))
-			{
-				TooltipHandler.TipRegion(rect7, "CharityQuestTip".Translate());
-				Widgets.DrawHighlight(rect7);
-			}
-		}
-		int num = Mathf.Max(quest.challengeRating, 1);
-		for (int num2 = 0; num2 < num; num2++)
-		{
-			GUI.DrawTexture(new Rect(rect4.xMax - (float)(15 * (num2 + 1)), rect4.y + rect4.height / 2f - 7f, 15f, 15f), RatingIcon);
-		}
-		if (Mouse.IsOver(rect4))
-		{
-			TooltipHandler.TipRegion(rect4, "QuestChallengeRatingTip".Translate());
-			Widgets.DrawHighlight(rect4);
-		}
-		GenUI.ResetLabelAlign();
-		if (Widgets.ButtonInvisible(rect))
-		{
-			Select(quest);
-			SoundDefOf.Click.PlayOneShotOnCamera();
-		}
-	}
 
-	private string GetShortTimeInfo(Quest quest, out string tip, out Color color)
-	{
-		color = Color.gray;
-		if (quest.State == QuestState.NotYetAccepted)
+		// Token: 0x06012BBA RID: 76730 RVA: 0x0058C360 File Offset: 0x0058A560
+		private void DoRow(Rect rect, Quest quest)
 		{
-			if (quest.TicksUntilExpiry >= 0)
-			{
-				color = ColorLibrary.RedReadable;
-				tip = "QuestExpiresIn".Translate(quest.TicksUntilExpiry.ToStringTicksToPeriod());
-				return quest.TicksUntilExpiry.ToStringTicksToPeriod(allowSeconds: true, shortForm: true);
-			}
-		}
-		else
-		{
+			Rect rect2 = rect;
+			rect2.width -= 95f;
+			Rect rect3 = rect;
+			rect3.xMax -= 4f;
+			rect3.xMin = rect3.xMax - 35f;
+			Rect rect4 = rect;
+			rect4.xMax = rect3.xMin;
+			rect4.xMin = rect4.xMax - 60f;
 			if (quest.Historical)
 			{
-				tip = "QuestFinishedAgo".Translate(quest.TicksSinceCleanup.ToStringTicksToPeriod());
-				return quest.TicksSinceCleanup.ToStringTicksToPeriod(allowSeconds: false, shortForm: true);
-			}
-			if (quest.EverAccepted)
-			{
-				foreach (QuestPart item in quest.PartsListForReading)
+				Rect position = rect.ContractedBy(2f);
+				QuestState state = quest.State;
+				if (state != QuestState.EndedSuccess)
 				{
-					if (item is QuestPart_Delay { State: QuestPartState.Enabled, isBad: not false } questPart_Delay && !questPart_Delay.expiryInfoPart.NullOrEmpty())
+					if (state != QuestState.EndedFailed)
 					{
-						color = ColorLibrary.RedReadable;
-						tip = "QuestExpiresIn".Translate(questPart_Delay.TicksLeft.ToStringTicksToPeriod());
-						return questPart_Delay.TicksLeft.ToStringTicksToPeriod(allowSeconds: false, shortForm: true, canUseDecimals: false);
+						Widgets.DrawRectFast(position, MainTabWindow_Quests.QuestExpiredColor, null);
+					}
+					else
+					{
+						Widgets.DrawRectFast(position, MainTabWindow_Quests.QuestFailedColor, null);
 					}
 				}
-				tip = GetAcceptedAgoByString(quest);
-				return quest.TicksSinceAccepted.ToStringTicksToPeriod(allowSeconds: false, shortForm: true);
-			}
-		}
-		tip = null;
-		return null;
-	}
-
-	private void DoSelectedQuestInfo(Rect rect)
-	{
-		Widgets.DrawMenuSection(rect);
-		if (selected == null)
-		{
-			Widgets.NoneLabelCenteredVertically(rect, "(" + "NoQuestSelected".Translate() + ")");
-			return;
-		}
-		Rect rect2 = rect.ContractedBy(17f);
-		Rect outRect = rect2;
-		Rect innerRect = new Rect(0f, 0f, outRect.width, selectedQuestLastHeight);
-		Rect rect3 = new Rect(0f, 0f, outRect.width - 16f, selectedQuestLastHeight);
-		Rect rect4 = rect3;
-		bool flag = rect3.height > rect2.height;
-		if (flag)
-		{
-			rect3.width -= 4f;
-			rect4.width -= 16f;
-		}
-		Widgets.BeginScrollView(outRect, ref selectedQuestScrollPosition, rect3);
-		float curY = 0f;
-		DoTitle(rect3, ref curY);
-		DoDismissButton(rect3, ref curY);
-		DoCharityIcon(rect3);
-		if (selected != null)
-		{
-			float curYBeforeAcceptButton = curY;
-			DoAcceptButton(rect3, ref curY);
-			DoRightAlignedInfo(rect3, ref curY, curYBeforeAcceptButton);
-			DoOutcomeInfo(rect3, ref curY);
-			DoDescription(rect3, ref curY);
-			DoAcceptanceRequirementInfo(innerRect, flag, ref curY);
-			DoIdeoCharityInfo(innerRect, flag, ref curY);
-			DoRewards(rect3, ref curY);
-			DoLookTargets(rect3, ref curY);
-			DoSelectTargets(rect3, ref curY);
-			float num = curY;
-			DoDefHyperlinks(rect3, ref curY);
-			float num2 = curY;
-			curY = num;
-			if (selected.root != null && !selected.root.hideInvolvedFactionsInfo)
-			{
-				DoFactionInfo(rect4, ref curY);
-			}
-			DoDebugInfoToggle(rect3, ref curY);
-			if (num2 > curY)
-			{
-				curY = num2;
-			}
-			DoDebugInfo(rect3, ref curY);
-			selectedQuestLastHeight = curY;
-		}
-		Widgets.EndScrollView();
-	}
-
-	private void DoTitle(Rect innerRect, ref float curY)
-	{
-		Text.Font = GameFont.Medium;
-		Rect rect = new Rect(innerRect.x, curY, innerRect.width, 100f);
-		Widgets.Label(rect, selected.name.Truncate(rect.width));
-		Text.Font = GameFont.Small;
-		curY += Text.LineHeight;
-		curY += 17f;
-	}
-
-	private void DoDismissButton(Rect innerRect, ref float curY)
-	{
-		Rect rect = new Rect(innerRect.xMax - 32f - 4f, innerRect.y, 32f, 32f);
-		Texture2D tex = ((!selected.Historical && selected.dismissed) ? ResumeQuestIcon : DismissIcon);
-		if (Widgets.ButtonImage(rect, tex))
-		{
-			if (selected.Historical)
-			{
-				selected.hiddenInUI = true;
-				SoundDefOf.Tick_High.PlayOneShotOnCamera();
-				Select(null);
-				return;
-			}
-			selected.dismissed = !selected.dismissed;
-			foreach (Quest subquest in selected.GetSubquests())
-			{
-				subquest.dismissed = selected.dismissed;
-			}
-			if (selected.dismissed)
-			{
-				SoundDefOf.Tick_Low.PlayOneShotOnCamera();
-				SortQuestsByTab();
-				selected = tmpQuestsToShow.FirstOrDefault((Quest x) => ShouldListNow(x));
-				tmpQuestsToShow.Clear();
-				return;
-			}
-			SoundDefOf.Tick_High.PlayOneShotOnCamera();
-			Select(selected);
-		}
-		if (Mouse.IsOver(rect))
-		{
-			string key = (selected.Historical ? "DeleteQuest" : (selected.dismissed ? "UnDismissQuest" : "DismissQuest"));
-			TooltipHandler.TipRegion(rect, key.Translate());
-		}
-	}
-
-	private void DoCharityIcon(Rect innerRect)
-	{
-		if (selected != null && selected.charity && ModsConfig.IdeologyActive)
-		{
-			Rect rect = new Rect(innerRect.xMax - 32f - 26f - 32f - 4f, innerRect.y, 32f, 32f);
-			GUI.DrawTexture(rect, CharityQuestIcon);
-			if (Mouse.IsOver(rect))
-			{
-				TooltipHandler.TipRegion(rect, "CharityQuestTip".Translate());
-			}
-		}
-	}
-
-	private void DoDebugInfoToggle(Rect innerRect, ref float curY)
-	{
-		if (!Prefs.DevMode)
-		{
-			showDebugInfo = false;
-			return;
-		}
-		if (DebugSettings.godMode)
-		{
-			showDebugInfo = true;
-			return;
-		}
-		Widgets.CheckboxLabeled(new Rect(innerRect.xMax - 110f, curY, 110f, 30f), "DEV: Show debug info", ref showDebugInfo);
-		curY += 30f;
-	}
-
-	private void DoAcceptButton(Rect innerRect, ref float curY)
-	{
-		QuestPart_Choice questPart_Choice = null;
-		List<QuestPart> partsListForReading = selected.PartsListForReading;
-		for (int i = 0; i < partsListForReading.Count; i++)
-		{
-			questPart_Choice = partsListForReading[i] as QuestPart_Choice;
-			if (questPart_Choice != null)
-			{
-				break;
-			}
-		}
-		if (questPart_Choice != null && !Prefs.DevMode)
-		{
-			return;
-		}
-		curY += 17f;
-		if (selected.State != QuestState.NotYetAccepted)
-		{
-			return;
-		}
-		float num = innerRect.x;
-		if (questPart_Choice == null)
-		{
-			Rect rect = new Rect(num, curY, 180f, 40f);
-			AcceptanceReport acceptanceReport = QuestUtility.CanAcceptQuest(selected);
-			if (!acceptanceReport.Accepted)
-			{
-				GUI.color = Color.grey;
-				TooltipHandler.TipRegion(rect, acceptanceReport.Reason.Colorize(ColoredText.WarningColor));
-			}
-			if (Widgets.ButtonText(rect, "AcceptQuest".Translate()))
-			{
-				AcceptQuestByInterface(null, selected.RequiresAccepter);
-			}
-			num += rect.width + 10f;
-			GUI.color = Color.white;
-		}
-		if (Prefs.DevMode && Widgets.ButtonText(new Rect(num, curY, 180f, 40f), "DEV: Accept instantly"))
-		{
-			SoundDefOf.Quest_Accepted.PlayOneShotOnCamera();
-			if (questPart_Choice != null && questPart_Choice.choices.Any())
-			{
-				questPart_Choice.Choose(questPart_Choice.choices.RandomElement());
-			}
-			selected.Accept(PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended.Where((Pawn p) => QuestUtility.CanPawnAcceptQuest(p, selected)).RandomElementWithFallback());
-			selected.dismissed = false;
-			Select(selected);
-		}
-		curY += 44f;
-	}
-
-	private void DoRightAlignedInfo(Rect innerRect, ref float curY, float curYBeforeAcceptButton)
-	{
-		bool flag = false;
-		Vector2 locForDates = QuestUtility.GetLocForDates();
-		float num = curYBeforeAcceptButton;
-		if (!selected.initiallyAccepted && selected.EverAccepted)
-		{
-			if (!flag)
-			{
-				num += 17f;
-				flag = true;
-			}
-			Rect rect = new Rect(innerRect.x, num, innerRect.width, 25f);
-			GUI.color = TimeLimitColor;
-			Text.Anchor = TextAnchor.MiddleRight;
-			string text = (selected.Historical ? GetAcceptedOnByString(selected) : GetAcceptedAgoByString(selected));
-			Widgets.Label(rect, text);
-			GUI.color = Color.white;
-			Text.Anchor = TextAnchor.UpperLeft;
-			rect.xMin = rect.xMax - Text.CalcSize(text).x;
-			if (Mouse.IsOver(rect))
-			{
-				TooltipHandler.TipRegion(rect, selected.Historical ? GetAcceptedAgoByString(selected) : GetAcceptedOnByString(selected));
-			}
-			if (selected.AccepterPawn != null && CameraJumper.CanJump(selected.AccepterPawn))
-			{
-				Widgets.DrawHighlightIfMouseover(rect);
-				if (Widgets.ButtonInvisible(rect))
+				else
 				{
-					CameraJumper.TryJumpAndSelect(selected.AccepterPawn);
-					Find.MainTabsRoot.EscapeCurrentTab();
+					Widgets.DrawRectFast(position, MainTabWindow_Quests.QuestCompletedColor, null);
 				}
 			}
-			num += Text.LineHeight;
-		}
-		else if (selected.Historical)
-		{
-			if (!flag)
+			if (this.selected == quest)
 			{
-				num += 17f;
-				flag = true;
+				Widgets.DrawHighlightSelected(rect);
 			}
-			Rect rect2 = new Rect(innerRect.x, num, innerRect.width, 25f);
-			GUI.color = TimeLimitColor;
-			Text.Anchor = TextAnchor.MiddleRight;
-			TaggedString taggedString = "AppearedOn".Translate(GenDate.DateFullStringWithHourAt(GenDate.TickGameToAbs(selected.appearanceTick), locForDates));
-			Widgets.Label(rect2, taggedString);
-			GUI.color = Color.white;
-			Text.Anchor = TextAnchor.UpperLeft;
-			rect2.xMin = rect2.xMax - Text.CalcSize(taggedString).x;
-			if (Mouse.IsOver(rect2))
+			Text.Anchor = TextAnchor.MiddleLeft;
+			Rect rect5 = new Rect(rect2.x + 4f, rect2.y, rect2.width - 4f, rect2.height);
+			Widgets.Label(rect5, quest.name.Truncate(rect5.width, null));
+			string timeTip;
+			Color color;
+			string shortTimeInfo = this.GetShortTimeInfo(quest, out timeTip, out color);
+			if (!shortTimeInfo.NullOrEmpty())
 			{
-				TooltipHandler.TipRegion(rect2, "AppearedDaysAgo".Translate(((float)selected.TicksSinceAppeared / 60000f).ToString("0.#")));
-			}
-			num += Text.LineHeight;
-		}
-		if (selected.State == QuestState.NotYetAccepted && selected.TicksUntilExpiry > 0)
-		{
-			if (!flag)
-			{
-				num += 17f;
-				flag = true;
-			}
-			Rect rect3 = new Rect(innerRect.x, num, innerRect.width, 25f);
-			GUI.color = TimeLimitColor;
-			Text.Anchor = TextAnchor.MiddleRight;
-			string text2 = "QuestExpiresIn".Translate(selected.TicksUntilExpiry.ToStringTicksToPeriod());
-			Widgets.Label(rect3, text2);
-			GUI.color = Color.white;
-			Text.Anchor = TextAnchor.UpperLeft;
-			rect3.xMin = rect3.xMax - Text.CalcSize(text2).x;
-			if (Mouse.IsOver(rect3))
-			{
-				TooltipHandler.TipRegion(rect3, "QuestExpiresOn".Translate(GenDate.DateFullStringWithHourAt(Find.TickManager.TicksAbs + selected.TicksUntilExpiry, locForDates)));
-			}
-			num += Text.LineHeight;
-		}
-		if (selected.State == QuestState.Ongoing)
-		{
-			tmpQuestParts.Clear();
-			tmpQuestParts.AddRange(selected.PartsListForReading);
-			tmpQuestParts.SortBy((QuestPart x) => (x is QuestPartActivable) ? ((QuestPartActivable)x).EnableTick : 0);
-			for (int num2 = 0; num2 < tmpQuestParts.Count; num2++)
-			{
-				if (!(tmpQuestParts[num2] is QuestPartActivable { State: QuestPartState.Enabled, ExpiryInfoPart: var expiryInfoPart } questPartActivable) || expiryInfoPart.NullOrEmpty())
+				GUI.color = color;
+				Text.Anchor = TextAnchor.MiddleRight;
+				Widgets.Label(rect3, shortTimeInfo);
+				GUI.color = Color.white;
+				if (Mouse.IsOver(rect3))
 				{
-					continue;
+					TooltipHandler.TipRegion(rect3, () => quest.name + (timeTip.NullOrEmpty() ? "" : ("\n" + timeTip)), quest.id ^ 875632098);
+					Widgets.DrawHighlight(rect3);
 				}
+			}
+			if (quest.dismissed && !quest.Historical)
+			{
+				rect4.x -= 25f;
+				Rect rect6 = new Rect(rect4.xMax + 5f, rect4.y + rect4.height / 2f - 7f, 15f, 15f);
+				GUI.DrawTexture(rect6, MainTabWindow_Quests.QuestDismissedIcon);
+				rect6.height = rect5.height;
+				rect6.y = rect5.y;
+				if (Mouse.IsOver(rect6))
+				{
+					TooltipHandler.TipRegion(rect6, "QuestDismissed".Translate());
+					Widgets.DrawHighlight(rect6);
+				}
+			}
+			if (ModsConfig.IdeologyActive && quest.charity && !quest.Historical && !quest.dismissed)
+			{
+				Rect rect7 = new Rect(rect4.x - 15f, rect4.y + rect4.height / 2f - 7f, 15f, 15f);
+				GUI.DrawTexture(rect7, MainTabWindow_Quests.CharityQuestIcon);
+				rect7.height = rect5.height;
+				rect7.y = rect5.y;
+				if (Mouse.IsOver(rect7))
+				{
+					TooltipHandler.TipRegion(rect7, "CharityQuestTip".Translate());
+					Widgets.DrawHighlight(rect7);
+				}
+			}
+			int num = Mathf.Max(quest.challengeRating, 1);
+			for (int i = 0; i < num; i++)
+			{
+				GUI.DrawTexture(new Rect(rect4.xMax - (float)(15 * (i + 1)), rect4.y + rect4.height / 2f - 7f, 15f, 15f), MainTabWindow_Quests.RatingIcon);
+			}
+			if (Mouse.IsOver(rect4))
+			{
+				TooltipHandler.TipRegion(rect4, "QuestChallengeRatingTip".Translate());
+				Widgets.DrawHighlight(rect4);
+			}
+			GenUI.ResetLabelAlign();
+			if (Widgets.ButtonInvisible(rect, true))
+			{
+				this.Select(quest);
+				SoundDefOf.Click.PlayOneShotOnCamera(null);
+			}
+		}
+
+		// Token: 0x06012BBB RID: 76731 RVA: 0x0058C73C File Offset: 0x0058A93C
+		private string GetShortTimeInfo(Quest quest, out string tip, out Color color)
+		{
+			color = Color.gray;
+			if (quest.State == QuestState.NotYetAccepted)
+			{
+				if (quest.TicksUntilExpiry >= 0)
+				{
+					color = ColorLibrary.RedReadable;
+					tip = "QuestExpiresIn".Translate(quest.TicksUntilExpiry.ToStringTicksToPeriod(true, false, true, true, false));
+					return quest.TicksUntilExpiry.ToStringTicksToPeriod(true, true, true, true, false);
+				}
+			}
+			else
+			{
+				if (quest.Historical)
+				{
+					tip = "QuestFinishedAgo".Translate(quest.TicksSinceCleanup.ToStringTicksToPeriod(true, false, true, true, false));
+					return quest.TicksSinceCleanup.ToStringTicksToPeriod(false, true, true, true, false);
+				}
+				if (quest.EverAccepted)
+				{
+					foreach (QuestPart questPart in quest.PartsListForReading)
+					{
+						QuestPart_Delay questPart_Delay = questPart as QuestPart_Delay;
+						if (questPart_Delay != null && questPart_Delay.State == QuestPartState.Enabled && questPart_Delay.isBad && !questPart_Delay.expiryInfoPart.NullOrEmpty())
+						{
+							color = ColorLibrary.RedReadable;
+							tip = "QuestExpiresIn".Translate(questPart_Delay.TicksLeft.ToStringTicksToPeriod(true, false, true, true, false));
+							return questPart_Delay.TicksLeft.ToStringTicksToPeriod(false, true, false, true, false);
+						}
+					}
+					tip = this.GetAcceptedAgoByString(quest);
+					return quest.TicksSinceAccepted.ToStringTicksToPeriod(false, true, true, true, false);
+				}
+			}
+			tip = null;
+			return null;
+		}
+
+		// Token: 0x06012BBC RID: 76732 RVA: 0x0058C8C0 File Offset: 0x0058AAC0
+		private void DoSelectedQuestInfo(Rect rect)
+		{
+			Widgets.DrawMenuSection(rect);
+			if (this.selected == null)
+			{
+				Widgets.NoneLabelCenteredVertically(rect, "(" + "NoQuestSelected".Translate() + ")");
+				return;
+			}
+			Rect rect2 = rect.ContractedBy(17f);
+			Rect outRect = rect2;
+			Rect innerRect = new Rect(0f, 0f, outRect.width, this.selectedQuestLastHeight);
+			Rect rect3 = new Rect(0f, 0f, outRect.width - 16f, this.selectedQuestLastHeight);
+			Rect rect4 = rect3;
+			bool flag = rect3.height > rect2.height;
+			if (flag)
+			{
+				rect3.width -= 4f;
+				rect4.width -= 16f;
+			}
+			Widgets.BeginScrollView(outRect, ref this.selectedQuestScrollPosition, rect3, true);
+			float num = 0f;
+			this.DoTitle(rect3, ref num);
+			this.DoDismissButton(rect3, ref num);
+			this.DoCharityIcon(rect3);
+			if (this.selected != null)
+			{
+				float curYBeforeAcceptButton = num;
+				this.DoAcceptButton(rect3, ref num);
+				this.DoRightAlignedInfo(rect3, ref num, curYBeforeAcceptButton);
+				this.DoOutcomeInfo(rect3, ref num);
+				this.DoDescription(rect3, ref num);
+				this.DoAcceptanceRequirementInfo(innerRect, flag, ref num);
+				this.DoIdeoCharityInfo(innerRect, flag, ref num);
+				this.DoRewards(rect3, ref num);
+				this.DoLookTargets(rect3, ref num);
+				this.DoSelectTargets(rect3, ref num);
+				float num2 = num;
+				this.DoDefHyperlinks(rect3, ref num);
+				float num3 = num;
+				num = num2;
+				if (this.selected.root != null && !this.selected.root.hideInvolvedFactionsInfo)
+				{
+					this.DoFactionInfo(rect4, ref num);
+				}
+				this.DoDebugInfoToggle(rect3, ref num);
+				if (num3 > num)
+				{
+					num = num3;
+				}
+				this.DoDebugInfo(rect3, ref num);
+				this.selectedQuestLastHeight = num;
+			}
+			Widgets.EndScrollView();
+		}
+
+		// Token: 0x06012BBD RID: 76733 RVA: 0x0058CA8C File Offset: 0x0058AC8C
+		private void DoTitle(Rect innerRect, ref float curY)
+		{
+			Text.Font = GameFont.Medium;
+			Rect rect = new Rect(innerRect.x, curY, innerRect.width, 100f);
+			Widgets.Label(rect, this.selected.name.Truncate(rect.width, null));
+			Text.Font = GameFont.Small;
+			curY += Text.LineHeight;
+			curY += 17f;
+		}
+
+		// Token: 0x06012BBE RID: 76734 RVA: 0x0058CAF4 File Offset: 0x0058ACF4
+		private void DoDismissButton(Rect innerRect, ref float curY)
+		{
+			Rect rect = new Rect(innerRect.xMax - 32f - 4f, innerRect.y, 32f, 32f);
+			Texture2D tex = (!this.selected.Historical && this.selected.dismissed) ? MainTabWindow_Quests.ResumeQuestIcon : MainTabWindow_Quests.DismissIcon;
+			if (Widgets.ButtonImage(rect, tex, true, null))
+			{
+				if (this.selected.Historical)
+				{
+					this.selected.hiddenInUI = true;
+					SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+					this.Select(null);
+					return;
+				}
+				this.selected.dismissed = !this.selected.dismissed;
+				foreach (Quest quest in this.selected.GetSubquests(null))
+				{
+					quest.dismissed = this.selected.dismissed;
+				}
+				if (this.selected.dismissed)
+				{
+					SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
+					this.SortQuestsByTab();
+					this.selected = MainTabWindow_Quests.tmpQuestsToShow.FirstOrDefault((Quest x) => this.ShouldListNow(x));
+					MainTabWindow_Quests.tmpQuestsToShow.Clear();
+					return;
+				}
+				SoundDefOf.Tick_High.PlayOneShotOnCamera(null);
+				this.Select(this.selected);
+			}
+			if (Mouse.IsOver(rect))
+			{
+				string key = this.selected.Historical ? "DeleteQuest" : (this.selected.dismissed ? "UnDismissQuest" : "DismissQuest");
+				TooltipHandler.TipRegion(rect, key.Translate());
+			}
+		}
+
+		// Token: 0x06012BBF RID: 76735 RVA: 0x0058CCA4 File Offset: 0x0058AEA4
+		private void DoCharityIcon(Rect innerRect)
+		{
+			if (this.selected != null && this.selected.charity && ModsConfig.IdeologyActive)
+			{
+				Rect rect = new Rect(innerRect.xMax - 32f - 26f - 32f - 4f, innerRect.y, 32f, 32f);
+				GUI.DrawTexture(rect, MainTabWindow_Quests.CharityQuestIcon);
+				if (Mouse.IsOver(rect))
+				{
+					TooltipHandler.TipRegion(rect, "CharityQuestTip".Translate());
+				}
+			}
+		}
+
+		// Token: 0x06012BC0 RID: 76736 RVA: 0x0058CD2C File Offset: 0x0058AF2C
+		private void DoDebugInfoToggle(Rect innerRect, ref float curY)
+		{
+			if (!Prefs.DevMode)
+			{
+				this.showDebugInfo = false;
+				return;
+			}
+			if (DebugSettings.godMode)
+			{
+				this.showDebugInfo = true;
+				return;
+			}
+			Widgets.CheckboxLabeled(new Rect(innerRect.xMax - 110f, curY, 110f, 30f), "DEV: Show debug info", ref this.showDebugInfo, false, null, null, false, false);
+			curY += 30f;
+		}
+
+		// Token: 0x06012BC1 RID: 76737 RVA: 0x0058CD94 File Offset: 0x0058AF94
+		private void DoAcceptButton(Rect innerRect, ref float curY)
+		{
+			QuestPart_Choice questPart_Choice = null;
+			List<QuestPart> partsListForReading = this.selected.PartsListForReading;
+			for (int i = 0; i < partsListForReading.Count; i++)
+			{
+				questPart_Choice = (partsListForReading[i] as QuestPart_Choice);
+				if (questPart_Choice != null)
+				{
+					break;
+				}
+			}
+			if (questPart_Choice != null && !Prefs.DevMode)
+			{
+				return;
+			}
+			curY += 17f;
+			if (this.selected.State == QuestState.NotYetAccepted)
+			{
+				float num = innerRect.x;
+				if (questPart_Choice == null)
+				{
+					Rect rect = new Rect(num, curY, 180f, 40f);
+					AcceptanceReport acceptanceReport = QuestUtility.CanAcceptQuest(this.selected);
+					if (!acceptanceReport.Accepted)
+					{
+						GUI.color = Color.grey;
+						TooltipHandler.TipRegion(rect, acceptanceReport.Reason.Colorize(ColoredText.WarningColor));
+					}
+					if (Widgets.ButtonText(rect, "AcceptQuest".Translate(), true, true, true, null))
+					{
+						this.AcceptQuestByInterface(null, this.selected.RequiresAccepter);
+					}
+					num += rect.width + 10f;
+					GUI.color = Color.white;
+				}
+				if (Prefs.DevMode && Widgets.ButtonText(new Rect(num, curY, 180f, 40f), "DEV: Accept instantly", true, true, true, null))
+				{
+					SoundDefOf.Quest_Accepted.PlayOneShotOnCamera(null);
+					if (questPart_Choice != null && questPart_Choice.choices.Any<QuestPart_Choice.Choice>())
+					{
+						questPart_Choice.Choose(questPart_Choice.choices.RandomElement<QuestPart_Choice.Choice>());
+					}
+					this.selected.Accept((from p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended
+					where QuestUtility.CanPawnAcceptQuest(p, this.selected)
+					select p).RandomElementWithFallback(null));
+					this.selected.dismissed = false;
+					this.Select(this.selected);
+				}
+				curY += 44f;
+			}
+		}
+
+		// Token: 0x06012BC2 RID: 76738 RVA: 0x0058CF50 File Offset: 0x0058B150
+		private void DoRightAlignedInfo(Rect innerRect, ref float curY, float curYBeforeAcceptButton)
+		{
+			bool flag = false;
+			Vector2 locForDates = QuestUtility.GetLocForDates();
+			float num = curYBeforeAcceptButton;
+			if (!this.selected.initiallyAccepted && this.selected.EverAccepted)
+			{
 				if (!flag)
 				{
 					num += 17f;
 					flag = true;
 				}
-				Rect rect4 = new Rect(innerRect.x, num, innerRect.width, 25f);
-				GUI.color = TimeLimitColor;
+				Rect rect = new Rect(innerRect.x, num, innerRect.width, 25f);
+				GUI.color = MainTabWindow_Quests.TimeLimitColor;
 				Text.Anchor = TextAnchor.MiddleRight;
-				Widgets.Label(rect4, expiryInfoPart);
+				string text = this.selected.Historical ? this.GetAcceptedOnByString(this.selected) : this.GetAcceptedAgoByString(this.selected);
+				Widgets.Label(rect, text);
 				GUI.color = Color.white;
 				Text.Anchor = TextAnchor.UpperLeft;
-				rect4.xMin = rect4.xMax - Text.CalcSize(expiryInfoPart).x;
-				if (Mouse.IsOver(rect4))
+				rect.xMin = rect.xMax - Text.CalcSize(text).x;
+				if (Mouse.IsOver(rect))
 				{
-					string expiryInfoPartTip = questPartActivable.ExpiryInfoPartTip;
-					if (!expiryInfoPartTip.NullOrEmpty())
+					TooltipHandler.TipRegion(rect, this.selected.Historical ? this.GetAcceptedAgoByString(this.selected) : this.GetAcceptedOnByString(this.selected));
+				}
+				if (this.selected.AccepterPawn != null && CameraJumper.CanJump(this.selected.AccepterPawn))
+				{
+					Widgets.DrawHighlightIfMouseover(rect);
+					if (Widgets.ButtonInvisible(rect, true))
 					{
-						TooltipHandler.TipRegion(rect4, expiryInfoPartTip);
+						CameraJumper.TryJumpAndSelect(this.selected.AccepterPawn, CameraJumper.MovementMode.Pan);
+						Find.MainTabsRoot.EscapeCurrentTab(true);
 					}
 				}
 				num += Text.LineHeight;
 			}
-			tmpQuestParts.Clear();
-		}
-		curY = Mathf.Max(curY, num);
-	}
-
-	private void DoAcceptanceRequirementInfo(Rect innerRect, bool scrollBarVisible, ref float curY)
-	{
-		if (!selected.EverAccepted && !selected.Historical)
-		{
-			IEnumerable<string> enumerable = ListUnmetAcceptRequirements();
-			int num = enumerable.Count();
-			if (num != 0)
+			else if (this.selected.Historical)
 			{
-				bool flag = num > 1;
-				string text = "QuestAcceptanceRequirementsDescription".Translate() + (flag ? ": " : " ") + (flag ? ("\n" + enumerable.ToLineList("  - ", capitalizeItems: true)) : (enumerable.First() + "."));
-				curY += 17f;
-				DrawInfoBox(innerRect, scrollBarVisible, ref curY, text, acceptanceRequirementsBoxBgColor, AcceptanceRequirementsBoxColor, AcceptanceRequirementsColor);
-				new LookTargets(ListUnmetAcceptRequirementCulprits()).TryHighlight(arrow: true, colonistBar: true, circleOverlay: true);
-			}
-		}
-	}
-
-	private void DoIdeoCharityInfo(Rect innerRect, bool scrollBarVisible, ref float curY)
-	{
-		if (!selected.charity || !ModsConfig.IdeologyActive)
-		{
-			return;
-		}
-		List<Pawn> allMaps_FreeColonistsSpawned = PawnsFinder.AllMaps_FreeColonistsSpawned;
-		List<Ideo> ideosListForReading = Find.IdeoManager.IdeosListForReading;
-		string text = "";
-		for (int i = 0; i < ideosListForReading.Count; i++)
-		{
-			Ideo ideo = ideosListForReading[i];
-			List<Precept> preceptsListForReading = ideo.PreceptsListForReading;
-			bool flag = false;
-			for (int j = 0; j < preceptsListForReading.Count; j++)
-			{
-				if (preceptsListForReading[j].def.issue == IssueDefOf.Charity)
+				if (!flag)
 				{
+					num += 17f;
 					flag = true;
-					break;
 				}
-			}
-			if (!flag)
-			{
-				continue;
-			}
-			tmpColonistsForIdeo.Clear();
-			for (int k = 0; k < allMaps_FreeColonistsSpawned.Count; k++)
-			{
-				Pawn pawn = allMaps_FreeColonistsSpawned[k];
-				if (pawn != null && pawn.Ideo == ideo && !pawn.IsQuestReward(selected))
+				Rect rect2 = new Rect(innerRect.x, num, innerRect.width, 25f);
+				GUI.color = MainTabWindow_Quests.TimeLimitColor;
+				Text.Anchor = TextAnchor.MiddleRight;
+				TaggedString taggedString = "AppearedOn".Translate(GenDate.DateFullStringWithHourAt((long)GenDate.TickGameToAbs(this.selected.appearanceTick), locForDates));
+				Widgets.Label(rect2, taggedString);
+				GUI.color = Color.white;
+				Text.Anchor = TextAnchor.UpperLeft;
+				rect2.xMin = rect2.xMax - Text.CalcSize(taggedString).x;
+				if (Mouse.IsOver(rect2))
 				{
-					tmpColonistsForIdeo.Add(pawn);
+					TooltipHandler.TipRegion(rect2, "AppearedDaysAgo".Translate(((float)this.selected.TicksSinceAppeared / 60000f).ToString("0.#")));
 				}
+				num += Text.LineHeight;
 			}
-			if (tmpColonistsForIdeo.Count != 0)
+			if (this.selected.State == QuestState.NotYetAccepted && this.selected.TicksUntilExpiry > 0)
 			{
-				if (!text.NullOrEmpty())
+				if (!flag)
 				{
-					text += "\n\n";
+					num += 17f;
+					flag = true;
 				}
-				text += "IdeoCharityQuestInfo".Translate(ideo.name, GenThing.ThingsToCommaList(tmpColonistsForIdeo));
+				Rect rect3 = new Rect(innerRect.x, num, innerRect.width, 25f);
+				GUI.color = MainTabWindow_Quests.TimeLimitColor;
+				Text.Anchor = TextAnchor.MiddleRight;
+				string text2 = "QuestExpiresIn".Translate(this.selected.TicksUntilExpiry.ToStringTicksToPeriod(true, false, true, true, false));
+				Widgets.Label(rect3, text2);
+				GUI.color = Color.white;
+				Text.Anchor = TextAnchor.UpperLeft;
+				rect3.xMin = rect3.xMax - Text.CalcSize(text2).x;
+				if (Mouse.IsOver(rect3))
+				{
+					TooltipHandler.TipRegion(rect3, "QuestExpiresOn".Translate(GenDate.DateFullStringWithHourAt((long)(Find.TickManager.TicksAbs + this.selected.TicksUntilExpiry), locForDates)));
+				}
+				num += Text.LineHeight;
 			}
+			if (this.selected.State == QuestState.Ongoing)
+			{
+				this.tmpQuestParts.Clear();
+				this.tmpQuestParts.AddRange(this.selected.PartsListForReading);
+				this.tmpQuestParts.SortBy(delegate(QuestPart x)
+				{
+					if (!(x is QuestPartActivable))
+					{
+						return 0;
+					}
+					return ((QuestPartActivable)x).EnableTick;
+				});
+				for (int i = 0; i < this.tmpQuestParts.Count; i++)
+				{
+					QuestPartActivable questPartActivable = this.tmpQuestParts[i] as QuestPartActivable;
+					if (questPartActivable != null && questPartActivable.State == QuestPartState.Enabled)
+					{
+						string expiryInfoPart = questPartActivable.ExpiryInfoPart;
+						if (!expiryInfoPart.NullOrEmpty())
+						{
+							if (!flag)
+							{
+								num += 17f;
+								flag = true;
+							}
+							Rect rect4 = new Rect(innerRect.x, num, innerRect.width, 25f);
+							GUI.color = MainTabWindow_Quests.TimeLimitColor;
+							Text.Anchor = TextAnchor.MiddleRight;
+							Widgets.Label(rect4, expiryInfoPart);
+							GUI.color = Color.white;
+							Text.Anchor = TextAnchor.UpperLeft;
+							rect4.xMin = rect4.xMax - Text.CalcSize(expiryInfoPart).x;
+							if (Mouse.IsOver(rect4))
+							{
+								string expiryInfoPartTip = questPartActivable.ExpiryInfoPartTip;
+								if (!expiryInfoPartTip.NullOrEmpty())
+								{
+									TooltipHandler.TipRegion(rect4, expiryInfoPartTip);
+								}
+							}
+							num += Text.LineHeight;
+						}
+					}
+				}
+				this.tmpQuestParts.Clear();
+			}
+			curY = Mathf.Max(curY, num);
 		}
-		if (!text.NullOrEmpty())
+
+		// Token: 0x06012BC3 RID: 76739 RVA: 0x0058D418 File Offset: 0x0058B618
+		private void DoAcceptanceRequirementInfo(Rect innerRect, bool scrollBarVisible, ref float curY)
 		{
+			if (this.selected.EverAccepted || this.selected.Historical)
+			{
+				return;
+			}
+			IEnumerable<string> enumerable = this.ListUnmetAcceptRequirements();
+			int num = enumerable.Count<string>();
+			if (num == 0)
+			{
+				return;
+			}
+			bool flag = num > 1;
+			string text = "QuestAcceptanceRequirementsDescription".Translate() + (flag ? ": " : " ") + (flag ? ("\n" + enumerable.ToLineList("  - ", true)) : (enumerable.First<string>() + "."));
 			curY += 17f;
-			DrawInfoBox(innerRect, scrollBarVisible, ref curY, text, IdeoCharityBoxBackgroundColor, IdeoCharityBoxBorderColor, IdeoCharityTextColor);
+			this.DrawInfoBox(innerRect, scrollBarVisible, ref curY, text, MainTabWindow_Quests.acceptanceRequirementsBoxBgColor, MainTabWindow_Quests.AcceptanceRequirementsBoxColor, MainTabWindow_Quests.AcceptanceRequirementsColor);
+			new LookTargets(this.ListUnmetAcceptRequirementCulprits()).TryHighlight(true, true, true);
 		}
-	}
 
-	private void DrawInfoBox(Rect innerRect, bool scrollBarVisible, ref float curY, string text, Color boxBackground, Color boxBorder, Color textColor)
-	{
-		float num = 0f;
-		float x = innerRect.x + 8f;
-		float num2 = innerRect.width - 16f;
-		if (scrollBarVisible)
+		// Token: 0x06012BC4 RID: 76740 RVA: 0x0058D4E4 File Offset: 0x0058B6E4
+		private void DoIdeoCharityInfo(Rect innerRect, bool scrollBarVisible, ref float curY)
 		{
-			num2 -= 31f;
-		}
-		Rect rect = new Rect(x, curY, num2, 10000f);
-		num += Text.CalcHeight(text, rect.width);
-		Rect rect2 = new Rect(x, curY, num2, num).ExpandedBy(8f);
-		Widgets.DrawBoxSolid(rect2, boxBackground);
-		GUI.color = textColor;
-		Widgets.Label(rect, text);
-		GUI.color = boxBorder;
-		Widgets.DrawBox(rect2, 2);
-		curY += num;
-		GUI.color = Color.white;
-	}
-
-	private IEnumerable<string> ListUnmetAcceptRequirements()
-	{
-		uniqueEntries.Clear();
-		for (int i = 0; i < selected.PartsListForReading.Count; i++)
-		{
-			if (selected.PartsListForReading[i] is QuestPart_RequirementsToAccept { ShowInRequirementBox: not false } questPart_RequirementsToAccept)
+			if (!this.selected.charity || !ModsConfig.IdeologyActive)
 			{
-				AcceptanceReport acceptanceReport = questPart_RequirementsToAccept.CanAccept();
-				if (!acceptanceReport.Accepted)
+				return;
+			}
+			List<Pawn> allMaps_FreeColonistsSpawned = PawnsFinder.AllMaps_FreeColonistsSpawned;
+			List<Ideo> ideosListForReading = Find.IdeoManager.IdeosListForReading;
+			string text = "";
+			for (int i = 0; i < ideosListForReading.Count; i++)
+			{
+				Ideo ideo = ideosListForReading[i];
+				List<Precept> preceptsListForReading = ideo.PreceptsListForReading;
+				bool flag = false;
+				for (int j = 0; j < preceptsListForReading.Count; j++)
 				{
-					uniqueEntries.Add(acceptanceReport.Reason);
+					if (preceptsListForReading[j].def.issue == IssueDefOf.Charity)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					MainTabWindow_Quests.tmpColonistsForIdeo.Clear();
+					for (int k = 0; k < allMaps_FreeColonistsSpawned.Count; k++)
+					{
+						Pawn pawn = allMaps_FreeColonistsSpawned[k];
+						if (pawn != null && pawn.Ideo == ideo && !pawn.IsQuestReward(this.selected))
+						{
+							MainTabWindow_Quests.tmpColonistsForIdeo.Add(pawn);
+						}
+					}
+					if (MainTabWindow_Quests.tmpColonistsForIdeo.Count != 0)
+					{
+						if (!text.NullOrEmpty())
+						{
+							text += "\n\n";
+						}
+						text += "IdeoCharityQuestInfo".Translate(ideo.name, GenThing.ThingsToCommaList(MainTabWindow_Quests.tmpColonistsForIdeo, false, true, -1));
+					}
 				}
 			}
-		}
-		foreach (string uniqueEntry in uniqueEntries)
-		{
-			yield return uniqueEntry;
-		}
-	}
-
-	private IEnumerable<GlobalTargetInfo> ListUnmetAcceptRequirementCulprits()
-	{
-		for (int i = 0; i < selected.PartsListForReading.Count; i++)
-		{
-			if (!(selected.PartsListForReading[i] is QuestPart_RequirementsToAccept questPart_RequirementsToAccept))
+			if (text.NullOrEmpty())
 			{
-				continue;
+				return;
 			}
-			foreach (GlobalTargetInfo culprit in questPart_RequirementsToAccept.Culprits)
-			{
-				yield return culprit;
-			}
+			curY += 17f;
+			this.DrawInfoBox(innerRect, scrollBarVisible, ref curY, text, MainTabWindow_Quests.IdeoCharityBoxBackgroundColor, MainTabWindow_Quests.IdeoCharityBoxBorderColor, MainTabWindow_Quests.IdeoCharityTextColor);
 		}
-	}
 
-	private void DoOutcomeInfo(Rect innerRect, ref float curY)
-	{
-		if (selected.Historical)
+		// Token: 0x06012BC5 RID: 76741 RVA: 0x0058D658 File Offset: 0x0058B858
+		private void DrawInfoBox(Rect innerRect, bool scrollBarVisible, ref float curY, string text, Color boxBackground, Color boxBorder, Color textColor)
 		{
-			string text = ((selected.State == QuestState.EndedOfferExpired) ? ((string)"QuestOutcomeInfo_OfferExpired".Translate()) : ((selected.State == QuestState.EndedUnknownOutcome || selected.State == QuestState.EndedSuccess) ? ((string)"QuestOutcomeInfo_UnknownOrSuccess".Translate()) : ((selected.State == QuestState.EndedFailed) ? ((string)"QuestOutcomeInfo_Failed".Translate()) : ((selected.State != QuestState.EndedInvalid) ? null : ((string)"QuestOutcomeInfo_Invalid".Translate())))));
+			float num = 0f;
+			float x = innerRect.x + 8f;
+			float num2 = innerRect.width - 16f;
+			if (scrollBarVisible)
+			{
+				num2 -= 31f;
+			}
+			Rect rect = new Rect(x, curY, num2, 10000f);
+			num += Text.CalcHeight(text, rect.width);
+			Rect rect2 = new Rect(x, curY, num2, num).ExpandedBy(8f);
+			Widgets.DrawBoxSolid(rect2, boxBackground);
+			GUI.color = textColor;
+			Widgets.Label(rect, text);
+			GUI.color = boxBorder;
+			Widgets.DrawBox(rect2, 2, null);
+			curY += num;
+			GUI.color = Color.white;
+		}
+
+		// Token: 0x06012BC6 RID: 76742 RVA: 0x0058D6FC File Offset: 0x0058B8FC
+		private IEnumerable<string> ListUnmetAcceptRequirements()
+		{
+			MainTabWindow_Quests.uniqueEntries.Clear();
+			for (int i = 0; i < this.selected.PartsListForReading.Count; i++)
+			{
+				QuestPart_RequirementsToAccept questPart_RequirementsToAccept = this.selected.PartsListForReading[i] as QuestPart_RequirementsToAccept;
+				if (questPart_RequirementsToAccept != null && questPart_RequirementsToAccept.ShowInRequirementBox)
+				{
+					AcceptanceReport acceptanceReport = questPart_RequirementsToAccept.CanAccept();
+					if (!acceptanceReport.Accepted)
+					{
+						MainTabWindow_Quests.uniqueEntries.Add(acceptanceReport.Reason);
+					}
+				}
+			}
+			foreach (string text in MainTabWindow_Quests.uniqueEntries)
+			{
+				yield return text;
+			}
+			HashSet<string>.Enumerator enumerator = default(HashSet<string>.Enumerator);
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012BC7 RID: 76743 RVA: 0x0058D70C File Offset: 0x0058B90C
+		private IEnumerable<GlobalTargetInfo> ListUnmetAcceptRequirementCulprits()
+		{
+			int num;
+			for (int i = 0; i < this.selected.PartsListForReading.Count; i = num + 1)
+			{
+				QuestPart_RequirementsToAccept questPart_RequirementsToAccept = this.selected.PartsListForReading[i] as QuestPart_RequirementsToAccept;
+				if (questPart_RequirementsToAccept != null)
+				{
+					foreach (GlobalTargetInfo globalTargetInfo in questPart_RequirementsToAccept.Culprits)
+					{
+						yield return globalTargetInfo;
+					}
+					IEnumerator<GlobalTargetInfo> enumerator = null;
+				}
+				num = i;
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012BC8 RID: 76744 RVA: 0x0058D71C File Offset: 0x0058B91C
+		private void DoOutcomeInfo(Rect innerRect, ref float curY)
+		{
+			if (!this.selected.Historical)
+			{
+				return;
+			}
+			string text;
+			if (this.selected.State == QuestState.EndedOfferExpired)
+			{
+				text = "QuestOutcomeInfo_OfferExpired".Translate();
+			}
+			else if (this.selected.State == QuestState.EndedUnknownOutcome || this.selected.State == QuestState.EndedSuccess)
+			{
+				text = "QuestOutcomeInfo_UnknownOrSuccess".Translate();
+			}
+			else if (this.selected.State == QuestState.EndedFailed)
+			{
+				text = "QuestOutcomeInfo_Failed".Translate();
+			}
+			else if (this.selected.State == QuestState.EndedInvalid)
+			{
+				text = "QuestOutcomeInfo_Invalid".Translate();
+			}
+			else
+			{
+				text = null;
+			}
 			if (!text.NullOrEmpty())
 			{
 				curY += 17f;
@@ -872,577 +824,785 @@ public class MainTabWindow_Quests : MainTabWindow
 				curY += Text.LineHeight;
 			}
 		}
-	}
 
-	private void DoDescription(Rect innerRect, ref float curY)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		if (!selected.description.RawText.NullOrEmpty())
+		// Token: 0x06012BC9 RID: 76745 RVA: 0x0058D804 File Offset: 0x0058BA04
+		private void DoDescription(Rect innerRect, ref float curY)
 		{
-			string value = selected.description.Resolve();
-			stringBuilder.Append(value);
-		}
-		tmpQuestParts.Clear();
-		tmpQuestParts.AddRange(selected.PartsListForReading);
-		tmpQuestParts.SortBy((QuestPart x) => (x is QuestPartActivable) ? ((QuestPartActivable)x).EnableTick : 0);
-		for (int num = 0; num < tmpQuestParts.Count; num++)
-		{
-			if (tmpQuestParts[num] is QuestPartActivable { State: not QuestPartState.Enabled })
+			StringBuilder stringBuilder = new StringBuilder();
+			if (!this.selected.description.RawText.NullOrEmpty())
 			{
-				continue;
+				string value = this.selected.description.Resolve();
+				stringBuilder.Append(value);
 			}
-			string descriptionPart = tmpQuestParts[num].DescriptionPart;
-			if (!descriptionPart.NullOrEmpty())
+			this.tmpQuestParts.Clear();
+			this.tmpQuestParts.AddRange(this.selected.PartsListForReading);
+			this.tmpQuestParts.SortBy(delegate(QuestPart x)
 			{
-				if (stringBuilder.Length != 0)
+				if (!(x is QuestPartActivable))
 				{
-					stringBuilder.AppendLine();
-					stringBuilder.AppendLine();
+					return 0;
 				}
-				stringBuilder.Append(descriptionPart);
+				return ((QuestPartActivable)x).EnableTick;
+			});
+			for (int i = 0; i < this.tmpQuestParts.Count; i++)
+			{
+				QuestPartActivable questPartActivable = this.tmpQuestParts[i] as QuestPartActivable;
+				if (questPartActivable == null || questPartActivable.State == QuestPartState.Enabled)
+				{
+					string descriptionPart = this.tmpQuestParts[i].DescriptionPart;
+					if (!descriptionPart.NullOrEmpty())
+					{
+						if (stringBuilder.Length != 0)
+						{
+							stringBuilder.AppendLine();
+							stringBuilder.AppendLine();
+						}
+						stringBuilder.Append(descriptionPart);
+					}
+				}
 			}
-		}
-		tmpQuestParts.Clear();
-		if (stringBuilder.Length != 0)
-		{
+			this.tmpQuestParts.Clear();
+			if (stringBuilder.Length == 0)
+			{
+				return;
+			}
 			curY += 17f;
 			Rect rect = new Rect(innerRect.x, curY, innerRect.width, 10000f);
 			Widgets.Label(rect, stringBuilder.ToString());
 			curY += Text.CalcHeight(stringBuilder.ToString(), rect.width);
 		}
-	}
 
-	private void DoRewards(Rect innerRect, ref float curY)
-	{
-		QuestPart_Choice choice = null;
-		List<QuestPart> partsListForReading = selected.PartsListForReading;
-		for (int i = 0; i < partsListForReading.Count; i++)
+		// Token: 0x06012BCA RID: 76746 RVA: 0x0058D964 File Offset: 0x0058BB64
+		private void DoRewards(Rect innerRect, ref float curY)
 		{
-			choice = partsListForReading[i] as QuestPart_Choice;
-			if (choice != null)
-			{
-				break;
-			}
-		}
-		if (choice == null)
-		{
-			return;
-		}
-		bool flag = selected.State == QuestState.NotYetAccepted;
-		bool flag2 = true;
-		for (int j = 0; j < choice.choices.Count; j++)
-		{
-			tmpStackElements.Clear();
-			float num = 0f;
-			for (int k = 0; k < choice.choices[j].rewards.Count; k++)
-			{
-				tmpStackElements.AddRange(choice.choices[j].rewards[k].StackElements);
-				num += choice.choices[j].rewards[k].TotalMarketValue;
-			}
-			if (!tmpStackElements.Any())
-			{
-				continue;
-			}
-			if (num > 0f && (choice.choices[j].rewards.Count != 1 || !(choice.choices[j].rewards[0] is Reward_Items { items: not null } reward_Items) || reward_Items.items.Count != 1 || !(reward_Items.items[0].StyleSourcePrecept is Precept_Relic)))
-			{
-				TaggedString totalValueStr = "TotalValue".Translate(num.ToStringMoney("F0"));
-				tmpStackElements.Add(new GenUI.AnonymousStackElement
-				{
-					drawer = delegate(Rect r)
-					{
-						GUI.color = new Color(0.7f, 0.7f, 0.7f);
-						Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), totalValueStr);
-						GUI.color = Color.white;
-					},
-					width = Text.CalcSize(totalValueStr).x + 10f
-				});
-			}
-			if (flag2)
-			{
-				curY += 17f;
-				flag2 = false;
-			}
-			else
-			{
-				curY += 10f;
-			}
-			Rect rect = new Rect(innerRect.x, curY, innerRect.width, 10000f);
-			Rect rect2 = rect.ContractedBy(10f);
-			if (flag)
-			{
-				rect2.xMin += 100f;
-			}
-			rect.height = GenUI.DrawElementStack(rect2, 24f, tmpStackElements, null, (GenUI.AnonymousStackElement obj) => obj.width, 4f, 5f, allowOrderOptimization: false).height + 20f;
-			Widgets.DrawBoxSolid(rect, new Color(0.13f, 0.13f, 0.13f));
-			GUI.color = new Color(1f, 1f, 1f, 0.3f);
-			Widgets.DrawHighlightIfMouseover(rect);
-			GUI.color = Color.white;
-			GenUI.DrawElementStack(rect2, 24f, tmpStackElements, delegate(Rect r, GenUI.AnonymousStackElement obj)
-			{
-				obj.drawer(r);
-			}, (GenUI.AnonymousStackElement obj) => obj.width, 4f, 5f, allowOrderOptimization: false);
-			if (flag)
-			{
-				AcceptanceReport acceptanceReport = QuestUtility.CanAcceptQuest(selected);
-				if (!acceptanceReport)
-				{
-					GUI.color = Color.grey;
-				}
-				Rect rect3 = new Rect(rect.x, rect.y, 100f, rect.height);
-				if (Widgets.ButtonText(rect3, "AcceptQuestFor".Translate() + ":"))
-				{
-					tmpRemainingQuestParts.Clear();
-					tmpRemainingQuestParts.AddRange(selected.PartsListForReading);
-					for (int num2 = 0; num2 < choice.choices.Count; num2++)
-					{
-						if (j == num2)
-						{
-							continue;
-						}
-						for (int num3 = 0; num3 < choice.choices[num2].questParts.Count; num3++)
-						{
-							QuestPart item = choice.choices[num2].questParts[num3];
-							if (!choice.choices[j].questParts.Contains(item))
-							{
-								tmpRemainingQuestParts.Remove(item);
-							}
-						}
-					}
-					bool requiresAccepter = false;
-					for (int num4 = 0; num4 < tmpRemainingQuestParts.Count; num4++)
-					{
-						if (tmpRemainingQuestParts[num4].RequiresAccepter)
-						{
-							requiresAccepter = true;
-							break;
-						}
-					}
-					tmpRemainingQuestParts.Clear();
-					QuestPart_Choice.Choice localChoice = choice.choices[j];
-					AcceptQuestByInterface(delegate
-					{
-						choice.Choose(localChoice);
-					}, requiresAccepter);
-				}
-				TaggedString taggedString = "AcceptQuestForTip".Translate();
-				if (!acceptanceReport && !acceptanceReport.Reason.NullOrEmpty())
-				{
-					taggedString += "\n\n" + acceptanceReport.Reason.Colorize(ColorLibrary.RedReadable);
-				}
-				TooltipHandler.TipRegion(rect3, taggedString);
-				GUI.color = Color.white;
-			}
-			curY += rect.height;
-		}
-		tmpStackElements.Clear();
-	}
-
-	private void DoLookTargets(Rect innerRect, ref float curY)
-	{
-		List<Map> maps = Find.Maps;
-		int num = 0;
-		for (int i = 0; i < maps.Count; i++)
-		{
-			if (maps[i].IsPlayerHome)
-			{
-				num++;
-			}
-		}
-		tmpLookTargets.Clear();
-		tmpLookTargets.AddRange(selected.QuestLookTargets);
-		tmpLookTargets.SortBy(delegate(GlobalTargetInfo x)
-		{
-			if (x.Thing is Pawn)
-			{
-				return 0;
-			}
-			if (x.HasThing)
-			{
-				return 1;
-			}
-			if (!x.IsWorldTarget)
-			{
-				return 2;
-			}
-			return (!(x.WorldObject is Settlement) || ((Settlement)x.WorldObject).Faction != Faction.OfPlayer) ? 3 : 4;
-		}, (GlobalTargetInfo x) => x.Label);
-		bool flag = false;
-		for (int num2 = 0; num2 < tmpLookTargets.Count; num2++)
-		{
-			GlobalTargetInfo globalTargetInfo = tmpLookTargets[num2];
-			if (globalTargetInfo.HasWorldObject && globalTargetInfo.WorldObject is MapParent mapParent && (!mapParent.HasMap || !mapParent.Map.IsPlayerHome))
-			{
-				flag = true;
-				break;
-			}
-		}
-		bool flag2 = false;
-		for (int num3 = 0; num3 < tmpLookTargets.Count; num3++)
-		{
-			GlobalTargetInfo globalTargetInfo2 = tmpLookTargets[num3];
-			if (!CameraJumper.CanJump(globalTargetInfo2))
-			{
-				continue;
-			}
-			Map anyPlayerHomeMap = Find.AnyPlayerHomeMap;
-			if (num != 1 || anyPlayerHomeMap == null || !(globalTargetInfo2 == anyPlayerHomeMap.Parent) || flag)
-			{
-				if (!flag2)
-				{
-					flag2 = true;
-					curY += 17f;
-				}
-				if (Widgets.ButtonText(new Rect(innerRect.x, curY, innerRect.width, 25f), "JumpToTargetCustom".Translate(globalTargetInfo2.Label), drawBackground: false))
-				{
-					CameraJumper.TryJumpAndSelect(globalTargetInfo2);
-					Find.MainTabsRoot.EscapeCurrentTab();
-				}
-				curY += 25f;
-			}
-		}
-	}
-
-	private void DoSelectTargets(Rect innerRect, ref float curY)
-	{
-		bool flag = false;
-		for (int i = 0; i < selected.PartsListForReading.Count; i++)
-		{
-			QuestPart questPart = selected.PartsListForReading[i];
-			tmpSelectTargets.Clear();
-			tmpSelectTargets.AddRange(questPart.QuestSelectTargets);
-			if (tmpSelectTargets.Count == 0)
-			{
-				continue;
-			}
-			if (!flag)
-			{
-				flag = true;
-				curY += 4f;
-			}
-			if (Widgets.ButtonText(new Rect(innerRect.x, curY, innerRect.width, 25f), questPart.QuestSelectTargetsLabel, drawBackground: false))
-			{
-				Map map = null;
-				int num = 0;
-				Vector3 zero = Vector3.zero;
-				Find.Selector.ClearSelection();
-				for (int j = 0; j < tmpSelectTargets.Count; j++)
-				{
-					GlobalTargetInfo target = tmpSelectTargets[j];
-					if (CameraJumper.CanJump(target) && target.HasThing)
-					{
-						Find.Selector.Select(target.Thing);
-						if (map == null)
-						{
-							map = target.Map;
-						}
-						else if (target.Map != map)
-						{
-							num = 0;
-							break;
-						}
-						zero += target.Cell.ToVector3();
-						num++;
-					}
-				}
-				if (num > 0)
-				{
-					CameraJumper.TryJump(new IntVec3(zero / num), map);
-				}
-				Find.MainTabsRoot.EscapeCurrentTab();
-			}
-			curY += 25f;
-		}
-	}
-
-	private void DoFactionInfo(Rect rect, ref float curY)
-	{
-		curY += 15f;
-		foreach (Faction involvedFaction in selected.InvolvedFactions)
-		{
-			if (involvedFaction != null && !involvedFaction.Hidden && !involvedFaction.IsPlayer)
-			{
-				FactionUIUtility.DrawRelatedFactionInfo(rect, involvedFaction, ref curY);
-			}
-		}
-	}
-
-	private void DoDefHyperlinks(Rect rect, ref float curY)
-	{
-		curY += 25f;
-		foreach (Dialog_InfoCard.Hyperlink hyperlink in selected.Hyperlinks)
-		{
-			float num = Text.CalcHeight(hyperlink.Label, rect.width);
-			float width = rect.width / 2f;
-			Rect rect2 = new Rect(rect.x, curY, width, num);
-			Color value = Widgets.NormalOptionColor;
-			if (hyperlink.quest != null && (hyperlink.quest.IsSubquestOf(selected) || selected.IsSubquestOf(hyperlink.quest)))
-			{
-				if (!selected.hidden && !hyperlink.quest.hidden)
-				{
-					string text = "";
-					if (hyperlink.quest.Historical)
-					{
-						text += "(" + "Finished".Translate().ToLower() + ") ";
-						value = Color.gray;
-					}
-					text += (hyperlink.quest.IsSubquestOf(selected) ? "HasSubquest".Translate() : "SubquestOf".Translate());
-					text = text + ": " + hyperlink.Label;
-					Widgets.HyperlinkWithIcon(rect2, hyperlink, text, 2f, 6f, value, truncateLabel: true);
-				}
-			}
-			else
-			{
-				Widgets.HyperlinkWithIcon(rect2, hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, value);
-			}
-			curY += num;
-		}
-	}
-
-	private void DoDebugInfo(Rect innerRect, ref float curY)
-	{
-		if (!showDebugInfo)
-		{
-			return;
-		}
-		curY += 17f;
-		List<QuestPart> partsListForReading = selected.PartsListForReading;
-		if (selected.State == QuestState.Ongoing)
-		{
+			QuestPart_Choice choice = null;
+			List<QuestPart> partsListForReading = this.selected.PartsListForReading;
 			for (int i = 0; i < partsListForReading.Count; i++)
 			{
-				partsListForReading[i].DoDebugWindowContents(innerRect, ref curY);
-			}
-		}
-		if (selected.State == QuestState.Ongoing || selected.State == QuestState.NotYetAccepted)
-		{
-			Rect rect = new Rect(innerRect.x, curY, 210f, 25f);
-			debugSendSignalTextField = Widgets.TextField(rect, debugSendSignalTextField);
-			Rect rect2 = new Rect(innerRect.x + rect.width + 4f, curY, 117f, 25f);
-			if (Widgets.ButtonText(rect2, "Send signal"))
-			{
-				Find.SignalManager.SendSignal(new Signal(debugSendSignalTextField));
-				debugSendSignalTextField = "";
-			}
-			if (Widgets.ButtonText(new Rect(rect2.xMax + 4f, curY, 165f, 25f), "Send defined signal..."))
-			{
-				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				foreach (string item in from x in DebugPossibleSignals(selected).Distinct()
-					orderby x
-					select x)
+				choice = (partsListForReading[i] as QuestPart_Choice);
+				if (choice != null)
 				{
-					string signalLocal = item;
-					list.Add(new FloatMenuOption(signalLocal, delegate
-					{
-						Find.SignalManager.SendSignal(new Signal(signalLocal));
-						debugSendSignalTextField = "";
-					}));
+					break;
 				}
-				Find.WindowStack.Add(new FloatMenu(list));
 			}
-			curY += rect.height + 4f;
-		}
-		string text = "-----------------";
-		text = text + "\nId: " + selected.id;
-		text = text + "\nState: " + selected.State;
-		text += "\nData:";
-		text = text + "\n" + Scribe.saver.DebugOutputFor(selected);
-		text += "\n";
-		text += "\nActive QuestParts:";
-		bool flag = false;
-		for (int num = 0; num < partsListForReading.Count; num++)
-		{
-			if (partsListForReading[num] is QuestPartActivable { State: QuestPartState.Enabled } questPartActivable)
+			if (choice == null)
 			{
-				text = text + "\n" + questPartActivable.ToString();
-				flag = true;
+				return;
 			}
-		}
-		if (!flag)
-		{
-			text += "\nNone";
-		}
-		Rect rect3 = new Rect(innerRect.x, curY, 180f, 40f);
-		if (Widgets.ButtonText(rect3, "Copy debug to clipboard"))
-		{
-			GUIUtility.systemCopyBuffer = text;
-		}
-		curY += rect3.height + 4f;
-		Widgets.LongLabel(innerRect.x, innerRect.width, text, ref curY);
-	}
-
-	private bool ShouldListNow(Quest quest)
-	{
-		if (quest.hidden && !showAll)
-		{
-			return false;
-		}
-		switch (curTab)
-		{
-		case QuestsTab.Available:
-			if (quest.State == QuestState.NotYetAccepted && !quest.dismissed)
+			bool flag = this.selected.State == QuestState.NotYetAccepted;
+			bool flag2 = true;
+			for (int j = 0; j < choice.choices.Count; j++)
 			{
-				return !quest.hiddenInUI;
-			}
-			return false;
-		case QuestsTab.Active:
-			if (quest.State == QuestState.Ongoing && !quest.dismissed)
-			{
-				return !quest.hiddenInUI;
-			}
-			return false;
-		case QuestsTab.Historical:
-			if (!quest.hiddenInUI)
-			{
-				if (!quest.Historical)
+				MainTabWindow_Quests.tmpStackElements.Clear();
+				float num = 0f;
+				for (int k = 0; k < choice.choices[j].rewards.Count; k++)
 				{
-					return quest.dismissed;
+					MainTabWindow_Quests.tmpStackElements.AddRange(choice.choices[j].rewards[k].StackElements);
+					num += choice.choices[j].rewards[k].TotalMarketValue;
 				}
-				return true;
-			}
-			return false;
-		default:
-			return false;
-		}
-	}
-
-	private IEnumerable<string> DebugPossibleSignals(Quest quest)
-	{
-		string input = Scribe.saver.DebugOutputFor(selected);
-		foreach (Match item in Regex.Matches(input, ">(Quest" + quest.id + "\\.[a-zA-Z0-9/\\-\\.]*)<"))
-		{
-			yield return item.Groups[1].Value;
-		}
-	}
-
-	private string GetAcceptedAgoByString(Quest quest)
-	{
-		string text = quest.TicksSinceAccepted.ToStringTicksToPeriod();
-		if (!quest.AccepterPawnLabelCap.NullOrEmpty())
-		{
-			return "AcceptedAgoBy".Translate(text, quest.AccepterPawnLabelCap);
-		}
-		return "AcceptedAgo".Translate(text);
-	}
-
-	private string GetAcceptedOnByString(Quest quest)
-	{
-		Vector2 locForDates = QuestUtility.GetLocForDates();
-		string text = GenDate.DateFullStringWithHourAt(GenDate.TickGameToAbs(quest.acceptanceTick), locForDates);
-		if (!quest.AccepterPawnLabelCap.NullOrEmpty())
-		{
-			return "AcceptedOnBy".Translate(text, quest.AccepterPawnLabelCap);
-		}
-		return "AcceptedOn".Translate(text);
-	}
-
-	private void AcceptQuestByInterface(Action preAcceptAction = null, bool requiresAccepter = false)
-	{
-		if (!QuestUtility.CanAcceptQuest(selected))
-		{
-			Messages.Message("MessageCannotAcceptQuest".Translate(), MessageTypeDefOf.RejectInput, historical: false);
-			return;
-		}
-		if (!requiresAccepter)
-		{
-			SoundDefOf.Quest_Accepted.PlayOneShotOnCamera();
-			if (preAcceptAction != null)
-			{
-				preAcceptAction();
-			}
-			selected.Accept(null);
-			Select(selected);
-			return;
-		}
-		List<FloatMenuOption> list = new List<FloatMenuOption>();
-		foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended)
-		{
-			if (!QuestUtility.CanPawnAcceptQuest(p, selected))
-			{
-				continue;
-			}
-			Pawn pLocal = p;
-			string text = "AcceptWith".Translate(p);
-			if (p.royalty != null && p.royalty.AllTitlesInEffectForReading.Any())
-			{
-				text = text + " (" + p.royalty.MostSeniorTitle.def.GetLabelFor(pLocal) + ")";
-			}
-			list.Add(new FloatMenuOption(text, delegate
-			{
-				if (QuestUtility.CanPawnAcceptQuest(pLocal, selected))
+				if (MainTabWindow_Quests.tmpStackElements.Any<GenUI.AnonymousStackElement>())
 				{
-					QuestPart_GiveRoyalFavor questPart_GiveRoyalFavor = selected.PartsListForReading.OfType<QuestPart_GiveRoyalFavor>().FirstOrDefault();
-					if (questPart_GiveRoyalFavor != null && questPart_GiveRoyalFavor.giveToAccepter)
+					if (num > 0f)
 					{
-						IEnumerable<Trait> conceitedTraits = RoyalTitleUtility.GetConceitedTraits(p);
-						IEnumerable<Trait> traitsAffectingPsylinkNegatively = RoyalTitleUtility.GetTraitsAffectingPsylinkNegatively(p);
-						bool totallyDisabled = p.skills.GetSkill(SkillDefOf.Social).TotallyDisabled;
-						bool flag = conceitedTraits.Any();
-						bool flag2 = !p.HasPsylink && traitsAffectingPsylinkNegatively.Any();
-						if (totallyDisabled || flag || flag2)
+						if (choice.choices[j].rewards.Count != 1)
 						{
-							NamedArgument arg = p.Named("PAWN");
-							NamedArgument arg2 = questPart_GiveRoyalFavor.faction.Named("FACTION");
-							TaggedString taggedString = null;
-							if (totallyDisabled)
-							{
-								taggedString = "RoyalIncapableOfSocial".Translate(arg, arg2);
-							}
-							TaggedString taggedString2 = null;
-							if (flag)
-							{
-								taggedString2 = "RoyalWithConceitedTrait".Translate(arg, arg2, conceitedTraits.Select((Trait t) => t.Label).ToCommaList(useAnd: true));
-							}
-							TaggedString taggedString3 = null;
-							if (flag2)
-							{
-								taggedString3 = "RoyalWithTraitAffectingPsylinkNegatively".Translate(arg, arg2, traitsAffectingPsylinkNegatively.Select((Trait t) => t.Label).ToCommaList(useAnd: true));
-							}
-							TaggedString text2 = "QuestGivesRoyalFavor".Translate(arg, arg2);
-							if (totallyDisabled)
-							{
-								text2 += "\n\n" + taggedString;
-							}
-							if (flag)
-							{
-								text2 += "\n\n" + taggedString2;
-							}
-							if (flag2)
-							{
-								text2 += "\n\n" + taggedString3;
-							}
-							text2 += "\n\n" + "WantToContinue".Translate();
-							Find.WindowStack.Add(new Dialog_MessageBox(text2, "Confirm".Translate(), AcceptAction, "GoBack".Translate()));
+							goto IL_195;
 						}
-						else
+						Reward_Items reward_Items = choice.choices[j].rewards[0] as Reward_Items;
+						if (reward_Items == null || reward_Items.items == null || reward_Items.items.Count != 1)
 						{
-							AcceptAction();
+							goto IL_195;
 						}
+						bool flag3 = !(reward_Items.items[0].StyleSourcePrecept is Precept_Relic);
+						IL_196:
+						if (flag3)
+						{
+							TaggedString totalValueStr = "TotalValue".Translate(num.ToStringMoney("F0"));
+							MainTabWindow_Quests.tmpStackElements.Add(new GenUI.AnonymousStackElement
+							{
+								drawer = delegate(Rect r)
+								{
+									GUI.color = new Color(0.7f, 0.7f, 0.7f);
+									Widgets.Label(new Rect(r.x + 5f, r.y, r.width - 10f, r.height), totalValueStr);
+									GUI.color = Color.white;
+								},
+								width = Text.CalcSize(totalValueStr).x + 10f
+							});
+							goto IL_205;
+						}
+						goto IL_205;
+						IL_195:
+						flag3 = true;
+						goto IL_196;
+					}
+					IL_205:
+					if (flag2)
+					{
+						curY += 17f;
+						flag2 = false;
 					}
 					else
 					{
-						AcceptAction();
+						curY += 10f;
+					}
+					Rect rect = new Rect(innerRect.x, curY, innerRect.width, 10000f);
+					Rect rect2 = rect.ContractedBy(10f);
+					if (flag)
+					{
+						rect2.xMin += 100f;
+					}
+					rect.height = GenUI.DrawElementStack<GenUI.AnonymousStackElement>(rect2, 24f, MainTabWindow_Quests.tmpStackElements, null, (GenUI.AnonymousStackElement obj) => obj.width, 4f, 5f, false).height + 20f;
+					Widgets.DrawBoxSolid(rect, new Color(0.13f, 0.13f, 0.13f));
+					GUI.color = new Color(1f, 1f, 1f, 0.3f);
+					Widgets.DrawHighlightIfMouseover(rect);
+					GUI.color = Color.white;
+					GenUI.DrawElementStack<GenUI.AnonymousStackElement>(rect2, 24f, MainTabWindow_Quests.tmpStackElements, delegate(Rect r, GenUI.AnonymousStackElement obj)
+					{
+						obj.drawer(r);
+					}, (GenUI.AnonymousStackElement obj) => obj.width, 4f, 5f, false);
+					if (flag)
+					{
+						AcceptanceReport report = QuestUtility.CanAcceptQuest(this.selected);
+						if (!report)
+						{
+							GUI.color = Color.grey;
+						}
+						Rect rect3 = new Rect(rect.x, rect.y, 100f, rect.height);
+						if (Widgets.ButtonText(rect3, "AcceptQuestFor".Translate() + ":", true, true, true, null))
+						{
+							MainTabWindow_Quests.tmpRemainingQuestParts.Clear();
+							MainTabWindow_Quests.tmpRemainingQuestParts.AddRange(this.selected.PartsListForReading);
+							for (int l = 0; l < choice.choices.Count; l++)
+							{
+								if (j != l)
+								{
+									for (int m = 0; m < choice.choices[l].questParts.Count; m++)
+									{
+										QuestPart item = choice.choices[l].questParts[m];
+										if (!choice.choices[j].questParts.Contains(item))
+										{
+											MainTabWindow_Quests.tmpRemainingQuestParts.Remove(item);
+										}
+									}
+								}
+							}
+							bool requiresAccepter = false;
+							for (int n = 0; n < MainTabWindow_Quests.tmpRemainingQuestParts.Count; n++)
+							{
+								if (MainTabWindow_Quests.tmpRemainingQuestParts[n].RequiresAccepter)
+								{
+									requiresAccepter = true;
+									break;
+								}
+							}
+							MainTabWindow_Quests.tmpRemainingQuestParts.Clear();
+							QuestPart_Choice.Choice localChoice = choice.choices[j];
+							this.AcceptQuestByInterface(delegate
+							{
+								choice.Choose(localChoice);
+							}, requiresAccepter);
+						}
+						TaggedString taggedString = "AcceptQuestForTip".Translate();
+						if (!report && !report.Reason.NullOrEmpty())
+						{
+							taggedString += "\n\n" + report.Reason.Colorize(ColorLibrary.RedReadable);
+						}
+						TooltipHandler.TipRegion(rect3, taggedString);
+						GUI.color = Color.white;
+					}
+					curY += rect.height;
+				}
+			}
+			MainTabWindow_Quests.tmpStackElements.Clear();
+		}
+
+		// Token: 0x06012BCB RID: 76747 RVA: 0x0058DF34 File Offset: 0x0058C134
+		private void DoLookTargets(Rect innerRect, ref float curY)
+		{
+			List<Map> maps = Find.Maps;
+			int num = 0;
+			for (int i = 0; i < maps.Count; i++)
+			{
+				if (maps[i].IsPlayerHome)
+				{
+					num++;
+				}
+			}
+			MainTabWindow_Quests.tmpLookTargets.Clear();
+			MainTabWindow_Quests.tmpLookTargets.AddRange(this.selected.QuestLookTargets);
+			MainTabWindow_Quests.tmpLookTargets.SortBy(delegate(GlobalTargetInfo x)
+			{
+				if (x.Thing is Pawn)
+				{
+					return 0;
+				}
+				if (x.HasThing)
+				{
+					return 1;
+				}
+				if (!x.IsWorldTarget)
+				{
+					return 2;
+				}
+				if (!(x.WorldObject is Settlement) || ((Settlement)x.WorldObject).Faction != Faction.OfPlayer)
+				{
+					return 3;
+				}
+				return 4;
+			}, (GlobalTargetInfo x) => x.Label);
+			bool flag = false;
+			for (int j = 0; j < MainTabWindow_Quests.tmpLookTargets.Count; j++)
+			{
+				GlobalTargetInfo globalTargetInfo = MainTabWindow_Quests.tmpLookTargets[j];
+				if (globalTargetInfo.HasWorldObject)
+				{
+					MapParent mapParent = globalTargetInfo.WorldObject as MapParent;
+					if (mapParent != null && (!mapParent.HasMap || !mapParent.Map.IsPlayerHome))
+					{
+						flag = true;
+						break;
 					}
 				}
-			}));
-			void AcceptAction()
+			}
+			bool flag2 = false;
+			for (int k = 0; k < MainTabWindow_Quests.tmpLookTargets.Count; k++)
 			{
-				SoundDefOf.Quest_Accepted.PlayOneShotOnCamera();
+				GlobalTargetInfo globalTargetInfo2 = MainTabWindow_Quests.tmpLookTargets[k];
+				if (CameraJumper.CanJump(globalTargetInfo2))
+				{
+					Map anyPlayerHomeMap = Find.AnyPlayerHomeMap;
+					if (num != 1 || anyPlayerHomeMap == null || !(globalTargetInfo2 == anyPlayerHomeMap.Parent) || flag)
+					{
+						if (!flag2)
+						{
+							flag2 = true;
+							curY += 17f;
+						}
+						if (Widgets.ButtonText(new Rect(innerRect.x, curY, innerRect.width, 25f), "JumpToTargetCustom".Translate(globalTargetInfo2.Label), false, true, true, null))
+						{
+							CameraJumper.TryJumpAndSelect(globalTargetInfo2, CameraJumper.MovementMode.Pan);
+							Find.MainTabsRoot.EscapeCurrentTab(true);
+						}
+						curY += 25f;
+					}
+				}
+			}
+		}
+
+		// Token: 0x06012BCC RID: 76748 RVA: 0x0058E110 File Offset: 0x0058C310
+		private void DoSelectTargets(Rect innerRect, ref float curY)
+		{
+			bool flag = false;
+			for (int i = 0; i < this.selected.PartsListForReading.Count; i++)
+			{
+				QuestPart questPart = this.selected.PartsListForReading[i];
+				MainTabWindow_Quests.tmpSelectTargets.Clear();
+				MainTabWindow_Quests.tmpSelectTargets.AddRange(questPart.QuestSelectTargets);
+				if (MainTabWindow_Quests.tmpSelectTargets.Count != 0)
+				{
+					if (!flag)
+					{
+						flag = true;
+						curY += 4f;
+					}
+					if (Widgets.ButtonText(new Rect(innerRect.x, curY, innerRect.width, 25f), questPart.QuestSelectTargetsLabel, false, true, true, null))
+					{
+						Map map = null;
+						int num = 0;
+						Vector3 a = Vector3.zero;
+						Find.Selector.ClearSelection();
+						for (int j = 0; j < MainTabWindow_Quests.tmpSelectTargets.Count; j++)
+						{
+							GlobalTargetInfo target = MainTabWindow_Quests.tmpSelectTargets[j];
+							if (CameraJumper.CanJump(target) && target.HasThing)
+							{
+								Find.Selector.Select(target.Thing, true, true);
+								if (map == null)
+								{
+									map = target.Map;
+								}
+								else if (target.Map != map)
+								{
+									num = 0;
+									break;
+								}
+								a += target.Cell.ToVector3();
+								num++;
+							}
+						}
+						if (num > 0)
+						{
+							CameraJumper.TryJump(new IntVec3(a / (float)num), map, CameraJumper.MovementMode.Pan);
+						}
+						Find.MainTabsRoot.EscapeCurrentTab(true);
+					}
+					curY += 25f;
+				}
+			}
+		}
+
+		// Token: 0x06012BCD RID: 76749 RVA: 0x0058E298 File Offset: 0x0058C498
+		private void DoFactionInfo(Rect rect, ref float curY)
+		{
+			curY += 15f;
+			foreach (Faction faction in this.selected.InvolvedFactions)
+			{
+				if (faction != null && !faction.Hidden && !faction.IsPlayer)
+				{
+					FactionUIUtility.DrawRelatedFactionInfo(rect, faction, ref curY);
+				}
+			}
+		}
+
+		// Token: 0x06012BCE RID: 76750 RVA: 0x0058E308 File Offset: 0x0058C508
+		private void DoDefHyperlinks(Rect rect, ref float curY)
+		{
+			curY += 25f;
+			foreach (Dialog_InfoCard.Hyperlink hyperlink in this.selected.Hyperlinks)
+			{
+				float num = Text.CalcHeight(hyperlink.Label, rect.width);
+				float width = rect.width / 2f;
+				Rect rect2 = new Rect(rect.x, curY, width, num);
+				Color value = Widgets.NormalOptionColor;
+				if (hyperlink.quest != null && (hyperlink.quest.IsSubquestOf(this.selected) || this.selected.IsSubquestOf(hyperlink.quest)))
+				{
+					if (!this.selected.hidden && !hyperlink.quest.hidden)
+					{
+						string text = "";
+						if (hyperlink.quest.Historical)
+						{
+							text += "(" + "Finished".Translate().ToLower() + ") ";
+							value = Color.gray;
+						}
+						text += (hyperlink.quest.IsSubquestOf(this.selected) ? "HasSubquest".Translate() : "SubquestOf".Translate());
+						text = text + ": " + hyperlink.Label;
+						Widgets.HyperlinkWithIcon(rect2, hyperlink, text, 2f, 6f, new Color?(value), true, null);
+					}
+				}
+				else
+				{
+					Widgets.HyperlinkWithIcon(rect2, hyperlink, "ViewHyperlink".Translate(hyperlink.Label), 2f, 6f, new Color?(value), false, null);
+				}
+				curY += num;
+			}
+		}
+
+		// Token: 0x06012BCF RID: 76751 RVA: 0x0058E4F8 File Offset: 0x0058C6F8
+		private void DoDebugInfo(Rect innerRect, ref float curY)
+		{
+			if (!this.showDebugInfo)
+			{
+				return;
+			}
+			curY += 17f;
+			List<QuestPart> partsListForReading = this.selected.PartsListForReading;
+			if (this.selected.State == QuestState.Ongoing)
+			{
+				for (int i = 0; i < partsListForReading.Count; i++)
+				{
+					partsListForReading[i].DoDebugWindowContents(innerRect, ref curY);
+				}
+			}
+			if (this.selected.State == QuestState.Ongoing || this.selected.State == QuestState.NotYetAccepted)
+			{
+				Rect rect = new Rect(innerRect.x, curY, 210f, 25f);
+				this.debugSendSignalTextField = Widgets.TextField(rect, this.debugSendSignalTextField);
+				Rect rect2 = new Rect(innerRect.x + rect.width + 4f, curY, 117f, 25f);
+				if (Widgets.ButtonText(rect2, "Send signal", true, true, true, null))
+				{
+					Find.SignalManager.SendSignal(new Signal(this.debugSendSignalTextField, false));
+					this.debugSendSignalTextField = "";
+				}
+				if (Widgets.ButtonText(new Rect(rect2.xMax + 4f, curY, 165f, 25f), "Send defined signal...", true, true, true, null))
+				{
+					List<FloatMenuOption> list = new List<FloatMenuOption>();
+					foreach (string signalLocal2 in from x in this.DebugPossibleSignals(this.selected).Distinct<string>()
+					orderby x
+					select x)
+					{
+						string signalLocal = signalLocal2;
+						list.Add(new FloatMenuOption(signalLocal, delegate()
+						{
+							Find.SignalManager.SendSignal(new Signal(signalLocal, false));
+							this.debugSendSignalTextField = "";
+						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					}
+					Find.WindowStack.Add(new FloatMenu(list));
+				}
+				curY += rect.height + 4f;
+			}
+			string text = "-----------------";
+			text = text + "\nId: " + this.selected.id.ToString();
+			text = text + "\nState: " + this.selected.State.ToString();
+			text += "\nData:";
+			text = text + "\n" + Scribe.saver.DebugOutputFor(this.selected);
+			text += "\n";
+			text += "\nActive QuestParts:";
+			bool flag = false;
+			for (int j = 0; j < partsListForReading.Count; j++)
+			{
+				QuestPartActivable questPartActivable = partsListForReading[j] as QuestPartActivable;
+				if (questPartActivable != null && questPartActivable.State == QuestPartState.Enabled)
+				{
+					text = text + "\n" + questPartActivable.ToString();
+					flag = true;
+				}
+			}
+			if (!flag)
+			{
+				text += "\nNone";
+			}
+			Rect rect3 = new Rect(innerRect.x, curY, 180f, 40f);
+			if (Widgets.ButtonText(rect3, "Copy debug to clipboard", true, true, true, null))
+			{
+				GUIUtility.systemCopyBuffer = text;
+			}
+			curY += rect3.height + 4f;
+			Widgets.LongLabel(innerRect.x, innerRect.width, text, ref curY, true);
+		}
+
+		// Token: 0x06012BD0 RID: 76752 RVA: 0x0058E860 File Offset: 0x0058CA60
+		private bool ShouldListNow(Quest quest)
+		{
+			if (quest.hidden && !this.showAll)
+			{
+				return false;
+			}
+			switch (this.curTab)
+			{
+			case MainTabWindow_Quests.QuestsTab.Available:
+				return quest.State == QuestState.NotYetAccepted && !quest.dismissed && !quest.hiddenInUI;
+			case MainTabWindow_Quests.QuestsTab.Active:
+				return quest.State == QuestState.Ongoing && !quest.dismissed && !quest.hiddenInUI;
+			case MainTabWindow_Quests.QuestsTab.Historical:
+				return !quest.hiddenInUI && (quest.Historical || quest.dismissed);
+			default:
+				return false;
+			}
+		}
+
+		// Token: 0x06012BD1 RID: 76753 RVA: 0x0058E8EF File Offset: 0x0058CAEF
+		private IEnumerable<string> DebugPossibleSignals(Quest quest)
+		{
+			string input = Scribe.saver.DebugOutputFor(this.selected);
+			foreach (object obj in Regex.Matches(input, ">(Quest" + quest.id.ToString() + "\\.[a-zA-Z0-9/\\-\\.]*)<"))
+			{
+				string value = ((Match)obj).Groups[1].Value;
+				yield return value;
+			}
+			IEnumerator enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012BD2 RID: 76754 RVA: 0x0058E908 File Offset: 0x0058CB08
+		private string GetAcceptedAgoByString(Quest quest)
+		{
+			string value = quest.TicksSinceAccepted.ToStringTicksToPeriod(true, false, true, true, false);
+			if (!quest.AccepterPawnLabelCap.NullOrEmpty())
+			{
+				return "AcceptedAgoBy".Translate(value, quest.AccepterPawnLabelCap);
+			}
+			return "AcceptedAgo".Translate(value);
+		}
+
+		// Token: 0x06012BD3 RID: 76755 RVA: 0x0058E96C File Offset: 0x0058CB6C
+		private string GetAcceptedOnByString(Quest quest)
+		{
+			Vector2 locForDates = QuestUtility.GetLocForDates();
+			string value = GenDate.DateFullStringWithHourAt((long)GenDate.TickGameToAbs(quest.acceptanceTick), locForDates);
+			if (!quest.AccepterPawnLabelCap.NullOrEmpty())
+			{
+				return "AcceptedOnBy".Translate(value, quest.AccepterPawnLabelCap);
+			}
+			return "AcceptedOn".Translate(value);
+		}
+
+		// Token: 0x06012BD4 RID: 76756 RVA: 0x0058E9D8 File Offset: 0x0058CBD8
+		private void AcceptQuestByInterface(Action preAcceptAction = null, bool requiresAccepter = false)
+		{
+			if (!QuestUtility.CanAcceptQuest(this.selected))
+			{
+				Messages.Message("MessageCannotAcceptQuest".Translate(), MessageTypeDefOf.RejectInput, false);
+				return;
+			}
+			if (!requiresAccepter)
+			{
+				SoundDefOf.Quest_Accepted.PlayOneShotOnCamera(null);
 				if (preAcceptAction != null)
 				{
 					preAcceptAction();
 				}
-				selected.Accept(pLocal);
-				Select(selected);
-				Messages.Message("MessageQuestAccepted".Translate(pLocal, selected.name), pLocal, MessageTypeDefOf.TaskCompletion, historical: false);
+				this.selected.Accept(null);
+				this.Select(this.selected);
+				return;
+			}
+			List<FloatMenuOption> list = new List<FloatMenuOption>();
+			using (List<Pawn>.Enumerator enumerator = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists_NoSuspended.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Pawn p = enumerator.Current;
+					if (QuestUtility.CanPawnAcceptQuest(p, this.selected))
+					{
+						Pawn pLocal = p;
+						string text = "AcceptWith".Translate(p);
+						if (p.royalty != null && p.royalty.AllTitlesInEffectForReading.Any<RoyalTitle>())
+						{
+							text = text + " (" + p.royalty.MostSeniorTitle.def.GetLabelFor(pLocal) + ")";
+						}
+						list.Add(new FloatMenuOption(text, delegate()
+						{
+							if (!QuestUtility.CanPawnAcceptQuest(pLocal, this.selected))
+							{
+								return;
+							}
+							QuestPart_GiveRoyalFavor questPart_GiveRoyalFavor = this.selected.PartsListForReading.OfType<QuestPart_GiveRoyalFavor>().FirstOrDefault<QuestPart_GiveRoyalFavor>();
+							if (questPart_GiveRoyalFavor == null || !questPart_GiveRoyalFavor.giveToAccepter)
+							{
+								base.<AcceptQuestByInterface>g__AcceptAction|1();
+								return;
+							}
+							IEnumerable<Trait> conceitedTraits = RoyalTitleUtility.GetConceitedTraits(p);
+							IEnumerable<Trait> traitsAffectingPsylinkNegatively = RoyalTitleUtility.GetTraitsAffectingPsylinkNegatively(p);
+							bool totallyDisabled = p.skills.GetSkill(SkillDefOf.Social).TotallyDisabled;
+							bool flag = conceitedTraits.Any<Trait>();
+							bool flag2 = !p.HasPsylink && traitsAffectingPsylinkNegatively.Any<Trait>();
+							if (totallyDisabled || flag || flag2)
+							{
+								NamedArgument arg = p.Named("PAWN");
+								NamedArgument arg2 = questPart_GiveRoyalFavor.faction.Named("FACTION");
+								TaggedString t4 = null;
+								if (totallyDisabled)
+								{
+									t4 = "RoyalIncapableOfSocial".Translate(arg, arg2);
+								}
+								TaggedString t2 = null;
+								if (flag)
+								{
+									t2 = "RoyalWithConceitedTrait".Translate(arg, arg2, (from t in conceitedTraits
+									select t.Label).ToCommaList(true, false));
+								}
+								TaggedString t3 = null;
+								if (flag2)
+								{
+									t3 = "RoyalWithTraitAffectingPsylinkNegatively".Translate(arg, arg2, (from t in traitsAffectingPsylinkNegatively
+									select t.Label).ToCommaList(true, false));
+								}
+								TaggedString taggedString = "QuestGivesRoyalFavor".Translate(arg, arg2);
+								if (totallyDisabled)
+								{
+									taggedString += "\n\n" + t4;
+								}
+								if (flag)
+								{
+									taggedString += "\n\n" + t2;
+								}
+								if (flag2)
+								{
+									taggedString += "\n\n" + t3;
+								}
+								taggedString += "\n\n" + "WantToContinue".Translate();
+								Find.WindowStack.Add(new Dialog_MessageBox(taggedString, "Confirm".Translate(), new Action(base.<AcceptQuestByInterface>g__AcceptAction|1), "GoBack".Translate(), null, null, false, null, null, WindowLayer.Dialog));
+								return;
+							}
+							base.<AcceptQuestByInterface>g__AcceptAction|1();
+						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					}
+				}
+			}
+			if (list.Count > 0)
+			{
+				Find.WindowStack.Add(new FloatMenu(list));
+				return;
+			}
+			Messages.Message("MessageNoColonistCanAcceptQuest".Translate(Faction.OfPlayer.def.pawnsPlural), MessageTypeDefOf.RejectInput, false);
+		}
+
+		// Token: 0x06012BDD RID: 76765 RVA: 0x0058EDD0 File Offset: 0x0058CFD0
+		[CompilerGenerated]
+		private void <DoQuestsList>g__DrawQuest|49_0(Quest quest, int indent = 0, ref MainTabWindow_Quests.<>c__DisplayClass49_0 A_3)
+		{
+			if (MainTabWindow_Quests.tmpQuestsVisited.Contains(quest))
+			{
+				return;
+			}
+			if (quest.parent != null && MainTabWindow_Quests.tmpQuestsToShow.Contains(quest.parent) && !MainTabWindow_Quests.tmpQuestsVisited.Contains(quest.parent))
+			{
+				return;
+			}
+			float num = A_3.scrollPosition.y - 32f;
+			float num2 = A_3.scrollPosition.y + A_3.scrollOutRect.height;
+			if (A_3.curY > num && A_3.curY < num2)
+			{
+				float num3 = (float)indent * 10f;
+				this.DoRow(new Rect(num3, A_3.curY, A_3.scrollViewRect.width - 4f - num3, 32f), quest);
+			}
+			A_3.curY += 32f;
+			MainTabWindow_Quests.tmpQuestsVisited.Add(quest);
+			indent++;
+			foreach (Quest quest2 in quest.GetSubquests(null))
+			{
+				if (MainTabWindow_Quests.tmpQuestsToShow.Contains(quest2))
+				{
+					this.<DoQuestsList>g__DrawQuest|49_0(quest2, indent, ref A_3);
+				}
 			}
 		}
-		if (list.Count > 0)
+
+		// Token: 0x0400C27C RID: 49788
+		private Quest selected;
+
+		// Token: 0x0400C27D RID: 49789
+		private MainTabWindow_Quests.QuestsTab curTab;
+
+		// Token: 0x0400C27E RID: 49790
+		private List<TabRecord> tabs = new List<TabRecord>();
+
+		// Token: 0x0400C27F RID: 49791
+		private Vector2 scrollPosition_available;
+
+		// Token: 0x0400C280 RID: 49792
+		private Vector2 scrollPosition_active;
+
+		// Token: 0x0400C281 RID: 49793
+		private Vector2 scrollPosition_historical;
+
+		// Token: 0x0400C282 RID: 49794
+		private Vector2 selectedQuestScrollPosition;
+
+		// Token: 0x0400C283 RID: 49795
+		private float selectedQuestLastHeight;
+
+		// Token: 0x0400C284 RID: 49796
+		private bool showDebugInfo;
+
+		// Token: 0x0400C285 RID: 49797
+		private List<QuestPart> tmpQuestParts = new List<QuestPart>();
+
+		// Token: 0x0400C286 RID: 49798
+		private string debugSendSignalTextField;
+
+		// Token: 0x0400C287 RID: 49799
+		private bool showAll;
+
+		// Token: 0x0400C288 RID: 49800
+		private QuickSearchWidget quickSearchWidget = new QuickSearchWidget();
+
+		// Token: 0x0400C289 RID: 49801
+		private const float LeftRectWidthFraction = 0.36f;
+
+		// Token: 0x0400C28A RID: 49802
+		private const float RowHeight = 32f;
+
+		// Token: 0x0400C28B RID: 49803
+		private const float CheckBoxHeight = 24f;
+
+		// Token: 0x0400C28C RID: 49804
+		private const float ShowDebugInfoToggleWidth = 110f;
+
+		// Token: 0x0400C28D RID: 49805
+		private const float DismisIconWidth = 32f;
+
+		// Token: 0x0400C28E RID: 49806
+		private const float TimeInfoWidth = 35f;
+
+		// Token: 0x0400C28F RID: 49807
+		private const float CharityIconWidth = 32f;
+
+		// Token: 0x0400C290 RID: 49808
+		private static readonly Color TimeLimitColor = new Color(1f, 1f, 1f, 0.7f);
+
+		// Token: 0x0400C291 RID: 49809
+		private static readonly Color AcceptanceRequirementsColor = new Color(1f, 0.25f, 0.25f);
+
+		// Token: 0x0400C292 RID: 49810
+		private static readonly Color AcceptanceRequirementsBoxColor = new Color(0.62f, 0.18f, 0.18f);
+
+		// Token: 0x0400C293 RID: 49811
+		private static readonly Color acceptanceRequirementsBoxBgColor = new Color(0.13f, 0.13f, 0.13f);
+
+		// Token: 0x0400C294 RID: 49812
+		private static readonly Color IdeoCharityTextColor = new Color32(byte.MaxValue, 237, 38, byte.MaxValue);
+
+		// Token: 0x0400C295 RID: 49813
+		private static readonly Color IdeoCharityBoxBorderColor = new Color32(205, 207, 18, byte.MaxValue);
+
+		// Token: 0x0400C296 RID: 49814
+		private static readonly Color IdeoCharityBoxBackgroundColor = new Color(0.13f, 0.13f, 0.13f);
+
+		// Token: 0x0400C297 RID: 49815
+		private static readonly Color QuestCompletedColor = GenColor.FromHex("1e591a");
+
+		// Token: 0x0400C298 RID: 49816
+		private static readonly Color QuestFailedColor = GenColor.FromHex("5e2f2f");
+
+		// Token: 0x0400C299 RID: 49817
+		private static readonly Color QuestExpiredColor = GenColor.FromHex("916e2d");
+
+		// Token: 0x0400C29A RID: 49818
+		private const int RowIconSize = 15;
+
+		// Token: 0x0400C29B RID: 49819
+		private const float RatingWidth = 60f;
+
+		// Token: 0x0400C29C RID: 49820
+		private const float RewardsConfigButtonHeight = 40f;
+
+		// Token: 0x0400C29D RID: 49821
+		private static Texture2D RatingIcon = null;
+
+		// Token: 0x0400C29E RID: 49822
+		private static readonly Texture2D DismissIcon = ContentFinder<Texture2D>.Get("UI/Buttons/Dismiss", true);
+
+		// Token: 0x0400C29F RID: 49823
+		private static readonly Texture2D ResumeQuestIcon = ContentFinder<Texture2D>.Get("UI/Buttons/UnDismiss", true);
+
+		// Token: 0x0400C2A0 RID: 49824
+		private static readonly Texture2D QuestDismissedIcon = ContentFinder<Texture2D>.Get("UI/Icons/DismissedQuestIcon", true);
+
+		// Token: 0x0400C2A1 RID: 49825
+		private static readonly Texture2D CharityQuestIcon = ContentFinder<Texture2D>.Get("UI/Icons/CharityQuestIcon", true);
+
+		// Token: 0x0400C2A2 RID: 49826
+		private const float IndentWidth = 10f;
+
+		// Token: 0x0400C2A3 RID: 49827
+		private const float SearchBoxHeight = 24f;
+
+		// Token: 0x0400C2A4 RID: 49828
+		private static List<Quest> tmpQuestsToShow = new List<Quest>();
+
+		// Token: 0x0400C2A5 RID: 49829
+		private static HashSet<Quest> tmpQuestsVisited = new HashSet<Quest>();
+
+		// Token: 0x0400C2A6 RID: 49830
+		private static List<Thing> tmpColonistsForIdeo = new List<Thing>();
+
+		// Token: 0x0400C2A7 RID: 49831
+		private static readonly HashSet<string> uniqueEntries = new HashSet<string>();
+
+		// Token: 0x0400C2A8 RID: 49832
+		private static List<GenUI.AnonymousStackElement> tmpStackElements = new List<GenUI.AnonymousStackElement>();
+
+		// Token: 0x0400C2A9 RID: 49833
+		private static List<QuestPart> tmpRemainingQuestParts = new List<QuestPart>();
+
+		// Token: 0x0400C2AA RID: 49834
+		private static List<GlobalTargetInfo> tmpLookTargets = new List<GlobalTargetInfo>();
+
+		// Token: 0x0400C2AB RID: 49835
+		private static List<GlobalTargetInfo> tmpSelectTargets = new List<GlobalTargetInfo>();
+
+		// Token: 0x02003406 RID: 13318
+		private enum QuestsTab : byte
 		{
-			Find.WindowStack.Add(new FloatMenu(list));
-		}
-		else
-		{
-			Messages.Message("MessageNoColonistCanAcceptQuest".Translate(Faction.OfPlayer.def.pawnsPlural), MessageTypeDefOf.RejectInput, historical: false);
+			// Token: 0x0400C2AD RID: 49837
+			Available,
+			// Token: 0x0400C2AE RID: 49838
+			Active,
+			// Token: 0x0400C2AF RID: 49839
+			Historical
 		}
 	}
 }

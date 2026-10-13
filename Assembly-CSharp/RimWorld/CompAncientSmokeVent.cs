@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class CompAncientSmokeVent : CompAncientVent
+namespace RimWorld
 {
-	protected override void ToggleIndividualVent(bool on)
+	// Token: 0x02002BD1 RID: 11217
+	public class CompAncientSmokeVent : CompAncientVent
 	{
-		parent.GetComp<CompFleckEmitterLongTerm>().Enabled = on;
+		// Token: 0x0600FAEC RID: 64236 RVA: 0x0048E878 File Offset: 0x0048CA78
+		protected override void ToggleIndividualVent(bool on)
+		{
+			this.parent.GetComp<CompFleckEmitterLongTerm>().Enabled = on;
+		}
 	}
 }

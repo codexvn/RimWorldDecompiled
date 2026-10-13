@@ -1,71 +1,83 @@
+﻿using System;
+using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class Verb_CastTargetEffectLances : Verb_CastTargetEffect
+namespace Verse.AI
 {
-	public override void OnGUI(LocalTargetInfo target)
+	// Token: 0x02000E71 RID: 3697
+	public class Verb_CastTargetEffectLances : Verb_CastTargetEffect
 	{
-		if (CanHitTarget(target) && verbProps.targetParams.CanTarget(target.ToTargetInfo(caster.Map)))
+		// Token: 0x06005D24 RID: 23844 RVA: 0x001DAAF0 File Offset: 0x001D8CF0
+		public override void OnGUI(LocalTargetInfo target)
 		{
-			Pawn pawn = target.Pawn;
-			if (pawn != null)
+			if (this.CanHitTarget(target) && this.verbProps.targetParams.CanTarget(target.ToTargetInfo(this.caster.Map), null))
 			{
-				bool flag = target.Pawn.kindDef.isBoss;
-				foreach (CompTargetEffect comp in base.EquipmentSource.GetComps<CompTargetEffect>())
+				Pawn pawn = target.Pawn;
+				if (pawn == null)
 				{
-					if (!comp.CanApplyOn(pawn))
+					base.OnGUI(target);
+					return;
+				}
+				bool flag = target.Pawn.kindDef.isBoss;
+				using (IEnumerator<CompTargetEffect> enumerator = base.EquipmentSource.GetComps<CompTargetEffect>().GetEnumerator())
+				{
+					while (enumerator.MoveNext())
 					{
-						flag = true;
-						break;
+						if (!enumerator.Current.CanApplyOn(pawn))
+						{
+							flag = true;
+							break;
+						}
 					}
 				}
 				if (flag)
 				{
 					GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
-					if (!string.IsNullOrEmpty(verbProps.invalidTargetPawn))
+					if (!string.IsNullOrEmpty(this.verbProps.invalidTargetPawn))
 					{
-						Widgets.MouseAttachedLabel(verbProps.invalidTargetPawn.CapitalizeFirst(), 0f, -20f);
+						Widgets.MouseAttachedLabel(this.verbProps.invalidTargetPawn.CapitalizeFirst(), 0f, -20f, null);
+						return;
 					}
 				}
-				else if (pawn.GetStatValue(StatDefOf.PsychicSensitivity) <= 0f)
+				else if (pawn.GetStatValue(StatDefOf.PsychicSensitivity, true, -1) <= 0f)
 				{
 					GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
-					Widgets.MouseAttachedLabel("CannotShootPawnIsPsychicallyDeaf".Translate(pawn), 0f, -20f);
+					Widgets.MouseAttachedLabel("CannotShootPawnIsPsychicallyDeaf".Translate(pawn), 0f, -20f, null);
+					return;
 				}
 			}
 			else
 			{
-				base.OnGUI(target);
+				GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
 			}
 		}
-		else
-		{
-			GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
-		}
-	}
 
-	public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
-	{
-		Pawn pawn = target.Pawn;
-		if (pawn != null)
+		// Token: 0x06005D25 RID: 23845 RVA: 0x001DAC40 File Offset: 0x001D8E40
+		public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
 		{
-			if (target.Pawn.kindDef.isBoss)
+			Pawn pawn = target.Pawn;
+			if (pawn != null)
 			{
-				return false;
-			}
-			if (pawn.GetStatValue(StatDefOf.PsychicSensitivity) <= 0f)
-			{
-				return false;
-			}
-			foreach (CompTargetEffect comp in base.EquipmentSource.GetComps<CompTargetEffect>())
-			{
-				if (!comp.CanApplyOn(target.Pawn))
+				if (target.Pawn.kindDef.isBoss)
 				{
 					return false;
 				}
+				if (pawn.GetStatValue(StatDefOf.PsychicSensitivity, true, -1) <= 0f)
+				{
+					return false;
+				}
+				using (IEnumerator<CompTargetEffect> enumerator = base.EquipmentSource.GetComps<CompTargetEffect>().GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						if (!enumerator.Current.CanApplyOn(target.Pawn))
+						{
+							return false;
+						}
+					}
+				}
 			}
+			return base.ValidateTarget(target, showMessages);
 		}
-		return base.ValidateTarget(target, showMessages);
 	}
 }

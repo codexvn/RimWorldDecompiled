@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-[AttributeUsage(AttributeTargets.Field)]
-public class EditorNullableAttribute : Attribute
+namespace Verse
 {
+	// Token: 0x02000B5D RID: 2909
+	[AttributeUsage(AttributeTargets.Field)]
+	public class EditorNullableAttribute : Attribute
+	{
+	}
 }

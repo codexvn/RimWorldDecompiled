@@ -1,23 +1,29 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse.Sound;
-
-public class AudioGrain_Clip : AudioGrain
+namespace Verse.Sound
 {
-	[NoTranslate]
-	public string clipPath = "";
-
-	public override IEnumerable<ResolvedGrain> GetResolvedGrains()
+	// Token: 0x02000DFA RID: 3578
+	public class AudioGrain_Clip : AudioGrain
 	{
-		AudioClip audioClip = ContentFinder<AudioClip>.Get(clipPath);
-		if (audioClip != null)
+		// Token: 0x06005AF3 RID: 23283 RVA: 0x001D2F30 File Offset: 0x001D1130
+		public override IEnumerable<ResolvedGrain> GetResolvedGrains()
 		{
-			yield return new ResolvedGrain_Clip(audioClip);
+			AudioClip audioClip = ContentFinder<AudioClip>.Get(this.clipPath, true);
+			if (audioClip != null)
+			{
+				yield return new ResolvedGrain_Clip(audioClip);
+			}
+			else
+			{
+				Log.Error("Grain couldn't resolve: Clip not found at " + this.clipPath);
+			}
+			yield break;
 		}
-		else
-		{
-			Log.Error("Grain couldn't resolve: Clip not found at " + clipPath);
-		}
+
+		// Token: 0x040041E4 RID: 16868
+		[NoTranslate]
+		public string clipPath = "";
 	}
 }

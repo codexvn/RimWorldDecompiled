@@ -1,20 +1,32 @@
+﻿using System;
 using System.Linq;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class TransitionAction_EnsureHaveExitDestination : TransitionAction
+namespace Verse.AI.Group
 {
-	public override void DoAction(Transition trans)
+	// Token: 0x020010B5 RID: 4277
+	public class TransitionAction_EnsureHaveExitDestination : TransitionAction
 	{
-		LordToil_Travel lordToil_Travel = (LordToil_Travel)trans.target;
-		if (!lordToil_Travel.HasDestination() && lordToil_Travel.lord.ownedPawns.Where((Pawn x) => x.Spawned).TryRandomElement(out var result))
+		// Token: 0x060068E3 RID: 26851 RVA: 0x00211E88 File Offset: 0x00210088
+		public override void DoAction(Transition trans)
 		{
-			if (!CellFinder.TryFindRandomPawnExitCell(result, out var result2))
+			LordToil_Travel lordToil_Travel = (LordToil_Travel)trans.target;
+			if (lordToil_Travel.HasDestination())
 			{
-				RCellFinder.TryFindRandomPawnEntryCell(out result2, result.Map, 0f);
+				return;
 			}
-			lordToil_Travel.SetDestination(result2);
+			Pawn pawn;
+			if ((from x in lordToil_Travel.lord.ownedPawns
+			where x.Spawned
+			select x).TryRandomElement(out pawn))
+			{
+				IntVec3 destination;
+				if (!CellFinder.TryFindRandomPawnExitCell(pawn, out destination))
+				{
+					RCellFinder.TryFindRandomPawnEntryCell(out destination, pawn.Map, 0f, false, null);
+				}
+				lordToil_Travel.SetDestination(destination);
+			}
 		}
 	}
 }

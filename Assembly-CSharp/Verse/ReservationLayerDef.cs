@@ -1,5 +1,9 @@
-namespace Verse;
+﻿using System;
 
-public class ReservationLayerDef : Def
+namespace Verse
 {
+	// Token: 0x020002D6 RID: 726
+	public class ReservationLayerDef : Def
+	{
+	}
 }

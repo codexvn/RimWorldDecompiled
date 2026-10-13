@@ -1,88 +1,88 @@
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using RimWorld.Planet;
 using RimWorld.SketchGen;
 using Verse;
 
-namespace RimWorld;
-
-public class TileMutatorWorker_Stockpile : TileMutatorWorker
+namespace RimWorld
 {
-	public enum StockpileType
+	// Token: 0x0200211C RID: 8476
+	public class TileMutatorWorker_Stockpile : TileMutatorWorker
 	{
-		Medicine,
-		Chemfuel,
-		Component,
-		Weapons,
-		Gravcore,
-		Drugs
-	}
-
-	public static readonly List<StockpileType> GeneratableStockpileTypes = new List<StockpileType>
-	{
-		StockpileType.Medicine,
-		StockpileType.Chemfuel,
-		StockpileType.Component,
-		StockpileType.Weapons,
-		StockpileType.Drugs
-	};
-
-	public TileMutatorWorker_Stockpile(TileMutatorDef def)
-		: base(def)
-	{
-	}
-
-	public override string GetLabel(PlanetTile tile)
-	{
-		return ("Stockpile" + GetStockpileType(tile)).Translate();
-	}
-
-	public override void GeneratePostFog(Map map)
-	{
-		if (!ModsConfig.OdysseyActive)
+		// Token: 0x0600B8F1 RID: 47345 RVA: 0x0034CD7F File Offset: 0x0034AF7F
+		public TileMutatorWorker_Stockpile(TileMutatorDef def) : base(def)
 		{
-			return;
 		}
-		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-		Sketch sketch = RimWorld.SketchGen.SketchGen.Generate(parms: new SketchResolveParams
+
+		// Token: 0x0600B8F2 RID: 47346 RVA: 0x003564B0 File Offset: 0x003546B0
+		public override string GetLabel(PlanetTile tile)
 		{
-			sketch = new Sketch()
-		}, root: SketchResolverDefOf.AncientHatch);
-		if (!MapGenUtility.TryGetRandomClearRect(sketch.OccupiedSize.x, sketch.OccupiedSize.z, out var rect, -1, -1, Validator))
+			return ("Stockpile" + TileMutatorWorker_Stockpile.GetStockpileType(tile).ToString()).Translate();
+		}
+
+		// Token: 0x0600B8F3 RID: 47347 RVA: 0x003564E8 File Offset: 0x003546E8
+		public override void GeneratePostFog(Map map)
 		{
-			if (!CellFinder.TryFindRandomCell(map, (IntVec3 c) => Validator(CellRect.CenteredOn(c, sketch.OccupiedSize)), out var result))
+			TileMutatorWorker_Stockpile.<>c__DisplayClass4_0 CS$<>8__locals1 = new TileMutatorWorker_Stockpile.<>c__DisplayClass4_0();
+			CS$<>8__locals1.map = map;
+			if (!ModsConfig.OdysseyActive)
 			{
 				return;
 			}
-			rect = CellRect.CenteredOn(result, sketch.OccupiedSize);
+			CS$<>8__locals1.usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+			SketchResolveParams parms = default(SketchResolveParams);
+			parms.sketch = new Sketch();
+			CS$<>8__locals1.sketch = SketchGen.Generate(SketchResolverDefOf.AncientHatch, parms);
+			CellRect item;
+			if (!MapGenUtility.TryGetRandomClearRect(CS$<>8__locals1.sketch.OccupiedSize.x, CS$<>8__locals1.sketch.OccupiedSize.z, out item, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<GeneratePostFog>g__Validator|0), -1f, 0.7f, MapGenUtility.SearchWeightMode.Largest, 1))
+			{
+				IntVec3 center;
+				if (!CellFinder.TryFindRandomCell(CS$<>8__locals1.map, (IntVec3 c) => base.<GeneratePostFog>g__Validator|0(CellRect.CenteredOn(c, CS$<>8__locals1.sketch.OccupiedSize)), out center))
+				{
+					return;
+				}
+				item = CellRect.CenteredOn(center, CS$<>8__locals1.sketch.OccupiedSize);
+			}
+			List<Thing> list = new List<Thing>();
+			CS$<>8__locals1.sketch.Spawn(CS$<>8__locals1.map, item.Min, null, Sketch.SpawnPosType.Unchanged, Sketch.SpawnMode.Normal, true, false, true, list, false, false, null, null, null);
+			CS$<>8__locals1.usedRects.Add(item);
+			(list.FirstOrDefault((Thing t) => t.def == ThingDefOf.AncientHatch) as AncientHatch).stockpileType = TileMutatorWorker_Stockpile.GetStockpileType(CS$<>8__locals1.map.Tile);
 		}
-		List<Thing> list = new List<Thing>();
-		sketch.Spawn(map, rect.Min, null, Sketch.SpawnPosType.Unchanged, Sketch.SpawnMode.Normal, wipeIfCollides: true, forceTerrainAffordance: false, clearEdificeWhereFloor: true, list);
-		usedRects.Add(rect);
-		(list.FirstOrDefault((Thing t) => t.def == ThingDefOf.AncientHatch) as AncientHatch).stockpileType = GetStockpileType(map.Tile);
-		bool Validator(CellRect r)
-		{
-			if (!r.InBounds(map))
-			{
-				return false;
-			}
-			if (r.Cells.Any((IntVec3 c) => c.Fogged(map)))
-			{
-				return false;
-			}
-			if (!usedRects.Any((CellRect ur) => ur.Overlaps(r)))
-			{
-				return !sketch.IsSpawningBlocked(map, r.Min, null);
-			}
-			return false;
-		}
-	}
 
-	private static StockpileType GetStockpileType(PlanetTile tile)
-	{
-		Rand.PushState(tile.tileId);
-		StockpileType result = GeneratableStockpileTypes.RandomElement();
-		Rand.PopState();
-		return result;
+		// Token: 0x0600B8F4 RID: 47348 RVA: 0x00356626 File Offset: 0x00354826
+		private static TileMutatorWorker_Stockpile.StockpileType GetStockpileType(PlanetTile tile)
+		{
+			Rand.PushState(tile.tileId);
+			TileMutatorWorker_Stockpile.StockpileType result = TileMutatorWorker_Stockpile.GeneratableStockpileTypes.RandomElement<TileMutatorWorker_Stockpile.StockpileType>();
+			Rand.PopState();
+			return result;
+		}
+
+		// Token: 0x04007F8B RID: 32651
+		public static readonly List<TileMutatorWorker_Stockpile.StockpileType> GeneratableStockpileTypes = new List<TileMutatorWorker_Stockpile.StockpileType>
+		{
+			TileMutatorWorker_Stockpile.StockpileType.Medicine,
+			TileMutatorWorker_Stockpile.StockpileType.Chemfuel,
+			TileMutatorWorker_Stockpile.StockpileType.Component,
+			TileMutatorWorker_Stockpile.StockpileType.Weapons,
+			TileMutatorWorker_Stockpile.StockpileType.Drugs
+		};
+
+		// Token: 0x0200211D RID: 8477
+		public enum StockpileType
+		{
+			// Token: 0x04007F8D RID: 32653
+			Medicine,
+			// Token: 0x04007F8E RID: 32654
+			Chemfuel,
+			// Token: 0x04007F8F RID: 32655
+			Component,
+			// Token: 0x04007F90 RID: 32656
+			Weapons,
+			// Token: 0x04007F91 RID: 32657
+			Gravcore,
+			// Token: 0x04007F92 RID: 32658
+			Drugs
+		}
 	}
 }

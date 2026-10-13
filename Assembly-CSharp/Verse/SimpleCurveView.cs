@@ -1,79 +1,98 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 
-namespace Verse;
-
-public class SimpleCurveView
+namespace Verse
 {
-	public Rect rect;
-
-	private Dictionary<object, float> debugInputValues = new Dictionary<object, float>();
-
-	private const float ResetZoomBuffer = 0.1f;
-
-	private static Rect identityRect = new Rect(0f, 0f, 1f, 1f);
-
-	public IEnumerable<float> DebugInputValues
+	// Token: 0x020000E0 RID: 224
+	public class SimpleCurveView
 	{
-		get
+		// Token: 0x1700012A RID: 298
+		// (get) Token: 0x0600062B RID: 1579 RVA: 0x0001E76B File Offset: 0x0001C96B
+		public IEnumerable<float> DebugInputValues
 		{
-			if (debugInputValues == null)
+			get
 			{
+				if (this.debugInputValues == null)
+				{
+					yield break;
+				}
+				foreach (float num in this.debugInputValues.Values)
+				{
+					yield return num;
+				}
+				Dictionary<object, float>.ValueCollection.Enumerator enumerator = default(Dictionary<object, float>.ValueCollection.Enumerator);
+				yield break;
 				yield break;
 			}
-			foreach (float value in debugInputValues.Values)
+		}
+
+		// Token: 0x0600062C RID: 1580 RVA: 0x0001E77B File Offset: 0x0001C97B
+		public void SetDebugInput(object key, float value)
+		{
+			this.debugInputValues[key] = value;
+		}
+
+		// Token: 0x0600062D RID: 1581 RVA: 0x0001E78A File Offset: 0x0001C98A
+		public void ClearDebugInputFrom(object key)
+		{
+			if (this.debugInputValues.ContainsKey(key))
 			{
-				yield return value;
+				this.debugInputValues.Remove(key);
 			}
 		}
-	}
 
-	public void SetDebugInput(object key, float value)
-	{
-		debugInputValues[key] = value;
-	}
+		// Token: 0x0600062E RID: 1582 RVA: 0x0001E7A8 File Offset: 0x0001C9A8
+		public void SetViewRectAround(SimpleCurve curve)
+		{
+			if (curve.PointsCount == 0)
+			{
+				this.rect = SimpleCurveView.identityRect;
+				return;
+			}
+			this.rect.xMin = (from pt in curve.Points
+			select pt.Loc.x).Min();
+			this.rect.xMax = (from pt in curve.Points
+			select pt.Loc.x).Max();
+			this.rect.yMin = (from pt in curve.Points
+			select pt.Loc.y).Min();
+			this.rect.yMax = (from pt in curve.Points
+			select pt.Loc.y).Max();
+			if (Mathf.Approximately(this.rect.width, 0f))
+			{
+				this.rect.width = this.rect.xMin * 2f;
+			}
+			if (Mathf.Approximately(this.rect.height, 0f))
+			{
+				this.rect.height = this.rect.yMin * 2f;
+			}
+			if (Mathf.Approximately(this.rect.width, 0f))
+			{
+				this.rect.width = 1f;
+			}
+			if (Mathf.Approximately(this.rect.height, 0f))
+			{
+				this.rect.height = 1f;
+			}
+			float width = this.rect.width;
+			float height = this.rect.height;
+			this.rect.xMin = this.rect.xMin - width * 0.1f;
+			this.rect.xMax = this.rect.xMax + width * 0.1f;
+			this.rect.yMin = this.rect.yMin - height * 0.1f;
+			this.rect.yMax = this.rect.yMax + height * 0.1f;
+		}
 
-	public void ClearDebugInputFrom(object key)
-	{
-		if (debugInputValues.ContainsKey(key))
-		{
-			debugInputValues.Remove(key);
-		}
-	}
+		// Token: 0x04000325 RID: 805
+		public Rect rect;
 
-	public void SetViewRectAround(SimpleCurve curve)
-	{
-		if (curve.PointsCount == 0)
-		{
-			rect = identityRect;
-			return;
-		}
-		rect.xMin = curve.Points.Select((CurvePoint pt) => pt.Loc.x).Min();
-		rect.xMax = curve.Points.Select((CurvePoint pt) => pt.Loc.x).Max();
-		rect.yMin = curve.Points.Select((CurvePoint pt) => pt.Loc.y).Min();
-		rect.yMax = curve.Points.Select((CurvePoint pt) => pt.Loc.y).Max();
-		if (Mathf.Approximately(rect.width, 0f))
-		{
-			rect.width = rect.xMin * 2f;
-		}
-		if (Mathf.Approximately(rect.height, 0f))
-		{
-			rect.height = rect.yMin * 2f;
-		}
-		if (Mathf.Approximately(rect.width, 0f))
-		{
-			rect.width = 1f;
-		}
-		if (Mathf.Approximately(rect.height, 0f))
-		{
-			rect.height = 1f;
-		}
-		float width = rect.width;
-		float height = rect.height;
-		rect.xMin -= width * 0.1f;
-		rect.xMax += width * 0.1f;
-		rect.yMin -= height * 0.1f;
-		rect.yMax += height * 0.1f;
+		// Token: 0x04000326 RID: 806
+		private Dictionary<object, float> debugInputValues = new Dictionary<object, float>();
+
+		// Token: 0x04000327 RID: 807
+		private const float ResetZoomBuffer = 0.1f;
+
+		// Token: 0x04000328 RID: 808
+		private static Rect identityRect = new Rect(0f, 0f, 1f, 1f);
 	}
 }

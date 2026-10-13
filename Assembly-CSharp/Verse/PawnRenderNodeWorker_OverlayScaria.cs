@@ -1,20 +1,21 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class PawnRenderNodeWorker_OverlayScaria : PawnRenderNodeWorker_Overlay
+namespace Verse
 {
-	protected override PawnOverlayDrawer OverlayDrawer(Pawn pawn)
+	// Token: 0x02000645 RID: 1605
+	public class PawnRenderNodeWorker_OverlayScaria : PawnRenderNodeWorker_Overlay
 	{
-		return pawn.Drawer.renderer.ScariaSoreDrawer;
-	}
-
-	public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
-	{
-		if (base.CanDrawNow(node, parms))
+		// Token: 0x0600287D RID: 10365 RVA: 0x000D617A File Offset: 0x000D437A
+		protected override PawnOverlayDrawer OverlayDrawer(Pawn pawn)
 		{
-			return parms.rotDrawMode != RotDrawMode.Dessicated;
+			return pawn.Drawer.renderer.ScariaSoreDrawer;
 		}
-		return false;
+
+		// Token: 0x0600287E RID: 10366 RVA: 0x000D6107 File Offset: 0x000D4307
+		public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
+		{
+			return base.CanDrawNow(node, parms) && parms.rotDrawMode != RotDrawMode.Dessicated;
+		}
 	}
 }

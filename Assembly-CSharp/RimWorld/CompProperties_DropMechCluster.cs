@@ -1,8 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class CompProperties_DropMechCluster : CompProperties_EffectWithDest
+namespace RimWorld
 {
-	public float points;
+	// Token: 0x0200220F RID: 8719
+	public class CompProperties_DropMechCluster : CompProperties_EffectWithDest
+	{
+		// Token: 0x040082FF RID: 33535
+		public float points;
 
-	public bool startDormant = true;
+		// Token: 0x04008300 RID: 33536
+		public bool startDormant = true;
+	}
 }

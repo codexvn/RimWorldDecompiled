@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-[AttributeUsage(AttributeTargets.Field)]
-public class XmlInheritanceAllowDuplicateNodes : Attribute
+namespace Verse
 {
+	// Token: 0x02000838 RID: 2104
+	[AttributeUsage(AttributeTargets.Field)]
+	public class XmlInheritanceAllowDuplicateNodes : Attribute
+	{
+	}
 }

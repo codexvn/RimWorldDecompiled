@@ -1,16 +1,16 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class FeatureWorker_Bay : FeatureWorker_Protrusion
+namespace RimWorld.Planet
 {
-	protected override bool IsRoot(PlanetTile tile)
+	// Token: 0x02003C39 RID: 15417
+	public class FeatureWorker_Bay : FeatureWorker_Protrusion
 	{
-		BiomeDef primaryBiome = Find.WorldGrid[tile].PrimaryBiome;
-		if (primaryBiome != BiomeDefOf.Ocean)
+		// Token: 0x06014EA5 RID: 85669 RVA: 0x00643834 File Offset: 0x00641A34
+		protected override bool IsRoot(PlanetTile tile)
 		{
-			return primaryBiome == BiomeDefOf.Lake;
+			BiomeDef primaryBiome = Find.WorldGrid[tile].PrimaryBiome;
+			return primaryBiome == BiomeDefOf.Ocean || primaryBiome == BiomeDefOf.Lake;
 		}
-		return true;
 	}
 }

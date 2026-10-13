@@ -1,43 +1,45 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public struct CellWithRadius : IEquatable<CellWithRadius>
+namespace RimWorld
 {
-	public readonly IntVec3 cell;
-
-	public readonly float radius;
-
-	public CellWithRadius(IntVec3 c, float r)
+	// Token: 0x02001F67 RID: 8039
+	public struct CellWithRadius : IEquatable<CellWithRadius>
 	{
-		cell = c;
-		radius = r;
-	}
-
-	public bool Equals(CellWithRadius other)
-	{
-		if (cell.Equals(other.cell))
+		// Token: 0x0600B1A2 RID: 45474 RVA: 0x0032C60F File Offset: 0x0032A80F
+		public CellWithRadius(IntVec3 c, float r)
 		{
-			float num = radius;
-			return num.Equals(other.radius);
+			this.cell = c;
+			this.radius = r;
 		}
-		return false;
-	}
 
-	public override bool Equals(object obj)
-	{
-		if (obj is CellWithRadius other)
+		// Token: 0x0600B1A3 RID: 45475 RVA: 0x0032C620 File Offset: 0x0032A820
+		public bool Equals(CellWithRadius other)
 		{
-			return Equals(other);
+			return this.cell.Equals(other.cell) && this.radius.Equals(other.radius);
 		}
-		return false;
-	}
 
-	public override int GetHashCode()
-	{
-		int num = cell.GetHashCode() * 397;
-		float num2 = radius;
-		return num ^ num2.GetHashCode();
+		// Token: 0x0600B1A4 RID: 45476 RVA: 0x0032C65C File Offset: 0x0032A85C
+		public override bool Equals(object obj)
+		{
+			if (obj is CellWithRadius)
+			{
+				CellWithRadius other = (CellWithRadius)obj;
+				return this.Equals(other);
+			}
+			return false;
+		}
+
+		// Token: 0x0600B1A5 RID: 45477 RVA: 0x0032C684 File Offset: 0x0032A884
+		public override int GetHashCode()
+		{
+			return this.cell.GetHashCode() * 397 ^ this.radius.GetHashCode();
+		}
+
+		// Token: 0x04007986 RID: 31110
+		public readonly IntVec3 cell;
+
+		// Token: 0x04007987 RID: 31111
+		public readonly float radius;
 	}
 }

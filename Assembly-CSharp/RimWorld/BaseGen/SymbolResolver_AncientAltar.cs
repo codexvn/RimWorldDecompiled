@@ -1,170 +1,192 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_AncientAltar : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private const int AncillaryRoomSize = 11;
-
-	private const int AncillaryRoomCornerRadius = 3;
-
-	private const int EntrancePathLength = 3;
-
-	private static readonly IntVec2 MainRoomSize = new IntVec2(17, 21);
-
-	private const string UnfoggedSignalPrefix = "UnfoggedSignal";
-
-	public static IntVec2 Size => new IntVec2(MainRoomSize.x + 22, MainRoomSize.z + 22);
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003945 RID: 14661
+	public class SymbolResolver_AncientAltar : SymbolResolver
 	{
-		rp.floorDef = (Rand.Bool ? TerrainDefOf.FlagstoneSandstone : TerrainDefOf.TileSandstone);
-		rp.wallStuff = BaseGenUtility.RandomCheapWallStuff(rp.faction, notVeryFlammable: true);
-		CellRect rect = CellRect.CenteredOn(rp.rect.CenterCell, MainRoomSize.x, MainRoomSize.z);
-		CellRect rect2 = new CellRect(rect.CenterCell.x - 5, rect.minZ + 2, 1, rect.Height - 4);
-		CellRect rect3 = new CellRect(rect.CenterCell.x + 5, rect.minZ + 2, 1, rect.Height - 4);
-		CellRect cellRect = rect.ExpandedBy(-1);
-		CellRect rect4 = new CellRect(cellRect.minX, cellRect.minZ + 3, 1, cellRect.Height - 6);
-		CellRect rect5 = new CellRect(cellRect.maxX, cellRect.minZ + 3, 1, cellRect.Height - 6);
-		ResolveParams resolveParams = rp;
-		resolveParams.rect = rect4;
-		resolveParams.singleThingStuff = rp.wallStuff;
-		if (rp.exteriorThreatPoints.HasValue && Faction.OfMechanoids != null)
+		// Token: 0x17003332 RID: 13106
+		// (get) Token: 0x060142E1 RID: 82657 RVA: 0x00603788 File Offset: 0x00601988
+		public static IntVec2 Size
 		{
-			ResolveParams resolveParams2 = rp;
-			resolveParams2.rect = rp.rect.ExpandedBy(10);
-			resolveParams2.sleepingMechanoidsWakeupSignalTag = rp.triggerSecuritySignal;
-			resolveParams2.sendWokenUpMessage = false;
-			resolveParams2.threatPoints = rp.exteriorThreatPoints.Value;
-			BaseGen.symbolStack.Push("sleepingMechanoids", resolveParams2);
-		}
-		int num = Rand.Range(2, 6);
-		for (int i = 0; i < num; i++)
-		{
-			resolveParams.singleThingDef = (Rand.Bool ? ThingDefOf.Sarcophagus : ThingDefOf.Urn);
-			resolveParams.thingRot = Rot4.North;
-			BaseGen.symbolStack.Push("edgeThing", resolveParams);
-		}
-		num = Rand.Range(1, 6);
-		resolveParams.rect = rect5;
-		for (int j = 0; j < num; j++)
-		{
-			resolveParams.singleThingDef = (Rand.Bool ? ThingDefOf.Sarcophagus : ThingDefOf.Urn);
-			resolveParams.thingRot = Rot4.North;
-			BaseGen.symbolStack.Push("edgeThing", resolveParams);
-		}
-		CellRect cellRect2 = new CellRect(rect.minX - 11 + 1, rect.minZ + 5, 11, 11);
-		CellRect cellRect3 = new CellRect(rect.maxX, rect.minZ + 5, 11, 11);
-		CellRect cellRect4 = new CellRect(rect.minX + rect.Width / 2 - 5, rect.maxZ, 11, 11);
-		CellRect[] array = new CellRect[3] { cellRect2, cellRect3, cellRect4 };
-		ResolveParams resolveParams3 = rp;
-		resolveParams3.rect = rect.ContractedBy(3);
-		resolveParams3.unfoggedSignalTag = "UnfoggedSignal" + Find.UniqueIDsManager.GetNextSignalTagID();
-		BaseGen.symbolStack.Push("unfoggedTrigger", resolveParams3);
-		ResolveParams resolveParams4 = rp;
-		resolveParams4.sound = SoundDefOf.AncientRelicRoomReveal;
-		resolveParams4.soundOneShotActionSignalTag = resolveParams3.unfoggedSignalTag;
-		BaseGen.symbolStack.Push("soundOneShotAction", resolveParams4);
-		ResolveParams resolveParams5 = rp;
-		resolveParams5.singleThingDef = ThingDefOf.SteleLarge;
-		IntVec2 size = ThingDefOf.SteleLarge.size;
-		resolveParams5.rect = new CellRect(rect2.minX + 1, rect.maxZ - size.x, size.x, size.z);
-		BaseGen.symbolStack.Push("thing", resolveParams5);
-		resolveParams5.rect = new CellRect(rect3.maxX - size.x, rect.maxZ - size.x, size.x, size.z);
-		BaseGen.symbolStack.Push("thing", resolveParams5);
-		ResolveParams resolveParams6 = rp;
-		resolveParams6.singleThingDef = ThingDefOf.Column;
-		resolveParams6.singleThingStuff = rp.wallStuff;
-		resolveParams6.fillWithThingsPadding = 2;
-		resolveParams6.rect = rect2;
-		BaseGen.symbolStack.Push("fillWithThings", resolveParams6);
-		resolveParams6.rect = rect3;
-		BaseGen.symbolStack.Push("fillWithThings", resolveParams6);
-		Thing item = rp.relicThing ?? ThingMaker.MakeThing(ThingDefOf.Beer);
-		Thing thing = ThingMaker.MakeThing(ThingDefOf.Reliquary, BaseGenUtility.CheapStuffFor(ThingDefOf.Reliquary, rp.faction));
-		thing.TryGetComp<CompThingContainer>().innerContainer.TryAdd(item);
-		ResolveParams resolveParams7 = rp;
-		resolveParams7.sound = SoundDefOf.AncientRelicTakenAlarm;
-		resolveParams7.soundOneShotActionSignalTag = rp.triggerSecuritySignal;
-		BaseGen.symbolStack.Push("soundOneShotAction", resolveParams7);
-		CellRect rect6 = CellRect.CenteredOn(rect.CenterCell, thing.def.Size.x, thing.def.Size.z);
-		ResolveParams resolveParams8 = rp;
-		resolveParams8.rect = rect6;
-		resolveParams8.triggerContainerEmptiedSignalTag = rp.triggerSecuritySignal;
-		resolveParams8.triggerContainerEmptiedThing = thing;
-		BaseGen.symbolStack.Push("containerEmptiedTrigger", resolveParams8);
-		ResolveParams resolveParams9 = rp;
-		resolveParams9.rect = rect6;
-		resolveParams9.thingRot = Rot4.South;
-		resolveParams9.singleThingToSpawn = thing;
-		BaseGen.symbolStack.Push("thing", resolveParams9);
-		CellRect rect7 = resolveParams9.rect.ExpandedBy(2);
-		foreach (IntVec3 corner in rect7.Corners)
-		{
-			ResolveParams resolveParams10 = rp;
-			resolveParams10.faction = Faction.OfAncients;
-			resolveParams10.singleThingDef = ThingDefOf.AncientLamp;
-			resolveParams10.rect = CellRect.CenteredOn(corner, 1, 1);
-			BaseGen.symbolStack.Push("thing", resolveParams10);
-		}
-		ResolveParams resolveParams11 = rp;
-		resolveParams11.rect = rect7;
-		resolveParams11.floorDef = TerrainDefOf.PavedTile;
-		BaseGen.symbolStack.Push("floor", resolveParams11);
-		ResolveParams resolveParams12 = rp;
-		resolveParams12.floorDef = TerrainDefOf.Gravel;
-		BaseGen.symbolStack.Push("outdoorsPath", resolveParams12);
-		ResolveParams resolveParams13 = rp;
-		CellRect rect8 = (resolveParams13.rect = new CellRect(rect.minX + rect.Width / 2, rect.minZ, 1, 1));
-		resolveParams13.singleThingDef = ThingDefOf.Door;
-		resolveParams13.singleThingStuff = rp.wallStuff;
-		BaseGen.symbolStack.Push("thing", resolveParams13);
-		ResolveParams resolveParams14 = rp;
-		resolveParams14.rect = rect8;
-		resolveParams14.singleThingDef = ThingDefOf.AncientLamp;
-		resolveParams14.rect = new CellRect(rect8.minX - 1, rect8.minZ - 1, 1, 1);
-		BaseGen.symbolStack.Push("thing", resolveParams14);
-		BaseGen.symbolStack.Push("clear", resolveParams14);
-		resolveParams14.rect = new CellRect(rect8.maxX + 1, rect8.minZ - 1, 1, 1);
-		BaseGen.symbolStack.Push("thing", resolveParams14);
-		BaseGen.symbolStack.Push("clear", resolveParams14);
-		ResolveParams resolveParams15 = resolveParams13;
-		resolveParams15.rect = new CellRect(rect.minX - 1, cellRect2.minZ + 3, 2, cellRect2.Height - 6);
-		BaseGen.symbolStack.Push("floor", resolveParams15);
-		BaseGen.symbolStack.Push("clear", resolveParams15);
-		ResolveParams resolveParams16 = resolveParams13;
-		resolveParams16.rect = new CellRect(rect.maxX, cellRect3.minZ + 3, 2, cellRect3.Height - 6);
-		BaseGen.symbolStack.Push("floor", resolveParams16);
-		BaseGen.symbolStack.Push("clear", resolveParams16);
-		ResolveParams resolveParams17 = resolveParams13;
-		resolveParams17.rect = new CellRect(cellRect4.minX + 3, rect.maxZ, cellRect4.Width - 6, 2);
-		BaseGen.symbolStack.Push("floor", resolveParams17);
-		BaseGen.symbolStack.Push("clear", resolveParams17);
-		resolveParams13.rect = rect;
-		resolveParams13.cornerRadius = 3;
-		BaseGen.symbolStack.Push("emptyRoomRounded", resolveParams13);
-		resolveParams13.rect = new CellRect(rect8.minX, rect8.minZ - 3, 1, 3);
-		BaseGen.symbolStack.Push("clear", resolveParams13);
-		if (rp.interiorThreatPoints.HasValue)
-		{
-			ResolveParams resolveParams18 = rp;
-			resolveParams18.threatPoints = rp.interiorThreatPoints.Value / (float)array.Length;
-			foreach (CellRect cellRect5 in array)
+			get
 			{
-				resolveParams18.sleepingMechanoidsWakeupSignalTag = rp.triggerSecuritySignal;
-				resolveParams18.ancientCryptosleepCasketOpenSignalTag = rp.triggerSecuritySignal;
-				resolveParams18.rect = cellRect5.ContractedBy(3);
-				resolveParams18.sendWokenUpMessage = false;
-				BaseGen.symbolStack.Push("ancientComplex_interior_sleepingMechanoids", resolveParams18);
+				return new IntVec2(SymbolResolver_AncientAltar.MainRoomSize.x + 22, SymbolResolver_AncientAltar.MainRoomSize.z + 22);
 			}
 		}
-		ResolveParams resolveParams19 = rp;
-		resolveParams19.cornerRadius = 3;
-		CellRect[] array2 = array;
-		foreach (CellRect rect9 in array2)
+
+		// Token: 0x060142E2 RID: 82658 RVA: 0x006037AC File Offset: 0x006019AC
+		public override void Resolve(ResolveParams rp)
 		{
-			resolveParams19.rect = rect9;
-			BaseGen.symbolStack.Push("emptyRoomRounded", resolveParams19);
+			rp.floorDef = (Rand.Bool ? TerrainDefOf.FlagstoneSandstone : TerrainDefOf.TileSandstone);
+			rp.wallStuff = BaseGenUtility.RandomCheapWallStuff(rp.faction, true);
+			CellRect cellRect = CellRect.CenteredOn(rp.rect.CenterCell, SymbolResolver_AncientAltar.MainRoomSize.x, SymbolResolver_AncientAltar.MainRoomSize.z);
+			CellRect cellRect2 = new CellRect(cellRect.CenterCell.x - 5, cellRect.minZ + 2, 1, cellRect.Height - 4);
+			CellRect cellRect3 = new CellRect(cellRect.CenterCell.x + 5, cellRect.minZ + 2, 1, cellRect.Height - 4);
+			CellRect cellRect4 = cellRect.ExpandedBy(-1);
+			CellRect rect = new CellRect(cellRect4.minX, cellRect4.minZ + 3, 1, cellRect4.Height - 6);
+			CellRect rect2 = new CellRect(cellRect4.maxX, cellRect4.minZ + 3, 1, cellRect4.Height - 6);
+			ResolveParams resolveParams = rp;
+			resolveParams.rect = rect;
+			resolveParams.singleThingStuff = rp.wallStuff;
+			if (rp.exteriorThreatPoints != null && Faction.OfMechanoids != null)
+			{
+				ResolveParams resolveParams2 = rp;
+				resolveParams2.rect = rp.rect.ExpandedBy(10);
+				resolveParams2.sleepingMechanoidsWakeupSignalTag = rp.triggerSecuritySignal;
+				resolveParams2.sendWokenUpMessage = new bool?(false);
+				resolveParams2.threatPoints = new float?(rp.exteriorThreatPoints.Value);
+				BaseGen.symbolStack.Push("sleepingMechanoids", resolveParams2, null);
+			}
+			int num = Rand.Range(2, 6);
+			for (int i = 0; i < num; i++)
+			{
+				resolveParams.singleThingDef = (Rand.Bool ? ThingDefOf.Sarcophagus : ThingDefOf.Urn);
+				resolveParams.thingRot = new Rot4?(Rot4.North);
+				BaseGen.symbolStack.Push("edgeThing", resolveParams, null);
+			}
+			num = Rand.Range(1, 6);
+			resolveParams.rect = rect2;
+			for (int j = 0; j < num; j++)
+			{
+				resolveParams.singleThingDef = (Rand.Bool ? ThingDefOf.Sarcophagus : ThingDefOf.Urn);
+				resolveParams.thingRot = new Rot4?(Rot4.North);
+				BaseGen.symbolStack.Push("edgeThing", resolveParams, null);
+			}
+			CellRect cellRect5 = new CellRect(cellRect.minX - 11 + 1, cellRect.minZ + 5, 11, 11);
+			CellRect cellRect6 = new CellRect(cellRect.maxX, cellRect.minZ + 5, 11, 11);
+			CellRect cellRect7 = new CellRect(cellRect.minX + cellRect.Width / 2 - 5, cellRect.maxZ, 11, 11);
+			CellRect[] array = new CellRect[]
+			{
+				cellRect5,
+				cellRect6,
+				cellRect7
+			};
+			ResolveParams resolveParams3 = rp;
+			resolveParams3.rect = cellRect.ContractedBy(3);
+			resolveParams3.unfoggedSignalTag = "UnfoggedSignal" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
+			BaseGen.symbolStack.Push("unfoggedTrigger", resolveParams3, null);
+			ResolveParams resolveParams4 = rp;
+			resolveParams4.sound = SoundDefOf.AncientRelicRoomReveal;
+			resolveParams4.soundOneShotActionSignalTag = resolveParams3.unfoggedSignalTag;
+			BaseGen.symbolStack.Push("soundOneShotAction", resolveParams4, null);
+			ResolveParams resolveParams5 = rp;
+			resolveParams5.singleThingDef = ThingDefOf.SteleLarge;
+			IntVec2 size = ThingDefOf.SteleLarge.size;
+			resolveParams5.rect = new CellRect(cellRect2.minX + 1, cellRect.maxZ - size.x, size.x, size.z);
+			BaseGen.symbolStack.Push("thing", resolveParams5, null);
+			resolveParams5.rect = new CellRect(cellRect3.maxX - size.x, cellRect.maxZ - size.x, size.x, size.z);
+			BaseGen.symbolStack.Push("thing", resolveParams5, null);
+			ResolveParams resolveParams6 = rp;
+			resolveParams6.singleThingDef = ThingDefOf.Column;
+			resolveParams6.singleThingStuff = rp.wallStuff;
+			resolveParams6.fillWithThingsPadding = new int?(2);
+			resolveParams6.rect = cellRect2;
+			BaseGen.symbolStack.Push("fillWithThings", resolveParams6, null);
+			resolveParams6.rect = cellRect3;
+			BaseGen.symbolStack.Push("fillWithThings", resolveParams6, null);
+			Thing item = rp.relicThing ?? ThingMaker.MakeThing(ThingDefOf.Beer, null);
+			Thing thing = ThingMaker.MakeThing(ThingDefOf.Reliquary, BaseGenUtility.CheapStuffFor(ThingDefOf.Reliquary, rp.faction));
+			thing.TryGetComp<CompThingContainer>().innerContainer.TryAdd(item, true);
+			ResolveParams resolveParams7 = rp;
+			resolveParams7.sound = SoundDefOf.AncientRelicTakenAlarm;
+			resolveParams7.soundOneShotActionSignalTag = rp.triggerSecuritySignal;
+			BaseGen.symbolStack.Push("soundOneShotAction", resolveParams7, null);
+			CellRect rect3 = CellRect.CenteredOn(cellRect.CenterCell, thing.def.Size.x, thing.def.Size.z);
+			ResolveParams resolveParams8 = rp;
+			resolveParams8.rect = rect3;
+			resolveParams8.triggerContainerEmptiedSignalTag = rp.triggerSecuritySignal;
+			resolveParams8.triggerContainerEmptiedThing = thing;
+			BaseGen.symbolStack.Push("containerEmptiedTrigger", resolveParams8, null);
+			ResolveParams resolveParams9 = rp;
+			resolveParams9.rect = rect3;
+			resolveParams9.thingRot = new Rot4?(Rot4.South);
+			resolveParams9.singleThingToSpawn = thing;
+			BaseGen.symbolStack.Push("thing", resolveParams9, null);
+			CellRect rect4 = resolveParams9.rect.ExpandedBy(2);
+			foreach (IntVec3 center in rect4.Corners)
+			{
+				ResolveParams resolveParams10 = rp;
+				resolveParams10.faction = Faction.OfAncients;
+				resolveParams10.singleThingDef = ThingDefOf.AncientLamp;
+				resolveParams10.rect = CellRect.CenteredOn(center, 1, 1);
+				BaseGen.symbolStack.Push("thing", resolveParams10, null);
+			}
+			ResolveParams resolveParams11 = rp;
+			resolveParams11.rect = rect4;
+			resolveParams11.floorDef = TerrainDefOf.PavedTile;
+			BaseGen.symbolStack.Push("floor", resolveParams11, null);
+			ResolveParams resolveParams12 = rp;
+			resolveParams12.floorDef = TerrainDefOf.Gravel;
+			BaseGen.symbolStack.Push("outdoorsPath", resolveParams12, null);
+			ResolveParams resolveParams13 = rp;
+			CellRect cellRect8 = new CellRect(cellRect.minX + cellRect.Width / 2, cellRect.minZ, 1, 1);
+			resolveParams13.rect = cellRect8;
+			resolveParams13.singleThingDef = ThingDefOf.Door;
+			resolveParams13.singleThingStuff = rp.wallStuff;
+			BaseGen.symbolStack.Push("thing", resolveParams13, null);
+			ResolveParams resolveParams14 = rp;
+			resolveParams14.rect = cellRect8;
+			resolveParams14.singleThingDef = ThingDefOf.AncientLamp;
+			resolveParams14.rect = new CellRect(cellRect8.minX - 1, cellRect8.minZ - 1, 1, 1);
+			BaseGen.symbolStack.Push("thing", resolveParams14, null);
+			BaseGen.symbolStack.Push("clear", resolveParams14, null);
+			resolveParams14.rect = new CellRect(cellRect8.maxX + 1, cellRect8.minZ - 1, 1, 1);
+			BaseGen.symbolStack.Push("thing", resolveParams14, null);
+			BaseGen.symbolStack.Push("clear", resolveParams14, null);
+			ResolveParams resolveParams15 = resolveParams13;
+			resolveParams15.rect = new CellRect(cellRect.minX - 1, cellRect5.minZ + 3, 2, cellRect5.Height - 6);
+			BaseGen.symbolStack.Push("floor", resolveParams15, null);
+			BaseGen.symbolStack.Push("clear", resolveParams15, null);
+			ResolveParams resolveParams16 = resolveParams13;
+			resolveParams16.rect = new CellRect(cellRect.maxX, cellRect6.minZ + 3, 2, cellRect6.Height - 6);
+			BaseGen.symbolStack.Push("floor", resolveParams16, null);
+			BaseGen.symbolStack.Push("clear", resolveParams16, null);
+			ResolveParams resolveParams17 = resolveParams13;
+			resolveParams17.rect = new CellRect(cellRect7.minX + 3, cellRect.maxZ, cellRect7.Width - 6, 2);
+			BaseGen.symbolStack.Push("floor", resolveParams17, null);
+			BaseGen.symbolStack.Push("clear", resolveParams17, null);
+			resolveParams13.rect = cellRect;
+			resolveParams13.cornerRadius = new int?(3);
+			BaseGen.symbolStack.Push("emptyRoomRounded", resolveParams13, null);
+			resolveParams13.rect = new CellRect(cellRect8.minX, cellRect8.minZ - 3, 1, 3);
+			BaseGen.symbolStack.Push("clear", resolveParams13, null);
+			if (rp.interiorThreatPoints != null)
+			{
+				ResolveParams resolveParams18 = rp;
+				resolveParams18.threatPoints = new float?(rp.interiorThreatPoints.Value / (float)array.Length);
+				foreach (CellRect cellRect9 in array)
+				{
+					resolveParams18.sleepingMechanoidsWakeupSignalTag = rp.triggerSecuritySignal;
+					resolveParams18.ancientCryptosleepCasketOpenSignalTag = rp.triggerSecuritySignal;
+					resolveParams18.rect = cellRect9.ContractedBy(3);
+					resolveParams18.sendWokenUpMessage = new bool?(false);
+					BaseGen.symbolStack.Push("ancientComplex_interior_sleepingMechanoids", resolveParams18, null);
+				}
+			}
+			ResolveParams resolveParams19 = rp;
+			resolveParams19.cornerRadius = new int?(3);
+			foreach (CellRect rect5 in array)
+			{
+				resolveParams19.rect = rect5;
+				BaseGen.symbolStack.Push("emptyRoomRounded", resolveParams19, null);
+			}
 		}
+
+		// Token: 0x0400DF10 RID: 57104
+		private const int AncillaryRoomSize = 11;
+
+		// Token: 0x0400DF11 RID: 57105
+		private const int AncillaryRoomCornerRadius = 3;
+
+		// Token: 0x0400DF12 RID: 57106
+		private const int EntrancePathLength = 3;
+
+		// Token: 0x0400DF13 RID: 57107
+		private static readonly IntVec2 MainRoomSize = new IntVec2(17, 21);
+
+		// Token: 0x0400DF14 RID: 57108
+		private const string UnfoggedSignalPrefix = "UnfoggedSignal";
 	}
 }

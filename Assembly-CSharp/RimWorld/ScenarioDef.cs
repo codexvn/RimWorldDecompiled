@@ -1,35 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ScenarioDef : Def
+namespace RimWorld
 {
-	public Scenario scenario;
-
-	public override void PostLoad()
+	// Token: 0x02001ADD RID: 6877
+	public class ScenarioDef : Def
 	{
-		base.PostLoad();
-		if (scenario.name.NullOrEmpty())
+		// Token: 0x060099B3 RID: 39347 RVA: 0x002CBFD4 File Offset: 0x002CA1D4
+		public override void PostLoad()
 		{
-			scenario.name = label;
+			base.PostLoad();
+			if (this.scenario.name.NullOrEmpty())
+			{
+				this.scenario.name = this.label;
+			}
+			if (this.scenario.description.NullOrEmpty())
+			{
+				this.scenario.description = this.description;
+			}
+			this.scenario.Category = ScenarioCategory.FromDef;
 		}
-		if (scenario.description.NullOrEmpty())
-		{
-			scenario.description = description;
-		}
-		scenario.Category = ScenarioCategory.FromDef;
-	}
 
-	public override IEnumerable<string> ConfigErrors()
-	{
-		if (scenario == null)
+		// Token: 0x060099B4 RID: 39348 RVA: 0x002CC039 File Offset: 0x002CA239
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return "null scenario";
+			if (this.scenario == null)
+			{
+				yield return "null scenario";
+			}
+			foreach (string text in this.scenario.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			yield break;
+			yield break;
 		}
-		foreach (string item in scenario.ConfigErrors())
-		{
-			yield return item;
-		}
+
+		// Token: 0x04006952 RID: 26962
+		public Scenario scenario;
 	}
 }

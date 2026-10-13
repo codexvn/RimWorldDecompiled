@@ -1,80 +1,115 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Verse.Grammar;
-
-public class Rule_File : Rule
+namespace Verse.Grammar
 {
-	[MayTranslate]
-	public string path;
-
-	[MayTranslate]
-	[TranslationCanChangeCount]
-	public List<string> pathList = new List<string>();
-
-	[Unsaved(false)]
-	private List<string> cachedStrings = new List<string>();
-
-	public override float BaseSelectionWeight => cachedStrings.Count;
-
-	public override Rule DeepCopy()
+	// Token: 0x02000DEE RID: 3566
+	public class Rule_File : Rule
 	{
-		Rule_File rule_File = (Rule_File)base.DeepCopy();
-		rule_File.path = path;
-		if (pathList != null)
+		// Token: 0x17000E7D RID: 3709
+		// (get) Token: 0x06005AC9 RID: 23241 RVA: 0x001D2254 File Offset: 0x001D0454
+		public override float BaseSelectionWeight
 		{
-			rule_File.pathList = pathList.ToList();
+			get
+			{
+				return (float)this.cachedStrings.Count;
+			}
 		}
-		if (cachedStrings != null)
-		{
-			rule_File.cachedStrings = cachedStrings.ToList();
-		}
-		return rule_File;
-	}
 
-	public override string Generate()
-	{
-		if (cachedStrings.NullOrEmpty())
+		// Token: 0x06005ACA RID: 23242 RVA: 0x001D2264 File Offset: 0x001D0464
+		public override Rule DeepCopy()
 		{
-			return "Filestring";
+			Rule_File rule_File = (Rule_File)base.DeepCopy();
+			rule_File.path = this.path;
+			if (this.pathList != null)
+			{
+				rule_File.pathList = this.pathList.ToList<string>();
+			}
+			if (this.cachedStrings != null)
+			{
+				rule_File.cachedStrings = this.cachedStrings.ToList<string>();
+			}
+			return rule_File;
 		}
-		return cachedStrings.RandomElement();
-	}
 
-	public override void Init()
-	{
-		if (!path.NullOrEmpty())
+		// Token: 0x06005ACB RID: 23243 RVA: 0x001D22BC File Offset: 0x001D04BC
+		public override string Generate()
 		{
-			LoadStringsFromFile(path);
+			if (this.cachedStrings.NullOrEmpty<string>())
+			{
+				return "Filestring";
+			}
+			return this.cachedStrings.RandomElement<string>();
 		}
-		foreach (string path in pathList)
-		{
-			LoadStringsFromFile(path);
-		}
-	}
 
-	private void LoadStringsFromFile(string filePath)
-	{
-		if (!Translator.TryGetTranslatedStringsForFile(filePath, out var stringList))
+		// Token: 0x06005ACC RID: 23244 RVA: 0x001D22DC File Offset: 0x001D04DC
+		public override void Init()
 		{
-			return;
+			if (!this.path.NullOrEmpty())
+			{
+				this.LoadStringsFromFile(this.path);
+			}
+			foreach (string filePath in this.pathList)
+			{
+				this.LoadStringsFromFile(filePath);
+			}
 		}
-		foreach (string item in stringList)
-		{
-			cachedStrings.Add(item);
-		}
-	}
 
-	public override string ToString()
-	{
-		if (!path.NullOrEmpty())
+		// Token: 0x06005ACD RID: 23245 RVA: 0x001D2348 File Offset: 0x001D0548
+		private void LoadStringsFromFile(string filePath)
 		{
-			return keyword + "->(" + cachedStrings.Count + " strings from file: " + path + ")";
+			List<string> list;
+			if (Translator.TryGetTranslatedStringsForFile(filePath, out list))
+			{
+				foreach (string item in list)
+				{
+					this.cachedStrings.Add(item);
+				}
+			}
 		}
-		if (pathList.Count > 0)
+
+		// Token: 0x06005ACE RID: 23246 RVA: 0x001D23A8 File Offset: 0x001D05A8
+		public override string ToString()
 		{
-			return keyword + "->(" + cachedStrings.Count + " strings from " + pathList.Count + " files)";
+			if (!this.path.NullOrEmpty())
+			{
+				return string.Concat(new string[]
+				{
+					this.keyword,
+					"->(",
+					this.cachedStrings.Count.ToString(),
+					" strings from file: ",
+					this.path,
+					")"
+				});
+			}
+			if (this.pathList.Count > 0)
+			{
+				return string.Concat(new string[]
+				{
+					this.keyword,
+					"->(",
+					this.cachedStrings.Count.ToString(),
+					" strings from ",
+					this.pathList.Count.ToString(),
+					" files)"
+				});
+			}
+			return this.keyword + "->(Rule_File with no configuration)";
 		}
-		return keyword + "->(Rule_File with no configuration)";
+
+		// Token: 0x040041B9 RID: 16825
+		[MayTranslate]
+		public string path;
+
+		// Token: 0x040041BA RID: 16826
+		[MayTranslate]
+		[TranslationCanChangeCount]
+		public List<string> pathList = new List<string>();
+
+		// Token: 0x040041BB RID: 16827
+		[Unsaved(false)]
+		private List<string> cachedStrings = new List<string>();
 	}
 }

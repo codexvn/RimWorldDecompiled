@@ -1,69 +1,86 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_ChangeNeed : QuestPart
+namespace RimWorld
 {
-	public string inSignal;
-
-	public Pawn pawn;
-
-	public NeedDef need;
-
-	public float offset;
-
-	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	// Token: 0x02001C1A RID: 7194
+	public class QuestPart_ChangeNeed : QuestPart
 	{
-		get
+		// Token: 0x1700189F RID: 6303
+		// (get) Token: 0x0600A033 RID: 41011 RVA: 0x002E2CB7 File Offset: 0x002E0EB7
+		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
 		{
-			foreach (GlobalTargetInfo questLookTarget in base.QuestLookTargets)
+			get
 			{
-				yield return questLookTarget;
+				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				{
+					yield return globalTargetInfo;
+				}
+				IEnumerator<GlobalTargetInfo> enumerator = null;
+				if (this.pawn != null)
+				{
+					yield return this.pawn;
+				}
+				yield break;
+				yield break;
 			}
-			if (pawn != null)
+		}
+
+		// Token: 0x0600A034 RID: 41012 RVA: 0x002E2CC8 File Offset: 0x002E0EC8
+		public override void Notify_QuestSignalReceived(Signal signal)
+		{
+			base.Notify_QuestSignalReceived(signal);
+			Need need;
+			if (signal.tag == this.inSignal && this.pawn != null && this.pawn.needs != null && this.pawn.needs.TryGetNeed(this.need, out need))
 			{
-				yield return pawn;
+				need.CurLevel += this.offset;
 			}
 		}
-	}
 
-	public override void Notify_QuestSignalReceived(Signal signal)
-	{
-		base.Notify_QuestSignalReceived(signal);
-		if (signal.tag == inSignal && pawn != null && pawn.needs != null && pawn.needs.TryGetNeed(this.need, out var need))
+		// Token: 0x0600A035 RID: 41013 RVA: 0x002E2D34 File Offset: 0x002E0F34
+		public override void ExposeData()
 		{
-			need.CurLevel += offset;
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
+			Scribe_References.Look<Pawn>(ref this.pawn, "pawn", false);
+			Scribe_Defs.Look<NeedDef>(ref this.need, "need");
+			Scribe_Values.Look<float>(ref this.offset, "offset", 0f, false);
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref inSignal, "inSignal");
-		Scribe_References.Look(ref pawn, "pawn");
-		Scribe_Defs.Look(ref need, "need");
-		Scribe_Values.Look(ref offset, "offset", 0f);
-	}
-
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		need = NeedDefOf.Food;
-		offset = 0.5f;
-		if (Find.AnyPlayerHomeMap != null)
+		// Token: 0x0600A036 RID: 41014 RVA: 0x002E2D90 File Offset: 0x002E0F90
+		public override void AssignDebugData()
 		{
-			Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault();
+			base.AssignDebugData();
+			this.need = NeedDefOf.Food;
+			this.offset = 0.5f;
+			if (Find.AnyPlayerHomeMap != null)
+			{
+				Find.RandomPlayerHomeMap.mapPawns.FreeColonists.FirstOrDefault<Pawn>();
+			}
 		}
-	}
 
-	public override void ReplacePawnReferences(Pawn replace, Pawn with)
-	{
-		if (pawn == replace)
+		// Token: 0x0600A037 RID: 41015 RVA: 0x002E2DCA File Offset: 0x002E0FCA
+		public override void ReplacePawnReferences(Pawn replace, Pawn with)
 		{
-			pawn = with;
+			if (this.pawn == replace)
+			{
+				this.pawn = with;
+			}
 		}
+
+		// Token: 0x04006EC9 RID: 28361
+		public string inSignal;
+
+		// Token: 0x04006ECA RID: 28362
+		public Pawn pawn;
+
+		// Token: 0x04006ECB RID: 28363
+		public NeedDef need;
+
+		// Token: 0x04006ECC RID: 28364
+		public float offset;
 	}
 }

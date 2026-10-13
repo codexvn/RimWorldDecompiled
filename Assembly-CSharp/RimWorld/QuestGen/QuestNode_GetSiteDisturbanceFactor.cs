@@ -1,37 +1,45 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetSiteDisturbanceFactor : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<IEnumerable<SitePartDef>> sitePartDefs;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A80 RID: 14976
+	public class QuestNode_GetSiteDisturbanceFactor : QuestNode
 	{
-		SetVars(slate);
-		return true;
-	}
-
-	protected override void RunInt()
-	{
-		SetVars(QuestGen.slate);
-	}
-
-	private void SetVars(Slate slate)
-	{
-		float num = 1f;
-		IEnumerable<SitePartDef> value = sitePartDefs.GetValue(slate);
-		if (value != null)
+		// Token: 0x0601475D RID: 83805 RVA: 0x0061C508 File Offset: 0x0061A708
+		protected override bool TestRunInt(Slate slate)
 		{
-			foreach (SitePartDef item in value)
-			{
-				num *= item.activeThreatDisturbanceFactor;
-			}
+			this.SetVars(slate);
+			return true;
 		}
-		slate.Set(storeAs.GetValue(slate), num);
+
+		// Token: 0x0601475E RID: 83806 RVA: 0x0061C512 File Offset: 0x0061A712
+		protected override void RunInt()
+		{
+			this.SetVars(QuestGen.slate);
+		}
+
+		// Token: 0x0601475F RID: 83807 RVA: 0x0061C520 File Offset: 0x0061A720
+		private void SetVars(Slate slate)
+		{
+			float num = 1f;
+			IEnumerable<SitePartDef> value = this.sitePartDefs.GetValue(slate);
+			if (value != null)
+			{
+				foreach (SitePartDef sitePartDef in value)
+				{
+					num *= sitePartDef.activeThreatDisturbanceFactor;
+				}
+			}
+			slate.Set<float>(this.storeAs.GetValue(slate), num, false);
+		}
+
+		// Token: 0x0400E26E RID: 57966
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E26F RID: 57967
+		public SlateRef<IEnumerable<SitePartDef>> sitePartDefs;
 	}
 }

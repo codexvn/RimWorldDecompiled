@@ -1,65 +1,74 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public sealed class HiddenItemsManager : IExposable
+namespace RimWorld
 {
-	private Dictionary<ThingDef, bool> hiddenItemDefs;
-
-	public void SetDiscovered(ThingDef def)
+	// Token: 0x02001B51 RID: 6993
+	public sealed class HiddenItemsManager : IExposable
 	{
-		if (hiddenItemDefs.ContainsKey(def))
+		// Token: 0x06009C2A RID: 39978 RVA: 0x002D5472 File Offset: 0x002D3672
+		public void SetDiscovered(ThingDef def)
 		{
-			hiddenItemDefs[def] = false;
-		}
-	}
-
-	public bool Hidden(ThingDef def)
-	{
-		bool value;
-		return hiddenItemDefs.TryGetValue(def, out value) && value;
-	}
-
-	public HiddenItemsManager()
-	{
-		hiddenItemDefs = new Dictionary<ThingDef, bool>();
-		foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
-		{
-			if (allDef.hiddenWhileUndiscovered)
+			if (!this.hiddenItemDefs.ContainsKey(def))
 			{
-				hiddenItemDefs.Add(allDef, value: true);
+				return;
+			}
+			this.hiddenItemDefs[def] = false;
+		}
+
+		// Token: 0x06009C2B RID: 39979 RVA: 0x002D5490 File Offset: 0x002D3690
+		public bool Hidden(ThingDef def)
+		{
+			bool flag;
+			return this.hiddenItemDefs.TryGetValue(def, out flag) && flag;
+		}
+
+		// Token: 0x06009C2C RID: 39980 RVA: 0x002D54B0 File Offset: 0x002D36B0
+		public HiddenItemsManager()
+		{
+			this.hiddenItemDefs = new Dictionary<ThingDef, bool>();
+			foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+			{
+				if (thingDef.hiddenWhileUndiscovered)
+				{
+					this.hiddenItemDefs.Add(thingDef, true);
+				}
 			}
 		}
-	}
 
-	public void ClearHiddenDefs()
-	{
-		hiddenItemDefs.Clear();
-	}
-
-	public void ExposeData()
-	{
-		Scribe_Collections.Look(ref hiddenItemDefs, "hiddenItemDefs", LookMode.Def, LookMode.Value);
-		if (Scribe.mode != LoadSaveMode.PostLoadInit)
+		// Token: 0x06009C2D RID: 39981 RVA: 0x002D551C File Offset: 0x002D371C
+		public void ClearHiddenDefs()
 		{
-			return;
+			this.hiddenItemDefs.Clear();
 		}
-		Dictionary<ThingDef, bool> dictionary = new Dictionary<ThingDef, bool>();
-		foreach (ThingDef allDef in DefDatabase<ThingDef>.AllDefs)
+
+		// Token: 0x06009C2E RID: 39982 RVA: 0x002D552C File Offset: 0x002D372C
+		public void ExposeData()
 		{
-			if (allDef.hiddenWhileUndiscovered)
+			Scribe_Collections.Look<ThingDef, bool>(ref this.hiddenItemDefs, "hiddenItemDefs", LookMode.Def, LookMode.Value);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				dictionary.Add(allDef, value: true);
+				Dictionary<ThingDef, bool> dictionary = new Dictionary<ThingDef, bool>();
+				foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs)
+				{
+					if (thingDef.hiddenWhileUndiscovered)
+					{
+						dictionary.Add(thingDef, true);
+					}
+				}
+				foreach (KeyValuePair<ThingDef, bool> keyValuePair in this.hiddenItemDefs)
+				{
+					if (dictionary.ContainsKey(keyValuePair.Key))
+					{
+						dictionary[keyValuePair.Key] = keyValuePair.Value;
+					}
+				}
+				this.hiddenItemDefs = dictionary;
 			}
 		}
-		foreach (KeyValuePair<ThingDef, bool> hiddenItemDef in hiddenItemDefs)
-		{
-			if (dictionary.ContainsKey(hiddenItemDef.Key))
-			{
-				dictionary[hiddenItemDef.Key] = hiddenItemDef.Value;
-			}
-		}
-		hiddenItemDefs = dictionary;
+
+		// Token: 0x04006C55 RID: 27733
+		private Dictionary<ThingDef, bool> hiddenItemDefs;
 	}
 }

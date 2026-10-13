@@ -1,31 +1,42 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class CompDestroyNearbyPlantsOnSpawn : ThingComp
+namespace RimWorld
 {
-	public CompProperties_DestroyNearbyPlantsOnSpawn Props => (CompProperties_DestroyNearbyPlantsOnSpawn)props;
-
-	public override void PostSpawnSetup(bool respawningAfterLoad)
+	// Token: 0x02002C58 RID: 11352
+	public class CompDestroyNearbyPlantsOnSpawn : ThingComp
 	{
-		if (respawningAfterLoad)
+		// Token: 0x17002818 RID: 10264
+		// (get) Token: 0x0600FE8F RID: 65167 RVA: 0x0049C979 File Offset: 0x0049AB79
+		public CompProperties_DestroyNearbyPlantsOnSpawn Props
 		{
-			return;
-		}
-		foreach (IntVec3 item in GenRadial.RadialCellsAround(parent.Position, Props.radius, useCenter: true))
-		{
-			if (!item.InBounds(parent.Map))
+			get
 			{
-				continue;
+				return (CompProperties_DestroyNearbyPlantsOnSpawn)this.props;
 			}
-			List<Thing> thingList = item.GetThingList(parent.Map);
-			for (int num = thingList.Count - 1; num >= 0; num--)
+		}
+
+		// Token: 0x0600FE90 RID: 65168 RVA: 0x0049C988 File Offset: 0x0049AB88
+		public override void PostSpawnSetup(bool respawningAfterLoad)
+		{
+			if (respawningAfterLoad)
 			{
-				Thing thing = thingList[num];
-				if (thing is Plant && !thing.def.preventSkyfallersLandingOn)
+				return;
+			}
+			foreach (IntVec3 c in GenRadial.RadialCellsAround(this.parent.Position, (float)this.Props.radius, true))
+			{
+				if (c.InBounds(this.parent.Map))
 				{
-					thing.Kill();
+					List<Thing> thingList = c.GetThingList(this.parent.Map);
+					for (int i = thingList.Count - 1; i >= 0; i--)
+					{
+						Thing thing = thingList[i];
+						if (thing is Plant && !thing.def.preventSkyfallersLandingOn)
+						{
+							thing.Kill(null, null);
+						}
+					}
 				}
 			}
 		}

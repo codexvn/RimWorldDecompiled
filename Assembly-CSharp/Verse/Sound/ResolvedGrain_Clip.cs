@@ -1,41 +1,46 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse.Sound;
-
-public class ResolvedGrain_Clip : ResolvedGrain
+namespace Verse.Sound
 {
-	public AudioClip clip;
-
-	public ResolvedGrain_Clip(AudioClip clip)
+	// Token: 0x02000E01 RID: 3585
+	public class ResolvedGrain_Clip : ResolvedGrain
 	{
-		this.clip = clip;
-		duration = clip.length;
-	}
-
-	public override string ToString()
-	{
-		return "Clip:" + clip.name;
-	}
-
-	public override bool Equals(object obj)
-	{
-		if (obj == null)
+		// Token: 0x06005B14 RID: 23316 RVA: 0x001D32C7 File Offset: 0x001D14C7
+		public ResolvedGrain_Clip(AudioClip clip)
 		{
-			return false;
+			this.clip = clip;
+			this.duration = clip.length;
 		}
-		if (!(obj is ResolvedGrain_Clip resolvedGrain_Clip))
-		{
-			return false;
-		}
-		return resolvedGrain_Clip.clip == clip;
-	}
 
-	public override int GetHashCode()
-	{
-		if (clip == null)
+		// Token: 0x06005B15 RID: 23317 RVA: 0x001D32E2 File Offset: 0x001D14E2
+		public override string ToString()
 		{
-			return 0;
+			return "Clip:" + this.clip.name;
 		}
-		return clip.GetHashCode();
+
+		// Token: 0x06005B16 RID: 23318 RVA: 0x001D32FC File Offset: 0x001D14FC
+		public override bool Equals(object obj)
+		{
+			if (obj == null)
+			{
+				return false;
+			}
+			ResolvedGrain_Clip resolvedGrain_Clip = obj as ResolvedGrain_Clip;
+			return resolvedGrain_Clip != null && resolvedGrain_Clip.clip == this.clip;
+		}
+
+		// Token: 0x06005B17 RID: 23319 RVA: 0x001D332B File Offset: 0x001D152B
+		public override int GetHashCode()
+		{
+			if (this.clip == null)
+			{
+				return 0;
+			}
+			return this.clip.GetHashCode();
+		}
+
+		// Token: 0x040041F5 RID: 16885
+		public AudioClip clip;
 	}
 }

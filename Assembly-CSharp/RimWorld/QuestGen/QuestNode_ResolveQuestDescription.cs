@@ -1,34 +1,43 @@
+﻿using System;
 using Verse.Grammar;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_ResolveQuestDescription : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<RulePack> rules;
-
-	public const string TextRoot = "questDescription";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003BE3 RID: 15331
+	public class QuestNode_ResolveQuestDescription : QuestNode
 	{
-		return true;
-	}
-
-	protected override void RunInt()
-	{
-		if (rules.GetValue(QuestGen.slate) != null)
+		// Token: 0x06014CED RID: 85229 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool TestRunInt(Slate slate)
 		{
-			QuestGen.AddQuestDescriptionRules(rules.GetValue(QuestGen.slate));
+			return true;
 		}
-		Resolve();
-	}
 
-	public static void Resolve()
-	{
-		if (!QuestGen.slate.TryGet<string>("resolvedQuestDescription", out var var) && !QuestGen.quest.hidden)
+		// Token: 0x06014CEE RID: 85230 RVA: 0x0063BB1C File Offset: 0x00639D1C
+		protected override void RunInt()
 		{
-			var = QuestGenUtility.ResolveAbsoluteText(QuestGen.QuestDescriptionRulesReadOnly, QuestGen.QuestDescriptionConstantsReadOnly, "questDescription");
-			QuestGen.slate.Set("resolvedQuestDescription", var);
+			if (this.rules.GetValue(QuestGen.slate) != null)
+			{
+				QuestGen.AddQuestDescriptionRules(this.rules.GetValue(QuestGen.slate));
+			}
+			QuestNode_ResolveQuestDescription.Resolve();
 		}
-		QuestGen.quest.description = var;
+
+		// Token: 0x06014CEF RID: 85231 RVA: 0x0063BB4C File Offset: 0x00639D4C
+		public static void Resolve()
+		{
+			string text;
+			if (!QuestGen.slate.TryGet<string>("resolvedQuestDescription", out text, false) && !QuestGen.quest.hidden)
+			{
+				text = QuestGenUtility.ResolveAbsoluteText(QuestGen.QuestDescriptionRulesReadOnly, QuestGen.QuestDescriptionConstantsReadOnly, "questDescription", true);
+				QuestGen.slate.Set<string>("resolvedQuestDescription", text, false);
+			}
+			QuestGen.quest.description = text;
+		}
+
+		// Token: 0x0400E7A4 RID: 59300
+		public SlateRef<RulePack> rules;
+
+		// Token: 0x0400E7A5 RID: 59301
+		public const string TextRoot = "questDescription";
 	}
 }

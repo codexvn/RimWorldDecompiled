@@ -1,50 +1,59 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_Hypothermia : Alert_Critical
+namespace RimWorld
 {
-	private List<Pawn> hypothermiaDangerColonistsResult = new List<Pawn>();
-
-	private List<Pawn> HypothermiaDangerColonists
+	// Token: 0x02002FC6 RID: 12230
+	public class Alert_Hypothermia : Alert_Critical
 	{
-		get
+		// Token: 0x060113CF RID: 70607 RVA: 0x004F0528 File Offset: 0x004EE728
+		public Alert_Hypothermia()
 		{
-			hypothermiaDangerColonistsResult.Clear();
-			foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended)
+			this.defaultLabel = "AlertHypothermia".Translate();
+		}
+
+		// Token: 0x17002CB0 RID: 11440
+		// (get) Token: 0x060113D0 RID: 70608 RVA: 0x004F0550 File Offset: 0x004EE750
+		private List<Pawn> HypothermiaDangerColonists
+		{
+			get
 			{
-				if (!item.SafeTemperatureRange().Includes(item.AmbientTemperature))
+				this.hypothermiaDangerColonistsResult.Clear();
+				foreach (Pawn pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned_FreeColonists_NoSuspended)
 				{
-					Hediff firstHediffOfDef = item.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Hypothermia);
-					if (firstHediffOfDef != null && firstHediffOfDef.CurStageIndex >= 3)
+					if (!pawn.SafeTemperatureRange().Includes(pawn.AmbientTemperature))
 					{
-						hypothermiaDangerColonistsResult.Add(item);
+						Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.Hypothermia, false);
+						if (firstHediffOfDef != null && firstHediffOfDef.CurStageIndex >= 3)
+						{
+							this.hypothermiaDangerColonistsResult.Add(pawn);
+						}
 					}
 				}
+				return this.hypothermiaDangerColonistsResult;
 			}
-			return hypothermiaDangerColonistsResult;
 		}
-	}
 
-	public Alert_Hypothermia()
-	{
-		defaultLabel = "AlertHypothermia".Translate();
-	}
-
-	public override TaggedString GetExplanation()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		foreach (Pawn item in hypothermiaDangerColonistsResult)
+		// Token: 0x060113D1 RID: 70609 RVA: 0x004F05F4 File Offset: 0x004EE7F4
+		public override TaggedString GetExplanation()
 		{
-			stringBuilder.AppendLine("  - " + item.NameShortColored.Resolve());
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (Pawn pawn in this.hypothermiaDangerColonistsResult)
+			{
+				stringBuilder.AppendLine("  - " + pawn.NameShortColored.Resolve());
+			}
+			return "AlertHypothermiaDesc".Translate(stringBuilder.ToString().TrimEndNewlines());
 		}
-		return "AlertHypothermiaDesc".Translate(stringBuilder.ToString().TrimEndNewlines());
-	}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(HypothermiaDangerColonists);
+		// Token: 0x060113D2 RID: 70610 RVA: 0x004F0680 File Offset: 0x004EE880
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.HypothermiaDangerColonists);
+		}
+
+		// Token: 0x0400B2F2 RID: 45810
+		private List<Pawn> hypothermiaDangerColonistsResult = new List<Pawn>();
 	}
 }

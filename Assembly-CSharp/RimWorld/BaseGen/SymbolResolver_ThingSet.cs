@@ -1,36 +1,38 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_ThingSet : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200393D RID: 14653
+	public class SymbolResolver_ThingSet : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		ThingSetMakerDef obj = rp.thingSetMakerDef ?? ThingSetMakerDefOf.MapGen_DefaultStockpile;
-		ThingSetMakerParams parms;
-		if (rp.thingSetMakerParams.HasValue)
+		// Token: 0x060142CE RID: 82638 RVA: 0x006032A0 File Offset: 0x006014A0
+		public override void Resolve(ResolveParams rp)
 		{
-			parms = rp.thingSetMakerParams.Value;
-		}
-		else
-		{
-			int num = rp.rect.Cells.Count((IntVec3 x) => x.Standable(map) && x.GetFirstItem(map) == null);
-			parms = new ThingSetMakerParams
+			Map map = BaseGen.globalSettings.map;
+			ThingSetMakerDef thingSetMakerDef = rp.thingSetMakerDef ?? ThingSetMakerDefOf.MapGen_DefaultStockpile;
+			ThingSetMakerParams parms;
+			if (rp.thingSetMakerParams != null)
 			{
-				countRange = new IntRange(num, num),
-				techLevel = ((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined)
-			};
-		}
-		parms.makingFaction = rp.faction;
-		List<Thing> list = obj.root.Generate(parms);
-		for (int num2 = 0; num2 < list.Count; num2++)
-		{
-			ResolveParams resolveParams = rp;
-			resolveParams.singleThingToSpawn = list[num2];
-			BaseGen.symbolStack.Push("thing", resolveParams);
+				parms = rp.thingSetMakerParams.Value;
+			}
+			else
+			{
+				int num = rp.rect.Cells.Count((IntVec3 x) => x.Standable(map) && x.GetFirstItem(map) == null);
+				parms = default(ThingSetMakerParams);
+				parms.countRange = new IntRange?(new IntRange(num, num));
+				parms.techLevel = new TechLevel?((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined);
+			}
+			parms.makingFaction = rp.faction;
+			List<Thing> list = thingSetMakerDef.root.Generate(parms);
+			for (int i = 0; i < list.Count; i++)
+			{
+				ResolveParams resolveParams = rp;
+				resolveParams.singleThingToSpawn = list[i];
+				BaseGen.symbolStack.Push("thing", resolveParams, null);
+			}
 		}
 	}
 }

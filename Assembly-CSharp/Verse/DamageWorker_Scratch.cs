@@ -1,56 +1,63 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Verse;
-
-public class DamageWorker_Scratch : DamageWorker_AddInjury
+namespace Verse
 {
-	protected override BodyPartRecord ChooseHitPart(DamageInfo dinfo, Pawn pawn)
+	// Token: 0x0200066F RID: 1647
+	public class DamageWorker_Scratch : DamageWorker_AddInjury
 	{
-		return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside);
-	}
-
-	protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageResult result)
-	{
-		if (dinfo.HitPart.depth == BodyPartDepth.Inside)
+		// Token: 0x0600296D RID: 10605 RVA: 0x000D999A File Offset: 0x000D7B9A
+		protected override BodyPartRecord ChooseHitPart(DamageInfo dinfo, Pawn pawn)
 		{
-			List<BodyPartRecord> list = new List<BodyPartRecord>();
-			for (BodyPartRecord bodyPartRecord = dinfo.HitPart; bodyPartRecord != null; bodyPartRecord = bodyPartRecord.parent)
+			return pawn.health.hediffSet.GetRandomNotMissingPart(dinfo.Def, dinfo.Height, BodyPartDepth.Outside, null);
+		}
+
+		// Token: 0x0600296E RID: 10606 RVA: 0x000DA600 File Offset: 0x000D8800
+		protected override void ApplySpecialEffectsToPart(Pawn pawn, float totalDamage, DamageInfo dinfo, DamageWorker.DamageResult result)
+		{
+			if (dinfo.HitPart.depth == BodyPartDepth.Inside)
 			{
-				list.Add(bodyPartRecord);
-				if (bodyPartRecord.depth == BodyPartDepth.Outside)
+				List<BodyPartRecord> list = new List<BodyPartRecord>();
+				for (BodyPartRecord bodyPartRecord = dinfo.HitPart; bodyPartRecord != null; bodyPartRecord = bodyPartRecord.parent)
 				{
-					break;
+					list.Add(bodyPartRecord);
+					if (bodyPartRecord.depth == BodyPartDepth.Outside)
+					{
+						break;
+					}
+				}
+				float num = (float)list.Count;
+				for (int i = 0; i < list.Count; i++)
+				{
+					DamageInfo dinfo2 = dinfo;
+					dinfo2.SetHitPart(list[i]);
+					base.FinalizeAndAddInjury(pawn, totalDamage / num, dinfo2, result);
+				}
+				return;
+			}
+			IEnumerable<BodyPartRecord> enumerable = dinfo.HitPart.GetDirectChildParts();
+			if (dinfo.HitPart.parent != null)
+			{
+				enumerable = enumerable.Concat(dinfo.HitPart.parent);
+				if (dinfo.HitPart.parent.parent != null)
+				{
+					enumerable = enumerable.Concat(dinfo.HitPart.parent.GetDirectChildParts());
 				}
 			}
-			float num = list.Count;
-			for (int i = 0; i < list.Count; i++)
+			enumerable = from target in enumerable
+			where target != dinfo.HitPart && !target.def.conceptual && target.depth == BodyPartDepth.Outside && !pawn.health.hediffSet.PartIsMissing(target)
+			select target;
+			BodyPartRecord bodyPartRecord2 = enumerable.RandomElementWithFallback(null);
+			if (bodyPartRecord2 == null)
 			{
-				DamageInfo dinfo2 = dinfo;
-				dinfo2.SetHitPart(list[i]);
-				FinalizeAndAddInjury(pawn, totalDamage / num, dinfo2, result);
+				base.FinalizeAndAddInjury(pawn, base.ReduceDamageToPreserveOutsideParts(totalDamage, dinfo, pawn), dinfo, result);
+				return;
 			}
-			return;
+			base.FinalizeAndAddInjury(pawn, base.ReduceDamageToPreserveOutsideParts(totalDamage * this.def.scratchSplitPercentage, dinfo, pawn), dinfo, result);
+			DamageInfo dinfo3 = dinfo;
+			dinfo3.SetHitPart(bodyPartRecord2);
+			base.FinalizeAndAddInjury(pawn, base.ReduceDamageToPreserveOutsideParts(totalDamage * this.def.scratchSplitPercentage, dinfo3, pawn), dinfo3, result);
 		}
-		IEnumerable<BodyPartRecord> enumerable = dinfo.HitPart.GetDirectChildParts();
-		if (dinfo.HitPart.parent != null)
-		{
-			enumerable = enumerable.Concat(dinfo.HitPart.parent);
-			if (dinfo.HitPart.parent.parent != null)
-			{
-				enumerable = enumerable.Concat(dinfo.HitPart.parent.GetDirectChildParts());
-			}
-		}
-		enumerable = enumerable.Where((BodyPartRecord target) => target != dinfo.HitPart && !target.def.conceptual && target.depth == BodyPartDepth.Outside && !pawn.health.hediffSet.PartIsMissing(target));
-		BodyPartRecord bodyPartRecord2 = enumerable.RandomElementWithFallback();
-		if (bodyPartRecord2 == null)
-		{
-			FinalizeAndAddInjury(pawn, ReduceDamageToPreserveOutsideParts(totalDamage, dinfo, pawn), dinfo, result);
-			return;
-		}
-		FinalizeAndAddInjury(pawn, ReduceDamageToPreserveOutsideParts(totalDamage * def.scratchSplitPercentage, dinfo, pawn), dinfo, result);
-		DamageInfo dinfo3 = dinfo;
-		dinfo3.SetHitPart(bodyPartRecord2);
-		FinalizeAndAddInjury(pawn, ReduceDamageToPreserveOutsideParts(totalDamage * def.scratchSplitPercentage, dinfo3, pawn), dinfo3, result);
 	}
 }

@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_SpawnsRevenant : CompProperties
+namespace RimWorld
 {
-	public CompProperties_SpawnsRevenant()
+	// Token: 0x02002E48 RID: 11848
+	public class CompProperties_SpawnsRevenant : CompProperties
 	{
-		compClass = typeof(CompSpawnsRevenant);
+		// Token: 0x06010AD5 RID: 68309 RVA: 0x004CEBAA File Offset: 0x004CCDAA
+		public CompProperties_SpawnsRevenant()
+		{
+			this.compClass = typeof(CompSpawnsRevenant);
+		}
 	}
 }

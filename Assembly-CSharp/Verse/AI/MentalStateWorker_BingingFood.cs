@@ -1,21 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class MentalStateWorker_BingingFood : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000F9C RID: 3996
+	public class MentalStateWorker_BingingFood : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x0600627C RID: 25212 RVA: 0x001F128E File Offset: 0x001EF48E
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			return base.StateCanOccur(pawn) && pawn.needs.food != null && (!pawn.Spawned || pawn.Map.resourceCounter.TotalHumanEdibleNutrition > 10f);
 		}
-		if (pawn.needs.food == null)
-		{
-			return false;
-		}
-		if (!pawn.Spawned)
-		{
-			return true;
-		}
-		return pawn.Map.resourceCounter.TotalHumanEdibleNutrition > 10f;
 	}
 }

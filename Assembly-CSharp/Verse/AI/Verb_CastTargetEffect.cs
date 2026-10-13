@@ -1,22 +1,30 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class Verb_CastTargetEffect : Verb_CastBase
+namespace Verse.AI
 {
-	protected override bool TryCastShot()
+	// Token: 0x02000E6F RID: 3695
+	public class Verb_CastTargetEffect : Verb_CastBase
 	{
-		Pawn casterPawn = CasterPawn;
-		Thing thing = currentTarget.Thing;
-		if (casterPawn == null || thing == null)
+		// Token: 0x06005D20 RID: 23840 RVA: 0x001DA9B8 File Offset: 0x001D8BB8
+		protected override bool TryCastShot()
 		{
-			return false;
+			Pawn casterPawn = this.CasterPawn;
+			Thing thing = this.currentTarget.Thing;
+			if (casterPawn == null || thing == null)
+			{
+				return false;
+			}
+			foreach (CompTargetEffect compTargetEffect in base.EquipmentSource.GetComps<CompTargetEffect>())
+			{
+				compTargetEffect.DoEffectOn(casterPawn, thing);
+			}
+			CompApparelReloadable reloadableCompSource = base.ReloadableCompSource;
+			if (reloadableCompSource != null)
+			{
+				reloadableCompSource.UsedOnce();
+			}
+			return true;
 		}
-		foreach (CompTargetEffect comp in base.EquipmentSource.GetComps<CompTargetEffect>())
-		{
-			comp.DoEffectOn(casterPawn, thing);
-		}
-		base.ReloadableCompSource?.UsedOnce();
-		return true;
 	}
 }

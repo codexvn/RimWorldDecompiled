@@ -1,24 +1,29 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse;
-
-public class PawnRenderNodeProperties_Eye : PawnRenderNodeProperties
+namespace Verse
 {
-	public PawnRenderNodeProperties_Eye()
+	// Token: 0x0200062D RID: 1581
+	public class PawnRenderNodeProperties_Eye : PawnRenderNodeProperties
 	{
-		visibleFacing = new List<Rot4>
+		// Token: 0x06002841 RID: 10305 RVA: 0x000D55B4 File Offset: 0x000D37B4
+		public PawnRenderNodeProperties_Eye()
 		{
-			Rot4.East,
-			Rot4.South,
-			Rot4.West
-		};
-		workerClass = typeof(PawnRenderNodeWorker_Eye);
-		nodeClass = typeof(PawnRenderNode_AttachmentHead);
-	}
+			this.visibleFacing = new List<Rot4>
+			{
+				Rot4.East,
+				Rot4.South,
+				Rot4.West
+			};
+			this.workerClass = typeof(PawnRenderNodeWorker_Eye);
+			this.nodeClass = typeof(PawnRenderNode_AttachmentHead);
+		}
 
-	public override void ResolveReferences()
-	{
-		skipFlag = RenderSkipFlagDefOf.Eyes;
+		// Token: 0x06002842 RID: 10306 RVA: 0x000D5613 File Offset: 0x000D3813
+		public override void ResolveReferences()
+		{
+			this.skipFlag = RenderSkipFlagDefOf.Eyes;
+		}
 	}
 }

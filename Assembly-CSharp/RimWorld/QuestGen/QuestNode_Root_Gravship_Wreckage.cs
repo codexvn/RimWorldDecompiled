@@ -1,97 +1,69 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_Gravship_Wreckage : QuestNode_Root_Gravcore
+namespace RimWorld.QuestGen
 {
-	private bool? scenarioMechSignalDisabled;
-
-	private bool ScenarioMechSignalDisabled
+	// Token: 0x02003B1C RID: 15132
+	public class QuestNode_Root_Gravship_Wreckage : QuestNode_Root_Gravcore
 	{
-		get
+		// Token: 0x06014961 RID: 84321 RVA: 0x006246F0 File Offset: 0x006228F0
+		protected override void RunInt()
 		{
-			if (!scenarioMechSignalDisabled.HasValue)
+			Slate slate = QuestGen.slate;
+			Quest quest = QuestGen.quest;
+			PlanetTile tile;
+			if (!this.TryFindSiteTile(out tile))
 			{
-				scenarioMechSignalDisabled = false;
-				Scenario scenario = Find.Scenario;
-				for (int i = 0; i < scenario.parts.Count; i++)
+				Log.Error("Could not find valid site tile for gravengine wreckage quest.");
+				return;
+			}
+			string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
+			string inSignal2 = QuestGenUtility.HardcodedSignalWithQuestID("site.MapSettled");
+			Site site = QuestGen_Sites.GenerateSite(new SitePartDefWithParams[]
+			{
+				new SitePartDefWithParams(SitePartDefOf.GravshipWreckage, new SitePartParams
 				{
-					if (scenario.parts[i] is ScenPart_DisableQuest scenPart_DisableQuest && scenPart_DisableQuest.questDef == QuestScriptDefOf.MechanoidSignal)
-					{
-						scenarioMechSignalDisabled = true;
-					}
-				}
-			}
-			return scenarioMechSignalDisabled.Value;
-		}
-	}
-
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		Quest quest = QuestGen.quest;
-		if (!TryFindSiteTile(out var tile))
-		{
-			Log.Error("Could not find valid site tile for gravengine wreckage quest.");
-			return;
-		}
-		string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.MapGenerated");
-		string inSignal2 = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
-		Site site = QuestGen_Sites.GenerateSite(new SitePartDefWithParams[1]
-		{
-			new SitePartDefWithParams(SitePartDefOf.GravshipWreckage, new SitePartParams
+					points = slate.Get<float>("points", 0f, false),
+					threatPoints = slate.Get<float>("points", 0f, false)
+				})
+			}, tile, null, false, null, WorldObjectDefOf.ClaimableSite);
+			site.questTags = new List<string>
 			{
-				points = slate.Get("points", 0f),
-				threatPoints = slate.Get("points", 0f)
-			})
-		}, tile, null, hiddenSitePartsPossible: false, null, WorldObjectDefOf.ClaimableSite);
-		site.questTags = new List<string> { QuestGen.slate.CurrentPrefix };
-		slate.Set("site", site);
-		quest.SpawnWorldObject(site);
-		Pawn pawn = FindAsker();
-		slate.Set("asker", pawn);
-		slate.Set("askerIsNull", pawn == null);
-		QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
-		choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.GravEngine));
-		quest.RewardChoice().choices.Add(choice);
-		quest.End(QuestEndOutcome.Success, 0, null, inSignal);
-		quest.End(QuestEndOutcome.Unknown, 0, null, inSignal2);
-		quest.AddPart<QuestPart_EngineClaimed>();
-	}
+				QuestGen.slate.CurrentPrefix
+			};
+			slate.Set<Site>("site", site, false);
+			quest.SpawnWorldObject(site, null, null);
+			Pawn pawn = this.FindAsker();
+			slate.Set<Pawn>("asker", pawn, false);
+			slate.Set<bool>("askerIsNull", pawn == null, false);
+			QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
+			choice.rewards.Add(new Reward_DefinedThingDef(ThingDefOf.GravEngine));
+			quest.RewardChoice(null, null).choices.Add(choice);
+			quest.End(QuestEndOutcome.Success, 0, null, inSignal, QuestPart.SignalListenMode.OngoingOnly, false, false);
+			quest.End(QuestEndOutcome.Unknown, 0, null, inSignal2, QuestPart.SignalListenMode.OngoingOnly, false, false);
+			quest.AddPart<QuestPart_EngineClaimed>();
+		}
 
-	protected override bool TestRunInt(Slate slate)
-	{
-		if (!ModsConfig.OdysseyActive)
+		// Token: 0x06014962 RID: 84322 RVA: 0x0062483C File Offset: 0x00622A3C
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			return ModsConfig.OdysseyActive && ResearchProjectDefOf.BasicGravtech.IsFinished && !GravshipUtility.PlayerHasGravEngine() && base.TestRunInt(slate);
 		}
-		if (!ResearchProjectDefOf.BasicGravtech.IsFinished && !ScenarioMechSignalDisabled)
+
+		// Token: 0x06014963 RID: 84323 RVA: 0x00624868 File Offset: 0x00622A68
+		private Pawn FindAsker()
 		{
-			return false;
-		}
-		if (GravshipUtility.PlayerHasGravEngine())
-		{
-			return false;
-		}
-		foreach (Quest item in Find.QuestManager.questsInDisplayOrder)
-		{
-			if (item.State == QuestState.Ongoing && item.root == QuestScriptDefOf.GravshipWreckage)
+			Faction faction;
+			if ((from f in Find.FactionManager.AllFactionsVisible
+			where f.def.humanlikeFaction && !f.IsPlayer && !f.HostileTo(Faction.OfPlayer) && f.def.techLevel > TechLevel.Neolithic && f.leader != null && !f.temporary && !f.Hidden
+			select f).TryRandomElement(out faction))
 			{
-				return false;
+				return faction.leader;
 			}
+			return null;
 		}
-		return base.TestRunInt(slate);
-	}
-
-	private Pawn FindAsker()
-	{
-		if (Find.FactionManager.AllFactionsVisible.Where((Faction f) => f.def.humanlikeFaction && !f.IsPlayer && !f.HostileTo(Faction.OfPlayer) && (int)f.def.techLevel > 2 && f.leader != null && !f.temporary && !f.Hidden).TryRandomElement(out var result))
-		{
-			return result.leader;
-		}
-		return null;
 	}
 }

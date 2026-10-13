@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Waylith.UnityCompat</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Brutal.Core.Logging">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

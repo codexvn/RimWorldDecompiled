@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -5,360 +6,434 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordToil_Siege : LordToil
+namespace RimWorld
 {
-	public Dictionary<Pawn, DutyDef> rememberedDuties = new Dictionary<Pawn, DutyDef>();
-
-	private const float BaseRadiusMin = 14f;
-
-	private const float BaseRadiusMax = 25f;
-
-	private static readonly FloatRange MealCountRangePerRaider = new FloatRange(1f, 3f);
-
-	private const int StartBuildingDelay = 450;
-
-	private static readonly FloatRange BuilderCountFraction = new FloatRange(0.25f, 0.4f);
-
-	private const float FractionLossesToAssault = 0.4f;
-
-	private const int InitalShellsPerCannon = 5;
-
-	private const int ReplenishAtShells = 4;
-
-	private const int ShellReplenishCount = 6;
-
-	private const int ReplenishAtMeals = 5;
-
-	private const int MealReplenishCount = 12;
-
-	public override IntVec3 FlagLoc => Data.siegeCenter;
-
-	private LordToilData_Siege Data => (LordToilData_Siege)data;
-
-	private IEnumerable<Frame> Frames
+	// Token: 0x0200171D RID: 5917
+	public class LordToil_Siege : LordToil
 	{
-		get
+		// Token: 0x1700156C RID: 5484
+		// (get) Token: 0x06008B4B RID: 35659 RVA: 0x00297C80 File Offset: 0x00295E80
+		public override IntVec3 FlagLoc
 		{
-			LordToilData_Siege data = Data;
-			float radSquared = (data.baseRadius + 10f) * (data.baseRadius + 10f);
-			List<Thing> framesList = base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingFrame);
-			if (framesList.Count == 0)
+			get
 			{
+				return this.Data.siegeCenter;
+			}
+		}
+
+		// Token: 0x1700156D RID: 5485
+		// (get) Token: 0x06008B4C RID: 35660 RVA: 0x00297C8D File Offset: 0x00295E8D
+		private LordToilData_Siege Data
+		{
+			get
+			{
+				return (LordToilData_Siege)this.data;
+			}
+		}
+
+		// Token: 0x1700156E RID: 5486
+		// (get) Token: 0x06008B4D RID: 35661 RVA: 0x00297C9A File Offset: 0x00295E9A
+		private IEnumerable<Frame> Frames
+		{
+			get
+			{
+				LordToilData_Siege data = this.Data;
+				float radSquared = (data.baseRadius + 10f) * (data.baseRadius + 10f);
+				List<Thing> framesList = base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingFrame);
+				if (framesList.Count == 0)
+				{
+					yield break;
+				}
+				int num;
+				for (int i = 0; i < framesList.Count; i = num + 1)
+				{
+					Frame frame = (Frame)framesList[i];
+					if (frame.Faction == this.lord.faction && (float)(frame.Position - data.siegeCenter).LengthHorizontalSquared < radSquared)
+					{
+						yield return frame;
+					}
+					num = i;
+				}
 				yield break;
 			}
-			for (int i = 0; i < framesList.Count; i++)
+		}
+
+		// Token: 0x1700156F RID: 5487
+		// (get) Token: 0x06008B4E RID: 35662 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool ForceHighStoryDanger
+		{
+			get
 			{
-				Frame frame = (Frame)framesList[i];
-				if (frame.Faction == lord.faction && (float)(frame.Position - data.siegeCenter).LengthHorizontalSquared < radSquared)
-				{
-					yield return frame;
-				}
+				return true;
 			}
 		}
-	}
 
-	public override bool ForceHighStoryDanger => true;
-
-	public LordToil_Siege(IntVec3 siegeCenter, float blueprintPoints)
-	{
-		data = new LordToilData_Siege();
-		Data.siegeCenter = siegeCenter;
-		Data.blueprintPoints = blueprintPoints;
-	}
-
-	public override void Init()
-	{
-		base.Init();
-		LordToilData_Siege lordToilData_Siege = Data;
-		lordToilData_Siege.baseRadius = Mathf.InverseLerp(14f, 25f, (float)lord.ownedPawns.Count / 50f);
-		lordToilData_Siege.baseRadius = Mathf.Clamp(lordToilData_Siege.baseRadius, 14f, 25f);
-		List<Thing> list = new List<Thing>();
-		foreach (Blueprint_Build item2 in SiegeBlueprintPlacer.PlaceBlueprints(lordToilData_Siege.siegeCenter, base.Map, lord.faction, lordToilData_Siege.blueprintPoints))
+		// Token: 0x06008B4F RID: 35663 RVA: 0x00297CAA File Offset: 0x00295EAA
+		public LordToil_Siege(IntVec3 siegeCenter, float blueprintPoints)
 		{
-			lordToilData_Siege.blueprints.Add(item2);
-			foreach (ThingDefCountClass cost in item2.TotalMaterialCost())
+			this.data = new LordToilData_Siege();
+			this.Data.siegeCenter = siegeCenter;
+			this.Data.blueprintPoints = blueprintPoints;
+		}
+
+		// Token: 0x06008B50 RID: 35664 RVA: 0x00297CE0 File Offset: 0x00295EE0
+		public override void Init()
+		{
+			base.Init();
+			LordToilData_Siege data = this.Data;
+			data.baseRadius = Mathf.InverseLerp(14f, 25f, (float)this.lord.ownedPawns.Count / 50f);
+			data.baseRadius = Mathf.Clamp(data.baseRadius, 14f, 25f);
+			List<Thing> list = new List<Thing>();
+			foreach (Blueprint_Build blueprint_Build in SiegeBlueprintPlacer.PlaceBlueprints(data.siegeCenter, base.Map, this.lord.faction, data.blueprintPoints))
 			{
-				Thing thing = list.FirstOrDefault((Thing t) => t.def == cost.thingDef);
-				if (thing != null)
+				data.blueprints.Add(blueprint_Build);
+				using (List<ThingDefCountClass>.Enumerator enumerator2 = blueprint_Build.TotalMaterialCost().GetEnumerator())
 				{
-					thing.stackCount += cost.count;
-					continue;
+					while (enumerator2.MoveNext())
+					{
+						ThingDefCountClass cost = enumerator2.Current;
+						Thing thing = list.FirstOrDefault((Thing t) => t.def == cost.thingDef);
+						if (thing != null)
+						{
+							thing.stackCount += cost.count;
+						}
+						else
+						{
+							Thing thing2 = ThingMaker.MakeThing(cost.thingDef, null);
+							thing2.stackCount = cost.count;
+							list.Add(thing2);
+						}
+					}
 				}
-				Thing thing2 = ThingMaker.MakeThing(cost.thingDef);
-				thing2.stackCount = cost.count;
-				list.Add(thing2);
-			}
-			if (item2.def.entityDefToBuild is ThingDef turret)
-			{
-				ThingDef thingDef = TurretGunUtility.TryFindRandomShellDef(turret, allowEMP: false, allowToxGas: false, mustHarmHealth: true, lord.faction.def.techLevel, allowAntigrainWarhead: false, 250f, lord.faction);
+				ThingDef thingDef = blueprint_Build.def.entityDefToBuild as ThingDef;
 				if (thingDef != null)
 				{
-					Thing thing3 = ThingMaker.MakeThing(thingDef);
-					thing3.stackCount = 5;
-					list.Add(thing3);
-				}
-			}
-		}
-		for (int num = 0; num < list.Count; num++)
-		{
-			list[num].stackCount = Mathf.CeilToInt((float)list[num].stackCount * Rand.Range(1f, 1.2f));
-		}
-		List<List<Thing>> list2 = new List<List<Thing>>();
-		for (int num2 = 0; num2 < list.Count; num2++)
-		{
-			while (list[num2].stackCount > list[num2].def.stackLimit)
-			{
-				int num3 = Mathf.CeilToInt((float)list[num2].def.stackLimit * Rand.Range(0.9f, 0.999f));
-				Thing thing4 = ThingMaker.MakeThing(list[num2].def);
-				thing4.stackCount = num3;
-				list[num2].stackCount -= num3;
-				list.Add(thing4);
-			}
-		}
-		List<Thing> list3 = new List<Thing>();
-		for (int num4 = 0; num4 < list.Count; num4++)
-		{
-			list3.Add(list[num4]);
-			if (num4 % 2 == 1 || num4 == list.Count - 1)
-			{
-				list2.Add(list3);
-				list3 = new List<Thing>();
-			}
-		}
-		List<Thing> list4 = new List<Thing>();
-		int num5 = Mathf.RoundToInt(MealCountRangePerRaider.RandomInRange * (float)lord.ownedPawns.Count);
-		for (int num6 = 0; num6 < num5; num6++)
-		{
-			Thing item = ThingMaker.MakeThing(ThingDefOf.MealSurvivalPack);
-			list4.Add(item);
-		}
-		list2.Add(list4);
-		DropPodUtility.DropThingGroupsNear(lordToilData_Siege.siegeCenter, base.Map, list2);
-		lordToilData_Siege.desiredBuilderFraction = BuilderCountFraction.RandomInRange;
-	}
-
-	public override void UpdateAllDuties()
-	{
-		LordToilData_Siege data = Data;
-		if (lord.ticksInToil < 450)
-		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
-			{
-				SetAsDefender(lord.ownedPawns[i]);
-			}
-			return;
-		}
-		rememberedDuties.Clear();
-		int num = Mathf.RoundToInt((float)lord.ownedPawns.Count * data.desiredBuilderFraction);
-		if (num <= 0)
-		{
-			num = 1;
-		}
-		int num2 = (from b in base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
-			where b.def.hasInteractionCell && b.Faction == lord.faction && b.Position.InHorDistOf(FlagLoc, data.baseRadius)
-			select b).Count();
-		if (num < num2)
-		{
-			num = num2;
-		}
-		int num3 = 0;
-		for (int num4 = 0; num4 < lord.ownedPawns.Count; num4++)
-		{
-			Pawn pawn = lord.ownedPawns[num4];
-			if (pawn.mindState.duty.def == DutyDefOf.Build)
-			{
-				rememberedDuties.Add(pawn, DutyDefOf.Build);
-				SetAsBuilder(pawn);
-				num3++;
-			}
-		}
-		int num5 = num - num3;
-		for (int num6 = 0; num6 < num5; num6++)
-		{
-			if (lord.ownedPawns.Where((Pawn pa) => !rememberedDuties.ContainsKey(pa) && CanBeBuilder(pa)).TryRandomElement(out var result))
-			{
-				rememberedDuties.Add(result, DutyDefOf.Build);
-				SetAsBuilder(result);
-				num3++;
-			}
-		}
-		for (int num7 = 0; num7 < lord.ownedPawns.Count; num7++)
-		{
-			Pawn pawn2 = lord.ownedPawns[num7];
-			if (!rememberedDuties.ContainsKey(pawn2))
-			{
-				SetAsDefender(pawn2);
-				rememberedDuties.Add(pawn2, DutyDefOf.Defend);
-			}
-		}
-		if (num3 == 0)
-		{
-			lord.ReceiveMemo("NoBuilders");
-		}
-	}
-
-	public override void Notify_PawnLost(Pawn victim, PawnLostCondition cond)
-	{
-		UpdateAllDuties();
-		base.Notify_PawnLost(victim, cond);
-	}
-
-	public override void Notify_ConstructionFailed(Pawn pawn, Frame frame, Blueprint_Build newBlueprint)
-	{
-		base.Notify_ConstructionFailed(pawn, frame, newBlueprint);
-		if (frame.Faction == lord.faction && newBlueprint != null)
-		{
-			Data.blueprints.Add(newBlueprint);
-		}
-	}
-
-	private bool CanBeBuilder(Pawn p)
-	{
-		if (p.WorkTypeIsDisabled(WorkTypeDefOf.Construction) || p.WorkTypeIsDisabled(WorkTypeDefOf.Firefighter))
-		{
-			return false;
-		}
-		return true;
-	}
-
-	private void SetAsBuilder(Pawn p)
-	{
-		LordToilData_Siege lordToilData_Siege = Data;
-		p.mindState.duty = new PawnDuty(DutyDefOf.Build, lordToilData_Siege.siegeCenter);
-		p.mindState.duty.radius = lordToilData_Siege.baseRadius;
-		int minLevel = Mathf.Max(ThingDefOf.Sandbags.constructionSkillPrerequisite, ThingDefOf.Turret_Mortar.constructionSkillPrerequisite);
-		p.skills.GetSkill(SkillDefOf.Construction).EnsureMinLevelWithMargin(minLevel);
-		p.workSettings.EnableAndInitialize();
-		List<WorkTypeDef> allDefsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
-		for (int i = 0; i < allDefsListForReading.Count; i++)
-		{
-			WorkTypeDef workTypeDef = allDefsListForReading[i];
-			if (workTypeDef == WorkTypeDefOf.Construction)
-			{
-				p.workSettings.SetPriority(workTypeDef, 1);
-			}
-			else
-			{
-				p.workSettings.Disable(workTypeDef);
-			}
-		}
-	}
-
-	private void SetAsDefender(Pawn p)
-	{
-		LordToilData_Siege lordToilData_Siege = Data;
-		p.mindState.duty = new PawnDuty(DutyDefOf.Defend, lordToilData_Siege.siegeCenter);
-		p.mindState.duty.radius = lordToilData_Siege.baseRadius;
-	}
-
-	public override void LordToilTick()
-	{
-		base.LordToilTick();
-		LordToilData_Siege lordToilData_Siege = Data;
-		if (lord.ticksInToil == 450)
-		{
-			lord.CurLordToil.UpdateAllDuties();
-		}
-		if (lord.ticksInToil > 450 && lord.ticksInToil % 500 == 0)
-		{
-			UpdateAllDuties();
-		}
-		if (Find.TickManager.TicksGame % 500 != 0)
-		{
-			return;
-		}
-		if (!Frames.Where((Frame frame) => !frame.Destroyed).Any() && !lordToilData_Siege.blueprints.Where((Blueprint blue) => !blue.Destroyed).Any() && !base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial).Any((Thing b) => b.Faction == lord.faction && b.def.building.buildingTags.Contains("Artillery")))
-		{
-			lord.ReceiveMemo("NoArtillery");
-			return;
-		}
-		int num = GenRadial.NumCellsInRadius(20f);
-		int num2 = 0;
-		int num3 = 0;
-		int num4 = 0;
-		int num5 = 0;
-		for (int num6 = 0; num6 < num; num6++)
-		{
-			IntVec3 c = lordToilData_Siege.siegeCenter + GenRadial.RadialPattern[num6];
-			if (!c.InBounds(base.Map))
-			{
-				continue;
-			}
-			List<Thing> thingList = c.GetThingList(base.Map);
-			for (int num7 = 0; num7 < thingList.Count; num7++)
-			{
-				Thing thing = thingList[num7];
-				if (thing.def.IsShell && thing.def.projectileWhenLoaded?.projectile != null && thing.def.projectileWhenLoaded.projectile.damageDef.harmsHealth)
-				{
-					num2 += thing.stackCount;
-				}
-				if (thing.def == ThingDefOf.MealSurvivalPack)
-				{
-					num3 += thing.stackCount;
-				}
-				if (thing.def == ThingDefOf.ReinforcedBarrel)
-				{
-					num5 += thing.stackCount;
-				}
-				if (Find.Storyteller.difficulty.classicMortars || thing.def.building == null || !thing.def.building.IsMortar || thing.Faction != lord.faction)
-				{
-					continue;
-				}
-				CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
-				if (compRefuelable != null)
-				{
-					num4++;
-					if (compRefuelable.Props.fuelFilter.Allows(ThingDefOf.ReinforcedBarrel) && compRefuelable.HasFuel)
+					ThingDef thingDef2 = TurretGunUtility.TryFindRandomShellDef(thingDef, false, false, true, this.lord.faction.def.techLevel, false, 250f, this.lord.faction);
+					if (thingDef2 != null)
 					{
-						num5++;
+						Thing thing3 = ThingMaker.MakeThing(thingDef2, null);
+						thing3.stackCount = 5;
+						list.Add(thing3);
 					}
 				}
 			}
-		}
-		if (num2 < 4)
-		{
-			ThingDef thingDef = TurretGunUtility.TryFindRandomShellDef(ThingDefOf.Turret_Mortar, allowEMP: false, allowToxGas: false, mustHarmHealth: true, lord.faction.def.techLevel, allowAntigrainWarhead: false, 250f, lord.faction);
-			if (thingDef != null)
+			for (int i = 0; i < list.Count; i++)
 			{
-				DropSupplies(thingDef, 6);
+				list[i].stackCount = Mathf.CeilToInt((float)list[i].stackCount * Rand.Range(1f, 1.2f));
+			}
+			List<List<Thing>> list2 = new List<List<Thing>>();
+			for (int j = 0; j < list.Count; j++)
+			{
+				while (list[j].stackCount > list[j].def.stackLimit)
+				{
+					int num = Mathf.CeilToInt((float)list[j].def.stackLimit * Rand.Range(0.9f, 0.999f));
+					Thing thing4 = ThingMaker.MakeThing(list[j].def, null);
+					thing4.stackCount = num;
+					list[j].stackCount -= num;
+					list.Add(thing4);
+				}
+			}
+			List<Thing> list3 = new List<Thing>();
+			for (int k = 0; k < list.Count; k++)
+			{
+				list3.Add(list[k]);
+				if (k % 2 == 1 || k == list.Count - 1)
+				{
+					list2.Add(list3);
+					list3 = new List<Thing>();
+				}
+			}
+			List<Thing> list4 = new List<Thing>();
+			int num2 = Mathf.RoundToInt(LordToil_Siege.MealCountRangePerRaider.RandomInRange * (float)this.lord.ownedPawns.Count);
+			for (int l = 0; l < num2; l++)
+			{
+				Thing item = ThingMaker.MakeThing(ThingDefOf.MealSurvivalPack, null);
+				list4.Add(item);
+			}
+			list2.Add(list4);
+			DropPodUtility.DropThingGroupsNear(data.siegeCenter, base.Map, list2, 110, false, false, true, true, true, false, null);
+			data.desiredBuilderFraction = LordToil_Siege.BuilderCountFraction.RandomInRange;
+		}
+
+		// Token: 0x06008B51 RID: 35665 RVA: 0x002980A8 File Offset: 0x002962A8
+		public override void UpdateAllDuties()
+		{
+			LordToilData_Siege data = this.Data;
+			if (this.lord.ticksInToil < 450)
+			{
+				for (int i = 0; i < this.lord.ownedPawns.Count; i++)
+				{
+					this.SetAsDefender(this.lord.ownedPawns[i]);
+				}
+				return;
+			}
+			this.rememberedDuties.Clear();
+			int num = Mathf.RoundToInt((float)this.lord.ownedPawns.Count * data.desiredBuilderFraction);
+			if (num <= 0)
+			{
+				num = 1;
+			}
+			int num2 = (from b in base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial)
+			where b.def.hasInteractionCell && b.Faction == this.lord.faction && b.Position.InHorDistOf(this.FlagLoc, data.baseRadius)
+			select b).Count<Thing>();
+			if (num < num2)
+			{
+				num = num2;
+			}
+			int num3 = 0;
+			for (int j = 0; j < this.lord.ownedPawns.Count; j++)
+			{
+				Pawn pawn = this.lord.ownedPawns[j];
+				if (pawn.mindState.duty.def == DutyDefOf.Build)
+				{
+					this.rememberedDuties.Add(pawn, DutyDefOf.Build);
+					this.SetAsBuilder(pawn);
+					num3++;
+				}
+			}
+			int num4 = num - num3;
+			Func<Pawn, bool> <>9__1;
+			for (int k = 0; k < num4; k++)
+			{
+				IEnumerable<Pawn> ownedPawns = this.lord.ownedPawns;
+				Func<Pawn, bool> predicate;
+				if ((predicate = <>9__1) == null)
+				{
+					predicate = (<>9__1 = ((Pawn pa) => !this.rememberedDuties.ContainsKey(pa) && this.CanBeBuilder(pa)));
+				}
+				Pawn pawn2;
+				if (ownedPawns.Where(predicate).TryRandomElement(out pawn2))
+				{
+					this.rememberedDuties.Add(pawn2, DutyDefOf.Build);
+					this.SetAsBuilder(pawn2);
+					num3++;
+				}
+			}
+			for (int l = 0; l < this.lord.ownedPawns.Count; l++)
+			{
+				Pawn pawn3 = this.lord.ownedPawns[l];
+				if (!this.rememberedDuties.ContainsKey(pawn3))
+				{
+					this.SetAsDefender(pawn3);
+					this.rememberedDuties.Add(pawn3, DutyDefOf.Defend);
+				}
+			}
+			if (num3 == 0)
+			{
+				this.lord.ReceiveMemo("NoBuilders");
+				return;
 			}
 		}
-		if (num3 < 5)
-		{
-			DropSupplies(ThingDefOf.MealSurvivalPack, 12);
-		}
-		if (!Find.Storyteller.difficulty.classicMortars && num5 < num4)
-		{
-			DropSupplies(ThingDefOf.ReinforcedBarrel, num4 - num5);
-		}
-	}
 
-	private void DropSupplies(ThingDef thingDef, int count)
-	{
-		List<Thing> list = new List<Thing>();
-		Thing thing = ThingMaker.MakeThing(thingDef);
-		thing.stackCount = count;
-		list.Add(thing);
-		DropPodUtility.DropThingsNear(Data.siegeCenter, base.Map, list);
-	}
+		// Token: 0x06008B52 RID: 35666 RVA: 0x002982C6 File Offset: 0x002964C6
+		public override void Notify_PawnLost(Pawn victim, PawnLostCondition cond)
+		{
+			this.UpdateAllDuties();
+			base.Notify_PawnLost(victim, cond);
+		}
 
-	public override void Cleanup()
-	{
-		LordToilData_Siege lordToilData_Siege = Data;
-		lordToilData_Siege.blueprints.RemoveAll((Blueprint blue) => blue.Destroyed);
-		for (int num = 0; num < lordToilData_Siege.blueprints.Count; num++)
+		// Token: 0x06008B53 RID: 35667 RVA: 0x002982D6 File Offset: 0x002964D6
+		public override void Notify_ConstructionFailed(Pawn pawn, Frame frame, Blueprint_Build newBlueprint)
 		{
-			lordToilData_Siege.blueprints[num].Destroy(DestroyMode.Cancel);
+			base.Notify_ConstructionFailed(pawn, frame, newBlueprint);
+			if (frame.Faction == this.lord.faction && newBlueprint != null)
+			{
+				this.Data.blueprints.Add(newBlueprint);
+			}
 		}
-		foreach (Frame item in Frames.ToList())
+
+		// Token: 0x06008B54 RID: 35668 RVA: 0x00298308 File Offset: 0x00296508
+		private bool CanBeBuilder(Pawn p)
 		{
-			item.Destroy(DestroyMode.Cancel);
+			return !p.WorkTypeIsDisabled(WorkTypeDefOf.Construction) && !p.WorkTypeIsDisabled(WorkTypeDefOf.Firefighter);
 		}
-		foreach (Building ownedBuilding in lord.ownedBuildings)
+
+		// Token: 0x06008B55 RID: 35669 RVA: 0x00298328 File Offset: 0x00296528
+		private void SetAsBuilder(Pawn p)
 		{
-			ownedBuilding.SetFaction(null);
+			LordToilData_Siege data = this.Data;
+			p.mindState.duty = new PawnDuty(DutyDefOf.Build, data.siegeCenter, -1f);
+			p.mindState.duty.radius = data.baseRadius;
+			int minLevel = Mathf.Max(ThingDefOf.Sandbags.constructionSkillPrerequisite, ThingDefOf.Turret_Mortar.constructionSkillPrerequisite);
+			p.skills.GetSkill(SkillDefOf.Construction).EnsureMinLevelWithMargin(minLevel);
+			p.workSettings.EnableAndInitialize();
+			List<WorkTypeDef> allDefsListForReading = DefDatabase<WorkTypeDef>.AllDefsListForReading;
+			for (int i = 0; i < allDefsListForReading.Count; i++)
+			{
+				WorkTypeDef workTypeDef = allDefsListForReading[i];
+				if (workTypeDef == WorkTypeDefOf.Construction)
+				{
+					p.workSettings.SetPriority(workTypeDef, 1);
+				}
+				else
+				{
+					p.workSettings.Disable(workTypeDef);
+				}
+			}
 		}
+
+		// Token: 0x06008B56 RID: 35670 RVA: 0x002983F8 File Offset: 0x002965F8
+		private void SetAsDefender(Pawn p)
+		{
+			LordToilData_Siege data = this.Data;
+			p.mindState.duty = new PawnDuty(DutyDefOf.Defend, data.siegeCenter, -1f);
+			p.mindState.duty.radius = data.baseRadius;
+		}
+
+		// Token: 0x06008B57 RID: 35671 RVA: 0x00298448 File Offset: 0x00296648
+		public override void LordToilTick()
+		{
+			base.LordToilTick();
+			LordToilData_Siege data = this.Data;
+			if (this.lord.ticksInToil == 450)
+			{
+				this.lord.CurLordToil.UpdateAllDuties();
+			}
+			if (this.lord.ticksInToil > 450 && this.lord.ticksInToil % 500 == 0)
+			{
+				this.UpdateAllDuties();
+			}
+			if (Find.TickManager.TicksGame % 500 == 0)
+			{
+				if (!(from frame in this.Frames
+				where !frame.Destroyed
+				select frame).Any<Frame>())
+				{
+					if (!(from blue in data.blueprints
+					where !blue.Destroyed
+					select blue).Any<Blueprint>() && !base.Map.listerThings.ThingsInGroup(ThingRequestGroup.BuildingArtificial).Any((Thing b) => b.Faction == this.lord.faction && b.def.building.buildingTags.Contains("Artillery")))
+					{
+						this.lord.ReceiveMemo("NoArtillery");
+						return;
+					}
+				}
+				int num = GenRadial.NumCellsInRadius(20f);
+				int num2 = 0;
+				int num3 = 0;
+				int num4 = 0;
+				int num5 = 0;
+				for (int i = 0; i < num; i++)
+				{
+					IntVec3 c = data.siegeCenter + GenRadial.RadialPattern[i];
+					if (c.InBounds(base.Map))
+					{
+						List<Thing> thingList = c.GetThingList(base.Map);
+						for (int j = 0; j < thingList.Count; j++)
+						{
+							Thing thing = thingList[j];
+							if (thing.def.IsShell)
+							{
+								ThingDef projectileWhenLoaded = thing.def.projectileWhenLoaded;
+								if (((projectileWhenLoaded != null) ? projectileWhenLoaded.projectile : null) != null && thing.def.projectileWhenLoaded.projectile.damageDef.harmsHealth)
+								{
+									num2 += thing.stackCount;
+								}
+							}
+							if (thing.def == ThingDefOf.MealSurvivalPack)
+							{
+								num3 += thing.stackCount;
+							}
+							if (thing.def == ThingDefOf.ReinforcedBarrel)
+							{
+								num5 += thing.stackCount;
+							}
+							if (!Find.Storyteller.difficulty.classicMortars && thing.def.building != null && thing.def.building.IsMortar && thing.Faction == this.lord.faction)
+							{
+								CompRefuelable compRefuelable = thing.TryGetComp<CompRefuelable>();
+								if (compRefuelable != null)
+								{
+									num4++;
+									if (compRefuelable.Props.fuelFilter.Allows(ThingDefOf.ReinforcedBarrel) && compRefuelable.HasFuel)
+									{
+										num5++;
+									}
+								}
+							}
+						}
+					}
+				}
+				if (num2 < 4)
+				{
+					ThingDef thingDef = TurretGunUtility.TryFindRandomShellDef(ThingDefOf.Turret_Mortar, false, false, true, this.lord.faction.def.techLevel, false, 250f, this.lord.faction);
+					if (thingDef != null)
+					{
+						this.DropSupplies(thingDef, 6);
+					}
+				}
+				if (num3 < 5)
+				{
+					this.DropSupplies(ThingDefOf.MealSurvivalPack, 12);
+				}
+				if (!Find.Storyteller.difficulty.classicMortars && num5 < num4)
+				{
+					this.DropSupplies(ThingDefOf.ReinforcedBarrel, num4 - num5);
+				}
+			}
+		}
+
+		// Token: 0x06008B58 RID: 35672 RVA: 0x00298768 File Offset: 0x00296968
+		private void DropSupplies(ThingDef thingDef, int count)
+		{
+			List<Thing> list = new List<Thing>();
+			Thing thing = ThingMaker.MakeThing(thingDef, null);
+			thing.stackCount = count;
+			list.Add(thing);
+			DropPodUtility.DropThingsNear(this.Data.siegeCenter, base.Map, list, 110, false, false, true, true, true, null);
+		}
+
+		// Token: 0x06008B59 RID: 35673 RVA: 0x002987B0 File Offset: 0x002969B0
+		public override void Cleanup()
+		{
+			LordToilData_Siege data = this.Data;
+			data.blueprints.RemoveAll((Blueprint blue) => blue.Destroyed);
+			for (int i = 0; i < data.blueprints.Count; i++)
+			{
+				data.blueprints[i].Destroy(DestroyMode.Cancel);
+			}
+			foreach (Frame frame in this.Frames.ToList<Frame>())
+			{
+				frame.Destroy(DestroyMode.Cancel);
+			}
+			foreach (Building building in this.lord.ownedBuildings)
+			{
+				building.SetFaction(null, null);
+			}
+		}
+
+		// Token: 0x04005A7F RID: 23167
+		public Dictionary<Pawn, DutyDef> rememberedDuties = new Dictionary<Pawn, DutyDef>();
+
+		// Token: 0x04005A80 RID: 23168
+		private const float BaseRadiusMin = 14f;
+
+		// Token: 0x04005A81 RID: 23169
+		private const float BaseRadiusMax = 25f;
+
+		// Token: 0x04005A82 RID: 23170
+		private static readonly FloatRange MealCountRangePerRaider = new FloatRange(1f, 3f);
+
+		// Token: 0x04005A83 RID: 23171
+		private const int StartBuildingDelay = 450;
+
+		// Token: 0x04005A84 RID: 23172
+		private static readonly FloatRange BuilderCountFraction = new FloatRange(0.25f, 0.4f);
+
+		// Token: 0x04005A85 RID: 23173
+		private const float FractionLossesToAssault = 0.4f;
+
+		// Token: 0x04005A86 RID: 23174
+		private const int InitalShellsPerCannon = 5;
+
+		// Token: 0x04005A87 RID: 23175
+		private const int ReplenishAtShells = 4;
+
+		// Token: 0x04005A88 RID: 23176
+		private const int ShellReplenishCount = 6;
+
+		// Token: 0x04005A89 RID: 23177
+		private const int ReplenishAtMeals = 5;
+
+		// Token: 0x04005A8A RID: 23178
+		private const int MealReplenishCount = 12;
 	}
 }

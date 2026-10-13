@@ -1,24 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SpecialThingFilterWorker_DeadmansApparel : SpecialThingFilterWorker
+namespace RimWorld
 {
-	public override bool Matches(Thing t)
+	// Token: 0x020036D0 RID: 14032
+	public class SpecialThingFilterWorker_DeadmansApparel : SpecialThingFilterWorker
 	{
-		if (t is Apparel apparel)
+		// Token: 0x060137A0 RID: 79776 RVA: 0x005C90B0 File Offset: 0x005C72B0
+		public override bool Matches(Thing t)
 		{
-			return apparel.WornByCorpse;
+			Apparel apparel = t as Apparel;
+			return apparel != null && apparel.WornByCorpse;
 		}
-		return false;
-	}
 
-	public override bool CanEverMatch(ThingDef def)
-	{
-		if (def.IsApparel)
+		// Token: 0x060137A1 RID: 79777 RVA: 0x005C9096 File Offset: 0x005C7296
+		public override bool CanEverMatch(ThingDef def)
 		{
-			return def.apparel.careIfWornByCorpse;
+			return def.IsApparel && def.apparel.careIfWornByCorpse;
 		}
-		return false;
 	}
 }

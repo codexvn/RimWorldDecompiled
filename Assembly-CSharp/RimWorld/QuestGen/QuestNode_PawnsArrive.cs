@@ -1,94 +1,107 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_PawnsArrive : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> inSignal;
-
-	public SlateRef<IEnumerable<Pawn>> pawns;
-
-	public SlateRef<PawnsArrivalModeDef> arrivalMode;
-
-	public SlateRef<bool> joinPlayer;
-
-	public SlateRef<IntVec3?> walkInSpot;
-
-	public SlateRef<string> customLetterLabel;
-
-	public SlateRef<string> customLetterText;
-
-	public SlateRef<RulePack> customLetterLabelRules;
-
-	public SlateRef<RulePack> customLetterTextRules;
-
-	public SlateRef<LetterDef> customLetterDef;
-
-	public SlateRef<bool> isSingleReward;
-
-	public SlateRef<bool> rewardDetailsHidden;
-
-	private const string RootSymbol = "root";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003ADF RID: 15071
+	public class QuestNode_PawnsArrive : QuestNode
 	{
-		if (!slate.Exists("map"))
+		// Token: 0x06014893 RID: 84115 RVA: 0x00620959 File Offset: 0x0061EB59
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			return slate.Exists("map", false);
 		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		PawnsArrivalModeDef pawnsArrivalModeDef = arrivalMode.GetValue(slate) ?? PawnsArrivalModeDefOf.EdgeWalkIn;
-		QuestPart_PawnsArrive pawnsArrive = new QuestPart_PawnsArrive();
-		pawnsArrive.inSignal = QuestGenUtility.HardcodedSignalWithQuestID(inSignal.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal");
-		pawnsArrive.pawns.AddRange(pawns.GetValue(slate));
-		pawnsArrive.arrivalMode = pawnsArrivalModeDef;
-		pawnsArrive.joinPlayer = joinPlayer.GetValue(slate);
-		pawnsArrive.mapParent = QuestGen.slate.Get<Map>("map").Parent;
-		pawnsArrive.customLetterDef = customLetterDef.GetValue(slate);
-		if (pawnsArrivalModeDef.walkIn)
+		// Token: 0x06014894 RID: 84116 RVA: 0x0062096C File Offset: 0x0061EB6C
+		protected override void RunInt()
 		{
-			pawnsArrive.spawnNear = walkInSpot.GetValue(slate) ?? QuestGen.slate.Get<IntVec3?>("walkInSpot") ?? IntVec3.Invalid;
-		}
-		if (!customLetterLabel.GetValue(slate).NullOrEmpty() || customLetterLabelRules.GetValue(slate) != null)
-		{
-			QuestGen.AddTextRequest("root", delegate(string x)
+			Slate slate = QuestGen.slate;
+			PawnsArrivalModeDef pawnsArrivalModeDef = this.arrivalMode.GetValue(slate) ?? PawnsArrivalModeDefOf.EdgeWalkIn;
+			QuestPart_PawnsArrive pawnsArrive = new QuestPart_PawnsArrive();
+			pawnsArrive.inSignal = (QuestGenUtility.HardcodedSignalWithQuestID(this.inSignal.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal", null, false));
+			pawnsArrive.pawns.AddRange(this.pawns.GetValue(slate));
+			pawnsArrive.arrivalMode = pawnsArrivalModeDef;
+			pawnsArrive.joinPlayer = this.joinPlayer.GetValue(slate);
+			pawnsArrive.mapParent = QuestGen.slate.Get<Map>("map", null, false).Parent;
+			pawnsArrive.customLetterDef = this.customLetterDef.GetValue(slate);
+			if (pawnsArrivalModeDef.walkIn)
 			{
-				pawnsArrive.customLetterLabel = x;
-			}, QuestGenUtility.MergeRules(customLetterLabelRules.GetValue(slate), customLetterLabel.GetValue(slate), "root"));
-		}
-		if (!customLetterText.GetValue(slate).NullOrEmpty() || customLetterTextRules.GetValue(slate) != null)
-		{
-			QuestGen.AddTextRequest("root", delegate(string x)
+				pawnsArrive.spawnNear = (this.walkInSpot.GetValue(slate) ?? (QuestGen.slate.Get<IntVec3?>("walkInSpot", null, false) ?? IntVec3.Invalid));
+			}
+			if (!this.customLetterLabel.GetValue(slate).NullOrEmpty() || this.customLetterLabelRules.GetValue(slate) != null)
 			{
-				pawnsArrive.customLetterText = x;
-			}, QuestGenUtility.MergeRules(customLetterTextRules.GetValue(slate), customLetterText.GetValue(slate), "root"));
-		}
-		QuestGen.quest.AddPart(pawnsArrive);
-		if (!isSingleReward.GetValue(slate))
-		{
-			return;
-		}
-		QuestPart_Choice questPart_Choice = new QuestPart_Choice();
-		questPart_Choice.inSignalChoiceUsed = pawnsArrive.inSignal;
-		QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
-		choice.questParts.Add(pawnsArrive);
-		foreach (Pawn pawn in pawnsArrive.pawns)
-		{
-			choice.rewards.Add(new Reward_Pawn
+				QuestGen.AddTextRequest("root", delegate(string x)
+				{
+					pawnsArrive.customLetterLabel = x;
+				}, QuestGenUtility.MergeRules(this.customLetterLabelRules.GetValue(slate), this.customLetterLabel.GetValue(slate), "root"));
+			}
+			if (!this.customLetterText.GetValue(slate).NullOrEmpty() || this.customLetterTextRules.GetValue(slate) != null)
 			{
-				pawn = pawn,
-				detailsHidden = rewardDetailsHidden.GetValue(slate)
-			});
+				QuestGen.AddTextRequest("root", delegate(string x)
+				{
+					pawnsArrive.customLetterText = x;
+				}, QuestGenUtility.MergeRules(this.customLetterTextRules.GetValue(slate), this.customLetterText.GetValue(slate), "root"));
+			}
+			QuestGen.quest.AddPart(pawnsArrive);
+			if (this.isSingleReward.GetValue(slate))
+			{
+				QuestPart_Choice questPart_Choice = new QuestPart_Choice();
+				questPart_Choice.inSignalChoiceUsed = pawnsArrive.inSignal;
+				QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
+				choice.questParts.Add(pawnsArrive);
+				foreach (Pawn pawn in pawnsArrive.pawns)
+				{
+					choice.rewards.Add(new Reward_Pawn
+					{
+						pawn = pawn,
+						detailsHidden = this.rewardDetailsHidden.GetValue(slate)
+					});
+				}
+				questPart_Choice.choices.Add(choice);
+				QuestGen.quest.AddPart(questPart_Choice);
+			}
 		}
-		questPart_Choice.choices.Add(choice);
-		QuestGen.quest.AddPart(questPart_Choice);
+
+		// Token: 0x0400E3D4 RID: 58324
+		[NoTranslate]
+		public SlateRef<string> inSignal;
+
+		// Token: 0x0400E3D5 RID: 58325
+		public SlateRef<IEnumerable<Pawn>> pawns;
+
+		// Token: 0x0400E3D6 RID: 58326
+		public SlateRef<PawnsArrivalModeDef> arrivalMode;
+
+		// Token: 0x0400E3D7 RID: 58327
+		public SlateRef<bool> joinPlayer;
+
+		// Token: 0x0400E3D8 RID: 58328
+		public SlateRef<IntVec3?> walkInSpot;
+
+		// Token: 0x0400E3D9 RID: 58329
+		public SlateRef<string> customLetterLabel;
+
+		// Token: 0x0400E3DA RID: 58330
+		public SlateRef<string> customLetterText;
+
+		// Token: 0x0400E3DB RID: 58331
+		public SlateRef<RulePack> customLetterLabelRules;
+
+		// Token: 0x0400E3DC RID: 58332
+		public SlateRef<RulePack> customLetterTextRules;
+
+		// Token: 0x0400E3DD RID: 58333
+		public SlateRef<LetterDef> customLetterDef;
+
+		// Token: 0x0400E3DE RID: 58334
+		public SlateRef<bool> isSingleReward;
+
+		// Token: 0x0400E3DF RID: 58335
+		public SlateRef<bool> rewardDetailsHidden;
+
+		// Token: 0x0400E3E0 RID: 58336
+		private const string RootSymbol = "root";
 	}
 }

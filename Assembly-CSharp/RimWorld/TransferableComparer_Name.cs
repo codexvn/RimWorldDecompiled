@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class TransferableComparer_Name : TransferableComparer
+namespace RimWorld
 {
-	public override int Compare(Transferable lhs, Transferable rhs)
+	// Token: 0x020034BF RID: 13503
+	public class TransferableComparer_Name : TransferableComparer
 	{
-		return lhs.Label.CompareTo(rhs.Label);
+		// Token: 0x06012FA3 RID: 77731 RVA: 0x005A1875 File Offset: 0x0059FA75
+		public override int Compare(Transferable lhs, Transferable rhs)
+		{
+			return lhs.Label.CompareTo(rhs.Label);
+		}
 	}
 }

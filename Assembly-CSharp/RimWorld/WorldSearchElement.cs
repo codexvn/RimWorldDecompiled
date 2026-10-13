@@ -1,39 +1,48 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class WorldSearchElement
+namespace RimWorld
 {
-	public PlanetTile tile = PlanetTile.Invalid;
-
-	public WorldObject worldObject;
-
-	public Landmark landmark;
-
-	public List<TileMutatorDef> mutators;
-
-	public string DisplayLabel
+	// Token: 0x020031BF RID: 12735
+	public class WorldSearchElement
 	{
-		get
+		// Token: 0x17002E8B RID: 11915
+		// (get) Token: 0x06011ECC RID: 73420 RVA: 0x00537B70 File Offset: 0x00535D70
+		public string DisplayLabel
 		{
-			if (worldObject != null)
+			get
 			{
-				return worldObject.LabelCap;
-			}
-			if (ModsConfig.OdysseyActive)
-			{
-				if (landmark != null)
+				if (this.worldObject != null)
 				{
-					return landmark.name.CapitalizeFirst();
+					return this.worldObject.LabelCap;
 				}
-				if (!mutators.NullOrEmpty())
+				if (ModsConfig.OdysseyActive)
 				{
-					return mutators[0].label.CapitalizeFirst();
+					if (this.landmark != null)
+					{
+						return this.landmark.name.CapitalizeFirst();
+					}
+					if (!this.mutators.NullOrEmpty<TileMutatorDef>())
+					{
+						return this.mutators[0].label.CapitalizeFirst();
+					}
 				}
+				return null;
 			}
-			return null;
 		}
+
+		// Token: 0x0400B991 RID: 47505
+		public PlanetTile tile = PlanetTile.Invalid;
+
+		// Token: 0x0400B992 RID: 47506
+		public WorldObject worldObject;
+
+		// Token: 0x0400B993 RID: 47507
+		public Landmark landmark;
+
+		// Token: 0x0400B994 RID: 47508
+		public List<TileMutatorDef> mutators;
 	}
 }

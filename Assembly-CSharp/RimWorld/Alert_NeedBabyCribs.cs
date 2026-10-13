@@ -1,30 +1,38 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_NeedBabyCribs : Alert
+namespace RimWorld
 {
-	public Alert_NeedBabyCribs()
+	// Token: 0x02002FF8 RID: 12280
+	public class Alert_NeedBabyCribs : Alert
 	{
-		defaultLabel = "AlertNeedBabyCribs".Translate();
-		defaultExplanation = "AlertNeedBabyCribsDesc".Translate();
-		defaultPriority = AlertPriority.High;
-		requireBiotech = true;
-	}
-
-	public override AlertReport GetReport()
-	{
-		foreach (Map map in Find.Maps)
+		// Token: 0x060114AB RID: 70827 RVA: 0x004F4CC3 File Offset: 0x004F2EC3
+		public Alert_NeedBabyCribs()
 		{
-			if (map.IsPlayerHome)
+			this.defaultLabel = "AlertNeedBabyCribs".Translate();
+			this.defaultExplanation = "AlertNeedBabyCribsDesc".Translate();
+			this.defaultPriority = AlertPriority.High;
+			this.requireBiotech = true;
+		}
+
+		// Token: 0x060114AC RID: 70828 RVA: 0x004F4D04 File Offset: 0x004F2F04
+		public override AlertReport GetReport()
+		{
+			foreach (Map map in Find.Maps)
 			{
-				Alert_NeedColonistBeds.AvailableColonistBeds(map, includeBabies: true, out var _, out var _, out var cribs);
-				if (cribs < 0)
+				if (map.IsPlayerHome)
 				{
-					return true;
+					int num;
+					int num2;
+					int num3;
+					Alert_NeedColonistBeds.AvailableColonistBeds(map, true, out num, out num2, out num3);
+					if (num3 < 0)
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

@@ -1,33 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
 
-namespace LudeonTK;
-
-public class DebugLogsUtility
+namespace LudeonTK
 {
-	public static string ThingListToUniqueCountString(IEnumerable<Thing> things)
+	// Token: 0x02000076 RID: 118
+	public class DebugLogsUtility
 	{
-		if (things == null)
+		// Token: 0x06000295 RID: 661 RVA: 0x0000E10C File Offset: 0x0000C30C
+		public static string ThingListToUniqueCountString(IEnumerable<Thing> things)
 		{
-			return "null";
-		}
-		Dictionary<ThingDef, int> dictionary = new Dictionary<ThingDef, int>();
-		foreach (Thing thing in things)
-		{
-			if (!dictionary.ContainsKey(thing.def))
+			if (things == null)
 			{
-				dictionary.Add(thing.def, 0);
+				return "null";
 			}
-			dictionary[thing.def]++;
+			Dictionary<ThingDef, int> dictionary = new Dictionary<ThingDef, int>();
+			foreach (Thing thing in things)
+			{
+				if (!dictionary.ContainsKey(thing.def))
+				{
+					dictionary.Add(thing.def, 0);
+				}
+				Dictionary<ThingDef, int> dictionary2 = dictionary;
+				ThingDef def = thing.def;
+				int num = dictionary2[def];
+				dictionary2[def] = num + 1;
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.AppendLine("Registered things in dynamic draw list:");
+			foreach (KeyValuePair<ThingDef, int> keyValuePair in from k in dictionary
+			orderby k.Value descending
+			select k)
+			{
+				StringBuilder stringBuilder2 = stringBuilder;
+				ThingDef key = keyValuePair.Key;
+				stringBuilder2.AppendLine(((key != null) ? key.ToString() : null) + " - " + keyValuePair.Value.ToString());
+			}
+			return stringBuilder.ToString();
 		}
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.AppendLine("Registered things in dynamic draw list:");
-		foreach (KeyValuePair<ThingDef, int> item in dictionary.OrderByDescending((KeyValuePair<ThingDef, int> k) => k.Value))
-		{
-			stringBuilder.AppendLine(item.Key?.ToString() + " - " + item.Value);
-		}
-		return stringBuilder.ToString();
 	}
 }

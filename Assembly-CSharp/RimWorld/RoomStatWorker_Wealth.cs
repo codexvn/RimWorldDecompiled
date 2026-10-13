@@ -1,26 +1,30 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomStatWorker_Wealth : RoomStatWorker
+namespace RimWorld
 {
-	public override float GetScore(Room room)
+	// Token: 0x02002179 RID: 8569
+	public class RoomStatWorker_Wealth : RoomStatWorker
 	{
-		float num = 0f;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
+		// Token: 0x0600BAF7 RID: 47863 RVA: 0x0035F884 File Offset: 0x0035DA84
+		public override float GetScore(Room room)
 		{
-			Thing thing = containedAndAdjacentThings[i];
-			if (thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Plant)
+			float num = 0f;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				num += (float)thing.stackCount * thing.MarketValue;
+				Thing thing = containedAndAdjacentThings[i];
+				if (thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Plant)
+				{
+					num += (float)thing.stackCount * thing.MarketValue;
+				}
 			}
+			foreach (IntVec3 c in room.Cells)
+			{
+				num += c.GetTerrain(room.Map).GetStatValueAbstract(StatDefOf.MarketValue, null);
+			}
+			return num;
 		}
-		foreach (IntVec3 cell in room.Cells)
-		{
-			num += cell.GetTerrain(room.Map).GetStatValueAbstract(StatDefOf.MarketValue);
-		}
-		return num;
 	}
 }

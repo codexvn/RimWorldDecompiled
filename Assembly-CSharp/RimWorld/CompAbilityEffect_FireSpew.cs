@@ -1,127 +1,151 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbilityEffect_FireSpew : CompAbilityEffect
+namespace RimWorld
 {
-	private readonly List<IntVec3> tmpCells = new List<IntVec3>();
-
-	private new CompProperties_AbilityFireSpew Props => (CompProperties_AbilityFireSpew)props;
-
-	private Pawn Pawn => parent.pawn;
-
-	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	// Token: 0x0200222A RID: 8746
+	public class CompAbilityEffect_FireSpew : CompAbilityEffect
 	{
-		IntVec3 cell = target.Cell;
-		Map mapHeld = parent.pawn.MapHeld;
-		DamageDef flame = DamageDefOf.Flame;
-		Pawn pawn = Pawn;
-		ThingDef filthDef = Props.filthDef;
-		int damAmount = Props.damAmount;
-		SimpleCurve flammabilityAttachFireChanceCurve = parent.verb.verbProps.flammabilityAttachFireChanceCurve;
-		List<IntVec3> overrideCells = AffectedCells(target);
-		GenExplosion.DoExplosion(cell, mapHeld, 0f, flame, pawn, damAmount, -1f, null, null, null, null, filthDef, 1f, 1, null, null, 255, applyDamageToExplosionCellsNeighbors: false, null, 0f, 1, 1f, damageFalloff: false, null, null, null, doVisualEffects: false, 0.6f, 0f, doSoundEffects: false, null, 1f, flammabilityAttachFireChanceCurve, overrideCells);
-		base.Apply(target, dest);
-	}
-
-	public override IEnumerable<PreCastAction> GetPreCastActions()
-	{
-		if (Props.effecterDef != null)
+		// Token: 0x17001D2F RID: 7471
+		// (get) Token: 0x0600BF2C RID: 48940 RVA: 0x0037703D File Offset: 0x0037523D
+		private new CompProperties_AbilityFireSpew Props
 		{
-			yield return new PreCastAction
+			get
 			{
-				action = delegate(LocalTargetInfo a, LocalTargetInfo b)
-				{
-					parent.AddEffecterToMaintain(Props.effecterDef.Spawn(parent.pawn.Position, a.Cell, parent.pawn.Map), Pawn.Position, a.Cell, 17, Pawn.MapHeld);
-				},
-				ticksAwayFromCast = 17
-			};
+				return (CompProperties_AbilityFireSpew)this.props;
+			}
 		}
-	}
 
-	public override void DrawEffectPreview(LocalTargetInfo target)
-	{
-		GenDraw.DrawFieldEdges(AffectedCells(target));
-	}
-
-	public override bool AICanTargetNow(LocalTargetInfo target)
-	{
-		if (Pawn.Faction != null)
+		// Token: 0x17001D30 RID: 7472
+		// (get) Token: 0x0600BF2D RID: 48941 RVA: 0x00375CA4 File Offset: 0x00373EA4
+		private Pawn Pawn
 		{
-			foreach (IntVec3 item in AffectedCells(target))
+			get
 			{
-				List<Thing> thingList = item.GetThingList(Pawn.Map);
-				for (int i = 0; i < thingList.Count; i++)
+				return this.parent.pawn;
+			}
+		}
+
+		// Token: 0x0600BF2E RID: 48942 RVA: 0x0037704C File Offset: 0x0037524C
+		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+		{
+			IntVec3 cell = target.Cell;
+			Map mapHeld = this.parent.pawn.MapHeld;
+			float radius = 0f;
+			DamageDef flame = DamageDefOf.Flame;
+			Thing pawn = this.Pawn;
+			ThingDef filthDef = this.Props.filthDef;
+			int damAmount = this.Props.damAmount;
+			float armorPenetration = -1f;
+			SoundDef explosionSound = null;
+			ThingDef weapon = null;
+			ThingDef projectile = null;
+			Thing intendedTarget = null;
+			ThingDef postExplosionSpawnThingDef = filthDef;
+			float postExplosionSpawnChance = 1f;
+			int postExplosionSpawnThingCount = 1;
+			SimpleCurve flammabilityAttachFireChanceCurve = this.parent.verb.verbProps.flammabilityAttachFireChanceCurve;
+			List<IntVec3> overrideCells = this.AffectedCells(target);
+			GenExplosion.DoExplosion(cell, mapHeld, radius, flame, pawn, damAmount, armorPenetration, explosionSound, weapon, projectile, intendedTarget, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount, null, null, 255, false, null, 0f, 1, 1f, false, null, null, null, false, 0.6f, 0f, false, null, 1f, flammabilityAttachFireChanceCurve, overrideCells, null, null);
+			base.Apply(target, dest);
+		}
+
+		// Token: 0x0600BF2F RID: 48943 RVA: 0x00377123 File Offset: 0x00375323
+		public override IEnumerable<PreCastAction> GetPreCastActions()
+		{
+			if (this.Props.effecterDef != null)
+			{
+				yield return new PreCastAction
 				{
-					if (thingList[i].Faction == Pawn.Faction)
+					action = delegate(LocalTargetInfo a, LocalTargetInfo b)
 					{
-						return false;
+						this.parent.AddEffecterToMaintain(this.Props.effecterDef.Spawn(this.parent.pawn.Position, a.Cell, this.parent.pawn.Map, 1f), this.Pawn.Position, a.Cell, 17, this.Pawn.MapHeld);
+					},
+					ticksAwayFromCast = 17
+				};
+			}
+			yield break;
+		}
+
+		// Token: 0x0600BF30 RID: 48944 RVA: 0x00377133 File Offset: 0x00375333
+		public override void DrawEffectPreview(LocalTargetInfo target)
+		{
+			GenDraw.DrawFieldEdges(this.AffectedCells(target), 2900);
+		}
+
+		// Token: 0x0600BF31 RID: 48945 RVA: 0x00377148 File Offset: 0x00375348
+		public override bool AICanTargetNow(LocalTargetInfo target)
+		{
+			if (this.Pawn.Faction != null)
+			{
+				foreach (IntVec3 c in this.AffectedCells(target))
+				{
+					List<Thing> thingList = c.GetThingList(this.Pawn.Map);
+					for (int i = 0; i < thingList.Count; i++)
+					{
+						if (thingList[i].Faction == this.Pawn.Faction)
+						{
+							return false;
+						}
 					}
 				}
+				return true;
 			}
+			return true;
 		}
-		return true;
-	}
 
-	private List<IntVec3> AffectedCells(LocalTargetInfo target)
-	{
-		tmpCells.Clear();
-		Vector3 vector = Pawn.Position.ToVector3Shifted().Yto0();
-		IntVec3 intVec = target.Cell.ClampInsideMap(Pawn.Map);
-		if (Pawn.Position == intVec)
+		// Token: 0x0600BF32 RID: 48946 RVA: 0x003771E4 File Offset: 0x003753E4
+		private List<IntVec3> AffectedCells(LocalTargetInfo target)
 		{
-			return tmpCells;
+			this.tmpCells.Clear();
+			Vector3 b = this.Pawn.Position.ToVector3Shifted().Yto0();
+			IntVec3 intVec = target.Cell.ClampInsideMap(this.Pawn.Map);
+			if (this.Pawn.Position == intVec)
+			{
+				return this.tmpCells;
+			}
+			float lengthHorizontal = (intVec - this.Pawn.Position).LengthHorizontal;
+			float num = (float)(intVec.x - this.Pawn.Position.x) / lengthHorizontal;
+			float num2 = (float)(intVec.z - this.Pawn.Position.z) / lengthHorizontal;
+			intVec.x = Mathf.RoundToInt((float)this.Pawn.Position.x + num * this.Props.range);
+			intVec.z = Mathf.RoundToInt((float)this.Pawn.Position.z + num2 * this.Props.range);
+			float target2 = Vector3.SignedAngle(intVec.ToVector3Shifted().Yto0() - b, Vector3.right, Vector3.up);
+			float num3 = this.Props.lineWidthEnd / 2f;
+			float num4 = Mathf.Sqrt(Mathf.Pow((intVec - this.Pawn.Position).LengthHorizontal, 2f) + Mathf.Pow(num3, 2f));
+			float num5 = 57.29578f * Mathf.Asin(num3 / num4);
+			int num6 = GenRadial.NumCellsInRadius(this.Props.range);
+			for (int i = 0; i < num6; i++)
+			{
+				IntVec3 intVec2 = this.Pawn.Position + GenRadial.RadialPattern[i];
+				if (this.<AffectedCells>g__CanUseCell|9_0(intVec2) && Mathf.Abs(Mathf.DeltaAngle(Vector3.SignedAngle(intVec2.ToVector3Shifted().Yto0() - b, Vector3.right, Vector3.up), target2)) <= num5)
+				{
+					this.tmpCells.Add(intVec2);
+				}
+			}
+			List<IntVec3> list = GenSight.BresenhamCellsBetween(this.Pawn.Position, intVec);
+			for (int j = 0; j < list.Count; j++)
+			{
+				IntVec3 intVec3 = list[j];
+				if (!this.tmpCells.Contains(intVec3) && this.<AffectedCells>g__CanUseCell|9_0(intVec3))
+				{
+					this.tmpCells.Add(intVec3);
+				}
+			}
+			return this.tmpCells;
 		}
-		float lengthHorizontal = (intVec - Pawn.Position).LengthHorizontal;
-		float num = (float)(intVec.x - Pawn.Position.x) / lengthHorizontal;
-		float num2 = (float)(intVec.z - Pawn.Position.z) / lengthHorizontal;
-		intVec.x = Mathf.RoundToInt((float)Pawn.Position.x + num * Props.range);
-		intVec.z = Mathf.RoundToInt((float)Pawn.Position.z + num2 * Props.range);
-		float target2 = Vector3.SignedAngle(intVec.ToVector3Shifted().Yto0() - vector, Vector3.right, Vector3.up);
-		float num3 = Props.lineWidthEnd / 2f;
-		float num4 = Mathf.Sqrt(Mathf.Pow((intVec - Pawn.Position).LengthHorizontal, 2f) + Mathf.Pow(num3, 2f));
-		float num5 = 57.29578f * Mathf.Asin(num3 / num4);
-		int num6 = GenRadial.NumCellsInRadius(Props.range);
-		for (int i = 0; i < num6; i++)
+
+		// Token: 0x0600BF35 RID: 48949 RVA: 0x003774E8 File Offset: 0x003756E8
+		[CompilerGenerated]
+		private bool <AffectedCells>g__CanUseCell|9_0(IntVec3 c)
 		{
-			IntVec3 intVec2 = Pawn.Position + GenRadial.RadialPattern[i];
-			if (CanUseCell(intVec2) && Mathf.Abs(Mathf.DeltaAngle(Vector3.SignedAngle(intVec2.ToVector3Shifted().Yto0() - vector, Vector3.right, Vector3.up), target2)) <= num5)
-			{
-				tmpCells.Add(intVec2);
-			}
+			ShootLine shootLine;
+			return c.InBounds(this.Pawn.Map) && !(c == this.Pawn.Position) && (this.Props.canHitFilledCells || !c.Filled(this.Pawn.Map)) && c.InHorDistOf(this.Pawn.Position, this.Props.range) && this.parent.verb.TryFindShootLineFromTo(this.parent.pawn.Position, c, out shootLine, false);
 		}
-		List<IntVec3> list = GenSight.BresenhamCellsBetween(Pawn.Position, intVec);
-		for (int j = 0; j < list.Count; j++)
-		{
-			IntVec3 intVec3 = list[j];
-			if (!tmpCells.Contains(intVec3) && CanUseCell(intVec3))
-			{
-				tmpCells.Add(intVec3);
-			}
-		}
-		return tmpCells;
-		bool CanUseCell(IntVec3 c)
-		{
-			if (!c.InBounds(Pawn.Map))
-			{
-				return false;
-			}
-			if (c == Pawn.Position)
-			{
-				return false;
-			}
-			if (!Props.canHitFilledCells && c.Filled(Pawn.Map))
-			{
-				return false;
-			}
-			if (!c.InHorDistOf(Pawn.Position, Props.range))
-			{
-				return false;
-			}
-			ShootLine resultingLine;
-			return parent.verb.TryFindShootLineFromTo(parent.pawn.Position, c, out resultingLine);
-		}
+
+		// Token: 0x04008340 RID: 33600
+		private readonly List<IntVec3> tmpCells = new List<IntVec3>();
 	}
 }

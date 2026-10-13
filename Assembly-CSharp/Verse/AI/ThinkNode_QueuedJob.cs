@@ -1,40 +1,53 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_QueuedJob : ThinkNode
+namespace Verse.AI
 {
-	public bool inBedOnly;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x02001015 RID: 4117
+	public class ThinkNode_QueuedJob : ThinkNode
 	{
-		ThinkNode_QueuedJob obj = (ThinkNode_QueuedJob)base.DeepCopy(resolve);
-		obj.inBedOnly = inBedOnly;
-		return obj;
-	}
-
-	public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
-	{
-		JobQueue jobQueue = pawn.jobs.jobQueue;
-		if (pawn.Downed || jobQueue.AnyCanBeginNow(pawn, inBedOnly))
+		// Token: 0x060064EA RID: 25834 RVA: 0x001FEA8F File Offset: 0x001FCC8F
+		public override ThinkNode DeepCopy(bool resolve = true)
 		{
-			while (jobQueue.Count > 0 && !jobQueue.Peek().job.CanBeginNow(pawn, inBedOnly))
+			ThinkNode_QueuedJob thinkNode_QueuedJob = (ThinkNode_QueuedJob)base.DeepCopy(resolve);
+			thinkNode_QueuedJob.inBedOnly = this.inBedOnly;
+			return thinkNode_QueuedJob;
+		}
+
+		// Token: 0x060064EB RID: 25835 RVA: 0x001FEAAC File Offset: 0x001FCCAC
+		public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
+		{
+			JobQueue jobQueue = pawn.jobs.jobQueue;
+			if (pawn.Downed || jobQueue.AnyCanBeginNow(pawn, this.inBedOnly))
 			{
-				QueuedJob queuedJob = jobQueue.Dequeue();
+				while (jobQueue.Count > 0 && !jobQueue.Peek().job.CanBeginNow(pawn, this.inBedOnly))
+				{
+					QueuedJob queuedJob = jobQueue.Dequeue();
+					if (pawn.jobs.debugLog)
+					{
+						Pawn_JobTracker jobs = pawn.jobs;
+						string str = "   Throwing away queued job that I cannot begin now: ";
+						Job job = queuedJob.job;
+						jobs.DebugLogEvent(str + ((job != null) ? job.ToString() : null));
+					}
+					queuedJob.Cleanup(pawn, false);
+				}
+			}
+			if (!jobParams.ignoreQueue && jobQueue.Count > 0 && jobQueue.Peek().job.CanBeginNow(pawn, this.inBedOnly))
+			{
+				QueuedJob queuedJob2 = jobQueue.Dequeue();
 				if (pawn.jobs.debugLog)
 				{
-					pawn.jobs.DebugLogEvent("   Throwing away queued job that I cannot begin now: " + queuedJob.job);
+					Pawn_JobTracker jobs2 = pawn.jobs;
+					string str2 = "   Returning queued job: ";
+					Job job2 = queuedJob2.job;
+					jobs2.DebugLogEvent(str2 + ((job2 != null) ? job2.ToString() : null));
 				}
-				queuedJob.Cleanup(pawn, canReturnToPool: false);
+				return new ThinkResult(queuedJob2.job, this, queuedJob2.tag, true);
 			}
+			return ThinkResult.NoJob;
 		}
-		if (!jobParams.ignoreQueue && jobQueue.Count > 0 && jobQueue.Peek().job.CanBeginNow(pawn, inBedOnly))
-		{
-			QueuedJob queuedJob2 = jobQueue.Dequeue();
-			if (pawn.jobs.debugLog)
-			{
-				pawn.jobs.DebugLogEvent("   Returning queued job: " + queuedJob2.job);
-			}
-			return new ThinkResult(queuedJob2.job, this, queuedJob2.tag, fromQueue: true);
-		}
-		return ThinkResult.NoJob;
+
+		// Token: 0x04004819 RID: 18457
+		public bool inBedOnly;
 	}
 }

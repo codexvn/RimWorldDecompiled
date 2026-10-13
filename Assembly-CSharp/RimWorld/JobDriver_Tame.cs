@@ -1,54 +1,76 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_Tame : JobDriver_InteractAnimal
+namespace RimWorld
 {
-	private const TargetIndex FoodIndex = TargetIndex.C;
-
-	protected override bool CanInteractNow => !TameUtility.TriedToTameTooRecently(base.Animal);
-
-	protected override IEnumerable<Toil> MakeNewToils()
+	// Token: 0x02001137 RID: 4407
+	public class JobDriver_Tame : JobDriver_InteractAnimal
 	{
-		Func<bool> noLongerDesignated = () => base.Map.designationManager.DesignationOn(base.Animal, DesignationDefOf.Tame) == null;
-		if (job.GetTarget(TargetIndex.C).HasThing)
+		// Token: 0x17001095 RID: 4245
+		// (get) Token: 0x06006B87 RID: 27527 RVA: 0x0021D52F File Offset: 0x0021B72F
+		protected override bool CanInteractNow
 		{
-			yield return Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.ClosestTouch).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOn(noLongerDesignated);
-			yield return Toils_Haul.TakeToInventory(TargetIndex.C, job.count).FailOn(noLongerDesignated);
-		}
-		foreach (Toil item in base.MakeNewToils())
-		{
-			item.FailOn(noLongerDesignated);
-			yield return item;
-		}
-		yield return Toils_Interpersonal.TryRecruit(TargetIndex.A);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.initAction = delegate
-		{
-			if (base.job.GetTarget(TargetIndex.A).Thing is Pawn pawn && AnimalPenUtility.NeedsToBeManagedByRope(pawn) && pawn.Faction == Faction.OfPlayer && AnimalPenUtility.GetCurrentPenOf(pawn, allowUnenclosedPens: false) == null)
+			get
 			{
-				RopingPriority ropingPriority = RopingPriority.Closest;
-				string jobFailReason;
-				CompAnimalPenMarker penAnimalShouldBeTakenTo = AnimalPenUtility.GetPenAnimalShouldBeTakenTo(base.pawn, pawn, out jobFailReason, forced: false, canInteractWhileSleeping: true, allowUnenclosedPens: true, ignoreSkillRequirements: true, ropingPriority);
-				Job job = null;
-				if (penAnimalShouldBeTakenTo != null)
-				{
-					job = WorkGiver_TakeToPen.MakeJob(base.pawn, pawn, penAnimalShouldBeTakenTo, allowUnenclosedPens: true, ropingPriority, out jobFailReason);
-				}
-				if (job != null)
-				{
-					base.pawn.jobs.StartJob(job, JobCondition.Succeeded);
-				}
-				else
-				{
-					Messages.Message("MessageTameNoSuitablePens".Translate(pawn.Named("ANIMAL")), pawn, MessageTypeDefOf.NeutralEvent);
-				}
+				return !TameUtility.TriedToTameTooRecently(base.Animal);
 			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Instant;
-		yield return toil;
+		}
+
+		// Token: 0x06006B88 RID: 27528 RVA: 0x0021D53F File Offset: 0x0021B73F
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			Func<bool> noLongerDesignated = () => base.Map.designationManager.DesignationOn(base.Animal, DesignationDefOf.Tame) == null;
+			if (this.job.GetTarget(TargetIndex.C).HasThing)
+			{
+				yield return Toils_Goto.GotoThing(TargetIndex.C, PathEndMode.ClosestTouch, false).FailOnDespawnedNullOrForbidden(TargetIndex.C).FailOn(noLongerDesignated);
+				yield return Toils_Haul.TakeToInventory(TargetIndex.C, this.job.count).FailOn(noLongerDesignated);
+			}
+			foreach (Toil toil in base.MakeNewToils())
+			{
+				toil.FailOn(noLongerDesignated);
+				yield return toil;
+			}
+			IEnumerator<Toil> enumerator = null;
+			yield return Toils_Interpersonal.TryRecruit(TargetIndex.A);
+			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+			toil2.initAction = delegate()
+			{
+				Pawn pawn = this.job.GetTarget(TargetIndex.A).Thing as Pawn;
+				if (pawn == null || !AnimalPenUtility.NeedsToBeManagedByRope(pawn))
+				{
+					return;
+				}
+				if (pawn.Faction != Faction.OfPlayer)
+				{
+					return;
+				}
+				if (AnimalPenUtility.GetCurrentPenOf(pawn, false) == null)
+				{
+					RopingPriority ropingPriority = RopingPriority.Closest;
+					string text;
+					CompAnimalPenMarker penAnimalShouldBeTakenTo = AnimalPenUtility.GetPenAnimalShouldBeTakenTo(this.pawn, pawn, out text, false, true, true, true, ropingPriority, null);
+					Job job = null;
+					if (penAnimalShouldBeTakenTo != null)
+					{
+						job = WorkGiver_TakeToPen.MakeJob(this.pawn, pawn, penAnimalShouldBeTakenTo, true, ropingPriority, out text);
+					}
+					if (job != null)
+					{
+						this.pawn.jobs.StartJob(job, JobCondition.Succeeded, null, false, true, null, null, false, false, null, false, true, false);
+						return;
+					}
+					Messages.Message("MessageTameNoSuitablePens".Translate(pawn.Named("ANIMAL")), pawn, MessageTypeDefOf.NeutralEvent, true);
+				}
+			};
+			toil2.defaultCompleteMode = ToilCompleteMode.Instant;
+			yield return toil2;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x04004BA2 RID: 19362
+		private const TargetIndex FoodIndex = TargetIndex.C;
 	}
 }

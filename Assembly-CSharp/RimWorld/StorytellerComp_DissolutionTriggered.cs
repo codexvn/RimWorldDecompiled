@@ -1,24 +1,36 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StorytellerComp_DissolutionTriggered : StorytellerComp
+namespace RimWorld
 {
-	private StorytellerCompProperties_DissolutionTriggered Props => (StorytellerCompProperties_DissolutionTriggered)props;
-
-	public override void Notify_DissolutionEvent(Thing thing)
+	// Token: 0x02001E41 RID: 7745
+	public class StorytellerComp_DissolutionTriggered : StorytellerComp
 	{
-		if (thing.def == Props.thing)
+		// Token: 0x17001A42 RID: 6722
+		// (get) Token: 0x0600AC52 RID: 44114 RVA: 0x00314043 File Offset: 0x00312243
+		private StorytellerCompProperties_DissolutionTriggered Props
 		{
-			IncidentParms incidentParms = new IncidentParms
+			get
 			{
-				target = thing.MapHeld,
-				spawnCenter = thing.Position
-			};
-			incidentParms.points = StorytellerUtility.DefaultThreatPointsNow(incidentParms.target);
-			if (Rand.Chance(IncidentChanceFinal(Props.incident, incidentParms.target)) && Props.incident.Worker.CanFireNow(incidentParms))
+				return (StorytellerCompProperties_DissolutionTriggered)this.props;
+			}
+		}
+
+		// Token: 0x0600AC53 RID: 44115 RVA: 0x00314050 File Offset: 0x00312250
+		public override void Notify_DissolutionEvent(Thing thing)
+		{
+			if (thing.def == this.Props.thing)
 			{
-				Find.Storyteller.incidentQueue.Add(Props.incident, Find.TickManager.TicksGame + Props.delayTicks, incidentParms);
+				IncidentParms incidentParms = new IncidentParms
+				{
+					target = thing.MapHeld,
+					spawnCenter = thing.Position
+				};
+				incidentParms.points = StorytellerUtility.DefaultThreatPointsNow(incidentParms.target);
+				if (Rand.Chance(base.IncidentChanceFinal(this.Props.incident, incidentParms.target)) && this.Props.incident.Worker.CanFireNow(incidentParms))
+				{
+					Find.Storyteller.incidentQueue.Add(this.Props.incident, Find.TickManager.TicksGame + this.Props.delayTicks, incidentParms, 0);
+				}
 			}
 		}
 	}

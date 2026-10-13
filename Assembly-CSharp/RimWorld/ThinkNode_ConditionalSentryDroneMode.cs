@@ -1,19 +1,20 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalSentryDroneMode : ThinkNode_Conditional
+namespace RimWorld
 {
-	public CompSentryDrone.SentryDroneMode mode;
-
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017D6 RID: 6102
+	public class ThinkNode_ConditionalSentryDroneMode : ThinkNode_Conditional
 	{
-		CompSentryDrone compSentryDrone = pawn.TryGetComp<CompSentryDrone>();
-		if (compSentryDrone != null)
+		// Token: 0x06008E02 RID: 36354 RVA: 0x002A1AA4 File Offset: 0x0029FCA4
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return compSentryDrone.Mode == mode;
+			CompSentryDrone compSentryDrone = pawn.TryGetComp<CompSentryDrone>();
+			return compSentryDrone != null && compSentryDrone.Mode == this.mode;
 		}
-		return false;
+
+		// Token: 0x04005BE6 RID: 23526
+		public CompSentryDrone.SentryDroneMode mode;
 	}
 }

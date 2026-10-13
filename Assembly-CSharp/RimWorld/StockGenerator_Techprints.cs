@@ -1,47 +1,49 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class StockGenerator_Techprints : StockGenerator
+namespace RimWorld
 {
-	private List<CountChance> countChances;
-
-	private List<ThingDef> tmpGenerated = new List<ThingDef>();
-
-	public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
+	// Token: 0x02002FA1 RID: 12193
+	public class StockGenerator_Techprints : StockGenerator
 	{
-		tmpGenerated.Clear();
-		int countToGenerate = CountChanceUtility.RandomCount(countChances);
-		int i = 0;
-		while (true)
+		// Token: 0x060112B6 RID: 70326 RVA: 0x004EBE8A File Offset: 0x004EA08A
+		public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
 		{
-			if (i < countToGenerate)
+			this.tmpGenerated.Clear();
+			int countToGenerate = CountChanceUtility.RandomCount(this.countChances);
+			int num;
+			for (int i = 0; i < countToGenerate; i = num + 1)
 			{
-				if (!TechprintUtility.TryGetTechprintDefToGenerate_NewTemp(faction, out var result, tmpGenerated))
+				ThingDef thingDef;
+				if (!TechprintUtility.TryGetTechprintDefToGenerate(faction, out thingDef, this.tmpGenerated, 3.4028235E+38f))
 				{
-					break;
+					yield break;
 				}
-				tmpGenerated.Add(result);
-				foreach (Thing item in StockGeneratorUtility.TryMakeForStock(result, 1, faction))
+				this.tmpGenerated.Add(thingDef);
+				foreach (Thing thing in StockGeneratorUtility.TryMakeForStock(thingDef, 1, faction))
 				{
-					yield return item;
+					yield return thing;
 				}
-				i++;
-				continue;
+				IEnumerator<Thing> enumerator = null;
+				num = i;
 			}
-			tmpGenerated.Clear();
-			break;
+			this.tmpGenerated.Clear();
+			yield break;
+			yield break;
 		}
-	}
 
-	public override bool HandlesThingDef(ThingDef thingDef)
-	{
-		if (thingDef.tradeTags != null && thingDef.tradeability != Tradeability.None && (int)thingDef.techLevel <= (int)maxTechLevelBuy)
+		// Token: 0x060112B7 RID: 70327 RVA: 0x004EBEA1 File Offset: 0x004EA0A1
+		public override bool HandlesThingDef(ThingDef thingDef)
 		{
-			return thingDef.tradeTags.Contains("Techprint");
+			return thingDef.tradeTags != null && thingDef.tradeability != Tradeability.None && thingDef.techLevel <= this.maxTechLevelBuy && thingDef.tradeTags.Contains("Techprint");
 		}
-		return false;
+
+		// Token: 0x0400B23C RID: 45628
+		private List<CountChance> countChances;
+
+		// Token: 0x0400B23D RID: 45629
+		private List<ThingDef> tmpGenerated = new List<ThingDef>();
 	}
 }

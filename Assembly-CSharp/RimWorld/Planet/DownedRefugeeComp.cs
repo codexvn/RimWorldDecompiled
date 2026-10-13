@@ -1,34 +1,46 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class DownedRefugeeComp : ImportantPawnComp, IThingHolder
+namespace RimWorld.Planet
 {
-	protected override string PawnSaveKey => "refugee";
-
-	protected override void RemovePawnOnWorldObjectRemoved()
+	// Token: 0x02003E25 RID: 15909
+	public class DownedRefugeeComp : ImportantPawnComp, IThingHolder
 	{
-		if (!pawn.Any)
+		// Token: 0x1700363B RID: 13883
+		// (get) Token: 0x06015BAA RID: 89002 RVA: 0x0067FBD6 File Offset: 0x0067DDD6
+		protected override string PawnSaveKey
 		{
-			return;
-		}
-		if (!pawn[0].Dead)
-		{
-			if (pawn[0].relations != null)
+			get
 			{
-				pawn[0].relations.Notify_FailedRescueQuest();
+				return "refugee";
 			}
-			HealthUtility.HealNonPermanentInjuriesAndRestoreLegs(pawn[0]);
 		}
-		pawn.ClearAndDestroyContentsOrPassToWorld();
-	}
 
-	public override string CompInspectStringExtra()
-	{
-		if (pawn.Any)
+		// Token: 0x06015BAB RID: 89003 RVA: 0x0067FBE0 File Offset: 0x0067DDE0
+		protected override void RemovePawnOnWorldObjectRemoved()
 		{
-			return "Refugee".Translate() + ": " + pawn[0].LabelCap;
+			if (this.pawn.Any)
+			{
+				if (!this.pawn[0].Dead)
+				{
+					if (this.pawn[0].relations != null)
+					{
+						this.pawn[0].relations.Notify_FailedRescueQuest();
+					}
+					HealthUtility.HealNonPermanentInjuriesAndRestoreLegs(this.pawn[0]);
+				}
+				this.pawn.ClearAndDestroyContentsOrPassToWorld(DestroyMode.Vanish);
+			}
 		}
-		return null;
+
+		// Token: 0x06015BAC RID: 89004 RVA: 0x0067FC53 File Offset: 0x0067DE53
+		public override string CompInspectStringExtra()
+		{
+			if (this.pawn.Any)
+			{
+				return "Refugee".Translate() + ": " + this.pawn[0].LabelCap;
+			}
+			return null;
+		}
 	}
 }

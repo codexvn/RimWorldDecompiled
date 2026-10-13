@@ -1,19 +1,23 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_PawnHasTale : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x0200186F RID: 6255
+	public class ThoughtWorker_PawnHasTale : ThoughtWorker
 	{
-		if (!p.RaceProps.Humanlike)
+		// Token: 0x06008FC4 RID: 36804 RVA: 0x002A7116 File Offset: 0x002A5316
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return false;
+			if (!p.RaceProps.Humanlike)
+			{
+				return false;
+			}
+			if (Find.TaleManager.GetLatestTale(this.def.taleDef, p) == null)
+			{
+				return false;
+			}
+			return true;
 		}
-		if (Find.TaleManager.GetLatestTale(def.taleDef, p) == null)
-		{
-			return false;
-		}
-		return true;
 	}
 }

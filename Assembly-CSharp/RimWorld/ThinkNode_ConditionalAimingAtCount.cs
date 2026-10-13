@@ -1,28 +1,33 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalAimingAtCount : ThinkNode_Conditional
+namespace RimWorld
 {
-	public int thresholdAiming = 1;
-
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017CE RID: 6094
+	public class ThinkNode_ConditionalAimingAtCount : ThinkNode_Conditional
 	{
-		List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
-		int num = 0;
-		for (int i = 0; i < potentialTargetsFor.Count; i++)
+		// Token: 0x06008DF0 RID: 36336 RVA: 0x002A194C File Offset: 0x0029FB4C
+		protected override bool Satisfied(Pawn pawn)
 		{
-			if (potentialTargetsFor[i].TargetCurrentlyAimingAt == pawn)
+			List<IAttackTarget> potentialTargetsFor = pawn.Map.attackTargetsCache.GetPotentialTargetsFor(pawn);
+			int num = 0;
+			for (int i = 0; i < potentialTargetsFor.Count; i++)
 			{
-				num++;
-				if (num >= thresholdAiming)
+				if (potentialTargetsFor[i].TargetCurrentlyAimingAt == pawn)
 				{
-					return true;
+					num++;
+					if (num >= this.thresholdAiming)
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04005BE1 RID: 23521
+		public int thresholdAiming = 1;
 	}
 }

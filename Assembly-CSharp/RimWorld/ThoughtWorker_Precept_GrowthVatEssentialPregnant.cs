@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_Precept_GrowthVatEssentialPregnant : ThoughtWorker_Precept
+namespace RimWorld
 {
-	protected override ThoughtState ShouldHaveThought(Pawn p)
+	// Token: 0x02001830 RID: 6192
+	public class ThoughtWorker_Precept_GrowthVatEssentialPregnant : ThoughtWorker_Precept
 	{
-		if (!ModsConfig.IdeologyActive || !ModsConfig.BiotechActive)
+		// Token: 0x06008F29 RID: 36649 RVA: 0x002A50DE File Offset: 0x002A32DE
+		protected override ThoughtState ShouldHaveThought(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (!ModsConfig.IdeologyActive || !ModsConfig.BiotechActive)
+			{
+				return ThoughtState.Inactive;
+			}
+			return p.health.hediffSet.HasHediff(HediffDefOf.PregnantHuman, false);
 		}
-		return p.health.hediffSet.HasHediff(HediffDefOf.PregnantHuman);
 	}
 }

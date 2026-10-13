@@ -1,64 +1,79 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetRandomPawnKindForFaction : QuestNode
+namespace RimWorld.QuestGen
 {
-	public class Choice
+	// Token: 0x02003AC7 RID: 15047
+	public class QuestNode_GetRandomPawnKindForFaction : QuestNode
 	{
-		public FactionDef factionDef;
-
-		public string categoryTag;
-
-		public List<PawnKindDef> pawnKinds;
-	}
-
-	public SlateRef<Thing> factionOf;
-
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<List<Choice>> choices;
-
-	public SlateRef<PawnKindDef> fallback;
-
-	protected override bool TestRunInt(Slate slate)
-	{
-		return SetVars(slate);
-	}
-
-	protected override void RunInt()
-	{
-		SetVars(QuestGen.slate);
-	}
-
-	private bool SetVars(Slate slate)
-	{
-		Thing value = factionOf.GetValue(slate);
-		if (value == null)
+		// Token: 0x06014843 RID: 84035 RVA: 0x0061F647 File Offset: 0x0061D847
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			return this.SetVars(slate);
 		}
-		Faction faction = value.Faction;
-		if (faction == null)
+
+		// Token: 0x06014844 RID: 84036 RVA: 0x0061F650 File Offset: 0x0061D850
+		protected override void RunInt()
 		{
-			return false;
+			this.SetVars(QuestGen.slate);
 		}
-		List<Choice> value2 = choices.GetValue(slate);
-		for (int i = 0; i < value2.Count; i++)
+
+		// Token: 0x06014845 RID: 84037 RVA: 0x0061F660 File Offset: 0x0061D860
+		private bool SetVars(Slate slate)
 		{
-			if (((value2[i].factionDef != null && faction.def == value2[i].factionDef) || (!value2[i].categoryTag.NullOrEmpty() && value2[i].categoryTag == faction.def.categoryTag)) && value2[i].pawnKinds.TryRandomElement(out var result))
+			Thing value = this.factionOf.GetValue(slate);
+			if (value == null)
 			{
-				slate.Set(storeAs.GetValue(slate), result);
+				return false;
+			}
+			Faction faction = value.Faction;
+			if (faction == null)
+			{
+				return false;
+			}
+			List<QuestNode_GetRandomPawnKindForFaction.Choice> value2 = this.choices.GetValue(slate);
+			for (int i = 0; i < value2.Count; i++)
+			{
+				PawnKindDef var;
+				if (((value2[i].factionDef != null && faction.def == value2[i].factionDef) || (!value2[i].categoryTag.NullOrEmpty() && value2[i].categoryTag == faction.def.categoryTag)) && value2[i].pawnKinds.TryRandomElement(out var))
+				{
+					slate.Set<PawnKindDef>(this.storeAs.GetValue(slate), var, false);
+					return true;
+				}
+			}
+			if (this.fallback.GetValue(slate) != null)
+			{
+				slate.Set<PawnKindDef>(this.storeAs.GetValue(slate), this.fallback.GetValue(slate), false);
 				return true;
 			}
+			return false;
 		}
-		if (fallback.GetValue(slate) != null)
+
+		// Token: 0x0400E35E RID: 58206
+		public SlateRef<Thing> factionOf;
+
+		// Token: 0x0400E35F RID: 58207
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E360 RID: 58208
+		public SlateRef<List<QuestNode_GetRandomPawnKindForFaction.Choice>> choices;
+
+		// Token: 0x0400E361 RID: 58209
+		public SlateRef<PawnKindDef> fallback;
+
+		// Token: 0x02003AC8 RID: 15048
+		public class Choice
 		{
-			slate.Set(storeAs.GetValue(slate), fallback.GetValue(slate));
-			return true;
+			// Token: 0x0400E362 RID: 58210
+			public FactionDef factionDef;
+
+			// Token: 0x0400E363 RID: 58211
+			public string categoryTag;
+
+			// Token: 0x0400E364 RID: 58212
+			public List<PawnKindDef> pawnKinds;
 		}
-		return false;
 	}
 }

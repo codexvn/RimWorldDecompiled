@@ -1,154 +1,179 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_AncientComplex_Defences : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static List<IntVec3> doorCells = new List<IntVec3>();
-
-	public const int FenceExpansionDistance = 5;
-
-	private const int RazorWireExpansionDistance = 7;
-
-	private const int TankTrapExpansionDistance = 10;
-
-	private const int VehicleExpansionDistance = 14;
-
-	private const int TripodExpansionRect = 1;
-
-	private const float ChanceToPlaceFence = 0.8f;
-
-	private const float ChanceToPlaceRazorWire = 0.6f;
-
-	private const float ChanceToPlaceTankTrap = 0.05f;
-
-	private const float ChanceToPlaceGunTripod = 0.05f;
-
-	private const float ChanceToPlaceVehicle = 0.015f;
-
-	private IEnumerable<ThingDef> AncientVehicles
+	// Token: 0x020038EA RID: 14570
+	public class SymbolResolver_AncientComplex_Defences : SymbolResolver
 	{
-		get
+		// Token: 0x1700332C RID: 13100
+		// (get) Token: 0x060141B0 RID: 82352 RVA: 0x005FC69D File Offset: 0x005FA89D
+		private IEnumerable<ThingDef> AncientVehicles
 		{
-			yield return ThingDefOf.AncientRustedJeep;
-			yield return ThingDefOf.AncientRustedCarFrame;
-			yield return ThingDefOf.AncientTank;
+			get
+			{
+				yield return ThingDefOf.AncientRustedJeep;
+				yield return ThingDefOf.AncientRustedCarFrame;
+				yield return ThingDefOf.AncientTank;
+				yield break;
+			}
 		}
-	}
 
-	public override bool CanResolve(ResolveParams rp)
-	{
-		return base.CanResolve(rp);
-	}
+		// Token: 0x060141B1 RID: 82353 RVA: 0x005FC6A6 File Offset: 0x005FA8A6
+		public override bool CanResolve(ResolveParams rp)
+		{
+			return base.CanResolve(rp);
+		}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		doorCells.Clear();
-		Map map = BaseGen.globalSettings.map;
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x060141B2 RID: 82354 RVA: 0x005FC6B0 File Offset: 0x005FA8B0
+		public override void Resolve(ResolveParams rp)
 		{
-			Building_Door door = item.GetDoor(BaseGen.globalSettings.map);
-			if (door != null && map.reachability.CanReachMapEdge(item, TraverseParms.For(TraverseMode.NoPassClosedDoors)))
+			SymbolResolver_AncientComplex_Defences.doorCells.Clear();
+			Map map = BaseGen.globalSettings.map;
+			foreach (IntVec3 c in rp.rect)
 			{
-				doorCells.Add(door.Position);
-			}
-		}
-		Thing placedThing;
-		foreach (IntVec3 item2 in rp.rect.ExpandedBy(5).EdgeCells.InRandomOrder())
-		{
-			if (Rand.Chance(0.8f))
-			{
-				TryPlaceThing(ThingDefOf.AncientFence, item2, out placedThing);
-			}
-		}
-		foreach (IntVec3 item3 in rp.rect.ExpandedBy(7).EdgeCells.InRandomOrder())
-		{
-			if (Rand.Chance(0.6f))
-			{
-				TryPlaceThing(ThingDefOf.AncientRazorWire, item3, out placedThing);
-			}
-		}
-		foreach (IntVec3 item4 in rp.rect.ExpandedBy(10).EdgeCells.InRandomOrder())
-		{
-			if (Rand.Chance(0.05f) && TryPlaceThing(ThingDefOf.AncientTankTrap, item4, out var placedThing2))
-			{
-				ScatterDebrisUtility.ScatterFilthAroundThing(placedThing2, map, ThingDefOf.Filth_RubbleBuilding, 0.5f, 0);
-			}
-		}
-		foreach (IntVec3 item5 in rp.rect.ExpandedBy(14).EdgeCells.InRandomOrder())
-		{
-			ThingDef thingDef = AncientVehicles.RandomElement();
-			if (Rand.Chance(0.015f) && TryPlaceThing(thingDef, item5, out var placedThing3, thingDef.rotatable ? Rot4.Random : thingDef.defaultPlacingRot))
-			{
-				ScatterDebrisUtility.ScatterFilthAroundThing(placedThing3, map, ThingDefOf.Filth_MachineBits);
-			}
-		}
-		foreach (IntVec3 item6 in rp.rect.ExpandedBy(1).EdgeCells.InRandomOrder())
-		{
-			if (!Rand.Chance(0.05f) || !TryPlaceThing(ThingDefOf.AncientMegaCannonTripod, item6, out var placedThing4) || !Rand.Bool)
-			{
-				continue;
-			}
-			ScatterDebrisUtility.ScatterFilthAroundThing(placedThing4, map, ThingDefOf.Filth_MachineBits);
-			foreach (IntVec3 item7 in GenAdj.OccupiedRect(item6, ThingDefOf.AncientMegaCannonTripod.defaultPlacingRot, ThingDefOf.AncientMegaCannonTripod.Size).ExpandedBy(ThingDefOf.AncientMegaCannonBarrel.Size.MagnitudeManhattan).EdgeCells.InRandomOrder())
-			{
-				Rot4 random = Rot4.Random;
-				if (TryPlaceThing(ThingDefOf.AncientMegaCannonBarrel, item7, out placedThing, random))
+				Building_Door door = c.GetDoor(BaseGen.globalSettings.map);
+				if (door != null && map.reachability.CanReachMapEdge(c, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false, false, false, true, false)))
 				{
-					break;
+					SymbolResolver_AncientComplex_Defences.doorCells.Add(door.Position);
 				}
 			}
-		}
-		doorCells.Clear();
-	}
-
-	private bool CanReachEntrance(IntVec3 cell, List<IntVec3> entrancePositions)
-	{
-		Map map = BaseGen.globalSettings.map;
-		for (int i = 0; i < entrancePositions.Count; i++)
-		{
-			if (map.reachability.CanReach(cell, entrancePositions[i], PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors)))
+			foreach (IntVec3 position in rp.rect.ExpandedBy(5).EdgeCells.InRandomOrder(null))
 			{
-				return true;
+				if (Rand.Chance(0.8f))
+				{
+					Thing thing;
+					this.TryPlaceThing(ThingDefOf.AncientFence, position, out thing, null);
+				}
 			}
+			foreach (IntVec3 position2 in rp.rect.ExpandedBy(7).EdgeCells.InRandomOrder(null))
+			{
+				if (Rand.Chance(0.6f))
+				{
+					Thing thing;
+					this.TryPlaceThing(ThingDefOf.AncientRazorWire, position2, out thing, null);
+				}
+			}
+			foreach (IntVec3 position3 in rp.rect.ExpandedBy(10).EdgeCells.InRandomOrder(null))
+			{
+				Thing thing2;
+				if (Rand.Chance(0.05f) && this.TryPlaceThing(ThingDefOf.AncientTankTrap, position3, out thing2, null))
+				{
+					ScatterDebrisUtility.ScatterFilthAroundThing(thing2, map, ThingDefOf.Filth_RubbleBuilding, 0.5f, 0, int.MaxValue, null);
+				}
+			}
+			foreach (IntVec3 position4 in rp.rect.ExpandedBy(14).EdgeCells.InRandomOrder(null))
+			{
+				ThingDef thingDef = this.AncientVehicles.RandomElement<ThingDef>();
+				Thing thing3;
+				if (Rand.Chance(0.015f) && this.TryPlaceThing(thingDef, position4, out thing3, new Rot4?(thingDef.rotatable ? Rot4.Random : thingDef.defaultPlacingRot)))
+				{
+					ScatterDebrisUtility.ScatterFilthAroundThing(thing3, map, ThingDefOf.Filth_MachineBits, 0.5f, 1, int.MaxValue, null);
+				}
+			}
+			foreach (IntVec3 intVec in rp.rect.ExpandedBy(1).EdgeCells.InRandomOrder(null))
+			{
+				Thing thing4;
+				if (Rand.Chance(0.05f) && this.TryPlaceThing(ThingDefOf.AncientMegaCannonTripod, intVec, out thing4, null) && Rand.Bool)
+				{
+					ScatterDebrisUtility.ScatterFilthAroundThing(thing4, map, ThingDefOf.Filth_MachineBits, 0.5f, 1, int.MaxValue, null);
+					foreach (IntVec3 position5 in GenAdj.OccupiedRect(intVec, ThingDefOf.AncientMegaCannonTripod.defaultPlacingRot, ThingDefOf.AncientMegaCannonTripod.Size).ExpandedBy(ThingDefOf.AncientMegaCannonBarrel.Size.MagnitudeManhattan).EdgeCells.InRandomOrder(null))
+					{
+						Rot4 random = Rot4.Random;
+						Thing thing;
+						if (this.TryPlaceThing(ThingDefOf.AncientMegaCannonBarrel, position5, out thing, new Rot4?(random)))
+						{
+							break;
+						}
+					}
+				}
+			}
+			SymbolResolver_AncientComplex_Defences.doorCells.Clear();
 		}
-		return false;
-	}
 
-	private bool TryPlaceThing(ThingDef thingDef, IntVec3 position, out Thing placedThing, Rot4? rot = null)
-	{
-		Map map = BaseGen.globalSettings.map;
-		CellRect rect = GenAdj.OccupiedRect(position, rot ?? thingDef.defaultPlacingRot, thingDef.size);
-		if (!rect.InBounds(map))
+		// Token: 0x060141B3 RID: 82355 RVA: 0x005FCACC File Offset: 0x005FACCC
+		private bool CanReachEntrance(IntVec3 cell, List<IntVec3> entrancePositions)
 		{
-			placedThing = null;
+			Map map = BaseGen.globalSettings.map;
+			for (int i = 0; i < entrancePositions.Count; i++)
+			{
+				if (map.reachability.CanReach(cell, entrancePositions[i], PathEndMode.OnCell, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false)))
+				{
+					return true;
+				}
+			}
 			return false;
 		}
-		if (!GenConstruct.TerrainCanSupport(rect, map, thingDef))
+
+		// Token: 0x060141B4 RID: 82356 RVA: 0x005FCB20 File Offset: 0x005FAD20
+		private bool TryPlaceThing(ThingDef thingDef, IntVec3 position, out Thing placedThing, Rot4? rot = null)
 		{
-			placedThing = null;
-			return false;
-		}
-		foreach (IntVec3 item in rect)
-		{
-			if (item.Roofed(map))
+			Map map = BaseGen.globalSettings.map;
+			CellRect rect = GenAdj.OccupiedRect(position, rot ?? thingDef.defaultPlacingRot, thingDef.size);
+			if (!rect.InBounds(map))
 			{
 				placedThing = null;
 				return false;
 			}
-			List<Thing> thingList = item.GetThingList(map);
-			for (int i = 0; i < thingList.Count; i++)
+			if (!GenConstruct.TerrainCanSupport(rect, map, thingDef))
 			{
-				if (thingList[i].def.category != ThingCategory.Plant)
+				placedThing = null;
+				return false;
+			}
+			foreach (IntVec3 c in rect)
+			{
+				if (c.Roofed(map))
 				{
 					placedThing = null;
 					return false;
 				}
+				List<Thing> thingList = c.GetThingList(map);
+				for (int i = 0; i < thingList.Count; i++)
+				{
+					if (thingList[i].def.category != ThingCategory.Plant)
+					{
+						placedThing = null;
+						return false;
+					}
+				}
 			}
+			placedThing = GenSpawn.Spawn(ThingMaker.MakeThing(thingDef, null), position, map, rot ?? thingDef.defaultPlacingRot, WipeMode.Vanish, false, false);
+			return true;
 		}
-		placedThing = GenSpawn.Spawn(ThingMaker.MakeThing(thingDef), position, map, rot ?? thingDef.defaultPlacingRot);
-		return true;
+
+		// Token: 0x0400DE8A RID: 56970
+		private static List<IntVec3> doorCells = new List<IntVec3>();
+
+		// Token: 0x0400DE8B RID: 56971
+		public const int FenceExpansionDistance = 5;
+
+		// Token: 0x0400DE8C RID: 56972
+		private const int RazorWireExpansionDistance = 7;
+
+		// Token: 0x0400DE8D RID: 56973
+		private const int TankTrapExpansionDistance = 10;
+
+		// Token: 0x0400DE8E RID: 56974
+		private const int VehicleExpansionDistance = 14;
+
+		// Token: 0x0400DE8F RID: 56975
+		private const int TripodExpansionRect = 1;
+
+		// Token: 0x0400DE90 RID: 56976
+		private const float ChanceToPlaceFence = 0.8f;
+
+		// Token: 0x0400DE91 RID: 56977
+		private const float ChanceToPlaceRazorWire = 0.6f;
+
+		// Token: 0x0400DE92 RID: 56978
+		private const float ChanceToPlaceTankTrap = 0.05f;
+
+		// Token: 0x0400DE93 RID: 56979
+		private const float ChanceToPlaceGunTripod = 0.05f;
+
+		// Token: 0x0400DE94 RID: 56980
+		private const float ChanceToPlaceVehicle = 0.015f;
 	}
 }

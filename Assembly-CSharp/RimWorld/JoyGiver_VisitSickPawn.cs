@@ -1,21 +1,25 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_VisitSickPawn : JoyGiver
+namespace RimWorld
 {
-	public override Job TryGiveJob(Pawn pawn)
+	// Token: 0x020014FF RID: 5375
+	public class JoyGiver_VisitSickPawn : JoyGiver
 	{
-		if (!SocialInteractionUtility.CanInitiateInteraction(pawn))
+		// Token: 0x06008015 RID: 32789 RVA: 0x00268F20 File Offset: 0x00267120
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
+			if (!SocialInteractionUtility.CanInitiateInteraction(pawn, null))
+			{
+				return null;
+			}
+			Pawn pawn2 = SickPawnVisitUtility.FindRandomSickPawn(pawn, JoyCategory.Low);
+			if (pawn2 == null)
+			{
+				return null;
+			}
+			return JobMaker.MakeJob(this.def.jobDef, pawn2, SickPawnVisitUtility.FindChair(pawn, pawn2));
 		}
-		Pawn pawn2 = SickPawnVisitUtility.FindRandomSickPawn(pawn, JoyCategory.Low);
-		if (pawn2 == null)
-		{
-			return null;
-		}
-		return JobMaker.MakeJob(def.jobDef, pawn2, SickPawnVisitUtility.FindChair(pawn, pawn2));
 	}
 }

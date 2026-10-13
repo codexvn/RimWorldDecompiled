@@ -1,68 +1,76 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class Dialog_SaveFileList : Dialog_FileList
+namespace RimWorld
 {
-	private static readonly Color AutosaveTextColor = new Color(0.75f, 0.75f, 0.75f);
-
-	private Task loadSavesTask;
-
-	protected override Color FileNameColor(SaveFileInfo sfi)
+	// Token: 0x020031D0 RID: 12752
+	public abstract class Dialog_SaveFileList : Dialog_FileList
 	{
-		if (SaveGameFilesUtility.IsAutoSave(Path.GetFileNameWithoutExtension(sfi.FileName)))
+		// Token: 0x06011F0C RID: 73484 RVA: 0x005390E8 File Offset: 0x005372E8
+		protected override Color FileNameColor(SaveFileInfo sfi)
 		{
-			GUI.color = AutosaveTextColor;
+			if (SaveGameFilesUtility.IsAutoSave(Path.GetFileNameWithoutExtension(sfi.FileName)))
+			{
+				GUI.color = Dialog_SaveFileList.AutosaveTextColor;
+			}
+			return base.FileNameColor(sfi);
 		}
-		return base.FileNameColor(sfi);
-	}
 
-	private void ReloadFilesTask()
-	{
-		Parallel.ForEach(files, delegate(SaveFileInfo file)
+		// Token: 0x06011F0D RID: 73485 RVA: 0x0053910D File Offset: 0x0053730D
+		private void ReloadFilesTask()
 		{
-			try
+			Parallel.ForEach<SaveFileInfo>(this.files, delegate(SaveFileInfo file)
 			{
-				file.LoadData();
-			}
-			catch (Exception arg)
-			{
-				Log.Error($"Exception loading {file.FileInfo.Name}: {arg}");
-			}
-		});
-	}
+				try
+				{
+					file.LoadData();
+				}
+				catch (Exception arg)
+				{
+					Log.Error(string.Format("Exception loading {0}: {1}", file.FileInfo.Name, arg));
+				}
+			});
+		}
 
-	protected override void ReloadFiles()
-	{
-		if (loadSavesTask != null && loadSavesTask.Status != TaskStatus.RanToCompletion)
+		// Token: 0x06011F0E RID: 73486 RVA: 0x0053913C File Offset: 0x0053733C
+		protected override void ReloadFiles()
 		{
-			loadSavesTask.Wait();
-		}
-		files.Clear();
-		foreach (FileInfo allSavedGameFile in GenFilePaths.AllSavedGameFiles)
-		{
-			try
+			if (this.loadSavesTask != null && this.loadSavesTask.Status != TaskStatus.RanToCompletion)
 			{
-				SaveFileInfo item = new SaveFileInfo(allSavedGameFile);
-				files.Add(item);
+				this.loadSavesTask.Wait();
 			}
-			catch (Exception arg)
+			this.files.Clear();
+			foreach (FileInfo fileInfo in GenFilePaths.AllSavedGameFiles)
 			{
-				Log.Error($"Exception loading {allSavedGameFile.Name}: {arg}");
+				try
+				{
+					SaveFileInfo item = new SaveFileInfo(fileInfo);
+					this.files.Add(item);
+				}
+				catch (Exception arg)
+				{
+					Log.Error(string.Format("Exception loading {0}: {1}", fileInfo.Name, arg));
+				}
 			}
+			this.loadSavesTask = Task.Run(new Action(this.ReloadFilesTask));
 		}
-		loadSavesTask = Task.Run((Action)ReloadFilesTask);
-	}
 
-	public override void PostClose()
-	{
-		if (Current.ProgramState == ProgramState.Playing)
+		// Token: 0x06011F0F RID: 73487 RVA: 0x00539200 File Offset: 0x00537400
+		public override void PostClose()
 		{
-			Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Menu);
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				Find.MainTabsRoot.SetCurrentTab(MainButtonDefOf.Menu, true);
+			}
 		}
+
+		// Token: 0x0400B9CA RID: 47562
+		private static readonly Color AutosaveTextColor = new Color(0.75f, 0.75f, 0.75f);
+
+		// Token: 0x0400B9CB RID: 47563
+		private Task loadSavesTask;
 	}
 }

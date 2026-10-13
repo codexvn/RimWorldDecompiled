@@ -1,20 +1,20 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalStateWorker_WanderOwnRoom : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000F9D RID: 3997
+	public class MentalStateWorker_WanderOwnRoom : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x0600627E RID: 25214 RVA: 0x001F12CC File Offset: 0x001EF4CC
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			if (!base.StateCanOccur(pawn))
+			{
+				return false;
+			}
+			Building_Bed ownedBed = pawn.ownership.OwnedBed;
+			return ownedBed != null && ownedBed.GetRoom(RegionType.Set_All) != null && !ownedBed.GetRoom(RegionType.Set_All).PsychologicallyOutdoors;
 		}
-		Building_Bed ownedBed = pawn.ownership.OwnedBed;
-		if (ownedBed == null || ownedBed.GetRoom() == null || ownedBed.GetRoom().PsychologicallyOutdoors)
-		{
-			return false;
-		}
-		return true;
 	}
 }

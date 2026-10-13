@@ -1,5 +1,9 @@
-namespace Verse;
+﻿using System;
 
-public class ClamorDef : Def
+namespace Verse
 {
+	// Token: 0x0200021E RID: 542
+	public class ClamorDef : Def
+	{
+	}
 }

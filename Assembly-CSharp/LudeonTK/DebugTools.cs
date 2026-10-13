@@ -1,20 +1,27 @@
-namespace LudeonTK;
+﻿using System;
 
-public static class DebugTools
+namespace LudeonTK
 {
-	public static DebugTool curTool;
-
-	public static MeasureTool curMeasureTool;
-
-	public static void DebugToolsOnGUI()
+	// Token: 0x02000079 RID: 121
+	public static class DebugTools
 	{
-		if (curTool != null)
+		// Token: 0x060002A5 RID: 677 RVA: 0x0000E487 File Offset: 0x0000C687
+		public static void DebugToolsOnGUI()
 		{
-			curTool.DebugToolOnGUI();
+			if (DebugTools.curTool != null)
+			{
+				DebugTools.curTool.DebugToolOnGUI();
+			}
+			if (DebugTools.curMeasureTool != null)
+			{
+				DebugTools.curMeasureTool.DebugToolOnGUI();
+			}
 		}
-		if (curMeasureTool != null)
-		{
-			curMeasureTool.DebugToolOnGUI();
-		}
+
+		// Token: 0x0400017A RID: 378
+		public static DebugTool curTool;
+
+		// Token: 0x0400017B RID: 379
+		public static MeasureTool curMeasureTool;
 	}
 }

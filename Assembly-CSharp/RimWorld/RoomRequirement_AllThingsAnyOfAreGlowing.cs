@@ -1,39 +1,52 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomRequirement_AllThingsAnyOfAreGlowing : RoomRequirement_ThingAnyOf
+namespace RimWorld
 {
-	public override string Label(Room r = null)
+	// Token: 0x020037B2 RID: 14258
+	public class RoomRequirement_AllThingsAnyOfAreGlowing : RoomRequirement_ThingAnyOf
 	{
-		return labelKey.Translate();
-	}
-
-	public override bool Met(Room r, Pawn p = null)
-	{
-		foreach (Thing item in r.ContainedThingsList(things))
+		// Token: 0x06013C29 RID: 80937 RVA: 0x005DC69C File Offset: 0x005DA89C
+		public override string Label(Room r = null)
 		{
-			if (!item.TryGetComp<CompGlower>().Glows)
-			{
-				return false;
-			}
+			return this.labelKey.Translate();
 		}
-		return true;
-	}
 
-	public override IEnumerable<string> ConfigErrors()
-	{
-		foreach (string item in base.ConfigErrors())
+		// Token: 0x06013C2A RID: 80938 RVA: 0x005DD970 File Offset: 0x005DBB70
+		public override bool Met(Room r, Pawn p = null)
 		{
-			yield return item;
-		}
-		foreach (ThingDef thing in things)
-		{
-			if (thing.GetCompProperties<CompProperties_Glower>() == null)
+			using (IEnumerator<Thing> enumerator = r.ContainedThingsList(this.things).GetEnumerator())
 			{
-				yield return "No comp glower on thingDef " + thing.defName;
+				while (enumerator.MoveNext())
+				{
+					if (!enumerator.Current.TryGetComp<CompGlower>().Glows)
+					{
+						return false;
+					}
+				}
 			}
+			return true;
+		}
+
+		// Token: 0x06013C2B RID: 80939 RVA: 0x005DD9D0 File Offset: 0x005DBBD0
+		public override IEnumerable<string> ConfigErrors()
+		{
+			foreach (string text in base.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			foreach (ThingDef thingDef in this.things)
+			{
+				if (thingDef.GetCompProperties<CompProperties_Glower>() == null)
+				{
+					yield return "No comp glower on thingDef " + thingDef.defName;
+				}
+			}
+			List<ThingDef>.Enumerator enumerator2 = default(List<ThingDef>.Enumerator);
+			yield break;
+			yield break;
 		}
 	}
 }

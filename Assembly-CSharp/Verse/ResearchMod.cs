@@ -1,6 +1,11 @@
-namespace Verse;
+﻿using System;
 
-public abstract class ResearchMod
+namespace Verse
 {
-	public abstract void Apply();
+	// Token: 0x020002D0 RID: 720
+	public abstract class ResearchMod
+	{
+		// Token: 0x060011AA RID: 4522
+		public abstract void Apply();
+	}
 }

@@ -1,35 +1,62 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class CompUseEffect_OffsetDeathrestCapacity : CompUseEffect
+namespace RimWorld
 {
-	private CompProperties_UseEffectOffsetDeathrestCapacity Props => (CompProperties_UseEffectOffsetDeathrestCapacity)props;
-
-	public override void DoEffect(Pawn user)
+	// Token: 0x02002F68 RID: 12136
+	public class CompUseEffect_OffsetDeathrestCapacity : CompUseEffect
 	{
-		if (ModsConfig.BiotechActive)
+		// Token: 0x17002C37 RID: 11319
+		// (get) Token: 0x06011193 RID: 70035 RVA: 0x004E8E51 File Offset: 0x004E7051
+		private CompProperties_UseEffectOffsetDeathrestCapacity Props
 		{
+			get
+			{
+				return (CompProperties_UseEffectOffsetDeathrestCapacity)this.props;
+			}
+		}
+
+		// Token: 0x06011194 RID: 70036 RVA: 0x004E8E5E File Offset: 0x004E705E
+		public override void DoEffect(Pawn user)
+		{
+			if (!ModsConfig.BiotechActive)
+			{
+				return;
+			}
 			base.DoEffect(user);
-			user.genes?.GetFirstGeneOfType<Gene_Deathrest>()?.OffsetCapacity(Props.offset);
+			Pawn_GeneTracker genes = user.genes;
+			if (genes == null)
+			{
+				return;
+			}
+			Gene_Deathrest firstGeneOfType = genes.GetFirstGeneOfType<Gene_Deathrest>();
+			if (firstGeneOfType == null)
+			{
+				return;
+			}
+			firstGeneOfType.OffsetCapacity(this.Props.offset, true);
 		}
-	}
 
-	public override AcceptanceReport CanBeUsedBy(Pawn p)
-	{
-		if (p.genes?.GetFirstGeneOfType<Gene_Deathrest>() == null)
+		// Token: 0x06011195 RID: 70037 RVA: 0x004E8E95 File Offset: 0x004E7095
+		public override AcceptanceReport CanBeUsedBy(Pawn p)
 		{
-			return "CannotDeathrest".Translate();
+			Pawn_GeneTracker genes = p.genes;
+			if (((genes != null) ? genes.GetFirstGeneOfType<Gene_Deathrest>() : null) == null)
+			{
+				return "CannotDeathrest".Translate();
+			}
+			return base.CanBeUsedBy(p);
 		}
-		return base.CanBeUsedBy(p);
-	}
 
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-	{
-		if (ModsConfig.BiotechActive)
+		// Token: 0x06011196 RID: 70038 RVA: 0x004E8EC2 File Offset: 0x004E70C2
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
 		{
-			yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DeathrestCapacity".Translate().CapitalizeFirst(), Props.offset.ToStringWithSign(), "DeathrestCapacityDesc".Translate(), 1010);
+			if (ModsConfig.BiotechActive)
+			{
+				yield return new StatDrawEntry(StatCategoryDefOf.BasicsNonPawnImportant, "DeathrestCapacity".Translate().CapitalizeFirst(), this.Props.offset.ToStringWithSign(), "DeathrestCapacityDesc".Translate(), 1010, null, null, false, false);
+			}
+			yield break;
 		}
 	}
 }

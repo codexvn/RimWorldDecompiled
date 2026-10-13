@@ -1,11 +1,16 @@
-namespace RimWorld.BaseGen;
+﻿using System;
 
-public class SymbolResolver_Interior_ConditionCauser : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003996 RID: 14742
+	public class SymbolResolver_Interior_ConditionCauser : SymbolResolver
 	{
-		ResolveParams resolveParams = rp;
-		resolveParams.singleThingToSpawn = rp.conditionCauser;
-		BaseGen.symbolStack.Push("thing", resolveParams);
+		// Token: 0x060143D7 RID: 82903 RVA: 0x0060AA58 File Offset: 0x00608C58
+		public override void Resolve(ResolveParams rp)
+		{
+			ResolveParams resolveParams = rp;
+			resolveParams.singleThingToSpawn = rp.conditionCauser;
+			BaseGen.symbolStack.Push("thing", resolveParams, null);
+		}
 	}
 }

@@ -1,92 +1,123 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse;
-
-public class PlayLog : IExposable
+namespace Verse
 {
-	private List<LogEntry> entries = new List<LogEntry>();
-
-	private const int Capacity = 150;
-
-	public List<LogEntry> AllEntries => entries;
-
-	public int LastTick
+	// Token: 0x02000341 RID: 833
+	public class PlayLog : IExposable
 	{
-		get
+		// Token: 0x17000413 RID: 1043
+		// (get) Token: 0x06001532 RID: 5426 RVA: 0x00064275 File Offset: 0x00062475
+		public List<LogEntry> AllEntries
 		{
-			if (entries.Count == 0)
+			get
 			{
-				return 0;
+				return this.entries;
 			}
-			return entries[0].Tick;
 		}
-	}
 
-	public void Add(LogEntry entry)
-	{
-		entries.Insert(0, entry);
-		ReduceToCapacity();
-	}
-
-	private void ReduceToCapacity()
-	{
-		while (entries.Count > 150)
+		// Token: 0x17000414 RID: 1044
+		// (get) Token: 0x06001533 RID: 5427 RVA: 0x0006427D File Offset: 0x0006247D
+		public int LastTick
 		{
-			RemoveEntry(entries[entries.Count - 1]);
-		}
-	}
-
-	public void ExposeData()
-	{
-		Scribe_Collections.Look(ref entries, "entries", LookMode.Deep);
-	}
-
-	public void Notify_PawnDiscarded(Pawn p, bool silentlyRemoveReferences)
-	{
-		for (int num = entries.Count - 1; num >= 0; num--)
-		{
-			if (entries[num].Concerns(p))
+			get
 			{
-				if (!silentlyRemoveReferences)
+				if (this.entries.Count == 0)
 				{
-					Log.Warning("Discarding pawn " + p?.ToString() + ", but he is referenced by a play log entry " + entries[num]?.ToString() + ".");
+					return 0;
 				}
-				RemoveEntry(entries[num]);
+				return this.entries[0].Tick;
 			}
 		}
-	}
 
-	public void Notify_FactionRemoved(Faction faction)
-	{
-		for (int i = 0; i < entries.Count; i++)
+		// Token: 0x06001534 RID: 5428 RVA: 0x0006429F File Offset: 0x0006249F
+		public void Add(LogEntry entry)
 		{
-			entries[i].Notify_FactionRemoved(faction);
+			this.entries.Insert(0, entry);
+			this.ReduceToCapacity();
 		}
-	}
 
-	public void Notify_IdeoRemoved(Ideo ideo)
-	{
-		for (int i = 0; i < entries.Count; i++)
+		// Token: 0x06001535 RID: 5429 RVA: 0x000642B4 File Offset: 0x000624B4
+		private void ReduceToCapacity()
 		{
-			entries[i].Notify_IdeoRemoved(ideo);
-		}
-	}
-
-	private void RemoveEntry(LogEntry entry)
-	{
-		entries.Remove(entry);
-	}
-
-	public bool AnyEntryConcerns(Pawn p)
-	{
-		for (int i = 0; i < entries.Count; i++)
-		{
-			if (entries[i].Concerns(p))
+			while (this.entries.Count > 150)
 			{
-				return true;
+				this.RemoveEntry(this.entries[this.entries.Count - 1]);
 			}
 		}
-		return false;
+
+		// Token: 0x06001536 RID: 5430 RVA: 0x000642E8 File Offset: 0x000624E8
+		public void ExposeData()
+		{
+			Scribe_Collections.Look<LogEntry>(ref this.entries, "entries", LookMode.Deep, Array.Empty<object>());
+		}
+
+		// Token: 0x06001537 RID: 5431 RVA: 0x00064300 File Offset: 0x00062500
+		public void Notify_PawnDiscarded(Pawn p, bool silentlyRemoveReferences)
+		{
+			for (int i = this.entries.Count - 1; i >= 0; i--)
+			{
+				if (this.entries[i].Concerns(p))
+				{
+					if (!silentlyRemoveReferences)
+					{
+						string[] array = new string[5];
+						array[0] = "Discarding pawn ";
+						array[1] = ((p != null) ? p.ToString() : null);
+						array[2] = ", but he is referenced by a play log entry ";
+						int num = 3;
+						LogEntry logEntry = this.entries[i];
+						array[num] = ((logEntry != null) ? logEntry.ToString() : null);
+						array[4] = ".";
+						Log.Warning(string.Concat(array));
+					}
+					this.RemoveEntry(this.entries[i]);
+				}
+			}
+		}
+
+		// Token: 0x06001538 RID: 5432 RVA: 0x000643A8 File Offset: 0x000625A8
+		public void Notify_FactionRemoved(Faction faction)
+		{
+			for (int i = 0; i < this.entries.Count; i++)
+			{
+				this.entries[i].Notify_FactionRemoved(faction);
+			}
+		}
+
+		// Token: 0x06001539 RID: 5433 RVA: 0x000643E0 File Offset: 0x000625E0
+		public void Notify_IdeoRemoved(Ideo ideo)
+		{
+			for (int i = 0; i < this.entries.Count; i++)
+			{
+				this.entries[i].Notify_IdeoRemoved(ideo);
+			}
+		}
+
+		// Token: 0x0600153A RID: 5434 RVA: 0x00064415 File Offset: 0x00062615
+		private void RemoveEntry(LogEntry entry)
+		{
+			this.entries.Remove(entry);
+		}
+
+		// Token: 0x0600153B RID: 5435 RVA: 0x00064424 File Offset: 0x00062624
+		public bool AnyEntryConcerns(Pawn p)
+		{
+			for (int i = 0; i < this.entries.Count; i++)
+			{
+				if (this.entries[i].Concerns(p))
+				{
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x040013CD RID: 5069
+		private List<LogEntry> entries = new List<LogEntry>();
+
+		// Token: 0x040013CE RID: 5070
+		private const int Capacity = 150;
 	}
 }

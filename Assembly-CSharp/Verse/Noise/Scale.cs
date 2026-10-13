@@ -1,71 +1,88 @@
-namespace Verse.Noise;
+﻿using System;
 
-public class Scale : ModuleBase
+namespace Verse.Noise
 {
-	private double m_x = 1.0;
-
-	private double m_y = 1.0;
-
-	private double m_z = 1.0;
-
-	public double X
+	// Token: 0x02000DC8 RID: 3528
+	public class Scale : ModuleBase
 	{
-		get
+		// Token: 0x060059CB RID: 22987 RVA: 0x001CCE1E File Offset: 0x001CB01E
+		public Scale() : base(1)
 		{
-			return m_x;
 		}
-		set
+
+		// Token: 0x060059CC RID: 22988 RVA: 0x001CCE54 File Offset: 0x001CB054
+		public Scale(ModuleBase input) : base(1)
 		{
-			m_x = value;
+			this.modules[0] = input;
 		}
-	}
 
-	public double Y
-	{
-		get
+		// Token: 0x060059CD RID: 22989 RVA: 0x001CCE94 File Offset: 0x001CB094
+		public Scale(double x, double y, double z, ModuleBase input) : base(1)
 		{
-			return m_y;
+			this.modules[0] = input;
+			this.X = x;
+			this.Y = y;
+			this.Z = z;
 		}
-		set
+
+		// Token: 0x17000E45 RID: 3653
+		// (get) Token: 0x060059CE RID: 22990 RVA: 0x001CCEF4 File Offset: 0x001CB0F4
+		// (set) Token: 0x060059CF RID: 22991 RVA: 0x001CCEFC File Offset: 0x001CB0FC
+		public double X
 		{
-			m_y = value;
+			get
+			{
+				return this.m_x;
+			}
+			set
+			{
+				this.m_x = value;
+			}
 		}
-	}
 
-	public double Z
-	{
-		get
+		// Token: 0x17000E46 RID: 3654
+		// (get) Token: 0x060059D0 RID: 22992 RVA: 0x001CCF05 File Offset: 0x001CB105
+		// (set) Token: 0x060059D1 RID: 22993 RVA: 0x001CCF0D File Offset: 0x001CB10D
+		public double Y
 		{
-			return m_z;
+			get
+			{
+				return this.m_y;
+			}
+			set
+			{
+				this.m_y = value;
+			}
 		}
-		set
+
+		// Token: 0x17000E47 RID: 3655
+		// (get) Token: 0x060059D2 RID: 22994 RVA: 0x001CCF16 File Offset: 0x001CB116
+		// (set) Token: 0x060059D3 RID: 22995 RVA: 0x001CCF1E File Offset: 0x001CB11E
+		public double Z
 		{
-			m_z = value;
+			get
+			{
+				return this.m_z;
+			}
+			set
+			{
+				this.m_z = value;
+			}
 		}
-	}
 
-	public Scale()
-		: base(1)
-	{
-	}
+		// Token: 0x060059D4 RID: 22996 RVA: 0x001CCF27 File Offset: 0x001CB127
+		public override double GetValue(double x, double y, double z)
+		{
+			return this.modules[0].GetValue(x * this.m_x, y * this.m_y, z * this.m_z);
+		}
 
-	public Scale(ModuleBase input)
-		: base(1)
-	{
-		modules[0] = input;
-	}
+		// Token: 0x040040D5 RID: 16597
+		private double m_x = 1.0;
 
-	public Scale(double x, double y, double z, ModuleBase input)
-		: base(1)
-	{
-		modules[0] = input;
-		X = x;
-		Y = y;
-		Z = z;
-	}
+		// Token: 0x040040D6 RID: 16598
+		private double m_y = 1.0;
 
-	public override double GetValue(double x, double y, double z)
-	{
-		return modules[0].GetValue(x * m_x, y * m_y, z * m_z);
+		// Token: 0x040040D7 RID: 16599
+		private double m_z = 1.0;
 	}
 }

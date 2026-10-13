@@ -1,17 +1,14 @@
-namespace Verse;
+﻿using System;
 
-public class DrawStyle_EmptyOval : DrawStyle_FilledOval
+namespace Verse
 {
-	protected override bool Filled(float x, float z, float radius, float ratio)
+	// Token: 0x020003E7 RID: 999
+	public class DrawStyle_EmptyOval : DrawStyle_FilledOval
 	{
-		if (Inside(x, z, radius, ratio))
+		// Token: 0x0600199B RID: 6555 RVA: 0x000814B4 File Offset: 0x0007F6B4
+		protected override bool Filled(float x, float z, float radius, float ratio)
 		{
-			if (Inside(x + 1f, z, radius, ratio) && Inside(x - 1f, z, radius, ratio) && Inside(x, z + 1f, radius, ratio) && Inside(x, z - 1f, radius, ratio) && Inside(x + 1f, z + 1f, radius, ratio) && Inside(x + 1f, z - 1f, radius, ratio) && Inside(x - 1f, z - 1f, radius, ratio))
-			{
-				return !Inside(x - 1f, z + 1f, radius, ratio);
-			}
-			return true;
+			return base.Inside(x, z, radius, ratio) && (!base.Inside(x + 1f, z, radius, ratio) || !base.Inside(x - 1f, z, radius, ratio) || !base.Inside(x, z + 1f, radius, ratio) || !base.Inside(x, z - 1f, radius, ratio) || !base.Inside(x + 1f, z + 1f, radius, ratio) || !base.Inside(x + 1f, z - 1f, radius, ratio) || !base.Inside(x - 1f, z - 1f, radius, ratio) || !base.Inside(x - 1f, z + 1f, radius, ratio));
 		}
-		return false;
 	}
 }

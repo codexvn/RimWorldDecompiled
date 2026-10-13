@@ -1,100 +1,128 @@
-using System;
+﻿using System;
 using RimWorld;
 using UnityEngine;
 using Verse.Sound;
 
-namespace Verse;
-
-public class FloatMenuGridOption
+namespace Verse
 {
-	public Texture2D texture;
-
-	public Color color = Color.white;
-
-	public Action action;
-
-	public TipSignal? tooltip;
-
-	public Rect iconTexCoords = new Rect(0f, 0f, 1f, 1f);
-
-	public Action<Rect> postDrawAction;
-
-	public bool Disabled => action == null;
-
-	public MenuOptionPriority Priority
+	// Token: 0x02000B6A RID: 2922
+	public class FloatMenuGridOption
 	{
-		get
+		// Token: 0x17000B61 RID: 2913
+		// (get) Token: 0x06004AF1 RID: 19185 RVA: 0x0017CFCF File Offset: 0x0017B1CF
+		public bool Disabled
 		{
-			if (Disabled)
+			get
 			{
-				return MenuOptionPriority.DisabledOption;
+				return this.action == null;
 			}
-			return MenuOptionPriority.Default;
 		}
-	}
 
-	public FloatMenuGridOption(Texture2D texture, Action action, Color? color = null, TipSignal? tooltip = null)
-	{
-		this.texture = texture;
-		this.action = action;
-		this.color = color ?? Color.white;
-		this.tooltip = tooltip;
-	}
+		// Token: 0x17000B62 RID: 2914
+		// (get) Token: 0x06004AF2 RID: 19186 RVA: 0x0017CFDA File Offset: 0x0017B1DA
+		public MenuOptionPriority Priority
+		{
+			get
+			{
+				if (this.Disabled)
+				{
+					return MenuOptionPriority.DisabledOption;
+				}
+				return MenuOptionPriority.Default;
+			}
+		}
 
-	public bool OnGUI(Rect rect)
-	{
-		bool flag = !Disabled && Mouse.IsOver(rect);
-		if (!Disabled)
+		// Token: 0x06004AF3 RID: 19187 RVA: 0x0017CFE8 File Offset: 0x0017B1E8
+		public FloatMenuGridOption(Texture2D texture, Action action, Color? color = null, TipSignal? tooltip = null)
 		{
-			MouseoverSounds.DoRegion(rect);
+			this.texture = texture;
+			this.action = action;
+			this.color = (color ?? Color.white);
+			this.tooltip = tooltip;
 		}
-		if (tooltip.HasValue)
-		{
-			TooltipHandler.TipRegion(rect, tooltip.Value);
-		}
-		Color color = GUI.color;
-		if (Disabled)
-		{
-			GUI.color = FloatMenuOption.ColorBGDisabled * color;
-		}
-		else if (flag)
-		{
-			GUI.color = FloatMenuOption.ColorBGActiveMouseover * color;
-		}
-		else
-		{
-			GUI.color = FloatMenuOption.ColorBGActive * color;
-		}
-		GUI.DrawTexture(rect, BaseContent.WhiteTex);
-		GUI.color = ((!Disabled) ? FloatMenuOption.ColorTextActive : FloatMenuOption.ColorTextDisabled) * color;
-		Widgets.DrawAtlas(rect, TexUI.FloatMenuOptionBG);
-		GUI.color = new Color(this.color.r, this.color.g, this.color.b, this.color.a * color.a);
-		Rect rect2 = rect.ContractedBy(2f);
-		if (!flag)
-		{
-			rect2 = rect2.ContractedBy(2f);
-		}
-		Material mat = (Disabled ? TexUI.GrayscaleGUI : null);
-		Widgets.DrawTextureFitted(rect2, texture, 1f, new Vector2(1f, 1f), iconTexCoords, 0f, mat);
-		GUI.color = color;
-		postDrawAction?.Invoke(rect2);
-		if (Widgets.ButtonInvisible(rect))
-		{
-			Chosen();
-			return true;
-		}
-		return false;
-	}
 
-	public void Chosen()
-	{
-		if (!Disabled)
+		// Token: 0x06004AF4 RID: 19188 RVA: 0x0017D05C File Offset: 0x0017B25C
+		public bool OnGUI(Rect rect)
 		{
-			action?.Invoke();
+			bool flag = !this.Disabled && Mouse.IsOver(rect);
+			if (!this.Disabled)
+			{
+				MouseoverSounds.DoRegion(rect);
+			}
+			if (this.tooltip != null)
+			{
+				TooltipHandler.TipRegion(rect, this.tooltip.Value);
+			}
+			Color color = GUI.color;
+			if (this.Disabled)
+			{
+				GUI.color = FloatMenuOption.ColorBGDisabled * color;
+			}
+			else if (flag)
+			{
+				GUI.color = FloatMenuOption.ColorBGActiveMouseover * color;
+			}
+			else
+			{
+				GUI.color = FloatMenuOption.ColorBGActive * color;
+			}
+			GUI.DrawTexture(rect, BaseContent.WhiteTex);
+			GUI.color = ((!this.Disabled) ? FloatMenuOption.ColorTextActive : FloatMenuOption.ColorTextDisabled) * color;
+			Widgets.DrawAtlas(rect, TexUI.FloatMenuOptionBG);
+			GUI.color = new Color(this.color.r, this.color.g, this.color.b, this.color.a * color.a);
+			Rect rect2 = rect.ContractedBy(2f);
+			if (!flag)
+			{
+				rect2 = rect2.ContractedBy(2f);
+			}
+			Material mat = this.Disabled ? TexUI.GrayscaleGUI : null;
+			Widgets.DrawTextureFitted(rect2, this.texture, 1f, new Vector2(1f, 1f), this.iconTexCoords, 0f, mat, 1f);
+			GUI.color = color;
+			Action<Rect> action = this.postDrawAction;
+			if (action != null)
+			{
+				action(rect2);
+			}
+			if (Widgets.ButtonInvisible(rect, true))
+			{
+				this.Chosen();
+				return true;
+			}
+			return false;
 		}
-		else
+
+		// Token: 0x06004AF5 RID: 19189 RVA: 0x0017D1E5 File Offset: 0x0017B3E5
+		public void Chosen()
 		{
-			SoundDefOf.ClickReject.PlayOneShotOnCamera();
+			if (this.Disabled)
+			{
+				SoundDefOf.ClickReject.PlayOneShotOnCamera(null);
+				return;
+			}
+			Action action = this.action;
+			if (action == null)
+			{
+				return;
+			}
+			action();
 		}
+
+		// Token: 0x04003531 RID: 13617
+		public Texture2D texture;
+
+		// Token: 0x04003532 RID: 13618
+		public Color color = Color.white;
+
+		// Token: 0x04003533 RID: 13619
+		public Action action;
+
+		// Token: 0x04003534 RID: 13620
+		public TipSignal? tooltip;
+
+		// Token: 0x04003535 RID: 13621
+		public Rect iconTexCoords = new Rect(0f, 0f, 1f, 1f);
+
+		// Token: 0x04003536 RID: 13622
+		public Action<Rect> postDrawAction;
 	}
 }

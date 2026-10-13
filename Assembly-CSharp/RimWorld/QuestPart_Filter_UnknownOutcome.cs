@@ -1,13 +1,15 @@
-namespace RimWorld;
+﻿using System;
 
-public class QuestPart_Filter_UnknownOutcome : QuestPart_Filter
+namespace RimWorld
 {
-	protected override bool Pass(SignalArgs args)
+	// Token: 0x02001BBE RID: 7102
+	public class QuestPart_Filter_UnknownOutcome : QuestPart_Filter
 	{
-		if (args.TryGetArg("OUTCOME", out QuestEndOutcome arg))
+		// Token: 0x06009E14 RID: 40468 RVA: 0x002DBE00 File Offset: 0x002DA000
+		protected override bool Pass(SignalArgs args)
 		{
-			return arg == QuestEndOutcome.Unknown;
+			QuestEndOutcome questEndOutcome;
+			return !args.TryGetArg<QuestEndOutcome>("OUTCOME", out questEndOutcome) || questEndOutcome == QuestEndOutcome.Unknown;
 		}
-		return true;
 	}
 }

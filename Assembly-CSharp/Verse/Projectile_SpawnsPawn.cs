@@ -1,23 +1,28 @@
-namespace Verse;
+﻿using System;
 
-public class Projectile_SpawnsPawn : Projectile
+namespace Verse
 {
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
+	// Token: 0x020008C8 RID: 2248
+	public class Projectile_SpawnsPawn : Projectile
 	{
-		Map map = base.Map;
-		base.Impact(hitThing, blockedByShield);
-		IntVec3 loc = base.Position;
-		if (def.projectile.tryAdjacentFreeSpaces && base.Position.GetFirstBuilding(map) != null)
+		// Token: 0x060038EA RID: 14570 RVA: 0x0012F924 File Offset: 0x0012DB24
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			foreach (IntVec3 item in GenAdjFast.AdjacentCells8Way(base.Position))
+			Map map = base.Map;
+			base.Impact(hitThing, blockedByShield);
+			IntVec3 loc = base.Position;
+			if (this.def.projectile.tryAdjacentFreeSpaces && base.Position.GetFirstBuilding(map) != null)
 			{
-				if (item.GetFirstBuilding(map) == null && item.Standable(map))
+				foreach (IntVec3 intVec in GenAdjFast.AdjacentCells8Way(base.Position))
 				{
-					loc = item;
-					break;
+					if (intVec.GetFirstBuilding(map) == null && intVec.Standable(map))
+					{
+						loc = intVec;
+						break;
+					}
 				}
 			}
+			GenSpawn.Spawn(PawnGenerator.GeneratePawn(this.def.projectile.spawnsPawnKind, base.Launcher.Faction, null), loc, map, WipeMode.Vanish);
 		}
-		GenSpawn.Spawn(PawnGenerator.GeneratePawn(def.projectile.spawnsPawnKind, base.Launcher.Faction), loc, map);
 	}
 }

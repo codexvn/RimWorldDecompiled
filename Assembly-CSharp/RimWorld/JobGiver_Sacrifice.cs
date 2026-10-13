@@ -1,17 +1,21 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_Sacrifice : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x0200144D RID: 5197
+	public class JobGiver_Sacrifice : ThinkNode_JobGiver
 	{
-		Pawn pawn2 = pawn.mindState.duty.focusSecond.Pawn;
-		if (!pawn.CanReserveAndReach(pawn2, PathEndMode.ClosestTouch, Danger.None))
+		// Token: 0x06007DD1 RID: 32209 RVA: 0x0025E490 File Offset: 0x0025C690
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
+			Pawn pawn2 = pawn.mindState.duty.focusSecond.Pawn;
+			if (!pawn.CanReserveAndReach(pawn2, PathEndMode.ClosestTouch, Danger.None, 1, -1, null, false))
+			{
+				return null;
+			}
+			return JobMaker.MakeJob(JobDefOf.Sacrifice, pawn2, pawn.mindState.duty.focus);
 		}
-		return JobMaker.MakeJob(JobDefOf.Sacrifice, pawn2, pawn.mindState.duty.focus);
 	}
 }

@@ -1,17 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public abstract class SitePartWorker_DistressCall : SitePartWorker
+namespace RimWorld.Planet
 {
-	public override void Init(Site site, SitePart sitePart)
+	// Token: 0x02003DEC RID: 15852
+	public abstract class SitePartWorker_DistressCall : SitePartWorker
 	{
-		base.Init(site, sitePart);
-		site.customLabel = sitePart.def.label.Formatted(site.Faction.Named("FACTION"));
-	}
+		// Token: 0x06015A17 RID: 88599 RVA: 0x00679660 File Offset: 0x00677860
+		public override void Init(Site site, SitePart sitePart)
+		{
+			base.Init(site, sitePart);
+			site.customLabel = sitePart.def.label.Formatted(site.Faction.Named("FACTION"));
+		}
 
-	public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
-	{
-		return (string)("Hostiles".Translate() + ": " + "Unknown".Translate().CapitalizeFirst()) + ("\n" + "Contains".Translate() + ": " + "Unknown".Translate().CapitalizeFirst());
+		// Token: 0x06015A18 RID: 88600 RVA: 0x00679698 File Offset: 0x00677898
+		public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
+		{
+			return "Hostiles".Translate() + ": " + "Unknown".Translate().CapitalizeFirst() + ("\n" + "Contains".Translate() + ": " + "Unknown".Translate().CapitalizeFirst());
+		}
 	}
 }

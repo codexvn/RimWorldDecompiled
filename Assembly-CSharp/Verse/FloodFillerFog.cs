@@ -1,159 +1,83 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
-using Unity.Collections;
-using Verse.AI.Group;
 
-namespace Verse;
-
-public static class FloodFillerFog
+namespace Verse
 {
-	private static bool testMode = false;
-
-	private static List<IntVec3> cellsToUnfog = new List<IntVec3>(1024);
-
-	private static bool deferPawnUnfoggedWake;
-
-	private static List<LordJob_SleepThenAssaultColony> lordsToWakeOnPawnUnfogged = new List<LordJob_SleepThenAssaultColony>();
-
-	private const int MaxNumTestUnfog = 500;
-
-	public static FloodUnfogResult FloodUnfog(IntVec3 root, Map map)
+	// Token: 0x0200040E RID: 1038
+	public static class FloodFillerFog
 	{
-		cellsToUnfog.Clear();
-		lordsToWakeOnPawnUnfogged.Clear();
-		FloodUnfogResult result = default(FloodUnfogResult);
-		NativeBitArray fogGridDirect = map.fogGrid.FogGrid_Unsafe;
-		FogGrid fogGrid = map.fogGrid;
-		List<IntVec3> newlyUnfoggedCells = new List<IntVec3>();
-		int numUnfogged = 0;
-		bool expanding = false;
-		CellRect viewRect = CellRect.ViewRect(map);
-		result.allOnScreen = true;
-		deferPawnUnfoggedWake = true;
-		try
+		// Token: 0x06001A49 RID: 6729 RVA: 0x00084BBC File Offset: 0x00082DBC
+		public static FloodUnfogResult FloodUnfog(IntVec3 root, Map map)
 		{
-			map.floodFiller.FloodFill(root, (Predicate<IntVec3>)PassCheck, (Action<IntVec3>)Processor, int.MaxValue, rememberParents: false, (IEnumerable<IntVec3>)null);
-			expanding = true;
-			for (int i = 0; i < newlyUnfoggedCells.Count; i++)
+			FloodFillerFog.<>c__DisplayClass3_0 CS$<>8__locals1 = new FloodFillerFog.<>c__DisplayClass3_0();
+			CS$<>8__locals1.map = map;
+			FloodFillerFog.cellsToUnfog.Clear();
+			CS$<>8__locals1.result = default(FloodUnfogResult);
+			CS$<>8__locals1.fogGridDirect = CS$<>8__locals1.map.fogGrid.FogGrid_Unsafe;
+			CS$<>8__locals1.fogGrid = CS$<>8__locals1.map.fogGrid;
+			CS$<>8__locals1.newlyUnfoggedCells = new List<IntVec3>();
+			CS$<>8__locals1.numUnfogged = 0;
+			CS$<>8__locals1.expanding = false;
+			CS$<>8__locals1.viewRect = CellRect.ViewRect(CS$<>8__locals1.map);
+			CS$<>8__locals1.result.allOnScreen = true;
+			CS$<>8__locals1.map.floodFiller.FloodFill(root, new Predicate<IntVec3>(CS$<>8__locals1.<FloodUnfog>g__PassCheck|0), new Action<IntVec3>(CS$<>8__locals1.<FloodUnfog>g__Processor|1), int.MaxValue, false, null);
+			CS$<>8__locals1.expanding = true;
+			for (int i = 0; i < CS$<>8__locals1.newlyUnfoggedCells.Count; i++)
 			{
-				IntVec3 intVec = newlyUnfoggedCells[i];
+				IntVec3 a = CS$<>8__locals1.newlyUnfoggedCells[i];
 				for (int j = 0; j < 8; j++)
 				{
-					IntVec3 intVec2 = intVec + GenAdj.AdjacentCells[j];
-					if (intVec2.InBounds(map) && fogGrid.IsFogged(intVec2) && !PassCheck(intVec2))
+					IntVec3 intVec = a + GenAdj.AdjacentCells[j];
+					if (intVec.InBounds(CS$<>8__locals1.map) && CS$<>8__locals1.fogGrid.IsFogged(intVec) && !CS$<>8__locals1.<FloodUnfog>g__PassCheck|0(intVec))
 					{
-						cellsToUnfog.Add(intVec2);
+						FloodFillerFog.cellsToUnfog.Add(intVec);
 					}
 				}
 			}
-			for (int k = 0; k < cellsToUnfog.Count; k++)
+			for (int k = 0; k < FloodFillerFog.cellsToUnfog.Count; k++)
 			{
-				fogGrid.Unfog(cellsToUnfog[k]);
-				if (testMode)
+				CS$<>8__locals1.fogGrid.Unfog(FloodFillerFog.cellsToUnfog[k]);
+				if (FloodFillerFog.testMode)
 				{
-					map.debugDrawer.FlashCell(cellsToUnfog[k], 0.3f, "x");
+					CS$<>8__locals1.map.debugDrawer.FlashCell(FloodFillerFog.cellsToUnfog[k], 0.3f, "x", 50);
 				}
 			}
+			FloodFillerFog.cellsToUnfog.Clear();
+			return CS$<>8__locals1.result;
 		}
-		finally
-		{
-			deferPawnUnfoggedWake = false;
-			cellsToUnfog.Clear();
-		}
-		WakeDeferredUnfoggedPawns();
-		return result;
-		bool PassCheck(IntVec3 c)
-		{
-			if (!fogGridDirect.IsSet(map.cellIndices.CellToIndex(c)))
-			{
-				return false;
-			}
-			Thing edifice = c.GetEdifice(map);
-			if (edifice != null && edifice.def.MakeFog)
-			{
-				return false;
-			}
-			if (testMode && !expanding && numUnfogged > 500)
-			{
-				return false;
-			}
-			return true;
-		}
-		void Processor(IntVec3 c)
-		{
-			fogGrid.Unfog(c);
-			newlyUnfoggedCells.Add(c);
-			List<Thing> thingList = c.GetThingList(map);
-			for (int l = 0; l < thingList.Count; l++)
-			{
-				if (thingList[l] is Pawn pawn)
-				{
-					pawn.mindState.Active = true;
-					if (pawn.def.race.IsMechanoid)
-					{
-						result.mechanoidFound = true;
-					}
-				}
-			}
-			if (!viewRect.Contains(c))
-			{
-				result.allOnScreen = false;
-			}
-			result.cellsUnfogged++;
-			if (testMode)
-			{
-				numUnfogged++;
-				map.debugDrawer.FlashCell(c, (float)numUnfogged / 200f, numUnfogged.ToStringCached());
-			}
-		}
-	}
 
-	public static bool TryDeferPawnUnfoggedWake(Pawn pawn)
-	{
-		if (!deferPawnUnfoggedWake)
+		// Token: 0x06001A4A RID: 6730 RVA: 0x00084D68 File Offset: 0x00082F68
+		public static void DebugFloodUnfog(IntVec3 root, Map map)
 		{
-			return false;
+			map.fogGrid.SetAllFogged();
+			foreach (IntVec3 loc in map.AllCells)
+			{
+				map.mapDrawer.MapMeshDirty(loc, MapMeshFlagDefOf.FogOfWar);
+			}
+			FloodFillerFog.testMode = true;
+			FloodFillerFog.FloodUnfog(root, map);
+			FloodFillerFog.testMode = false;
 		}
-		if (!(pawn.GetLord()?.LordJob is LordJob_SleepThenAssaultColony item))
-		{
-			return false;
-		}
-		if (!lordsToWakeOnPawnUnfogged.Contains(item))
-		{
-			lordsToWakeOnPawnUnfogged.Add(item);
-		}
-		return true;
-	}
 
-	private static void WakeDeferredUnfoggedPawns()
-	{
-		for (int i = 0; i < lordsToWakeOnPawnUnfogged.Count; i++)
+		// Token: 0x06001A4B RID: 6731 RVA: 0x00084DE4 File Offset: 0x00082FE4
+		public static void DebugRefogMap(Map map)
 		{
-			lordsToWakeOnPawnUnfogged[i].Notify_PawnUnfogged();
+			map.fogGrid.SetAllFogged();
+			foreach (IntVec3 loc in map.AllCells)
+			{
+				map.mapDrawer.MapMeshDirty(loc, MapMeshFlagDefOf.FogOfWar);
+			}
+			FloodFillerFog.FloodUnfog(map.mapPawns.FreeColonistsSpawned.RandomElement<Pawn>().Position, map);
 		}
-		lordsToWakeOnPawnUnfogged.Clear();
-	}
 
-	public static void DebugFloodUnfog(IntVec3 root, Map map)
-	{
-		map.fogGrid.SetAllFogged();
-		foreach (IntVec3 allCell in map.AllCells)
-		{
-			map.mapDrawer.MapMeshDirty(allCell, MapMeshFlagDefOf.FogOfWar);
-		}
-		testMode = true;
-		FloodUnfog(root, map);
-		testMode = false;
-	}
+		// Token: 0x0400173E RID: 5950
+		private static bool testMode = false;
 
-	public static void DebugRefogMap(Map map)
-	{
-		map.fogGrid.SetAllFogged();
-		foreach (IntVec3 allCell in map.AllCells)
-		{
-			map.mapDrawer.MapMeshDirty(allCell, MapMeshFlagDefOf.FogOfWar);
-		}
-		FloodUnfog(map.mapPawns.FreeColonistsSpawned.RandomElement().Position, map);
+		// Token: 0x0400173F RID: 5951
+		private static List<IntVec3> cellsToUnfog = new List<IntVec3>(1024);
+
+		// Token: 0x04001740 RID: 5952
+		private const int MaxNumTestUnfog = 500;
 	}
 }

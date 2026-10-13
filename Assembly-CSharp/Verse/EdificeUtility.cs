@@ -1,13 +1,15 @@
-namespace Verse;
+﻿using System;
 
-public static class EdificeUtility
+namespace Verse
 {
-	public static bool IsEdifice(this BuildableDef def)
+	// Token: 0x02000427 RID: 1063
+	public static class EdificeUtility
 	{
-		if (def is ThingDef { category: ThingCategory.Building } thingDef)
+		// Token: 0x06001B03 RID: 6915 RVA: 0x00088550 File Offset: 0x00086750
+		public static bool IsEdifice(this BuildableDef def)
 		{
-			return thingDef.building.isEdifice;
+			ThingDef thingDef = def as ThingDef;
+			return thingDef != null && thingDef.category == ThingCategory.Building && thingDef.building.isEdifice;
 		}
-		return false;
 	}
 }

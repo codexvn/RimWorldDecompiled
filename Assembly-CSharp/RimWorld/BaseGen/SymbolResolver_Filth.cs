@@ -1,43 +1,41 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Filth : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x02003922 RID: 14626
+	public class SymbolResolver_Filth : SymbolResolver
 	{
-		if (base.CanResolve(rp) && rp.filthDef != null)
+		// Token: 0x0601427A RID: 82554 RVA: 0x00601831 File Offset: 0x005FFA31
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return rp.filthDensity.HasValue;
+			return base.CanResolve(rp) && rp.filthDef != null && rp.filthDensity != null;
 		}
-		return false;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x0601427B RID: 82555 RVA: 0x00601854 File Offset: 0x005FFA54
+		public override void Resolve(ResolveParams rp)
 		{
-			if (CanPlaceFilth(item, rp))
+			foreach (IntVec3 intVec in rp.rect)
 			{
-				float num;
-				for (num = rp.filthDensity.Value.RandomInRange; num > 1f; num -= 1f)
+				if (this.CanPlaceFilth(intVec, rp))
 				{
-					FilthMaker.TryMakeFilth(item, BaseGen.globalSettings.map, rp.filthDef);
-				}
-				if (Rand.Chance(num))
-				{
-					FilthMaker.TryMakeFilth(item, BaseGen.globalSettings.map, rp.filthDef);
+					float num;
+					for (num = rp.filthDensity.Value.RandomInRange; num > 1f; num -= 1f)
+					{
+						FilthMaker.TryMakeFilth(intVec, BaseGen.globalSettings.map, rp.filthDef, 1, FilthSourceFlags.None, true);
+					}
+					if (Rand.Chance(num))
+					{
+						FilthMaker.TryMakeFilth(intVec, BaseGen.globalSettings.map, rp.filthDef, 1, FilthSourceFlags.None, true);
+					}
 				}
 			}
 		}
-	}
 
-	private bool CanPlaceFilth(IntVec3 cell, ResolveParams rp)
-	{
-		if (rp.ignoreDoorways.HasValue && rp.ignoreDoorways.Value && cell.GetDoor(BaseGen.globalSettings.map) != null)
+		// Token: 0x0601427C RID: 82556 RVA: 0x00601910 File Offset: 0x005FFB10
+		private bool CanPlaceFilth(IntVec3 cell, ResolveParams rp)
 		{
-			return false;
+			return rp.ignoreDoorways == null || !rp.ignoreDoorways.Value || cell.GetDoor(BaseGen.globalSettings.map) == null;
 		}
-		return true;
 	}
 }

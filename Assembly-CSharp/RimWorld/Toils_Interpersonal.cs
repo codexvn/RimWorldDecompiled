@@ -1,358 +1,358 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public static class Toils_Interpersonal
+namespace RimWorld
 {
-	public static Toil GotoInteractablePosition(TargetIndex target)
+	// Token: 0x02001377 RID: 4983
+	public static class Toils_Interpersonal
 	{
-		Toil toil = ToilMaker.MakeToil("GotoInteractablePosition");
-		toil.initAction = delegate
+		// Token: 0x06007A3C RID: 31292 RVA: 0x0024D874 File Offset: 0x0024BA74
+		public static Toil GotoInteractablePosition(TargetIndex target)
 		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)(Thing)actor.CurJob.GetTarget(target);
-			if (SocialInteractionUtility.IsGoodPositionForInteraction(actor, pawn))
+			Toil toil = ToilMaker.MakeToil("GotoInteractablePosition");
+			toil.initAction = delegate()
 			{
-				actor.jobs.curDriver.ReadyForNextToil();
-			}
-			else
-			{
-				actor.pather.StartPath(pawn, PathEndMode.Touch);
-			}
-		};
-		toil.tickIntervalAction = delegate
-		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)(Thing)actor.CurJob.GetTarget(target);
-			Map map = actor.Map;
-			if (SocialInteractionUtility.IsGoodPositionForInteraction(actor, pawn) && actor.Position.InHorDistOf(pawn.Position, Mathf.CeilToInt(3f)) && (!actor.pather.Moving || actor.pather.nextCell.GetDoor(map) == null))
-			{
-				actor.pather.StopDead();
-				actor.jobs.curDriver.ReadyForNextToil();
-			}
-			else if (!actor.pather.Moving)
-			{
-				IntVec3 intVec = SocialInteractionUtility.BestInteractableCell(actor, pawn);
-				if (intVec.IsValid)
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)((Thing)actor.CurJob.GetTarget(target));
+				if (SocialInteractionUtility.IsGoodPositionForInteraction(actor, pawn))
 				{
-					actor.pather.StartPath(intVec, PathEndMode.OnCell);
+					actor.jobs.curDriver.ReadyForNextToil();
+					return;
 				}
-				else
+				actor.pather.StartPath(pawn, PathEndMode.Touch);
+			};
+			toil.tickIntervalAction = delegate(int delta)
+			{
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)((Thing)actor.CurJob.GetTarget(target));
+				Map map = actor.Map;
+				if (SocialInteractionUtility.IsGoodPositionForInteraction(actor, pawn) && actor.Position.InHorDistOf(pawn.Position, (float)Mathf.CeilToInt(3f)) && (!actor.pather.Moving || actor.pather.nextCell.GetDoor(map) == null))
 				{
+					actor.pather.StopDead();
+					actor.jobs.curDriver.ReadyForNextToil();
+					return;
+				}
+				if (!actor.pather.Moving)
+				{
+					IntVec3 c = SocialInteractionUtility.BestInteractableCell(actor, pawn);
+					if (c.IsValid)
+					{
+						actor.pather.StartPath(c, PathEndMode.OnCell);
+						return;
+					}
 					actor.jobs.curDriver.EndJobWith(JobCondition.Incompletable);
 				}
-			}
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Never;
-		return toil;
-	}
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			return toil;
+		}
 
-	public static Toil GotoPrisoner(Pawn pawn, Pawn talkee, PrisonerInteractionModeDef mode)
-	{
-		Toil toil = ToilMaker.MakeToil("GotoPrisoner");
-		toil.initAction = delegate
+		// Token: 0x06007A3D RID: 31293 RVA: 0x0024D8EC File Offset: 0x0024BAEC
+		public static Toil GotoPrisoner(Pawn pawn, Pawn talkee, PrisonerInteractionModeDef mode)
 		{
-			pawn.pather.StartPath(talkee, PathEndMode.Touch);
-		};
-		toil.AddFailCondition(delegate
-		{
-			if (talkee.DestroyedOrNull())
+			Toil toil = ToilMaker.MakeToil("GotoPrisoner");
+			toil.initAction = delegate()
 			{
-				return true;
-			}
-			if (mode.mustBeAwake && !talkee.Awake())
-			{
-				return true;
-			}
-			if (!talkee.IsPrisonerOfColony)
-			{
-				return true;
-			}
-			return (talkee.guest == null || talkee.guest.IsInteractionDisabled(mode)) ? true : false;
-		});
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-		return toil;
-	}
+				pawn.pather.StartPath(talkee, PathEndMode.Touch);
+			};
+			toil.AddFailCondition(() => talkee.DestroyedOrNull() || (mode.mustBeAwake && !talkee.Awake()) || !talkee.IsPrisonerOfColony || (talkee.guest == null || talkee.guest.IsInteractionDisabled(mode)));
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+			return toil;
+		}
 
-	public static Toil GotoGuiltyColonist(Pawn pawn, Pawn talkee)
-	{
-		Toil toil = ToilMaker.MakeToil("GotoGuiltyColonist");
-		toil.initAction = delegate
+		// Token: 0x06007A3E RID: 31294 RVA: 0x0024D950 File Offset: 0x0024BB50
+		public static Toil GotoGuiltyColonist(Pawn pawn, Pawn talkee)
 		{
-			pawn.pather.StartPath(talkee, PathEndMode.Touch);
-		};
-		toil.AddFailCondition(delegate
-		{
-			if (talkee.DestroyedOrNull())
+			Toil toil = ToilMaker.MakeToil("GotoGuiltyColonist");
+			toil.initAction = delegate()
 			{
-				return true;
-			}
-			return !talkee.guilt.IsGuilty;
-		});
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-		return toil;
-	}
+				pawn.pather.StartPath(talkee, PathEndMode.Touch);
+			};
+			toil.AddFailCondition(() => talkee.DestroyedOrNull() || !talkee.guilt.IsGuilty);
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+			return toil;
+		}
 
-	public static Toil GotoSlave(Pawn pawn, Pawn talkee)
-	{
-		Toil toil = ToilMaker.MakeToil("GotoSlave");
-		toil.initAction = delegate
+		// Token: 0x06007A3F RID: 31295 RVA: 0x0024D9B0 File Offset: 0x0024BBB0
+		public static Toil GotoSlave(Pawn pawn, Pawn talkee)
 		{
-			pawn.pather.StartPath(talkee, PathEndMode.Touch);
-		};
-		toil.AddFailCondition(delegate
-		{
-			if (talkee.DestroyedOrNull())
+			Toil toil = ToilMaker.MakeToil("GotoSlave");
+			toil.initAction = delegate()
 			{
-				return true;
-			}
-			return !talkee.IsSlaveOfColony;
-		});
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
-		return toil;
-	}
+				pawn.pather.StartPath(talkee, PathEndMode.Touch);
+			};
+			toil.AddFailCondition(() => talkee.DestroyedOrNull() || !talkee.IsSlaveOfColony);
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.PatherArrival;
+			return toil;
+		}
 
-	public static Toil WaitToBeAbleToInteract(Pawn pawn)
-	{
-		Toil toil = ToilMaker.MakeToil("WaitToBeAbleToInteract");
-		toil.initAction = delegate
+		// Token: 0x06007A40 RID: 31296 RVA: 0x0024DA10 File Offset: 0x0024BC10
+		public static Toil WaitToBeAbleToInteract(Pawn pawn)
 		{
-			if (!pawn.interactions.InteractedTooRecentlyToInteract())
+			Toil toil = ToilMaker.MakeToil("WaitToBeAbleToInteract");
+			toil.initAction = delegate()
 			{
-				pawn.jobs.curDriver.ReadyForNextToil();
-			}
-		};
-		toil.tickIntervalAction = delegate
-		{
-			if (!pawn.interactions.InteractedTooRecentlyToInteract())
+				if (!pawn.interactions.InteractedTooRecentlyToInteract())
+				{
+					pawn.jobs.curDriver.ReadyForNextToil();
+				}
+			};
+			toil.tickIntervalAction = delegate(int delta)
 			{
-				pawn.jobs.curDriver.ReadyForNextToil();
-			}
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Never;
-		return toil;
-	}
+				if (!pawn.interactions.InteractedTooRecentlyToInteract())
+				{
+					pawn.jobs.curDriver.ReadyForNextToil();
+				}
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			return toil;
+		}
 
-	public static Toil ConvinceRecruitee(Pawn pawn, Pawn talkee, InteractionDef interactionDef = null)
-	{
-		Toil toil = ToilMaker.MakeToil("ConvinceRecruitee");
-		toil.initAction = delegate
+		// Token: 0x06007A41 RID: 31297 RVA: 0x0024DA68 File Offset: 0x0024BC68
+		public static Toil ConvinceRecruitee(Pawn pawn, Pawn talkee, InteractionDef interactionDef = null)
 		{
-			if (!pawn.interactions.TryInteractWith(talkee, interactionDef ?? InteractionDefOf.BuildRapport))
+			Toil toil = ToilMaker.MakeToil("ConvinceRecruitee");
+			toil.initAction = delegate()
 			{
-				pawn.jobs.curDriver.ReadyForNextToil();
-			}
-			else
-			{
+				if (!pawn.interactions.TryInteractWith(talkee, interactionDef ?? InteractionDefOf.BuildRapport))
+				{
+					pawn.jobs.curDriver.ReadyForNextToil();
+					return;
+				}
 				pawn.records.Increment(RecordDefOf.PrisonersChatted);
-			}
-		};
-		toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => SkillDefOf.Social;
-		return toil;
-	}
+			};
+			toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = (() => SkillDefOf.Social);
+			return toil;
+		}
 
-	public static Toil Interrogate(Pawn pawn, Pawn talkee)
-	{
-		Toil toil = ToilMaker.MakeToil("Interrogate");
-		toil.initAction = delegate
+		// Token: 0x06007A42 RID: 31298 RVA: 0x0024DB00 File Offset: 0x0024BD00
+		public static Toil Interrogate(Pawn pawn, Pawn talkee)
 		{
-			if (!pawn.interactions.TryInteractWith(talkee, InteractionDefOf.InterrogateIdentity))
+			Toil toil = ToilMaker.MakeToil("Interrogate");
+			toil.initAction = delegate()
 			{
-				pawn.jobs.curDriver.ReadyForNextToil();
-			}
-			else
-			{
+				if (!pawn.interactions.TryInteractWith(talkee, InteractionDefOf.InterrogateIdentity))
+				{
+					pawn.jobs.curDriver.ReadyForNextToil();
+					return;
+				}
 				pawn.records.Increment(RecordDefOf.PrisonersChatted);
-			}
-		};
-		toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => SkillDefOf.Social;
-		return toil;
-	}
+			};
+			toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = (() => SkillDefOf.Social);
+			return toil;
+		}
 
-	public static Toil ReduceWill(Pawn pawn, Pawn talkee)
-	{
-		Toil toil = ToilMaker.MakeToil("ReduceWill");
-		toil.initAction = delegate
+		// Token: 0x06007A43 RID: 31299 RVA: 0x0024DB90 File Offset: 0x0024BD90
+		public static Toil ReduceWill(Pawn pawn, Pawn talkee)
 		{
-			if (!pawn.interactions.TryInteractWith(talkee, InteractionDefOf.ReduceWill))
+			Toil toil = ToilMaker.MakeToil("ReduceWill");
+			toil.initAction = delegate()
 			{
-				pawn.jobs.curDriver.ReadyForNextToil();
-			}
-			else
-			{
+				if (!pawn.interactions.TryInteractWith(talkee, InteractionDefOf.ReduceWill))
+				{
+					pawn.jobs.curDriver.ReadyForNextToil();
+					return;
+				}
 				pawn.records.Increment(RecordDefOf.PrisonersChatted);
-			}
-		};
-		toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => SkillDefOf.Social;
-		return toil;
-	}
+			};
+			toil.FailOn(() => !talkee.guest.ScheduledForInteraction);
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = (() => SkillDefOf.Social);
+			return toil;
+		}
 
-	public static Toil SetLastInteractTime(TargetIndex targetInd)
-	{
-		Toil toil = ToilMaker.MakeToil("SetLastInteractTime");
-		toil.initAction = delegate
+		// Token: 0x06007A44 RID: 31300 RVA: 0x0024DC20 File Offset: 0x0024BE20
+		public static Toil SetLastInteractTime(TargetIndex targetInd)
 		{
-			Pawn obj = (Pawn)toil.actor.jobs.curJob.GetTarget(targetInd).Thing;
-			obj.mindState.lastAssignedInteractTime = Find.TickManager.TicksGame;
-			obj.mindState.interactionsToday++;
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Instant;
-		return toil;
-	}
-
-	public static Toil TryRecruit(TargetIndex recruiteeInd)
-	{
-		Toil toil = ToilMaker.MakeToil("TryRecruit");
-		toil.initAction = delegate
-		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(recruiteeInd).Thing;
-			if (pawn.Spawned && pawn.Awake())
+			Toil toil = ToilMaker.MakeToil("SetLastInteractTime");
+			toil.initAction = delegate()
 			{
-				InteractionDef intDef = (pawn.AnimalOrWildMan() ? InteractionDefOf.TameAttempt : InteractionDefOf.RecruitAttempt);
+				Pawn pawn = (Pawn)toil.actor.jobs.curJob.GetTarget(targetInd).Thing;
+				pawn.mindState.lastAssignedInteractTime = Find.TickManager.TicksGame;
+				pawn.mindState.interactionsToday++;
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Instant;
+			return toil;
+		}
+
+		// Token: 0x06007A45 RID: 31301 RVA: 0x0024DC74 File Offset: 0x0024BE74
+		public static Toil TryRecruit(TargetIndex recruiteeInd)
+		{
+			Toil toil = ToilMaker.MakeToil("TryRecruit");
+			toil.initAction = delegate()
+			{
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(recruiteeInd).Thing;
+				if (!pawn.Spawned || !pawn.Awake())
+				{
+					return;
+				}
+				InteractionDef intDef = pawn.AnimalOrWildMan() ? InteractionDefOf.TameAttempt : InteractionDefOf.RecruitAttempt;
 				actor.interactions.TryInteractWith(pawn, intDef);
-			}
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => (!((Pawn)toil.actor.jobs.curJob.GetTarget(recruiteeInd).Thing).RaceProps.Animal) ? SkillDefOf.Social : SkillDefOf.Animals;
-		return toil;
-	}
-
-	public static Toil TryTrain(TargetIndex traineeInd)
-	{
-		Toil toil = ToilMaker.MakeToil("TryTrain");
-		toil.initAction = delegate
-		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(traineeInd).Thing;
-			if (pawn.Spawned && pawn.Awake() && actor.interactions.TryInteractWith(pawn, InteractionDefOf.TrainAttempt))
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = delegate()
 			{
-				float statValue = actor.GetStatValue(StatDefOf.TrainAnimalChance);
-				statValue *= GenMath.LerpDouble(0f, 1f, 1.5f, 0.5f, pawn.GetStatValue(StatDefOf.Wildness));
-				if (actor.relations.DirectRelationExists(PawnRelationDefOf.Bond, pawn))
+				if (!((Pawn)toil.actor.jobs.curJob.GetTarget(recruiteeInd).Thing).RaceProps.Animal)
 				{
-					statValue *= 5f;
+					return SkillDefOf.Social;
 				}
-				statValue = Mathf.Clamp01(statValue);
-				TrainableDef trainableDef = pawn.training.NextTrainableToTrain();
-				if (trainableDef == null)
+				return SkillDefOf.Animals;
+			};
+			return toil;
+		}
+
+		// Token: 0x06007A46 RID: 31302 RVA: 0x0024DCFC File Offset: 0x0024BEFC
+		public static Toil TryTrain(TargetIndex traineeInd)
+		{
+			Toil toil = ToilMaker.MakeToil("TryTrain");
+			toil.initAction = delegate()
+			{
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(traineeInd).Thing;
+				if (pawn.Spawned && pawn.Awake() && actor.interactions.TryInteractWith(pawn, InteractionDefOf.TrainAttempt))
 				{
-					Log.ErrorOnce("Attempted to train untrainable animal", 7842936);
-				}
-				else
-				{
-					string text;
-					if (Rand.Value < statValue)
+					float num = actor.GetStatValue(StatDefOf.TrainAnimalChance, true, -1);
+					num *= GenMath.LerpDouble(0f, 1f, 1.5f, 0.5f, pawn.GetStatValue(StatDefOf.Wildness, true, -1));
+					if (actor.relations.DirectRelationExists(PawnRelationDefOf.Bond, pawn))
 					{
-						pawn.training.Train(trainableDef, actor);
+						num *= 5f;
+					}
+					num = Mathf.Clamp01(num);
+					TrainableDef trainableDef = pawn.training.NextTrainableToTrain();
+					if (trainableDef == null)
+					{
+						Log.ErrorOnce("Attempted to train untrainable animal", 7842936);
+						return;
+					}
+					string text;
+					if (Rand.Value < num)
+					{
+						pawn.training.Train(trainableDef, actor, false);
 						if (pawn.caller != null)
 						{
-							pawn.caller.DoCall();
+							pawn.caller.DoCall(false);
 						}
-						text = "TextMote_TrainSuccess".Translate(trainableDef.LabelCap, statValue.ToStringPercent());
+						text = "TextMote_TrainSuccess".Translate(trainableDef.LabelCap, num.ToStringPercent());
 						RelationsUtility.TryDevelopBondRelation(actor, pawn, 0.007f);
-						TaleRecorder.RecordTale(TaleDefOf.TrainedAnimal, actor, pawn, trainableDef);
+						TaleRecorder.RecordTale(TaleDefOf.TrainedAnimal, new object[]
+						{
+							actor,
+							pawn,
+							trainableDef
+						});
 					}
 					else
 					{
-						text = "TextMote_TrainFail".Translate(trainableDef.LabelCap, statValue.ToStringPercent());
+						text = "TextMote_TrainFail".Translate(trainableDef.LabelCap, num.ToStringPercent());
 					}
-					text = text + "\n" + pawn.training.GetSteps(trainableDef) + " / " + trainableDef.steps;
+					text = string.Concat(new string[]
+					{
+						text,
+						"\n",
+						pawn.training.GetSteps(trainableDef).ToString(),
+						" / ",
+						trainableDef.steps.ToString()
+					});
 					MoteMaker.ThrowText((actor.DrawPos + pawn.DrawPos) / 2f, actor.Map, text, 5f);
 				}
-			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 100;
-		toil.activeSkill = () => SkillDefOf.Animals;
-		return toil;
-	}
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 100;
+			toil.activeSkill = (() => SkillDefOf.Animals);
+			return toil;
+		}
 
-	public static Toil Interact(TargetIndex otherPawnInd, InteractionDef interaction)
-	{
-		Toil toil = ToilMaker.MakeToil("Interact");
-		toil.initAction = delegate
+		// Token: 0x06007A47 RID: 31303 RVA: 0x0024DD88 File Offset: 0x0024BF88
+		public static Toil Interact(TargetIndex otherPawnInd, InteractionDef interaction)
 		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(otherPawnInd).Thing;
-			if (pawn.Spawned)
+			Toil toil = ToilMaker.MakeToil("Interact");
+			toil.initAction = delegate()
 			{
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(otherPawnInd).Thing;
+				if (!pawn.Spawned)
+				{
+					return;
+				}
 				actor.interactions.TryInteractWith(pawn, interaction);
-			}
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 60;
-		return toil;
-	}
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 60;
+			return toil;
+		}
 
-	public static Toil TryEnslave(TargetIndex prisonerInd)
-	{
-		Toil toil = ToilMaker.MakeToil("TryEnslave");
-		toil.initAction = delegate
+		// Token: 0x06007A48 RID: 31304 RVA: 0x0024DDFC File Offset: 0x0024BFFC
+		public static Toil TryEnslave(TargetIndex prisonerInd)
 		{
-			Pawn actor = toil.actor;
-			Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(prisonerInd).Thing;
-			if (pawn.Spawned && pawn.Awake())
+			Toil toil = ToilMaker.MakeToil("TryEnslave");
+			toil.initAction = delegate()
 			{
+				Pawn actor = toil.actor;
+				Pawn pawn = (Pawn)actor.jobs.curJob.GetTarget(prisonerInd).Thing;
+				if (!pawn.Spawned || !pawn.Awake())
+				{
+					return;
+				}
 				actor.interactions.TryInteractWith(pawn, InteractionDefOf.EnslaveAttempt);
-			}
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => SkillDefOf.Social;
-		return toil;
-	}
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = (() => SkillDefOf.Social);
+			return toil;
+		}
 
-	public static Toil TryConvert(TargetIndex prisonerInd)
-	{
-		Toil toil = ToilMaker.MakeToil("TryConvert");
-		toil.initAction = delegate
+		// Token: 0x06007A49 RID: 31305 RVA: 0x0024DE98 File Offset: 0x0024C098
+		public static Toil TryConvert(TargetIndex prisonerInd)
 		{
-			Pawn actor = toil.actor;
-			Pawn recipient = (Pawn)actor.jobs.curJob.GetTarget(prisonerInd).Thing;
-			actor.interactions.TryInteractWith(recipient, InteractionDefOf.ConvertIdeoAttempt);
-		};
-		toil.socialMode = RandomSocialMode.Off;
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = 350;
-		toil.activeSkill = () => SkillDefOf.Social;
-		return toil;
-	}
+			Toil toil = ToilMaker.MakeToil("TryConvert");
+			toil.initAction = delegate()
+			{
+				Pawn actor = toil.actor;
+				Pawn recipient = (Pawn)actor.jobs.curJob.GetTarget(prisonerInd).Thing;
+				actor.interactions.TryInteractWith(recipient, InteractionDefOf.ConvertIdeoAttempt);
+			};
+			toil.socialMode = RandomSocialMode.Off;
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = 350;
+			toil.activeSkill = (() => SkillDefOf.Social);
+			return toil;
+		}
 
-	public static Toil ExtractHemogen(TargetIndex prisonerInd, float bloodLoss)
-	{
-		Toil toil = ToilMaker.MakeToil("ExtractHemogen");
-		toil.initAction = delegate
+		// Token: 0x06007A4A RID: 31306 RVA: 0x0024DF34 File Offset: 0x0024C134
+		public static Toil ExtractHemogen(TargetIndex prisonerInd, float bloodLoss)
 		{
-			GenPlace.TryPlaceThing(ThingMaker.MakeThing(ThingDefOf.HemogenPack), toil.actor.Position, toil.actor.Map, ThingPlaceMode.Near);
-			Pawn pawn = (Pawn)toil.actor.jobs.curJob.GetTarget(prisonerInd).Thing;
-			Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BloodLoss, pawn);
-			hediff.Severity = bloodLoss;
-			pawn.health.AddHediff(hediff);
-		};
-		return toil;
+			Toil toil = ToilMaker.MakeToil("ExtractHemogen");
+			toil.initAction = delegate()
+			{
+				GenPlace.TryPlaceThing(ThingMaker.MakeThing(ThingDefOf.HemogenPack, null), toil.actor.Position, toil.actor.Map, ThingPlaceMode.Near, null, null, null, 1);
+				Pawn pawn = (Pawn)toil.actor.jobs.curJob.GetTarget(prisonerInd).Thing;
+				Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.BloodLoss, pawn, null);
+				hediff.Severity = bloodLoss;
+				pawn.health.AddHediff(hediff, null, null, null);
+			};
+			return toil;
+		}
 	}
 }

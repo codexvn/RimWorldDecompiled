@@ -1,24 +1,29 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace Verse.AI.Group;
-
-public class Trigger_TicksPassedWithoutHarmOrMemos : Trigger_TicksPassed
+namespace Verse.AI.Group
 {
-	private List<string> memos;
-
-	public Trigger_TicksPassedWithoutHarmOrMemos(int tickLimit, params string[] memos)
-		: base(tickLimit)
+	// Token: 0x020010EE RID: 4334
+	public class Trigger_TicksPassedWithoutHarmOrMemos : Trigger_TicksPassed
 	{
-		this.memos = memos.ToList();
-	}
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
-	{
-		if (Trigger_PawnHarmed.SignalIsHarm(signal) || memos.Contains(signal.memo))
+		// Token: 0x06006963 RID: 26979 RVA: 0x00213397 File Offset: 0x00211597
+		public Trigger_TicksPassedWithoutHarmOrMemos(int tickLimit, params string[] memos) : base(tickLimit)
 		{
-			base.Data.ticksPassed = 0;
+			this.memos = memos.ToList<string>();
 		}
-		return base.ActivateOn(lord, signal);
+
+		// Token: 0x06006964 RID: 26980 RVA: 0x002133AC File Offset: 0x002115AC
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
+		{
+			if (Trigger_PawnHarmed.SignalIsHarm(signal) || this.memos.Contains(signal.memo))
+			{
+				base.Data.ticksPassed = 0;
+			}
+			return base.ActivateOn(lord, signal);
+		}
+
+		// Token: 0x04004A88 RID: 19080
+		private List<string> memos;
 	}
 }

@@ -1,141 +1,203 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_MechanitorShip : QuestNode
+namespace RimWorld.QuestGen
 {
-	private const string QuestTag = "MechanitorShip";
-
-	private const int TicksToShuttleArrival = 180;
-
-	private const int TicksToBeginAssault = 5000;
-
-	private static readonly IntRange RandomMechanitorCorpseAge = new IntRange(50, 360000000);
-
-	private const int LandingSpotDistanceToHostiles = 55;
-
-	public float combatPointsFactor = 1f;
-
-	public List<ShipPawnGroup> mechGroups;
-
-	protected override void RunInt()
+	// Token: 0x02003B5D RID: 15197
+	public class QuestNode_Root_MechanitorShip : QuestNode
 	{
-		if (!ModLister.CheckBiotech("Mechanitor ship"))
+		// Token: 0x06014A67 RID: 84583 RVA: 0x0062BCE4 File Offset: 0x00629EE4
+		protected override void RunInt()
 		{
-			return;
-		}
-		Quest quest = QuestGen.quest;
-		Slate slate = QuestGen.slate;
-		Map map = slate.Get<Map>("map") ?? QuestGen_Get.GetMap();
-		float num = slate.Get("points", 0f);
-		string questTagToAdd = QuestGenUtility.HardcodedTargetQuestTagWithQuestID("MechanitorShip");
-		string defendTimeoutSignal = QuestGen.GenerateNewSignal("DefendTimeout");
-		string beginAssaultSignal = QuestGen.GenerateNewSignal("BeginAssault");
-		string assaultBeganSignal = QuestGen.GenerateNewSignal("AssaultBegan");
-		string attackedSignal = QuestGenUtility.HardcodedSignalWithQuestID("mechs.TookDamageFromPlayer");
-		string text = QuestGenUtility.HardcodedSignalWithQuestID("mechs.Destroyed");
-		string text2 = QuestGenUtility.HardcodedSignalWithQuestID("mechs.Despawned");
-		slate.Set("map", map);
-		List<Thing> shuttleContents = new List<Thing>();
-		List<Pawn> mechs = new List<Pawn>();
-		GeneratePawns(mechGroups.RandomElement(), num * combatPointsFactor, quest, mechs);
-		shuttleContents.AddRange(mechs);
-		string var = (from m in mechs
+			QuestNode_Root_MechanitorShip.<>c__DisplayClass7_0 CS$<>8__locals1 = new QuestNode_Root_MechanitorShip.<>c__DisplayClass7_0();
+			if (!ModLister.CheckBiotech("Mechanitor ship"))
+			{
+				return;
+			}
+			CS$<>8__locals1.quest = QuestGen.quest;
+			Slate slate = QuestGen.slate;
+			QuestNode_Root_MechanitorShip.<>c__DisplayClass7_0 CS$<>8__locals2 = CS$<>8__locals1;
+			Map map;
+			if ((map = slate.Get<Map>("map", null, false)) == null)
+			{
+				map = QuestGen_Get.GetMap(false, null, false);
+			}
+			CS$<>8__locals2.map = map;
+			float num = slate.Get<float>("points", 0f, false);
+			string questTagToAdd = QuestGenUtility.HardcodedTargetQuestTagWithQuestID("MechanitorShip");
+			CS$<>8__locals1.defendTimeoutSignal = QuestGen.GenerateNewSignal("DefendTimeout", true);
+			CS$<>8__locals1.beginAssaultSignal = QuestGen.GenerateNewSignal("BeginAssault", true);
+			CS$<>8__locals1.assaultBeganSignal = QuestGen.GenerateNewSignal("AssaultBegan", true);
+			CS$<>8__locals1.attackedSignal = QuestGenUtility.HardcodedSignalWithQuestID("mechs.TookDamageFromPlayer");
+			string text = QuestGenUtility.HardcodedSignalWithQuestID("mechs.Destroyed");
+			string text2 = QuestGenUtility.HardcodedSignalWithQuestID("mechs.Despawned");
+			slate.Set<Map>("map", CS$<>8__locals1.map, false);
+			CS$<>8__locals1.shuttleContents = new List<Thing>();
+			CS$<>8__locals1.mechs = new List<Pawn>();
+			this.GeneratePawns(this.mechGroups.RandomElement<ShipPawnGroup>(), num * this.combatPointsFactor, CS$<>8__locals1.quest, CS$<>8__locals1.mechs);
+			CS$<>8__locals1.shuttleContents.AddRange(CS$<>8__locals1.mechs);
+			string var = (from m in CS$<>8__locals1.mechs
 			group m by m.kindDef into g
-			select GenLabel.BestKindLabel(g.Key, Gender.None) + " x" + g.Count()).ToLineList(" - ", capitalizeItems: true);
-		slate.Set("mechList", var);
-		slate.Set("mechs", mechs);
-		PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.Mechanitor_Basic, Faction.OfAncients, PawnGenerationContext.NonPlayer, map.Tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: true);
-		Pawn mechanitor = quest.GeneratePawn(request);
-		mechanitor.Corpse.Age = RandomMechanitorCorpseAge.RandomInRange;
-		mechanitor.relations.hidePawnRelations = true;
-		mechanitor.Corpse.GetComp<CompRottable>().RotProgress += mechanitor.Corpse.Age;
-		mechanitor.Corpse.SetForbidden(value: true);
-		shuttleContents.Add(mechanitor.Corpse);
-		slate.Set("mechanitor", mechanitor);
-		Thing thing = ThingMaker.MakeThing(ThingDefOf.ShuttleCrashed_Exitable_Mechanitor);
-		quest.SetFaction(Gen.YieldSingle(thing), Faction.OfAncients);
-		TryFindShuttleCrashPosition(map, thing.def.size, out var shuttleCrashPosition);
-		TransportShip transportShip = quest.GenerateTransportShip(TransportShipDefOf.Ship_ShuttleCrashing_Mechanitor, shuttleContents, thing).transportShip;
-		quest.AddShipJob_WaitTime(transportShip, 60, leaveImmediatelyWhenSatisfied: false).showGizmos = false;
-		quest.AddShipJob_Unload(transportShip, ShipJobStartMode.Queue, unforbidAll: false);
-		QuestUtility.AddQuestTag(ref transportShip.questTags, questTagToAdd);
-		quest.Delay(180, delegate
-		{
-			quest.Letter(LetterDefOf.NegativeEvent, null, null, null, null, useColonistsFromCaravanArg: false, QuestPart.SignalListenMode.OngoingOnly, shuttleContents, filterDeadPawnsFromLookTargets: false, "[mechanitorShuttleCrashedLetterText]", null, "[mechanitorShuttleCrashedLetterLabel]");
-			quest.AddShipJob_Arrive(transportShip, map.Parent, null, shuttleCrashPosition, ShipJobStartMode.Force_DelayCurrent, Faction.OfMechanoids);
-			quest.DefendPoint(map.Parent, mechanitor, shuttleCrashPosition, mechs, Faction.OfMechanoids, null, null, 5f);
-			quest.Delay(5000, delegate
+			select GenLabel.BestKindLabel(g.Key, Gender.None, false, -1) + " x" + g.Count<Pawn>().ToString()).ToLineList(" - ", true);
+			slate.Set<string>("mechList", var, false);
+			slate.Set<List<Pawn>>("mechs", CS$<>8__locals1.mechs, false);
+			PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.Mechanitor_Basic, Faction.OfAncients, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, true, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false);
+			CS$<>8__locals1.mechanitor = CS$<>8__locals1.quest.GeneratePawn(request, false);
+			CS$<>8__locals1.mechanitor.Corpse.Age = QuestNode_Root_MechanitorShip.RandomMechanitorCorpseAge.RandomInRange;
+			CS$<>8__locals1.mechanitor.relations.hidePawnRelations = true;
+			CS$<>8__locals1.mechanitor.Corpse.GetComp<CompRottable>().RotProgress += (float)CS$<>8__locals1.mechanitor.Corpse.Age;
+			CS$<>8__locals1.mechanitor.Corpse.SetForbidden(true, true);
+			CS$<>8__locals1.shuttleContents.Add(CS$<>8__locals1.mechanitor.Corpse);
+			slate.Set<Pawn>("mechanitor", CS$<>8__locals1.mechanitor, false);
+			Thing thing = ThingMaker.MakeThing(ThingDefOf.ShuttleCrashed_Exitable_Mechanitor, null);
+			CS$<>8__locals1.quest.SetFaction(Gen.YieldSingle<Thing>(thing), Faction.OfAncients, null);
+			this.TryFindShuttleCrashPosition(CS$<>8__locals1.map, thing.def.size, out CS$<>8__locals1.shuttleCrashPosition);
+			CS$<>8__locals1.transportShip = CS$<>8__locals1.quest.GenerateTransportShip(TransportShipDefOf.Ship_ShuttleCrashing_Mechanitor, CS$<>8__locals1.shuttleContents, thing, null).transportShip;
+			CS$<>8__locals1.quest.AddShipJob_WaitTime(CS$<>8__locals1.transportShip, 60, false, null, null).showGizmos = false;
+			CS$<>8__locals1.quest.AddShipJob_Unload(CS$<>8__locals1.transportShip, ShipJobStartMode.Queue, false, null);
+			QuestUtility.AddQuestTag(ref CS$<>8__locals1.transportShip.questTags, questTagToAdd);
+			CS$<>8__locals1.quest.Delay(180, delegate
 			{
-				quest.SignalPass(null, null, attackedSignal);
-			}).debugLabel = "Assault delay";
-			quest.AnySignal(new string[2] { attackedSignal, defendTimeoutSignal }, null, Gen.YieldSingle(beginAssaultSignal));
-			quest.SignalPassActivable(delegate
-			{
-				quest.AnyPawnInCombatShape(mechs, delegate
+				CS$<>8__locals1.quest.Letter(LetterDefOf.NegativeEvent, null, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, CS$<>8__locals1.shuttleContents, false, "[mechanitorShuttleCrashedLetterText]", null, "[mechanitorShuttleCrashedLetterLabel]", null, null);
+				CS$<>8__locals1.quest.AddShipJob_Arrive(CS$<>8__locals1.transportShip, CS$<>8__locals1.map.Parent, null, new IntVec3?(CS$<>8__locals1.shuttleCrashPosition), ShipJobStartMode.Force_DelayCurrent, Faction.OfMechanoids, null);
+				CS$<>8__locals1.quest.DefendPoint(CS$<>8__locals1.map.Parent, CS$<>8__locals1.mechanitor, CS$<>8__locals1.shuttleCrashPosition, CS$<>8__locals1.mechs, Faction.OfMechanoids, null, null, new float?((float)5), false, true);
+				Quest quest = CS$<>8__locals1.quest;
+				int delayTicks = 5000;
+				Action inner;
+				if ((inner = CS$<>8__locals1.<>9__4) == null)
 				{
-					QuestPart_AssaultColony questPart_AssaultColony = quest.AssaultColony(Faction.OfMechanoids, map.Parent, mechs);
-					questPart_AssaultColony.canKidnap = false;
-					questPart_AssaultColony.canSteal = false;
-					questPart_AssaultColony.canTimeoutOrFlee = false;
-					quest.Letter(LetterDefOf.ThreatSmall, null, null, null, null, useColonistsFromCaravanArg: false, QuestPart.SignalListenMode.OngoingOnly, mechs, filterDeadPawnsFromLookTargets: false, "[assaultBeginLetterText]", null, "[assaultBeginLetterLabel]");
-				}, null, null, assaultBeganSignal);
-			}, null, beginAssaultSignal, null, null, assaultBeganSignal);
-		}).debugLabel = "Arrival delay";
-		quest.AnySignal(new string[2] { text, text2 }, delegate
-		{
-			quest.AllPawnsDespawned(mechs, delegate
-			{
-				quest.AnyPawnHasHediff(Gen.YieldSingle(mechanitor), HediffDefOf.MechlinkImplant, delegate
+					inner = (CS$<>8__locals1.<>9__4 = delegate()
+					{
+						CS$<>8__locals1.quest.SignalPass(null, null, CS$<>8__locals1.attackedSignal);
+					});
+				}
+				quest.Delay(delayTicks, inner, null, null, null, false, null, null, false, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, false).debugLabel = "Assault delay";
+				CS$<>8__locals1.quest.AnySignal(new string[]
 				{
-					quest.Letter(LetterDefOf.PositiveEvent, null, null, null, null, useColonistsFromCaravanArg: false, QuestPart.SignalListenMode.OngoingOnly, Gen.YieldSingle(mechanitor.Corpse), filterDeadPawnsFromLookTargets: false, "[mechlinkAvailableLetterText]", null, "[mechlinkAvailableLetterLabel]");
-				});
-				QuestGen_End.End(quest, QuestEndOutcome.Success);
-			});
-		});
-	}
+					CS$<>8__locals1.attackedSignal,
+					CS$<>8__locals1.defendTimeoutSignal
+				}, null, Gen.YieldSingle<string>(CS$<>8__locals1.beginAssaultSignal), QuestPart.SignalListenMode.OngoingOnly);
+				Quest quest2 = CS$<>8__locals1.quest;
+				Action action;
+				if ((action = CS$<>8__locals1.<>9__5) == null)
+				{
+					action = (CS$<>8__locals1.<>9__5 = delegate()
+					{
+						Quest quest3 = CS$<>8__locals1.quest;
+						IEnumerable<Pawn> mechs = CS$<>8__locals1.mechs;
+						Action action2;
+						if ((action2 = CS$<>8__locals1.<>9__6) == null)
+						{
+							action2 = (CS$<>8__locals1.<>9__6 = delegate()
+							{
+								QuestPart_AssaultColony questPart_AssaultColony = CS$<>8__locals1.quest.AssaultColony(Faction.OfMechanoids, CS$<>8__locals1.map.Parent, CS$<>8__locals1.mechs, null, null);
+								questPart_AssaultColony.canKidnap = false;
+								questPart_AssaultColony.canSteal = false;
+								questPart_AssaultColony.canTimeoutOrFlee = false;
+								CS$<>8__locals1.quest.Letter(LetterDefOf.ThreatSmall, null, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, CS$<>8__locals1.mechs, false, "[assaultBeginLetterText]", null, "[assaultBeginLetterLabel]", null, null);
+							});
+						}
+						quest3.AnyPawnInCombatShape(mechs, action2, null, null, CS$<>8__locals1.assaultBeganSignal, null, null, QuestPart.SignalListenMode.OngoingOnly);
+					});
+				}
+				quest2.SignalPassActivable(action, null, CS$<>8__locals1.beginAssaultSignal, null, null, CS$<>8__locals1.assaultBeganSignal, false);
+			}, null, null, null, false, null, null, false, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, false).debugLabel = "Arrival delay";
+			CS$<>8__locals1.quest.AnySignal(new string[]
+			{
+				text,
+				text2
+			}, delegate
+			{
+				Quest quest = CS$<>8__locals1.quest;
+				IEnumerable<Pawn> mechs = CS$<>8__locals1.mechs;
+				Action action;
+				if ((action = CS$<>8__locals1.<>9__7) == null)
+				{
+					action = (CS$<>8__locals1.<>9__7 = delegate()
+					{
+						Quest quest2 = CS$<>8__locals1.quest;
+						IEnumerable<Pawn> pawns = Gen.YieldSingle<Pawn>(CS$<>8__locals1.mechanitor);
+						HediffDef mechlinkImplant = HediffDefOf.MechlinkImplant;
+						Action action2;
+						if ((action2 = CS$<>8__locals1.<>9__8) == null)
+						{
+							action2 = (CS$<>8__locals1.<>9__8 = delegate()
+							{
+								CS$<>8__locals1.quest.Letter(LetterDefOf.PositiveEvent, null, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, Gen.YieldSingle<Corpse>(CS$<>8__locals1.mechanitor.Corpse), false, "[mechlinkAvailableLetterText]", null, "[mechlinkAvailableLetterLabel]", null, null);
+							});
+						}
+						quest2.AnyPawnHasHediff(pawns, mechlinkImplant, action2, null, null, null, null, null, QuestPart.SignalListenMode.OngoingOnly);
+						CS$<>8__locals1.quest.End(QuestEndOutcome.Success, 0, null, null, QuestPart.SignalListenMode.OngoingOnly, false, false);
+					});
+				}
+				quest.AllPawnsDespawned(mechs, action, null, null, null, null, null, QuestPart.SignalListenMode.OngoingOnly);
+			}, null, QuestPart.SignalListenMode.OngoingOnly);
+		}
 
-	private void GeneratePawns(ShipPawnGroup group, float points, Quest quest, List<Pawn> outPawns)
-	{
-		foreach (ShipPawnOption item in group.options.Where((ShipPawnOption o) => o.requireOneOf))
+		// Token: 0x06014A68 RID: 84584 RVA: 0x0062C0D8 File Offset: 0x0062A2D8
+		private void GeneratePawns(ShipPawnGroup group, float points, Quest quest, List<Pawn> outPawns)
 		{
-			outPawns.Add(quest.GeneratePawn(item.pawnKind, Faction.OfMechanoids));
-			points -= item.pawnKind.combatPower;
+			foreach (ShipPawnOption shipPawnOption in from o in @group.options
+			where o.requireOneOf
+			select o)
+			{
+				outPawns.Add(quest.GeneratePawn(shipPawnOption.pawnKind, Faction.OfMechanoids, true, null, 0f, true, null, 0f, 0f, false, false, DevelopmentalStage.Adult, false));
+				points -= shipPawnOption.pawnKind.combatPower;
+			}
+			Func<ShipPawnOption, bool> <>9__1;
+			for (;;)
+			{
+				IEnumerable<ShipPawnOption> options = group.options;
+				Func<ShipPawnOption, bool> predicate;
+				if ((predicate = <>9__1) == null)
+				{
+					predicate = (<>9__1 = ((ShipPawnOption o) => o.pawnKind.combatPower < points));
+				}
+				ShipPawnOption shipPawnOption2;
+				if (!options.Where(predicate).TryRandomElementByWeight((ShipPawnOption o) => o.weight, out shipPawnOption2))
+				{
+					break;
+				}
+				outPawns.Add(quest.GeneratePawn(shipPawnOption2.pawnKind, Faction.OfMechanoids, true, null, 0f, true, null, 0f, 0f, false, false, DevelopmentalStage.Adult, false));
+				points -= shipPawnOption2.pawnKind.combatPower;
+			}
 		}
-		ShipPawnOption result;
-		while (group.options.Where((ShipPawnOption o) => o.pawnKind.combatPower < points).TryRandomElementByWeight((ShipPawnOption o) => o.weight, out result))
-		{
-			outPawns.Add(quest.GeneratePawn(result.pawnKind, Faction.OfMechanoids));
-			points -= result.pawnKind.combatPower;
-		}
-	}
 
-	protected override bool TestRunInt(Slate slate)
-	{
-		Map map = QuestGen_Get.GetMap();
-		if (map == null)
+		// Token: 0x06014A69 RID: 84585 RVA: 0x0062C238 File Offset: 0x0062A438
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			Map map = QuestGen_Get.GetMap(false, null, false);
+			IntVec3 intVec;
+			return map != null && Faction.OfMechanoids != null && this.TryFindShuttleCrashPosition(map, ThingDefOf.ShuttleCrashed_Exitable_Mechanitor.size, out intVec);
 		}
-		if (Faction.OfMechanoids == null)
-		{
-			return false;
-		}
-		if (!TryFindShuttleCrashPosition(map, ThingDefOf.ShuttleCrashed_Exitable_Mechanitor.size, out var _))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	private bool TryFindShuttleCrashPosition(Map map, IntVec2 size, out IntVec3 spot)
-	{
-		if (DropCellFinder.FindSafeLandingSpot(out spot, Faction.OfMechanoids, map, 55, 15, 25, size, ThingDefOf.ShuttleCrashed_Exitable_Mechanitor.interactionCellOffset))
+		// Token: 0x06014A6A RID: 84586 RVA: 0x0062C27C File Offset: 0x0062A47C
+		private bool TryFindShuttleCrashPosition(Map map, IntVec2 size, out IntVec3 spot)
 		{
-			return true;
+			return DropCellFinder.FindSafeLandingSpot(out spot, Faction.OfMechanoids, map, 55, 15, 25, new IntVec2?(size), new IntVec3?(ThingDefOf.ShuttleCrashed_Exitable_Mechanitor.interactionCellOffset));
 		}
-		return false;
+
+		// Token: 0x0400E56B RID: 58731
+		private const string QuestTag = "MechanitorShip";
+
+		// Token: 0x0400E56C RID: 58732
+		private const int TicksToShuttleArrival = 180;
+
+		// Token: 0x0400E56D RID: 58733
+		private const int TicksToBeginAssault = 5000;
+
+		// Token: 0x0400E56E RID: 58734
+		private static readonly IntRange RandomMechanitorCorpseAge = new IntRange(50, 360000000);
+
+		// Token: 0x0400E56F RID: 58735
+		private const int LandingSpotDistanceToHostiles = 55;
+
+		// Token: 0x0400E570 RID: 58736
+		public float combatPointsFactor = 1f;
+
+		// Token: 0x0400E571 RID: 58737
+		public List<ShipPawnGroup> mechGroups;
 	}
 }

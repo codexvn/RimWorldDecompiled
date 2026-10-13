@@ -1,18 +1,21 @@
+﻿using System;
 using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.CompilerServices;
 using System.Security;
 using System.Security.Permissions;
+using RimWorld;
 using RimWorld.Planet;
 using Unity.Burst;
 
+[assembly: AssemblyVersion("1.6.9340.29816")]
 [assembly: AssemblyCompany("Ludeon Studios")]
 [assembly: AssemblyCopyright("Copyright Ludeon Studios.")]
 [assembly: AssemblyTrademark("RimWorld is a registered trademark of Ludeon Studios.")]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(RimWorld_002EComputeLargestRects_0000B772_0024BurstDirectCall))]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(RimWorld_002ERectsComputeSpaces_0000B773_0024BurstDirectCall))]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(FastTileFinder.ComputeQueryJob.SphericalDistance_00014F7D_0024BurstDirectCall))]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(RimWorld_002EPlanet_002ECalculateAverageTileSize_00015440_0024BurstDirectCall))]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(RimWorld_002EPlanet_002EIntGetTileSize_00015442_0024BurstDirectCall))]
-[assembly: BurstCompiler.StaticTypeReinit(typeof(RimWorld_002EPlanet_002EIntGetTileCenter_00015445_0024BurstDirectCall))]
-[assembly: AssemblyVersion("1.6.9655.19392")]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(MapGenUtility.ComputeLargestRects_0000B6CA$BurstDirectCall))]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(MapGenUtility.RectsComputeSpaces_0000B6CB$BurstDirectCall))]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(FastTileFinder.ComputeQueryJob.SphericalDistance_00014E3B$BurstDirectCall))]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(PlanetLayer.CalculateAverageTileSize_000152FC$BurstDirectCall))]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(PlanetLayer.IntGetTileSize_000152FE$BurstDirectCall))]
+[assembly: BurstCompiler.StaticTypeReinitAttribute(typeof(PlanetLayer.IntGetTileCenter_00015301$BurstDirectCall))]
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]

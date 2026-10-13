@@ -1,87 +1,92 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Stockpile : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private List<IntVec3> cells = new List<IntVec3>();
-
-	private const float FreeCellsFraction = 0.45f;
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200397A RID: 14714
+	public class SymbolResolver_Stockpile : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		if (rp.stockpileConcreteContents != null)
+		// Token: 0x06014384 RID: 82820 RVA: 0x00608604 File Offset: 0x00606804
+		public override void Resolve(ResolveParams rp)
 		{
-			CalculateFreeCells(rp.rect, 0f);
-			int num = 0;
-			int num2 = rp.stockpileConcreteContents.Count - 1;
-			while (num2 >= 0 && num < cells.Count)
+			Map map = BaseGen.globalSettings.map;
+			if (rp.stockpileConcreteContents != null)
 			{
-				Thing thing = GenSpawn.Spawn(rp.stockpileConcreteContents[num2], cells[num], map);
-				if (thing != null && thing.def.category == ThingCategory.Item)
+				this.CalculateFreeCells(rp.rect, 0f);
+				int num = 0;
+				int num2 = rp.stockpileConcreteContents.Count - 1;
+				while (num2 >= 0 && num < this.cells.Count)
 				{
-					thing.SetForbidden(value: true, warnOnFail: false);
+					Thing thing = GenSpawn.Spawn(rp.stockpileConcreteContents[num2], this.cells[num], map, WipeMode.Vanish);
+					if (thing != null && thing.def.category == ThingCategory.Item)
+					{
+						thing.SetForbidden(true, false);
+					}
+					num++;
+					num2--;
 				}
-				num++;
-				num2--;
-			}
-			for (int num3 = rp.stockpileConcreteContents.Count - 1; num3 >= 0; num3--)
-			{
-				if (!rp.stockpileConcreteContents[num3].Spawned)
+				for (int i = rp.stockpileConcreteContents.Count - 1; i >= 0; i--)
 				{
-					rp.stockpileConcreteContents[num3].Destroy();
+					if (!rp.stockpileConcreteContents[i].Spawned)
+					{
+						rp.stockpileConcreteContents[i].Destroy(DestroyMode.Vanish);
+					}
 				}
+				rp.stockpileConcreteContents.Clear();
+				return;
 			}
-			rp.stockpileConcreteContents.Clear();
-			return;
-		}
-		CalculateFreeCells(rp.rect, 0.45f);
-		ThingSetMakerDef thingSetMakerDef = rp.thingSetMakerDef ?? ThingSetMakerDefOf.MapGen_DefaultStockpile;
-		ThingSetMakerParams value;
-		if (rp.thingSetMakerParams.HasValue)
-		{
-			value = rp.thingSetMakerParams.Value;
-		}
-		else
-		{
-			value = new ThingSetMakerParams
+			this.CalculateFreeCells(rp.rect, 0.45f);
+			ThingSetMakerDef thingSetMakerDef = rp.thingSetMakerDef ?? ThingSetMakerDefOf.MapGen_DefaultStockpile;
+			ThingSetMakerParams value;
+			if (rp.thingSetMakerParams != null)
 			{
-				techLevel = ((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined),
-				makingFaction = rp.faction,
-				validator = (ThingDef x) => (rp.faction == null || (int)x.techLevel >= (int)rp.faction.def.techLevel || !x.IsWeapon || !(x.GetStatValueAbstract(StatDefOf.MarketValue, GenStuff.DefaultStuffFor(x)) < 100f)) ? true : false
-			};
-			float num4 = rp.stockpileMarketValue ?? Mathf.Min((float)cells.Count * 130f, 1800f);
-			value.totalMarketValueRange = new FloatRange(num4, num4);
+				value = rp.thingSetMakerParams.Value;
+			}
+			else
+			{
+				value = default(ThingSetMakerParams);
+				value.techLevel = new TechLevel?((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined);
+				value.makingFaction = rp.faction;
+				value.validator = ((ThingDef x) => rp.faction == null || x.techLevel >= rp.faction.def.techLevel || !x.IsWeapon || x.GetStatValueAbstract(StatDefOf.MarketValue, GenStuff.DefaultStuffFor(x)) >= 100f);
+				float num3 = rp.stockpileMarketValue ?? Mathf.Min((float)this.cells.Count * 130f, 1800f);
+				value.totalMarketValueRange = new FloatRange?(new FloatRange(num3, num3));
+			}
+			if (value.countRange == null)
+			{
+				value.countRange = new IntRange?(new IntRange(this.cells.Count, this.cells.Count));
+			}
+			ResolveParams rp2 = rp;
+			rp2.thingSetMakerDef = thingSetMakerDef;
+			rp2.thingSetMakerParams = new ThingSetMakerParams?(value);
+			BaseGen.symbolStack.Push("thingSet", rp2, null);
 		}
-		if (!value.countRange.HasValue)
-		{
-			value.countRange = new IntRange(cells.Count, cells.Count);
-		}
-		ResolveParams resolveParams = rp;
-		resolveParams.thingSetMakerDef = thingSetMakerDef;
-		resolveParams.thingSetMakerParams = value;
-		BaseGen.symbolStack.Push("thingSet", resolveParams);
-	}
 
-	private void CalculateFreeCells(CellRect rect, float freeCellsFraction)
-	{
-		Map map = BaseGen.globalSettings.map;
-		cells.Clear();
-		foreach (IntVec3 item in rect)
+		// Token: 0x06014385 RID: 82821 RVA: 0x00608890 File Offset: 0x00606A90
+		private void CalculateFreeCells(CellRect rect, float freeCellsFraction)
 		{
-			if (item.Standable(map) && item.GetFirstItem(map) == null)
+			Map map = BaseGen.globalSettings.map;
+			this.cells.Clear();
+			foreach (IntVec3 intVec in rect)
 			{
-				cells.Add(item);
+				if (intVec.Standable(map) && intVec.GetFirstItem(map) == null)
+				{
+					this.cells.Add(intVec);
+				}
 			}
+			int num = (int)(freeCellsFraction * (float)this.cells.Count);
+			for (int i = 0; i < num; i++)
+			{
+				this.cells.RemoveAt(Rand.Range(0, this.cells.Count));
+			}
+			this.cells.Shuffle<IntVec3>();
 		}
-		int num = (int)(freeCellsFraction * (float)cells.Count);
-		for (int i = 0; i < num; i++)
-		{
-			cells.RemoveAt(Rand.Range(0, cells.Count));
-		}
-		cells.Shuffle();
+
+		// Token: 0x0400DF6D RID: 57197
+		private List<IntVec3> cells = new List<IntVec3>();
+
+		// Token: 0x0400DF6E RID: 57198
+		private const float FreeCellsFraction = 0.45f;
 	}
 }

@@ -1,79 +1,90 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public static class DigUtility
+namespace RimWorld
 {
-	private const int CheckOverrideInterval = 500;
-
-	public static Job PassBlockerJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker, bool canMineMineables, bool canMineNonMineables)
+	// Token: 0x02001414 RID: 5140
+	public static class DigUtility
 	{
-		if (StatDefOf.MiningSpeed.Worker.IsDisabledFor(pawn))
+		// Token: 0x06007D23 RID: 32035 RVA: 0x0025ABC4 File Offset: 0x00258DC4
+		public static Job PassBlockerJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker, bool canMineMineables, bool canMineNonMineables)
 		{
-			canMineMineables = false;
-			canMineNonMineables = false;
-		}
-		if (blocker.def.mineable)
-		{
-			if (canMineMineables)
+			if (StatDefOf.MiningSpeed.Worker.IsDisabledFor(pawn))
 			{
-				return MineOrWaitJob(pawn, blocker, cellBeforeBlocker);
+				canMineMineables = false;
+				canMineNonMineables = false;
 			}
-			return MeleeOrWaitJob(pawn, blocker, cellBeforeBlocker);
-		}
-		if (pawn.equipment != null && pawn.equipment.Primary != null)
-		{
-			Verb primaryVerb = pawn.equipment.PrimaryEq.PrimaryVerb;
-			if (primaryVerb.verbProps.ai_IsBuildingDestroyer && (!primaryVerb.IsIncendiary_Ranged() || blocker.FlammableNow))
+			if (blocker.def.mineable)
 			{
-				Job job = JobMaker.MakeJob(JobDefOf.UseVerbOnThing);
-				job.targetA = blocker;
-				job.verbToUse = primaryVerb;
-				job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
-				return job;
+				if (canMineMineables)
+				{
+					return DigUtility.MineOrWaitJob(pawn, blocker, cellBeforeBlocker);
+				}
+				return DigUtility.MeleeOrWaitJob(pawn, blocker, cellBeforeBlocker);
+			}
+			else
+			{
+				if (pawn.equipment != null && pawn.equipment.Primary != null)
+				{
+					Verb primaryVerb = pawn.equipment.PrimaryEq.PrimaryVerb;
+					if (primaryVerb.verbProps.ai_IsBuildingDestroyer && (!primaryVerb.IsIncendiary_Ranged() || blocker.FlammableNow))
+					{
+						Job job = JobMaker.MakeJob(JobDefOf.UseVerbOnThing);
+						job.targetA = blocker;
+						job.verbToUse = primaryVerb;
+						job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
+						return job;
+					}
+				}
+				if (canMineNonMineables)
+				{
+					return DigUtility.MineOrWaitJob(pawn, blocker, cellBeforeBlocker);
+				}
+				return DigUtility.MeleeOrWaitJob(pawn, blocker, cellBeforeBlocker);
 			}
 		}
-		if (canMineNonMineables)
-		{
-			return MineOrWaitJob(pawn, blocker, cellBeforeBlocker);
-		}
-		return MeleeOrWaitJob(pawn, blocker, cellBeforeBlocker);
-	}
 
-	private static Job MeleeOrWaitJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker)
-	{
-		if (!pawn.CanReserve(blocker))
+		// Token: 0x06007D24 RID: 32036 RVA: 0x0025AC94 File Offset: 0x00258E94
+		private static Job MeleeOrWaitJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker)
 		{
-			return WaitNearJob(pawn, cellBeforeBlocker);
+			if (!pawn.CanReserve(blocker, 1, -1, null, false))
+			{
+				return DigUtility.WaitNearJob(pawn, cellBeforeBlocker);
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, blocker);
+			job.ignoreDesignations = true;
+			job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
+			job.checkOverrideOnExpire = true;
+			return job;
 		}
-		Job job = JobMaker.MakeJob(JobDefOf.AttackMelee, blocker);
-		job.ignoreDesignations = true;
-		job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
-		job.checkOverrideOnExpire = true;
-		return job;
-	}
 
-	private static Job MineOrWaitJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker)
-	{
-		if (!pawn.CanReserve(blocker))
+		// Token: 0x06007D25 RID: 32037 RVA: 0x0025ACEC File Offset: 0x00258EEC
+		private static Job MineOrWaitJob(Pawn pawn, Thing blocker, IntVec3 cellBeforeBlocker)
 		{
-			return WaitNearJob(pawn, cellBeforeBlocker);
+			if (!pawn.CanReserve(blocker, 1, -1, null, false))
+			{
+				return DigUtility.WaitNearJob(pawn, cellBeforeBlocker);
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.Mine, blocker);
+			job.ignoreDesignations = true;
+			job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
+			job.checkOverrideOnExpire = true;
+			return job;
 		}
-		Job job = JobMaker.MakeJob(JobDefOf.Mine, blocker);
-		job.ignoreDesignations = true;
-		job.expiryInterval = JobGiver_AIFightEnemy.ExpiryInterval_ShooterSucceeded.RandomInRange;
-		job.checkOverrideOnExpire = true;
-		return job;
-	}
 
-	private static Job WaitNearJob(Pawn pawn, IntVec3 cellBeforeBlocker)
-	{
-		IntVec3 intVec = CellFinder.RandomClosewalkCellNear(cellBeforeBlocker, pawn.Map, 10);
-		if (intVec == pawn.Position)
+		// Token: 0x06007D26 RID: 32038 RVA: 0x0025AD44 File Offset: 0x00258F44
+		private static Job WaitNearJob(Pawn pawn, IntVec3 cellBeforeBlocker)
 		{
-			return JobMaker.MakeJob(JobDefOf.Wait, 20, checkOverrideOnExpiry: true);
+			IntVec3 intVec = CellFinder.RandomClosewalkCellNear(cellBeforeBlocker, pawn.Map, 10, null);
+			if (intVec == pawn.Position)
+			{
+				return JobMaker.MakeJob(JobDefOf.Wait, 20, true);
+			}
+			return JobMaker.MakeJob(JobDefOf.Goto, intVec, 500, true);
 		}
-		return JobMaker.MakeJob(JobDefOf.Goto, intVec, 500, checkOverrideOnExpiry: true);
+
+		// Token: 0x04005436 RID: 21558
+		private const int CheckOverrideInterval = 500;
 	}
 }

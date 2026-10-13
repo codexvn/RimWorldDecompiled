@@ -1,57 +1,67 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_LowHemogen : Alert
+namespace RimWorld
 {
-	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
-
-	private List<string> targetLabels = new List<string>();
-
-	public Alert_LowHemogen()
+	// Token: 0x02003046 RID: 12358
+	public class Alert_LowHemogen : Alert
 	{
-		requireBiotech = true;
-		defaultLabel = "AlertLowHemogen".Translate();
-	}
-
-	public override string GetLabel()
-	{
-		string text = defaultLabel;
-		if (targets.Count == 1)
+		// Token: 0x060115D8 RID: 71128 RVA: 0x004FB662 File Offset: 0x004F9862
+		public Alert_LowHemogen()
 		{
-			text = text + ": " + targetLabels[0];
+			this.requireBiotech = true;
+			this.defaultLabel = "AlertLowHemogen".Translate();
 		}
-		return text;
-	}
 
-	private void CalculateTargets()
-	{
-		targets.Clear();
-		targetLabels.Clear();
-		foreach (Pawn item in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned)
+		// Token: 0x060115D9 RID: 71129 RVA: 0x004FB69C File Offset: 0x004F989C
+		public override string GetLabel()
 		{
-			if (item.genes != null && item.RaceProps.Humanlike && item.Faction == Faction.OfPlayer)
+			string text = this.defaultLabel;
+			if (this.targets.Count == 1)
 			{
-				Gene_Hemogen firstGeneOfType = item.genes.GetFirstGeneOfType<Gene_Hemogen>();
-				if (firstGeneOfType != null && firstGeneOfType.Value < firstGeneOfType.MinLevelForAlert)
+				text = text + ": " + this.targetLabels[0];
+			}
+			return text;
+		}
+
+		// Token: 0x060115DA RID: 71130 RVA: 0x004FB6D8 File Offset: 0x004F98D8
+		private void CalculateTargets()
+		{
+			this.targets.Clear();
+			this.targetLabels.Clear();
+			foreach (Pawn pawn in PawnsFinder.AllMapsCaravansAndTravellingTransporters_AliveSpawned)
+			{
+				if (pawn.genes != null && pawn.RaceProps.Humanlike && pawn.Faction == Faction.OfPlayer)
 				{
-					targets.Add(item);
-					targetLabels.Add(item.NameShortColored.Resolve());
+					Gene_Hemogen firstGeneOfType = pawn.genes.GetFirstGeneOfType<Gene_Hemogen>();
+					if (firstGeneOfType != null && firstGeneOfType.Value < firstGeneOfType.MinLevelForAlert)
+					{
+						this.targets.Add(pawn);
+						this.targetLabels.Add(pawn.NameShortColored.Resolve());
+					}
 				}
 			}
 		}
-	}
 
-	public override TaggedString GetExplanation()
-	{
-		return "AlertLowHemogenDesc".Translate() + ":\n" + targetLabels.ToLineList("  - ");
-	}
+		// Token: 0x060115DB RID: 71131 RVA: 0x004FB79C File Offset: 0x004F999C
+		public override TaggedString GetExplanation()
+		{
+			return "AlertLowHemogenDesc".Translate() + ":\n" + this.targetLabels.ToLineList("  - ");
+		}
 
-	public override AlertReport GetReport()
-	{
-		CalculateTargets();
-		return AlertReport.CulpritsAre(targets);
+		// Token: 0x060115DC RID: 71132 RVA: 0x004FB7C7 File Offset: 0x004F99C7
+		public override AlertReport GetReport()
+		{
+			this.CalculateTargets();
+			return AlertReport.CulpritsAre(this.targets);
+		}
+
+		// Token: 0x0400B3D1 RID: 46033
+		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
+
+		// Token: 0x0400B3D2 RID: 46034
+		private List<string> targetLabels = new List<string>();
 	}
 }

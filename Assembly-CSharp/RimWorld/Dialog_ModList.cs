@@ -1,25 +1,28 @@
-using System;
+﻿using System;
 using System.IO;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class Dialog_ModList : Dialog_FileList
+namespace RimWorld
 {
-	protected override void ReloadFiles()
+	// Token: 0x020031CC RID: 12748
+	public abstract class Dialog_ModList : Dialog_FileList
 	{
-		files.Clear();
-		foreach (FileInfo allModListFile in GenFilePaths.AllModListFiles)
+		// Token: 0x06011F02 RID: 73474 RVA: 0x00538ED0 File Offset: 0x005370D0
+		protected override void ReloadFiles()
 		{
-			try
+			this.files.Clear();
+			foreach (FileInfo fileInfo in GenFilePaths.AllModListFiles)
 			{
-				SaveFileInfo saveFileInfo = new SaveFileInfo(allModListFile);
-				saveFileInfo.LoadData();
-				files.Add(saveFileInfo);
-			}
-			catch (Exception ex)
-			{
-				Log.Error("Exception loading " + allModListFile.Name + ": " + ex.ToString());
+				try
+				{
+					SaveFileInfo saveFileInfo = new SaveFileInfo(fileInfo);
+					saveFileInfo.LoadData();
+					this.files.Add(saveFileInfo);
+				}
+				catch (Exception ex)
+				{
+					Log.Error("Exception loading " + fileInfo.Name + ": " + ex.ToString());
+				}
 			}
 		}
 	}

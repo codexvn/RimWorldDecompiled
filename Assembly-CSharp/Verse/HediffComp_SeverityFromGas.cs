@@ -1,34 +1,44 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class HediffComp_SeverityFromGas : HediffComp
+namespace Verse
 {
-	public HediffCompProperties_SeverityFromGas Props => (HediffCompProperties_SeverityFromGas)props;
-
-	public override void CompPostTick(ref float severityAdjustment)
+	// Token: 0x02000704 RID: 1796
+	public class HediffComp_SeverityFromGas : HediffComp
 	{
-		if (Props.gasType == GasType.ToxGas && !ModsConfig.BiotechActive)
+		// Token: 0x170007C0 RID: 1984
+		// (get) Token: 0x06002BF3 RID: 11251 RVA: 0x000E4B61 File Offset: 0x000E2D61
+		public HediffCompProperties_SeverityFromGas Props
 		{
-			return;
-		}
-		Pawn pawn = parent.pawn;
-		if (!pawn.Spawned || !pawn.IsHashIntervalTick(Props.intervalTicks))
-		{
-			return;
-		}
-		if (pawn.Position.AnyGas(pawn.Map, Props.gasType))
-		{
-			float num = (float)(int)pawn.Position.GasDensity(pawn.Map, Props.gasType) / 255f * Props.severityGasDensityFactor;
-			if (Props.exposureStatFactor != null)
+			get
 			{
-				num *= 1f - pawn.GetStatValue(Props.exposureStatFactor);
+				return (HediffCompProperties_SeverityFromGas)this.props;
 			}
-			severityAdjustment += num;
 		}
-		else
+
+		// Token: 0x06002BF4 RID: 11252 RVA: 0x000E4B70 File Offset: 0x000E2D70
+		public override void CompPostTick(ref float severityAdjustment)
 		{
-			severityAdjustment += Props.severityNotExposed;
+			if (this.Props.gasType == GasType.ToxGas && !ModsConfig.BiotechActive)
+			{
+				return;
+			}
+			Pawn pawn = this.parent.pawn;
+			if (!pawn.Spawned || !pawn.IsHashIntervalTick(this.Props.intervalTicks))
+			{
+				return;
+			}
+			if (pawn.Position.AnyGas(pawn.Map, this.Props.gasType))
+			{
+				float num = (float)pawn.Position.GasDensity(pawn.Map, this.Props.gasType) / 255f * this.Props.severityGasDensityFactor;
+				if (this.Props.exposureStatFactor != null)
+				{
+					num *= 1f - pawn.GetStatValue(this.Props.exposureStatFactor, true, -1);
+				}
+				severityAdjustment += num;
+				return;
+			}
+			severityAdjustment += this.Props.severityNotExposed;
 		}
 	}
 }

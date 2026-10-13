@@ -1,173 +1,194 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class StatWorker_PossibleCompOffsets : StatWorker
+namespace RimWorld
 {
-	public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
+	// Token: 0x02003753 RID: 14163
+	public class StatWorker_PossibleCompOffsets : StatWorker
 	{
-		float num = base.GetValueUnfinalized(req, applyPostProcess);
-		if (req.HasThing)
+		// Token: 0x06013A24 RID: 80420 RVA: 0x005D4D3C File Offset: 0x005D2F3C
+		public override float GetValueUnfinalized(StatRequest req, bool applyPostProcess = true)
 		{
-			CompStatOffsetBase compStatOffsetBase = req.Thing.TryGetComp<CompStatOffsetBase>();
-			if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == stat)
+			float num = base.GetValueUnfinalized(req, applyPostProcess);
+			if (req.HasThing)
 			{
-				num += compStatOffsetBase.GetStatOffset(req.Pawn);
+				CompStatOffsetBase compStatOffsetBase = req.Thing.TryGetComp<CompStatOffsetBase>();
+				if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == this.stat)
+				{
+					num += compStatOffsetBase.GetStatOffset(req.Pawn);
+				}
 			}
+			return num;
 		}
-		return num;
-	}
 
-	public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
-	{
-		string explanationUnfinalized = base.GetExplanationUnfinalized(req, numberSense);
-		StringBuilder stringBuilder = new StringBuilder();
-		if (req.Thing != null)
+		// Token: 0x06013A25 RID: 80421 RVA: 0x005D4D90 File Offset: 0x005D2F90
+		public override string GetExplanationUnfinalized(StatRequest req, ToStringNumberSense numberSense)
 		{
-			Thing thing = req.Thing;
-			CompStatOffsetBase compStatOffsetBase = thing.TryGetComp<CompStatOffsetBase>();
-			List<string> list = new List<string>();
-			List<string> list2 = new List<string>();
-			if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == stat)
+			string explanationUnfinalized = base.GetExplanationUnfinalized(req, numberSense);
+			StringBuilder stringBuilder = new StringBuilder();
+			if (req.Thing != null)
 			{
-				stringBuilder.AppendLine();
-				for (int i = 0; i < compStatOffsetBase.Props.offsets.Count; i++)
+				Thing thing = req.Thing;
+				CompStatOffsetBase compStatOffsetBase = thing.TryGetComp<CompStatOffsetBase>();
+				List<string> list = new List<string>();
+				List<string> list2 = new List<string>();
+				if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == this.stat)
 				{
-					FocusStrengthOffset focusStrengthOffset = compStatOffsetBase.Props.offsets[i];
-					if (focusStrengthOffset.CanApply(thing))
+					stringBuilder.AppendLine();
+					for (int i = 0; i < compStatOffsetBase.Props.offsets.Count; i++)
 					{
-						list.Add(focusStrengthOffset.GetExplanation(thing));
-					}
-					else
-					{
-						list2.Add(focusStrengthOffset.GetExplanationAbstract(thing.def));
-					}
-				}
-				if (list.Count > 0)
-				{
-					stringBuilder.AppendLine(list.ToLineList());
-				}
-				if (list2.Count > 0)
-				{
-					if (list.Count > 0)
-					{
-						stringBuilder.AppendLine();
-					}
-					stringBuilder.AppendLine("StatReport_PossibleOffsets".Translate() + ":");
-					stringBuilder.AppendLine(list2.ToLineList("  - "));
-				}
-			}
-		}
-		else if (req.Def is ThingDef thingDef)
-		{
-			CompProperties_MeditationFocus compProperties = thingDef.GetCompProperties<CompProperties_MeditationFocus>();
-			if (compProperties != null && compProperties.offsets.Count > 0 && compProperties.statDef == stat)
-			{
-				stringBuilder.AppendLine();
-				stringBuilder.AppendLine("StatReport_PossibleOffsets".Translate() + ":");
-				stringBuilder.AppendLine(compProperties.GetExplanationAbstract(thingDef).ToLineList("  - "));
-			}
-		}
-		return explanationUnfinalized + stringBuilder;
-	}
-
-	public override string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized = true)
-	{
-		float num = 0f;
-		float num2 = 0f;
-		bool flag = false;
-		if (optionalReq.Thing != null && optionalReq.Thing.Spawned)
-		{
-			num = (num2 = optionalReq.Thing.def.GetStatValueAbstract(stat));
-			Thing thing = optionalReq.Thing;
-			CompStatOffsetBase compStatOffsetBase = thing.TryGetComp<CompStatOffsetBase>();
-			if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == stat)
-			{
-				for (int i = 0; i < compStatOffsetBase.Props.offsets.Count; i++)
-				{
-					FocusStrengthOffset focusStrengthOffset = compStatOffsetBase.Props.offsets[i];
-					if (!focusStrengthOffset.DependsOnPawn)
-					{
-						if (focusStrengthOffset.CanApply(thing))
+						FocusStrengthOffset focusStrengthOffset = compStatOffsetBase.Props.offsets[i];
+						if (focusStrengthOffset.CanApply(thing, null))
 						{
-							float offset = focusStrengthOffset.GetOffset(thing);
-							num += offset;
-							num2 += offset;
+							list.Add(focusStrengthOffset.GetExplanation(thing));
+						}
+						else
+						{
+							list2.Add(focusStrengthOffset.GetExplanationAbstract(thing.def));
 						}
 					}
-					else
+					if (list.Count > 0)
 					{
-						flag = true;
+						stringBuilder.AppendLine(list.ToLineList(null));
+					}
+					if (list2.Count > 0)
+					{
+						if (list.Count > 0)
+						{
+							stringBuilder.AppendLine();
+						}
+						stringBuilder.AppendLine("StatReport_PossibleOffsets".Translate() + ":");
+						stringBuilder.AppendLine(list2.ToLineList("  - "));
 					}
 				}
 			}
-		}
-		else if (optionalReq.Def is ThingDef)
-		{
-			(num2, num) = AbstractValueRange(optionalReq, numberSense);
-		}
-		string text = (flag ? " (+)" : "");
-		return RangeToString(num2, num, numberSense, finalized) + text;
-	}
-
-	private (float, float) AbstractValueRange(StatRequest req, ToStringNumberSense numberSense)
-	{
-		ThingDef obj = (ThingDef)req.Def;
-		float num2;
-		float num = (num2 = obj.GetStatValueAbstract(stat));
-		CompProperties_MeditationFocus compProperties = obj.GetCompProperties<CompProperties_MeditationFocus>();
-		if (compProperties != null && compProperties.statDef == stat)
-		{
-			for (int i = 0; i < compProperties.offsets.Count; i++)
+			else
 			{
-				FocusStrengthOffset focusStrengthOffset = compProperties.offsets[i];
-				if (!focusStrengthOffset.NeedsToBeSpawned && req.Thing != null)
+				ThingDef thingDef = req.Def as ThingDef;
+				if (thingDef != null)
 				{
-					num2 += focusStrengthOffset.GetOffset(req.Thing);
-					continue;
+					CompProperties_MeditationFocus compProperties = thingDef.GetCompProperties<CompProperties_MeditationFocus>();
+					if (compProperties != null && compProperties.offsets.Count > 0 && compProperties.statDef == this.stat)
+					{
+						stringBuilder.AppendLine();
+						stringBuilder.AppendLine("StatReport_PossibleOffsets".Translate() + ":");
+						stringBuilder.AppendLine(compProperties.GetExplanationAbstract(thingDef).ToLineList("  - ", false));
+					}
 				}
-				float num3 = focusStrengthOffset.MinOffset();
-				float num4 = focusStrengthOffset.MaxOffset();
-				if (num4 > 0f)
-				{
-					num += num4;
-				}
-				if (num4 < 0f)
-				{
-					num2 += num4;
-				}
-				num2 += num3;
 			}
+			string str = explanationUnfinalized;
+			StringBuilder stringBuilder2 = stringBuilder;
+			return str + ((stringBuilder2 != null) ? stringBuilder2.ToString() : null);
 		}
-		return (num2, num);
-	}
 
-	private string RangeToString(float min, float max, ToStringNumberSense numberSense, bool finalized)
-	{
-		if (finalized)
+		// Token: 0x06013A26 RID: 80422 RVA: 0x005D4F5C File Offset: 0x005D315C
+		public override string GetStatDrawEntryLabel(StatDef stat, float value, ToStringNumberSense numberSense, StatRequest optionalReq, bool finalized = true)
 		{
-			min = Mathf.Clamp(min, stat.minValue, stat.maxValue);
-			max = Mathf.Clamp(max, stat.minValue, stat.maxValue);
+			float num = 0f;
+			float num2 = 0f;
+			bool flag = false;
+			if (optionalReq.Thing != null && optionalReq.Thing.Spawned)
+			{
+				num2 = (num = optionalReq.Thing.def.GetStatValueAbstract(stat, null));
+				Thing thing = optionalReq.Thing;
+				CompStatOffsetBase compStatOffsetBase = thing.TryGetComp<CompStatOffsetBase>();
+				if (compStatOffsetBase != null && compStatOffsetBase.Props.statDef == stat)
+				{
+					for (int i = 0; i < compStatOffsetBase.Props.offsets.Count; i++)
+					{
+						FocusStrengthOffset focusStrengthOffset = compStatOffsetBase.Props.offsets[i];
+						if (!focusStrengthOffset.DependsOnPawn)
+						{
+							if (focusStrengthOffset.CanApply(thing, null))
+							{
+								float offset = focusStrengthOffset.GetOffset(thing, null);
+								num += offset;
+								num2 += offset;
+							}
+						}
+						else
+						{
+							flag = true;
+						}
+					}
+				}
+			}
+			else if (optionalReq.Def is ThingDef)
+			{
+				ValueTuple<float, float> valueTuple = this.AbstractValueRange(optionalReq, numberSense);
+				num2 = valueTuple.Item1;
+				num = valueTuple.Item2;
+			}
+			string str = flag ? " (+)" : "";
+			return this.RangeToString(num2, num, numberSense, finalized) + str;
 		}
-		if (max - min >= float.Epsilon)
-		{
-			string text = min.ToStringByStyle(stat.toStringStyle, numberSense);
-			string text2 = stat.ValueToString(max, numberSense, finalized);
-			return text + " - " + text2;
-		}
-		return stat.ValueToString(max, numberSense, finalized);
-	}
 
-	public override string GetExplanationFinalizePart(StatRequest req, ToStringNumberSense numberSense, float finalVal)
-	{
-		if (!req.HasThing || !req.Thing.Spawned)
+		// Token: 0x06013A27 RID: 80423 RVA: 0x005D5080 File Offset: 0x005D3280
+		private ValueTuple<float, float> AbstractValueRange(StatRequest req, ToStringNumberSense numberSense)
 		{
-			var (min, max) = AbstractValueRange(req, numberSense);
-			return "StatsReport_FinalValue".Translate() + ": " + RangeToString(min, max, numberSense, finalized: true);
+			ThingDef thingDef = (ThingDef)req.Def;
+			float num2;
+			float num = num2 = thingDef.GetStatValueAbstract(this.stat, null);
+			CompProperties_MeditationFocus compProperties = thingDef.GetCompProperties<CompProperties_MeditationFocus>();
+			if (compProperties != null && compProperties.statDef == this.stat)
+			{
+				for (int i = 0; i < compProperties.offsets.Count; i++)
+				{
+					FocusStrengthOffset focusStrengthOffset = compProperties.offsets[i];
+					if (!focusStrengthOffset.NeedsToBeSpawned && req.Thing != null)
+					{
+						num += focusStrengthOffset.GetOffset(req.Thing, null);
+					}
+					else
+					{
+						float num3 = focusStrengthOffset.MinOffset(null);
+						float num4 = focusStrengthOffset.MaxOffset(null);
+						if (num4 > 0f)
+						{
+							num2 += num4;
+						}
+						if (num4 < 0f)
+						{
+							num += num4;
+						}
+						num += num3;
+					}
+				}
+			}
+			return new ValueTuple<float, float>(num, num2);
 		}
-		return base.GetExplanationFinalizePart(req, numberSense, finalVal);
+
+		// Token: 0x06013A28 RID: 80424 RVA: 0x005D514C File Offset: 0x005D334C
+		private string RangeToString(float min, float max, ToStringNumberSense numberSense, bool finalized)
+		{
+			if (finalized)
+			{
+				min = Mathf.Clamp(min, this.stat.minValue, this.stat.maxValue);
+				max = Mathf.Clamp(max, this.stat.minValue, this.stat.maxValue);
+			}
+			if (max - min >= 1E-45f)
+			{
+				string str = min.ToStringByStyle(this.stat.toStringStyle, numberSense);
+				string str2 = this.stat.ValueToString(max, numberSense, finalized);
+				return str + " - " + str2;
+			}
+			return this.stat.ValueToString(max, numberSense, finalized);
+		}
+
+		// Token: 0x06013A29 RID: 80425 RVA: 0x005D51E0 File Offset: 0x005D33E0
+		public override string GetExplanationFinalizePart(StatRequest req, ToStringNumberSense numberSense, float finalVal)
+		{
+			if (!req.HasThing || !req.Thing.Spawned)
+			{
+				ValueTuple<float, float> valueTuple = this.AbstractValueRange(req, numberSense);
+				float item = valueTuple.Item1;
+				float item2 = valueTuple.Item2;
+				return "StatsReport_FinalValue".Translate() + ": " + this.RangeToString(item, item2, numberSense, true);
+			}
+			return base.GetExplanationFinalizePart(req, numberSense, finalVal);
+		}
 	}
 }

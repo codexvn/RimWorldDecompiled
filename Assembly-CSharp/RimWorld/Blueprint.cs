@@ -1,189 +1,230 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public abstract class Blueprint : ThingWithComps, IConstructible
+namespace RimWorld
 {
-	public override string Label => def.entityDefToBuild.label + "BlueprintLabelExtra".Translate();
-
-	protected abstract float WorkTotal { get; }
-
-	public override Graphic Graphic
+	// Token: 0x0200294A RID: 10570
+	public abstract class Blueprint : ThingWithComps, IConstructible
 	{
-		get
+		// Token: 0x1700232D RID: 9005
+		// (get) Token: 0x0600E78D RID: 59277 RVA: 0x0043789C File Offset: 0x00435A9C
+		public override string Label
 		{
-			ThingStyleDef styleDef = StyleDef;
-			if (styleDef?.blueprintGraphicData != null)
+			get
 			{
-				if (styleGraphicInt == null)
+				return this.def.entityDefToBuild.label + "BlueprintLabelExtra".Translate();
+			}
+		}
+
+		// Token: 0x1700232E RID: 9006
+		// (get) Token: 0x0600E78E RID: 59278
+		protected abstract float WorkTotal { get; }
+
+		// Token: 0x1700232F RID: 9007
+		// (get) Token: 0x0600E78F RID: 59279 RVA: 0x004378C4 File Offset: 0x00435AC4
+		public override Graphic Graphic
+		{
+			get
+			{
+				ThingStyleDef styleDef = this.StyleDef;
+				if (((styleDef != null) ? styleDef.blueprintGraphicData : null) != null)
 				{
-					styleGraphicInt = styleDef.blueprintGraphicData.Graphic;
+					if (this.styleGraphicInt == null)
+					{
+						this.styleGraphicInt = styleDef.blueprintGraphicData.Graphic;
+					}
+					return this.styleGraphicInt;
 				}
-				return styleGraphicInt;
+				return base.Graphic;
 			}
-			return base.Graphic;
 		}
-	}
 
-	public override IEnumerable<Gizmo> GetGizmos()
-	{
-		foreach (Gizmo gizmo in base.GetGizmos())
+		// Token: 0x0600E790 RID: 59280 RVA: 0x0043790C File Offset: 0x00435B0C
+		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			yield return gizmo;
-		}
-		Gizmo selectMonumentMarkerGizmo = QuestUtility.GetSelectMonumentMarkerGizmo(this);
-		if (selectMonumentMarkerGizmo != null)
-		{
-			yield return selectMonumentMarkerGizmo;
-		}
-	}
-
-	public virtual bool TryReplaceWithSolidThing(Pawn workerPawn, out Thing createdThing, out bool jobEnded)
-	{
-		bool flag = Find.Selector.IsSelected(this);
-		jobEnded = false;
-		if (GenConstruct.FirstBlockingThing(this, workerPawn) != null)
-		{
-			workerPawn.jobs.EndCurrentJob(JobCondition.Incompletable);
-			jobEnded = true;
-			createdThing = null;
-			return false;
-		}
-		createdThing = MakeSolidThing(out var shouldSelect);
-		Map map = base.Map;
-		if (Graphic is Graphic_Random)
-		{
-			createdThing.overrideGraphicIndex = thingIDNumber;
-		}
-		GenSpawn.WipeExistingThings(base.Position, base.Rotation, createdThing.def, map, DestroyMode.Deconstruct);
-		if (createdThing is Plant)
-		{
-			base.Position.GetPlant(base.Map)?.Destroy();
-		}
-		if (!base.Destroyed)
-		{
-			Destroy();
-		}
-		if (createdThing.def.CanHaveFaction)
-		{
-			createdThing.SetFactionDirect(workerPawn.Faction);
-		}
-		Thing thing = GenSpawn.Spawn(createdThing, base.Position, map, base.Rotation);
-		if ((shouldSelect || flag) && thing != null)
-		{
-			Find.Selector.Select(thing, playSound: false, forceDesignatorDeselect: false);
-		}
-		foreach (Pawn item in map.mapPawns.AllPawnsSpawned)
-		{
-			item.pather.NotifyThingTransformed(this, thing);
-		}
-		foreach (IntVec3 cell in thing.OccupiedRect().Cells)
-		{
-			if (map.planManager.TryGetPlan(cell, out var plan))
+			foreach (Gizmo gizmo in base.GetGizmos())
 			{
-				plan.RemoveCell(cell);
+				yield return gizmo;
 			}
+			IEnumerator<Gizmo> enumerator = null;
+			Gizmo selectMonumentMarkerGizmo = QuestUtility.GetSelectMonumentMarkerGizmo(this);
+			if (selectMonumentMarkerGizmo != null)
+			{
+				yield return selectMonumentMarkerGizmo;
+			}
+			yield break;
+			yield break;
 		}
-		return true;
-	}
 
-	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-	{
-		if (!WorldComponent_GravshipController.CutsceneInProgress || WorldComponent_GravshipController.GravshipRenderInProgess)
+		// Token: 0x0600E791 RID: 59281 RVA: 0x0043791C File Offset: 0x00435B1C
+		public virtual bool TryReplaceWithSolidThing(Pawn workerPawn, out Thing createdThing, out bool jobEnded)
 		{
+			bool flag = Find.Selector.IsSelected(this);
+			jobEnded = false;
+			if (GenConstruct.FirstBlockingThing(this, workerPawn) != null)
+			{
+				workerPawn.jobs.EndCurrentJob(JobCondition.Incompletable, true, true);
+				jobEnded = true;
+				createdThing = null;
+				return false;
+			}
+			bool flag2;
+			createdThing = this.MakeSolidThing(out flag2);
+			Map map = base.Map;
+			if (this.Graphic is Graphic_Random)
+			{
+				createdThing.overrideGraphicIndex = new int?(this.thingIDNumber);
+			}
+			GenSpawn.WipeExistingThings(base.Position, base.Rotation, createdThing.def, map, DestroyMode.Deconstruct);
+			if (createdThing is Plant)
+			{
+				Plant plant = base.Position.GetPlant(base.Map);
+				if (plant != null)
+				{
+					plant.Destroy(DestroyMode.Vanish);
+				}
+			}
+			if (!base.Destroyed)
+			{
+				this.Destroy(DestroyMode.Vanish);
+			}
+			if (createdThing.def.CanHaveFaction)
+			{
+				createdThing.SetFactionDirect(workerPawn.Faction);
+			}
+			Thing thing = GenSpawn.Spawn(createdThing, base.Position, map, base.Rotation, WipeMode.Vanish, false, false);
+			if ((flag2 || flag) && thing != null)
+			{
+				Find.Selector.Select(thing, false, false);
+			}
+			foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+			{
+				pawn.pather.NotifyThingTransformed(this, thing);
+			}
+			foreach (IntVec3 intVec in thing.OccupiedRect().Cells)
+			{
+				Plan plan;
+				if (map.planManager.TryGetPlan(intVec, out plan))
+				{
+					plan.RemoveCell(intVec);
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x0600E792 RID: 59282 RVA: 0x00437AD0 File Offset: 0x00435CD0
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
+		{
+			if (WorldComponent_GravshipController.CutsceneInProgress && !WorldComponent_GravshipController.GravshipRenderInProgess)
+			{
+				return;
+			}
 			base.DrawAt(drawLoc, flip);
 		}
-	}
 
-	public override void SpawnSetup(Map map, bool respawningAfterLoad)
-	{
-		map.blueprintGrid.Register(this);
-		base.SpawnSetup(map, respawningAfterLoad);
-	}
-
-	public void InheritStyle(Precept_ThingStyle styleSource, ThingStyleDef styleDef)
-	{
-		base.StyleSourcePrecept = styleSource;
-		if (styleSource == null)
+		// Token: 0x0600E793 RID: 59283 RVA: 0x00437AE9 File Offset: 0x00435CE9
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
-			StyleDef = styleDef;
+			map.blueprintGrid.Register(this);
+			base.SpawnSetup(map, respawningAfterLoad);
 		}
-	}
 
-	public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
-	{
-		Map map = base.Map;
-		base.DeSpawn(mode);
-		map.blueprintGrid.DeRegister(this);
-	}
-
-	protected abstract Thing MakeSolidThing(out bool shouldSelect);
-
-	public abstract List<ThingDefCountClass> TotalMaterialCost();
-
-	public bool IsCompleted()
-	{
-		return false;
-	}
-
-	public int ThingCountNeeded(ThingDef stuff)
-	{
-		foreach (ThingDefCountClass item in TotalMaterialCost())
+		// Token: 0x0600E794 RID: 59284 RVA: 0x00437AFF File Offset: 0x00435CFF
+		public void InheritStyle(Precept_ThingStyle styleSource, ThingStyleDef styleDef)
 		{
-			if (item.thingDef == stuff)
+			base.StyleSourcePrecept = styleSource;
+			if (styleSource == null)
 			{
-				return item.count;
+				this.StyleDef = styleDef;
 			}
 		}
-		return 0;
-	}
 
-	public int SpaceRemainingFor(ThingDef stuff)
-	{
-		return ThingCountNeeded(stuff);
-	}
-
-	public abstract BuildableDef EntityToBuild();
-
-	public abstract ThingStyleDef EntityToBuildStyle();
-
-	public abstract ThingDef EntityToBuildStuff();
-
-	public Thing BlockingHaulableOnTop()
-	{
-		if (def.entityDefToBuild.passability == Traversability.Standable)
+		// Token: 0x0600E795 RID: 59285 RVA: 0x00437B12 File Offset: 0x00435D12
+		public override void DeSpawn(DestroyMode mode = DestroyMode.Vanish)
 		{
-			return null;
+			Map map = base.Map;
+			base.DeSpawn(mode);
+			map.blueprintGrid.DeRegister(this);
 		}
-		foreach (IntVec3 item in this.OccupiedRect())
+
+		// Token: 0x0600E796 RID: 59286
+		protected abstract Thing MakeSolidThing(out bool shouldSelect);
+
+		// Token: 0x0600E797 RID: 59287
+		public abstract List<ThingDefCountClass> TotalMaterialCost();
+
+		// Token: 0x0600E798 RID: 59288 RVA: 0x00002501 File Offset: 0x00000701
+		public bool IsCompleted()
 		{
-			List<Thing> thingList = item.GetThingList(base.Map);
-			for (int i = 0; i < thingList.Count; i++)
+			return false;
+		}
+
+		// Token: 0x0600E799 RID: 59289 RVA: 0x00437B2C File Offset: 0x00435D2C
+		public int ThingCountNeeded(ThingDef stuff)
+		{
+			foreach (ThingDefCountClass thingDefCountClass in this.TotalMaterialCost())
 			{
-				Thing thing = thingList[i];
-				if (thing.def.EverHaulable)
+				if (thingDefCountClass.thingDef == stuff)
 				{
-					return thing;
+					return thingDefCountClass.count;
 				}
 			}
+			return 0;
 		}
-		return null;
-	}
 
-	public override string GetInspectString()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append(base.GetInspectString());
-		stringBuilder.AppendLineIfNotEmpty();
-		float workTotal = WorkTotal;
-		if (!Mathf.Approximately(workTotal, -1f))
+		// Token: 0x0600E79A RID: 59290 RVA: 0x00437B90 File Offset: 0x00435D90
+		public int SpaceRemainingFor(ThingDef stuff)
 		{
-			stringBuilder.Append("WorkLeft".Translate() + ": " + workTotal.ToStringWorkAmount());
+			return this.ThingCountNeeded(stuff);
 		}
-		return stringBuilder.ToString();
+
+		// Token: 0x0600E79B RID: 59291
+		public abstract BuildableDef EntityToBuild();
+
+		// Token: 0x0600E79C RID: 59292
+		public abstract ThingStyleDef EntityToBuildStyle();
+
+		// Token: 0x0600E79D RID: 59293
+		public abstract ThingDef EntityToBuildStuff();
+
+		// Token: 0x0600E79E RID: 59294 RVA: 0x00437B9C File Offset: 0x00435D9C
+		public Thing BlockingHaulableOnTop()
+		{
+			if (this.def.entityDefToBuild.passability == Traversability.Standable)
+			{
+				return null;
+			}
+			foreach (IntVec3 c in this.OccupiedRect())
+			{
+				List<Thing> thingList = c.GetThingList(base.Map);
+				for (int i = 0; i < thingList.Count; i++)
+				{
+					Thing thing = thingList[i];
+					if (thing.def.EverHaulable)
+					{
+						return thing;
+					}
+				}
+			}
+			return null;
+		}
+
+		// Token: 0x0600E79F RID: 59295 RVA: 0x00437C3C File Offset: 0x00435E3C
+		public override string GetInspectString()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(base.GetInspectString());
+			stringBuilder.AppendLineIfNotEmpty();
+			float workTotal = this.WorkTotal;
+			if (!Mathf.Approximately(workTotal, -1f))
+			{
+				stringBuilder.Append("WorkLeft".Translate() + ": " + workTotal.ToStringWorkAmount());
+			}
+			return stringBuilder.ToString();
+		}
 	}
 }

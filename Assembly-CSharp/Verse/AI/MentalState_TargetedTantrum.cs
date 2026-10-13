@@ -1,59 +1,66 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_TargetedTantrum : MentalState_Tantrum
+namespace Verse.AI
 {
-	public const int MinMarketValue = 300;
-
-	private static List<Thing> tmpThings = new List<Thing>();
-
-	public override void MentalStateTick(int delta)
+	// Token: 0x02000F98 RID: 3992
+	public class MentalState_TargetedTantrum : MentalState_Tantrum
 	{
-		if (target == null || target.Destroyed)
+		// Token: 0x0600626F RID: 25199 RVA: 0x001F0EB0 File Offset: 0x001EF0B0
+		public override void MentalStateTick(int delta)
 		{
-			RecoverFromState();
-		}
-		else if (!target.Spawned || !pawn.CanReach(target, PathEndMode.Touch, Danger.Deadly))
-		{
-			Thing thing = target;
-			if (!TryFindNewTarget())
+			if (this.target == null || this.target.Destroyed)
 			{
-				RecoverFromState();
+				base.RecoverFromState();
 				return;
 			}
-			Messages.Message("MessageTargetedTantrumChangedTarget".Translate(pawn.LabelShort, thing.Label, target.Label, pawn.Named("PAWN"), thing.Named("OLDTARGET"), target.Named("TARGET")).AdjustedFor(pawn), pawn, MessageTypeDefOf.NegativeEvent);
+			if (this.target.Spawned && this.pawn.CanReach(this.target, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+			{
+				base.MentalStateTick(delta);
+				return;
+			}
+			Thing target = this.target;
+			if (!this.TryFindNewTarget())
+			{
+				base.RecoverFromState();
+				return;
+			}
+			Messages.Message("MessageTargetedTantrumChangedTarget".Translate(this.pawn.LabelShort, target.Label, this.target.Label, this.pawn.Named("PAWN"), target.Named("OLDTARGET"), this.target.Named("TARGET")).AdjustedFor(this.pawn, "PAWN", true), this.pawn, MessageTypeDefOf.NegativeEvent, true);
 			base.MentalStateTick(delta);
 		}
-		else
+
+		// Token: 0x06006270 RID: 25200 RVA: 0x001F0FBA File Offset: 0x001EF1BA
+		public override void PreStart()
 		{
-			base.MentalStateTick(delta);
+			base.PreStart();
+			this.TryFindNewTarget();
 		}
-	}
 
-	public override void PreStart()
-	{
-		base.PreStart();
-		TryFindNewTarget();
-	}
-
-	private bool TryFindNewTarget()
-	{
-		TantrumMentalStateUtility.GetSmashableThingsNear(pawn, pawn.Position, tmpThings, null, 300);
-		bool result = tmpThings.TryRandomElementByWeight((Thing x) => x.MarketValue * (float)x.stackCount, out target);
-		tmpThings.Clear();
-		return result;
-	}
-
-	public override TaggedString GetBeginLetterText()
-	{
-		if (target == null)
+		// Token: 0x06006271 RID: 25201 RVA: 0x001F0FCC File Offset: 0x001EF1CC
+		private bool TryFindNewTarget()
 		{
-			Log.Error("No target. This should have been checked in this mental state's worker.");
-			return "";
+			TantrumMentalStateUtility.GetSmashableThingsNear(this.pawn, this.pawn.Position, MentalState_TargetedTantrum.tmpThings, null, 300, 40);
+			bool result = MentalState_TargetedTantrum.tmpThings.TryRandomElementByWeight((Thing x) => x.MarketValue * (float)x.stackCount, out this.target);
+			MentalState_TargetedTantrum.tmpThings.Clear();
+			return result;
 		}
-		return def.beginLetter.Formatted(pawn.NameShortColored, target.Label, pawn.Named("PAWN"), target.Named("TARGET")).AdjustedFor(pawn).Resolve()
-			.CapitalizeFirst();
+
+		// Token: 0x06006272 RID: 25202 RVA: 0x001F1038 File Offset: 0x001EF238
+		public override TaggedString GetBeginLetterText()
+		{
+			if (this.target == null)
+			{
+				Log.Error("No target. This should have been checked in this mental state's worker.");
+				return "";
+			}
+			return this.def.beginLetter.Formatted(this.pawn.NameShortColored, this.target.Label, this.pawn.Named("PAWN"), this.target.Named("TARGET")).AdjustedFor(this.pawn, "PAWN", true).Resolve().CapitalizeFirst();
+		}
+
+		// Token: 0x04004679 RID: 18041
+		public const int MinMarketValue = 300;
+
+		// Token: 0x0400467A RID: 18042
+		private static List<Thing> tmpThings = new List<Thing>();
 	}
 }

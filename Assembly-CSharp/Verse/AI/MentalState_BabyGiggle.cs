@@ -1,22 +1,27 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_BabyGiggle : MentalState_BabyFit
+namespace Verse.AI
 {
-	protected override void AuraEffect(Thing source, Pawn hearer)
+	// Token: 0x02000F8A RID: 3978
+	public class MentalState_BabyGiggle : MentalState_BabyFit
 	{
-		if (source is Pawn otherPawn && hearer.needs.mood != null)
+		// Token: 0x0600622A RID: 25130 RVA: 0x001F028C File Offset: 0x001EE48C
+		protected override void AuraEffect(Thing source, Pawn hearer)
 		{
-			if (hearer == otherPawn.GetMother() || hearer == otherPawn.GetFather())
+			Pawn pawn = source as Pawn;
+			if (pawn != null && hearer.needs.mood != null)
 			{
-				hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.MyGigglingBaby, otherPawn);
+				if (hearer == pawn.GetMother() || hearer == pawn.GetFather())
+				{
+					hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.MyGigglingBaby, pawn, null);
+				}
+				else
+				{
+					hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.GigglingBaby, pawn, null);
+				}
+				hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.BabyGiggledSocial, pawn, null);
 			}
-			else
-			{
-				hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.GigglingBaby, otherPawn);
-			}
-			hearer.needs.mood.thoughts.memories.TryGainMemory(ThoughtDefOf.BabyGiggledSocial, otherPawn);
 		}
 	}
 }

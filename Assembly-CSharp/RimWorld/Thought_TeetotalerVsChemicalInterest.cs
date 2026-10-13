@@ -1,22 +1,27 @@
-namespace RimWorld;
+﻿using System;
 
-public class Thought_TeetotalerVsChemicalInterest : Thought_SituationalSocial
+namespace RimWorld
 {
-	public override float OpinionOffset()
+	// Token: 0x02001862 RID: 6242
+	public class Thought_TeetotalerVsChemicalInterest : Thought_SituationalSocial
 	{
-		if (ThoughtUtility.ThoughtNullified(pawn, def))
+		// Token: 0x06008FAA RID: 36778 RVA: 0x002A6AD4 File Offset: 0x002A4CD4
+		public override float OpinionOffset()
 		{
-			return 0f;
+			if (ThoughtUtility.ThoughtNullified(this.pawn, this.def))
+			{
+				return 0f;
+			}
+			int num = this.otherPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire);
+			if (num <= 0)
+			{
+				return 0f;
+			}
+			if (num == 1)
+			{
+				return -20f;
+			}
+			return -30f;
 		}
-		int num = otherPawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire);
-		if (num <= 0)
-		{
-			return 0f;
-		}
-		if (num == 1)
-		{
-			return -20f;
-		}
-		return -30f;
 	}
 }

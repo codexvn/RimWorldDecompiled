@@ -1,22 +1,27 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse.Sound;
-
-public abstract class SoundFilter
+namespace Verse.Sound
 {
-	public abstract void SetupOn(AudioSource source);
-
-	protected static T GetOrMakeFilterOn<T>(AudioSource source) where T : Behaviour
+	// Token: 0x02000E06 RID: 3590
+	public abstract class SoundFilter
 	{
-		T val = source.gameObject.GetComponent<T>();
-		if (val != null)
+		// Token: 0x06005B23 RID: 23331
+		public abstract void SetupOn(AudioSource source);
+
+		// Token: 0x06005B24 RID: 23332 RVA: 0x001D3808 File Offset: 0x001D1A08
+		protected static T GetOrMakeFilterOn<T>(AudioSource source) where T : Behaviour
 		{
-			val.enabled = true;
+			T t = source.gameObject.GetComponent<T>();
+			if (t != null)
+			{
+				t.enabled = true;
+			}
+			else
+			{
+				t = source.gameObject.AddComponent<T>();
+			}
+			return t;
 		}
-		else
-		{
-			val = source.gameObject.AddComponent<T>();
-		}
-		return val;
 	}
 }

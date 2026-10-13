@@ -1,211 +1,237 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public class Pawn_RotationTracker : IExposable
+namespace Verse
 {
-	private Pawn pawn;
-
-	public Pawn_RotationTracker(Pawn pawn)
+	// Token: 0x020007EC RID: 2028
+	public class Pawn_RotationTracker : IExposable
 	{
-		this.pawn = pawn;
-	}
-
-	public void Notify_Spawned()
-	{
-		UpdateRotation();
-	}
-
-	public void UpdateRotation()
-	{
-		if (pawn.Destroyed)
+		// Token: 0x060033CE RID: 13262 RVA: 0x0010FD8F File Offset: 0x0010DF8F
+		public Pawn_RotationTracker(Pawn pawn)
 		{
-			return;
+			this.pawn = pawn;
 		}
-		if (pawn.kindDef.useFixedRotation)
+
+		// Token: 0x060033CF RID: 13263 RVA: 0x0010FD9E File Offset: 0x0010DF9E
+		public void Notify_Spawned()
 		{
-			pawn.Rotation = pawn.kindDef.fixedRotation;
+			this.UpdateRotation();
 		}
-		else
+
+		// Token: 0x060033D0 RID: 13264 RVA: 0x0010FDA8 File Offset: 0x0010DFA8
+		public void UpdateRotation()
 		{
-			if (pawn.jobs.HandlingFacing || (pawn.stances.stunner.Stunned && pawn.stances.stunner.DisableRotation))
+			if (this.pawn.Destroyed)
 			{
 				return;
 			}
-			if (pawn.stances.curStance is Stance_Busy stance_Busy && stance_Busy.focusTarg.IsValid)
+			if (this.pawn.kindDef.useFixedRotation)
+			{
+				this.pawn.Rotation = this.pawn.kindDef.fixedRotation;
+				return;
+			}
+			if (this.pawn.jobs.HandlingFacing)
+			{
+				return;
+			}
+			if (this.pawn.stances.stunner.Stunned && this.pawn.stances.stunner.DisableRotation)
+			{
+				return;
+			}
+			Stance_Busy stance_Busy = this.pawn.stances.curStance as Stance_Busy;
+			if (stance_Busy != null && stance_Busy.focusTarg.IsValid)
 			{
 				if (stance_Busy.focusTarg.HasThing)
 				{
-					Face(stance_Busy.focusTarg.Thing.DrawPos);
+					this.Face(stance_Busy.focusTarg.Thing.DrawPos);
+					return;
 				}
-				else
-				{
-					FaceCell(stance_Busy.focusTarg.Cell);
-				}
+				this.FaceCell(stance_Busy.focusTarg.Cell);
 				return;
 			}
-			if (pawn.pather.Moving)
+			else
 			{
-				if (pawn.pather.curPath != null && pawn.pather.curPath.NodesLeftCount >= 1)
+				if (!this.pawn.pather.Moving)
 				{
-					FaceAdjacentCell(pawn.pather.nextCell);
+					if (this.pawn.jobs.curJob != null)
+					{
+						LocalTargetInfo target = this.pawn.CurJob.GetTarget(this.pawn.jobs.curDriver.rotateToFace);
+						this.FaceTarget(target);
+					}
+					if (this.pawn.Drafted)
+					{
+						this.pawn.Rotation = Rot4.South;
+					}
+					return;
 				}
+				if (this.pawn.pather.curPath == null || this.pawn.pather.curPath.NodesLeftCount < 1)
+				{
+					return;
+				}
+				this.FaceAdjacentCell(this.pawn.pather.nextCell);
 				return;
-			}
-			if (pawn.jobs.curJob != null)
-			{
-				LocalTargetInfo target = pawn.CurJob.GetTarget(pawn.jobs.curDriver.rotateToFace);
-				FaceTarget(target);
-			}
-			if (pawn.Drafted)
-			{
-				pawn.Rotation = Rot4.South;
 			}
 		}
-	}
 
-	public void ProcessPostTickVisuals(int ticksPassed)
-	{
-		UpdateRotation();
-	}
-
-	private void FaceAdjacentCell(IntVec3 c)
-	{
-		if (!(c == pawn.Position))
+		// Token: 0x060033D1 RID: 13265 RVA: 0x0010FD9E File Offset: 0x0010DF9E
+		public void ProcessPostTickVisuals(int ticksPassed)
 		{
-			IntVec3 intVec = c - pawn.Position;
+			this.UpdateRotation();
+		}
+
+		// Token: 0x060033D2 RID: 13266 RVA: 0x0010FF40 File Offset: 0x0010E140
+		private void FaceAdjacentCell(IntVec3 c)
+		{
+			if (c == this.pawn.Position)
+			{
+				return;
+			}
+			IntVec3 intVec = c - this.pawn.Position;
 			if (intVec.x > 0)
 			{
-				pawn.Rotation = Rot4.East;
+				this.pawn.Rotation = Rot4.East;
+				return;
 			}
-			else if (intVec.x < 0)
+			if (intVec.x < 0)
 			{
-				pawn.Rotation = Rot4.West;
+				this.pawn.Rotation = Rot4.West;
+				return;
 			}
-			else if (intVec.z > 0)
+			if (intVec.z > 0)
 			{
-				pawn.Rotation = Rot4.North;
+				this.pawn.Rotation = Rot4.North;
+				return;
 			}
-			else
-			{
-				pawn.Rotation = Rot4.South;
-			}
+			this.pawn.Rotation = Rot4.South;
 		}
-	}
 
-	public void FaceCell(IntVec3 c)
-	{
-		if (!(c == pawn.Position))
+		// Token: 0x060033D3 RID: 13267 RVA: 0x0010FFD4 File Offset: 0x0010E1D4
+		public void FaceCell(IntVec3 c)
 		{
-			float angle = (c - pawn.Position).ToVector3().AngleFlat();
-			pawn.Rotation = RotFromAngleBiased(angle);
-		}
-	}
-
-	public void Face(Vector3 p)
-	{
-		if (!(p == pawn.DrawPos))
-		{
-			float angle = (p - pawn.DrawPos).AngleFlat();
-			pawn.Rotation = RotFromAngleBiased(angle);
-		}
-	}
-
-	public void FaceTarget(LocalTargetInfo target)
-	{
-		if (!target.IsValid)
-		{
-			return;
-		}
-		if (target.HasThing)
-		{
-			Thing thing = (target.Thing.Spawned ? target.Thing : ThingOwnerUtility.GetFirstSpawnedParentThing(target.Thing));
-			if (thing == null || !thing.Spawned)
+			if (c == this.pawn.Position)
 			{
 				return;
 			}
-			bool flag = false;
-			IntVec3 c = default(IntVec3);
-			CellRect cellRect = thing.OccupiedRect();
-			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
+			float angle = (c - this.pawn.Position).ToVector3().AngleFlat();
+			this.pawn.Rotation = Pawn_RotationTracker.RotFromAngleBiased(angle);
+		}
+
+		// Token: 0x060033D4 RID: 13268 RVA: 0x00110028 File Offset: 0x0010E228
+		public void Face(Vector3 p)
+		{
+			if (p == this.pawn.DrawPos)
 			{
-				for (int j = cellRect.minX; j <= cellRect.maxX; j++)
+				return;
+			}
+			float angle = (p - this.pawn.DrawPos).AngleFlat();
+			this.pawn.Rotation = Pawn_RotationTracker.RotFromAngleBiased(angle);
+		}
+
+		// Token: 0x060033D5 RID: 13269 RVA: 0x00110074 File Offset: 0x0010E274
+		public void FaceTarget(LocalTargetInfo target)
+		{
+			if (!target.IsValid)
+			{
+				return;
+			}
+			if (target.HasThing)
+			{
+				Thing thing = target.Thing.Spawned ? target.Thing : ThingOwnerUtility.GetFirstSpawnedParentThing(target.Thing);
+				if (thing != null && thing.Spawned)
 				{
-					if (pawn.Position == new IntVec3(j, 0, i))
+					bool flag = false;
+					IntVec3 c = default(IntVec3);
+					CellRect cellRect = thing.OccupiedRect();
+					for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
 					{
-						Face(thing.DrawPos);
+						for (int j = cellRect.minX; j <= cellRect.maxX; j++)
+						{
+							if (this.pawn.Position == new IntVec3(j, 0, i))
+							{
+								this.Face(thing.DrawPos);
+								return;
+							}
+						}
+					}
+					for (int k = cellRect.minZ; k <= cellRect.maxZ; k++)
+					{
+						for (int l = cellRect.minX; l <= cellRect.maxX; l++)
+						{
+							IntVec3 intVec = new IntVec3(l, 0, k);
+							if (intVec.AdjacentToCardinal(this.pawn.Position))
+							{
+								this.FaceAdjacentCell(intVec);
+								return;
+							}
+							if (intVec.AdjacentTo8Way(this.pawn.Position))
+							{
+								flag = true;
+								c = intVec;
+							}
+						}
+					}
+					if (flag)
+					{
+						if (DebugViewSettings.drawPawnRotatorTarget)
+						{
+							this.pawn.Map.debugDrawer.FlashCell(this.pawn.Position, 0.6f, "jbthing", 50);
+							GenDraw.DrawLineBetween(this.pawn.Position.ToVector3Shifted(), c.ToVector3Shifted());
+						}
+						this.FaceAdjacentCell(c);
 						return;
 					}
+					this.Face(thing.DrawPos);
+					return;
 				}
-			}
-			for (int k = cellRect.minZ; k <= cellRect.maxZ; k++)
-			{
-				for (int l = cellRect.minX; l <= cellRect.maxX; l++)
-				{
-					IntVec3 intVec = new IntVec3(l, 0, k);
-					if (intVec.AdjacentToCardinal(pawn.Position))
-					{
-						FaceAdjacentCell(intVec);
-						return;
-					}
-					if (intVec.AdjacentTo8Way(pawn.Position))
-					{
-						flag = true;
-						c = intVec;
-					}
-				}
-			}
-			if (flag)
-			{
-				if (DebugViewSettings.drawPawnRotatorTarget)
-				{
-					pawn.Map.debugDrawer.FlashCell(pawn.Position, 0.6f, "jbthing");
-					GenDraw.DrawLineBetween(pawn.Position.ToVector3Shifted(), c.ToVector3Shifted());
-				}
-				FaceAdjacentCell(c);
 			}
 			else
 			{
-				Face(thing.DrawPos);
+				if (this.pawn.Position.AdjacentTo8Way(target.Cell))
+				{
+					if (DebugViewSettings.drawPawnRotatorTarget)
+					{
+						this.pawn.Map.debugDrawer.FlashCell(this.pawn.Position, 0.2f, "jbloc", 50);
+						GenDraw.DrawLineBetween(this.pawn.Position.ToVector3Shifted(), target.Cell.ToVector3Shifted());
+					}
+					this.FaceAdjacentCell(target.Cell);
+					return;
+				}
+				if (target.Cell.IsValid && target.Cell != this.pawn.Position)
+				{
+					this.Face(target.Cell.ToVector3());
+					return;
+				}
 			}
 		}
-		else if (pawn.Position.AdjacentTo8Way(target.Cell))
-		{
-			if (DebugViewSettings.drawPawnRotatorTarget)
-			{
-				pawn.Map.debugDrawer.FlashCell(pawn.Position, 0.2f, "jbloc");
-				GenDraw.DrawLineBetween(pawn.Position.ToVector3Shifted(), target.Cell.ToVector3Shifted());
-			}
-			FaceAdjacentCell(target.Cell);
-		}
-		else if (target.Cell.IsValid && target.Cell != pawn.Position)
-		{
-			Face(target.Cell.ToVector3());
-		}
-	}
 
-	public static Rot4 RotFromAngleBiased(float angle)
-	{
-		if (angle < 30f)
+		// Token: 0x060033D6 RID: 13270 RVA: 0x001102E0 File Offset: 0x0010E4E0
+		public static Rot4 RotFromAngleBiased(float angle)
 		{
+			if (angle < 30f)
+			{
+				return Rot4.North;
+			}
+			if (angle < 150f)
+			{
+				return Rot4.East;
+			}
+			if (angle < 210f)
+			{
+				return Rot4.South;
+			}
+			if (angle < 330f)
+			{
+				return Rot4.West;
+			}
 			return Rot4.North;
 		}
-		if (angle < 150f)
-		{
-			return Rot4.East;
-		}
-		if (angle < 210f)
-		{
-			return Rot4.South;
-		}
-		if (angle < 330f)
-		{
-			return Rot4.West;
-		}
-		return Rot4.North;
-	}
 
-	public void ExposeData()
-	{
+		// Token: 0x060033D7 RID: 13271 RVA: 0x000026EA File Offset: 0x000008EA
+		public void ExposeData()
+		{
+		}
+
+		// Token: 0x04002721 RID: 10017
+		private Pawn pawn;
 	}
 }

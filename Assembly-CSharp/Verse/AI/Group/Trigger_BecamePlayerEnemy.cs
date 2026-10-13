@@ -1,19 +1,15 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_BecamePlayerEnemy : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010DC RID: 4316
+	public class Trigger_BecamePlayerEnemy : Trigger
 	{
-		if (signal.type == TriggerSignalType.FactionRelationsChanged)
+		// Token: 0x0600693A RID: 26938 RVA: 0x00212B9E File Offset: 0x00210D9E
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			if (lord.faction != null)
-			{
-				return lord.faction.HostileTo(Faction.OfPlayer);
-			}
-			return false;
+			return signal.type == TriggerSignalType.FactionRelationsChanged && lord.faction != null && lord.faction.HostileTo(Faction.OfPlayer);
 		}
-		return false;
 	}
 }

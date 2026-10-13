@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -6,302 +6,354 @@ using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace LudeonTK;
-
-public class DebugActionNode
+namespace LudeonTK
 {
-	public string label;
-
-	public DebugActionType actionType;
-
-	public Action action;
-
-	public Action<Pawn> pawnAction;
-
-	public Func<List<DebugActionNode>> childGetter;
-
-	public DebugActionAttribute sourceAttribute;
-
-	public Func<bool> visibilityGetter;
-
-	public Func<string> labelGetter;
-
-	public string category;
-
-	public int displayPriority;
-
-	public FieldInfo settingsField;
-
-	private bool childrenSetup;
-
-	public DebugActionNode parent;
-
-	public List<DebugActionNode> children = new List<DebugActionNode>();
-
-	private string cachedPath;
-
-	private string cachedLabelNow;
-
-	private bool sorted;
-
-	private bool? cachedCheckOn;
-
-	private int lastLabelCacheFrame = -1;
-
-	private const int LabelRecacheFrameCount = 30;
-
-	public bool IsRoot => parent == null;
-
-	public bool On
+	// Token: 0x0200006F RID: 111
+	public class DebugActionNode
 	{
-		get
+		// Token: 0x17000069 RID: 105
+		// (get) Token: 0x06000262 RID: 610 RVA: 0x0000D5E6 File Offset: 0x0000B7E6
+		public bool IsRoot
 		{
-			if (!cachedCheckOn.HasValue)
+			get
 			{
-				if (settingsField == null)
-				{
-					cachedCheckOn = false;
-				}
-				else
-				{
-					cachedCheckOn = (bool)settingsField.GetValue(null);
-				}
+				return this.parent == null;
 			}
-			return cachedCheckOn.Value;
 		}
-	}
 
-	public string LabelNow
-	{
-		get
+		// Token: 0x1700006A RID: 106
+		// (get) Token: 0x06000263 RID: 611 RVA: 0x0000D5F4 File Offset: 0x0000B7F4
+		public bool On
 		{
-			if (Time.frameCount >= lastLabelCacheFrame + 30)
+			get
 			{
-				DirtyLabelCache();
-			}
-			if (cachedLabelNow == null)
-			{
-				if (labelGetter != null)
+				if (this.cachedCheckOn == null)
 				{
-					try
+					if (this.settingsField == null)
 					{
-						cachedLabelNow = labelGetter();
+						this.cachedCheckOn = new bool?(false);
 					}
-					catch (Exception ex)
+					else
 					{
-						Log.Error("Exception getting label for DebugActionNode: " + ex);
-						cachedLabelNow = null;
-						return label;
+						this.cachedCheckOn = new bool?((bool)this.settingsField.GetValue(null));
 					}
 				}
-				else
-				{
-					cachedLabelNow = label;
-				}
+				return this.cachedCheckOn.Value;
 			}
-			return cachedLabelNow;
 		}
-	}
 
-	public bool ActiveNow
-	{
-		get
+		// Token: 0x1700006B RID: 107
+		// (get) Token: 0x06000264 RID: 612 RVA: 0x0000D654 File Offset: 0x0000B854
+		public string LabelNow
 		{
-			switch (actionType)
+			get
 			{
-			case DebugActionType.ToolWorld:
-				return WorldRendererUtility.WorldSelected;
-			case DebugActionType.ToolMap:
-			case DebugActionType.ToolMapForPawns:
+				if (Time.frameCount >= this.lastLabelCacheFrame + 30)
+				{
+					this.DirtyLabelCache();
+				}
+				if (this.cachedLabelNow == null)
+				{
+					if (this.labelGetter != null)
+					{
+						try
+						{
+							this.cachedLabelNow = this.labelGetter();
+							goto IL_72;
+						}
+						catch (Exception ex)
+						{
+							string str = "Exception getting label for DebugActionNode: ";
+							Exception ex2 = ex;
+							Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
+							this.cachedLabelNow = null;
+							return this.label;
+						}
+					}
+					this.cachedLabelNow = this.label;
+				}
+				IL_72:
+				return this.cachedLabelNow;
+			}
+		}
+
+		// Token: 0x1700006C RID: 108
+		// (get) Token: 0x06000265 RID: 613 RVA: 0x0000D6EC File Offset: 0x0000B8EC
+		public bool ActiveNow
+		{
+			get
+			{
+				DebugActionType debugActionType = this.actionType;
+				if (debugActionType - DebugActionType.ToolMap > 1)
+				{
+					return debugActionType != DebugActionType.ToolWorld || WorldRendererUtility.WorldSelected;
+				}
 				return WorldRendererUtility.DrawingMap;
-			default:
-				return true;
 			}
 		}
-	}
 
-	public bool VisibleNow
-	{
-		get
+		// Token: 0x1700006D RID: 109
+		// (get) Token: 0x06000266 RID: 614 RVA: 0x0000D717 File Offset: 0x0000B917
+		public bool VisibleNow
 		{
-			if (sourceAttribute != null && !sourceAttribute.IsAllowedInCurrentGameState)
+			get
 			{
-				return false;
+				return (this.sourceAttribute == null || this.sourceAttribute.IsAllowedInCurrentGameState) && (this.visibilityGetter == null || this.visibilityGetter());
 			}
-			if (visibilityGetter != null && !visibilityGetter())
-			{
-				return false;
-			}
-			return true;
 		}
-	}
 
-	public string Path
-	{
-		get
+		// Token: 0x1700006E RID: 110
+		// (get) Token: 0x06000267 RID: 615 RVA: 0x0000D748 File Offset: 0x0000B948
+		public string Path
 		{
-			if (cachedPath == null)
+			get
 			{
-				if (parent != null && !parent.IsRoot)
+				if (this.cachedPath == null)
 				{
-					cachedPath = parent.Path + "\\" + label;
+					if (this.parent != null && !this.parent.IsRoot)
+					{
+						this.cachedPath = this.parent.Path + "\\" + this.label;
+					}
+					else
+					{
+						this.cachedPath = this.label;
+					}
 				}
-				else
-				{
-					cachedPath = label;
-				}
+				return this.cachedPath;
 			}
-			return cachedPath;
 		}
-	}
 
-	public DebugActionNode()
-	{
-	}
-
-	public DebugActionNode(string label, DebugActionType actionType = DebugActionType.Action, Action action = null, Action<Pawn> pawnAction = null)
-	{
-		this.label = label;
-		this.actionType = actionType;
-		this.action = action;
-		this.pawnAction = pawnAction;
-	}
-
-	public void AddChild(DebugActionNode child)
-	{
-		child.SetParent(this);
-		children.Add(child);
-		sorted = false;
-	}
-
-	public void SetParent(DebugActionNode newParent)
-	{
-		parent = newParent;
-		DirtyPath();
-	}
-
-	private void DirtyPath()
-	{
-		cachedPath = null;
-		foreach (DebugActionNode child in children)
+		// Token: 0x06000268 RID: 616 RVA: 0x0000D7A7 File Offset: 0x0000B9A7
+		public DebugActionNode()
 		{
-			child.DirtyPath();
 		}
-	}
 
-	public void DirtyLabelCache()
-	{
-		cachedLabelNow = null;
-		cachedCheckOn = null;
-		lastLabelCacheFrame = Time.frameCount;
-	}
-
-	public void TrySort()
-	{
-		if (sorted)
+		// Token: 0x06000269 RID: 617 RVA: 0x0000D7C1 File Offset: 0x0000B9C1
+		public DebugActionNode(string label, DebugActionType actionType = DebugActionType.Action, Action action = null, Action<Pawn> pawnAction = null)
 		{
-			return;
+			this.label = label;
+			this.actionType = actionType;
+			this.action = action;
+			this.pawnAction = pawnAction;
 		}
-		if (!children.NullOrEmpty())
+
+		// Token: 0x0600026A RID: 618 RVA: 0x0000D7F8 File Offset: 0x0000B9F8
+		public void AddChild(DebugActionNode child)
 		{
-			children = (from r in children
+			child.SetParent(this);
+			this.children.Add(child);
+			this.sorted = false;
+		}
+
+		// Token: 0x0600026B RID: 619 RVA: 0x0000D814 File Offset: 0x0000BA14
+		public void SetParent(DebugActionNode newParent)
+		{
+			this.parent = newParent;
+			this.DirtyPath();
+		}
+
+		// Token: 0x0600026C RID: 620 RVA: 0x0000D824 File Offset: 0x0000BA24
+		private void DirtyPath()
+		{
+			this.cachedPath = null;
+			foreach (DebugActionNode debugActionNode in this.children)
+			{
+				debugActionNode.DirtyPath();
+			}
+		}
+
+		// Token: 0x0600026D RID: 621 RVA: 0x0000D87C File Offset: 0x0000BA7C
+		public void DirtyLabelCache()
+		{
+			this.cachedLabelNow = null;
+			this.cachedCheckOn = null;
+			this.lastLabelCacheFrame = Time.frameCount;
+		}
+
+		// Token: 0x0600026E RID: 622 RVA: 0x0000D89C File Offset: 0x0000BA9C
+		public void TrySort()
+		{
+			if (this.sorted)
+			{
+				return;
+			}
+			if (!this.children.NullOrEmpty<DebugActionNode>())
+			{
+				this.children = (from r in this.children
 				orderby DebugActionCategories.GetOrderFor(r.category), r.category, -r.displayPriority
-				select r).ToList();
-		}
-		sorted = true;
-	}
-
-	public void TrySetupChildren()
-	{
-		if (!childrenSetup && childGetter != null)
-		{
-			foreach (DebugActionNode item in childGetter())
-			{
-				AddChild(item);
+				select r).ToList<DebugActionNode>();
 			}
+			this.sorted = true;
 		}
-		childrenSetup = true;
-	}
 
-	private static IEnumerable<Pawn> PawnsInside(IThingHolder holder)
-	{
-		if (holder is Pawn pawn)
+		// Token: 0x0600026F RID: 623 RVA: 0x0000D944 File Offset: 0x0000BB44
+		public void TrySetupChildren()
 		{
-			yield return pawn;
+			if (!this.childrenSetup && this.childGetter != null)
+			{
+				foreach (DebugActionNode child in this.childGetter())
+				{
+					this.AddChild(child);
+				}
+			}
+			this.childrenSetup = true;
 		}
-		ThingOwner directlyHeldThings = holder.GetDirectlyHeldThings();
-		if (directlyHeldThings == null)
+
+		// Token: 0x06000270 RID: 624 RVA: 0x0000D9B4 File Offset: 0x0000BBB4
+		private static IEnumerable<Pawn> PawnsInside(IThingHolder holder)
 		{
+			Pawn pawn = holder as Pawn;
+			if (pawn != null)
+			{
+				yield return pawn;
+			}
+			ThingOwner directlyHeldThings = holder.GetDirectlyHeldThings();
+			if (directlyHeldThings == null)
+			{
+				yield break;
+			}
+			foreach (Thing thing in ((IEnumerable<Thing>)directlyHeldThings))
+			{
+				IThingHolder thingHolder = thing as IThingHolder;
+				if (thingHolder != null)
+				{
+					foreach (Pawn pawn2 in DebugActionNode.PawnsInside(thingHolder))
+					{
+						yield return pawn2;
+					}
+					IEnumerator<Pawn> enumerator2 = null;
+				}
+			}
+			IEnumerator<Thing> enumerator = null;
+			yield break;
 			yield break;
 		}
-		foreach (Thing item in (IEnumerable<Thing>)directlyHeldThings)
-		{
-			if (!(item is IThingHolder holder2))
-			{
-				continue;
-			}
-			foreach (Pawn item2 in PawnsInside(holder2))
-			{
-				yield return item2;
-			}
-		}
-	}
 
-	private static IEnumerable<Pawn> PawnsAt(IntVec3 cell, Map map)
-	{
-		foreach (Thing item in map.thingGrid.ThingsAt(cell))
+		// Token: 0x06000271 RID: 625 RVA: 0x0000D9C4 File Offset: 0x0000BBC4
+		private static IEnumerable<Pawn> PawnsAt(IntVec3 cell, Map map)
 		{
-			if (!(item is IThingHolder holder))
+			foreach (Thing thing in map.thingGrid.ThingsAt(cell))
 			{
-				continue;
-			}
-			foreach (Pawn item2 in PawnsInside(holder))
-			{
-				yield return item2;
-			}
-		}
-	}
-
-	public void Enter(Dialog_Debug dialog)
-	{
-		TrySetupChildren();
-		if (children.Any())
-		{
-			TrySort();
-			if (dialog == null)
-			{
-				dialog = new Dialog_Debug();
-				Find.WindowStack.Add(dialog);
-			}
-			dialog.SetCurrentNode(this);
-			return;
-		}
-		dialog?.Close();
-		switch (actionType)
-		{
-		case DebugActionType.Action:
-			action();
-			break;
-		case DebugActionType.ToolMap:
-		case DebugActionType.ToolWorld:
-			DebugTools.curTool = new DebugTool(LabelNow, action);
-			break;
-		case DebugActionType.ToolMapForPawns:
-		{
-			DebugActionNode instance = this;
-			DebugTools.curTool = new DebugTool(LabelNow, delegate
-			{
-				if (UI.MouseCell().InBounds(Find.CurrentMap))
+				IThingHolder thingHolder = thing as IThingHolder;
+				if (thingHolder != null)
 				{
-					foreach (Pawn item in PawnsAt(UI.MouseCell(), Find.CurrentMap).ToList())
+					foreach (Pawn pawn in DebugActionNode.PawnsInside(thingHolder))
 					{
-						instance.pawnAction(item);
+						yield return pawn;
 					}
+					IEnumerator<Pawn> enumerator2 = null;
 				}
-			});
-			break;
+			}
+			IEnumerator<Thing> enumerator = null;
+			yield break;
+			yield break;
 		}
+
+		// Token: 0x06000272 RID: 626 RVA: 0x0000D9DC File Offset: 0x0000BBDC
+		public void Enter(Dialog_Debug dialog)
+		{
+			this.TrySetupChildren();
+			if (this.children.Any<DebugActionNode>())
+			{
+				this.TrySort();
+				if (dialog == null)
+				{
+					dialog = new Dialog_Debug();
+					Find.WindowStack.Add(dialog);
+				}
+				dialog.SetCurrentNode(this);
+				return;
+			}
+			if (dialog != null)
+			{
+				dialog.Close(true);
+			}
+			switch (this.actionType)
+			{
+			case DebugActionType.Action:
+				this.action();
+				break;
+			case DebugActionType.ToolMap:
+			case DebugActionType.ToolWorld:
+				DebugTools.curTool = new DebugTool(this.LabelNow, this.action, null);
+				break;
+			case DebugActionType.ToolMapForPawns:
+			{
+				DebugActionNode instance = this;
+				DebugTools.curTool = new DebugTool(this.LabelNow, delegate()
+				{
+					if (UI.MouseCell().InBounds(Find.CurrentMap))
+					{
+						foreach (Pawn obj in DebugActionNode.PawnsAt(UI.MouseCell(), Find.CurrentMap).ToList<Pawn>())
+						{
+							instance.pawnAction(obj);
+						}
+					}
+				}, null);
+				break;
+			}
+			}
+			this.DirtyLabelCache();
 		}
-		DirtyLabelCache();
+
+		// Token: 0x04000147 RID: 327
+		public string label;
+
+		// Token: 0x04000148 RID: 328
+		public DebugActionType actionType;
+
+		// Token: 0x04000149 RID: 329
+		public Action action;
+
+		// Token: 0x0400014A RID: 330
+		public Action<Pawn> pawnAction;
+
+		// Token: 0x0400014B RID: 331
+		public Func<List<DebugActionNode>> childGetter;
+
+		// Token: 0x0400014C RID: 332
+		public DebugActionAttribute sourceAttribute;
+
+		// Token: 0x0400014D RID: 333
+		public Func<bool> visibilityGetter;
+
+		// Token: 0x0400014E RID: 334
+		public Func<string> labelGetter;
+
+		// Token: 0x0400014F RID: 335
+		public string category;
+
+		// Token: 0x04000150 RID: 336
+		public int displayPriority;
+
+		// Token: 0x04000151 RID: 337
+		public FieldInfo settingsField;
+
+		// Token: 0x04000152 RID: 338
+		private bool childrenSetup;
+
+		// Token: 0x04000153 RID: 339
+		public DebugActionNode parent;
+
+		// Token: 0x04000154 RID: 340
+		public List<DebugActionNode> children = new List<DebugActionNode>();
+
+		// Token: 0x04000155 RID: 341
+		private string cachedPath;
+
+		// Token: 0x04000156 RID: 342
+		private string cachedLabelNow;
+
+		// Token: 0x04000157 RID: 343
+		private bool sorted;
+
+		// Token: 0x04000158 RID: 344
+		private bool? cachedCheckOn;
+
+		// Token: 0x04000159 RID: 345
+		private int lastLabelCacheFrame = -1;
+
+		// Token: 0x0400015A RID: 346
+		private const int LabelRecacheFrameCount = 30;
 	}
 }

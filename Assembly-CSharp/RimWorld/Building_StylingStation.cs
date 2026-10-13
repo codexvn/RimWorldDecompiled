@@ -1,39 +1,47 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class Building_StylingStation : Building
+namespace RimWorld
 {
-	public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
+	// Token: 0x02002940 RID: 10560
+	public class Building_StylingStation : Building
 	{
-		foreach (FloatMenuOption floatMenuOption in base.GetFloatMenuOptions(selPawn))
+		// Token: 0x0600E734 RID: 59188 RVA: 0x004360F2 File Offset: 0x004342F2
+		public override IEnumerable<FloatMenuOption> GetFloatMenuOptions(Pawn selPawn)
 		{
-			yield return floatMenuOption;
-		}
-		if (!ModLister.IdeologyInstalled)
-		{
+			foreach (FloatMenuOption floatMenuOption in base.GetFloatMenuOptions(selPawn))
+			{
+				yield return floatMenuOption;
+			}
+			IEnumerator<FloatMenuOption> enumerator = null;
+			if (ModLister.IdeologyInstalled)
+			{
+				if (!selPawn.CanReach(this, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
+				{
+					yield return new FloatMenuOption("CannotUseReason".Translate("NoPath".Translate().CapitalizeFirst()), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				}
+				else
+				{
+					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ChangeStyle".Translate().CapitalizeFirst(), delegate()
+					{
+						selPawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.OpenStylingStationDialog, this), new JobTag?(JobTag.Misc), false);
+					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this, "ReservedBy", null);
+				}
+				Job job;
+				if (JobGiver_OptimizeApparel.TryCreateRecolorJob(selPawn, out job, true))
+				{
+					yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("RecolorApparel".Translate().CapitalizeFirst(), delegate()
+					{
+						Job job2;
+						JobGiver_OptimizeApparel.TryCreateRecolorJob(selPawn, out job2, false);
+						selPawn.jobs.TryTakeOrderedJob(job2, new JobTag?(JobTag.Misc), false);
+					}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0), selPawn, this, "ReservedBy", null);
+				}
+			}
 			yield break;
-		}
-		if (!selPawn.CanReach(this, PathEndMode.OnCell, Danger.Deadly))
-		{
-			yield return new FloatMenuOption("CannotUseReason".Translate("NoPath".Translate().CapitalizeFirst()), null);
-		}
-		else
-		{
-			yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("ChangeStyle".Translate().CapitalizeFirst(), delegate
-			{
-				selPawn.jobs.TryTakeOrderedJob(JobMaker.MakeJob(JobDefOf.OpenStylingStationDialog, this), JobTag.Misc);
-			}), selPawn, this);
-		}
-		if (JobGiver_OptimizeApparel.TryCreateRecolorJob(selPawn, out var _, dryRun: true))
-		{
-			yield return FloatMenuUtility.DecoratePrioritizedTask(new FloatMenuOption("RecolorApparel".Translate().CapitalizeFirst(), delegate
-			{
-				JobGiver_OptimizeApparel.TryCreateRecolorJob(selPawn, out var job2);
-				selPawn.jobs.TryTakeOrderedJob(job2, JobTag.Misc);
-			}), selPawn, this);
+			yield break;
 		}
 	}
 }

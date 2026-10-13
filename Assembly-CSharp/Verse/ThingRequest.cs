@@ -1,82 +1,89 @@
-namespace Verse;
+﻿using System;
 
-public struct ThingRequest
+namespace Verse
 {
-	public ThingDef singleDef;
-
-	public ThingRequestGroup group;
-
-	public bool IsUndefined
+	// Token: 0x0200044E RID: 1102
+	public struct ThingRequest
 	{
-		get
+		// Token: 0x170004FF RID: 1279
+		// (get) Token: 0x06001C90 RID: 7312 RVA: 0x0008F36F File Offset: 0x0008D56F
+		public bool IsUndefined
 		{
-			if (singleDef == null)
+			get
 			{
-				return group == ThingRequestGroup.Undefined;
+				return this.singleDef == null && this.group == ThingRequestGroup.Undefined;
 			}
-			return false;
 		}
-	}
 
-	public bool CanBeFoundInRegion
-	{
-		get
+		// Token: 0x17000500 RID: 1280
+		// (get) Token: 0x06001C91 RID: 7313 RVA: 0x0008F384 File Offset: 0x0008D584
+		public bool CanBeFoundInRegion
 		{
-			if (IsUndefined)
+			get
 			{
-				return false;
+				return !this.IsUndefined && (this.singleDef != null || this.group == ThingRequestGroup.Nothing || this.group.StoreInRegion());
 			}
-			if (singleDef == null && group != ThingRequestGroup.Nothing)
+		}
+
+		// Token: 0x06001C92 RID: 7314 RVA: 0x0008F3B0 File Offset: 0x0008D5B0
+		public static ThingRequest ForUndefined()
+		{
+			return new ThingRequest
 			{
-				return group.StoreInRegion();
+				singleDef = null,
+				group = ThingRequestGroup.Undefined
+			};
+		}
+
+		// Token: 0x06001C93 RID: 7315 RVA: 0x0008F3D8 File Offset: 0x0008D5D8
+		public static ThingRequest ForDef(ThingDef singleDef)
+		{
+			return new ThingRequest
+			{
+				singleDef = singleDef,
+				group = ThingRequestGroup.Undefined
+			};
+		}
+
+		// Token: 0x06001C94 RID: 7316 RVA: 0x0008F400 File Offset: 0x0008D600
+		public static ThingRequest ForGroup(ThingRequestGroup group)
+		{
+			return new ThingRequest
+			{
+				singleDef = null,
+				group = group
+			};
+		}
+
+		// Token: 0x06001C95 RID: 7317 RVA: 0x0008F426 File Offset: 0x0008D626
+		public bool Accepts(Thing t)
+		{
+			if (this.singleDef != null)
+			{
+				return t.def == this.singleDef;
 			}
-			return true;
+			return this.group == ThingRequestGroup.Everything || this.group.Includes(t.def);
 		}
-	}
 
-	public static ThingRequest ForUndefined()
-	{
-		return new ThingRequest
+		// Token: 0x06001C96 RID: 7318 RVA: 0x0008F45C File Offset: 0x0008D65C
+		public override string ToString()
 		{
-			singleDef = null,
-			group = ThingRequestGroup.Undefined
-		};
-	}
-
-	public static ThingRequest ForDef(ThingDef singleDef)
-	{
-		return new ThingRequest
-		{
-			singleDef = singleDef,
-			group = ThingRequestGroup.Undefined
-		};
-	}
-
-	public static ThingRequest ForGroup(ThingRequestGroup group)
-	{
-		return new ThingRequest
-		{
-			singleDef = null,
-			group = group
-		};
-	}
-
-	public bool Accepts(Thing t)
-	{
-		if (singleDef != null)
-		{
-			return t.def == singleDef;
+			string str;
+			if (this.singleDef != null)
+			{
+				str = "singleDef " + this.singleDef.defName;
+			}
+			else
+			{
+				str = "group " + this.group.ToString();
+			}
+			return "ThingRequest(" + str + ")";
 		}
-		if (group != ThingRequestGroup.Everything)
-		{
-			return group.Includes(t.def);
-		}
-		return true;
-	}
 
-	public override string ToString()
-	{
-		string text = ((singleDef == null) ? ("group " + group) : ("singleDef " + singleDef.defName));
-		return "ThingRequest(" + text + ")";
+		// Token: 0x04001870 RID: 6256
+		public ThingDef singleDef;
+
+		// Token: 0x04001871 RID: 6257
+		public ThingRequestGroup group;
 	}
 }

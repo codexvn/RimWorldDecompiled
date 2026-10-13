@@ -1,41 +1,51 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_FactionGoodwillForMoodChange : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> inSignal;
-
-	[NoTranslate]
-	public SlateRef<string> inSignalEnable;
-
-	[NoTranslate]
-	public SlateRef<string> outSignalSuccess;
-
-	[NoTranslate]
-	public SlateRef<string> outSignalFailed;
-
-	public SlateRef<IEnumerable<Pawn>> pawns;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AC5 RID: 15045
+	public class QuestNode_FactionGoodwillForMoodChange : QuestNode
 	{
-		return true;
-	}
-
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		if (pawns.GetValue(slate) != null)
+		// Token: 0x0601483D RID: 84029 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool TestRunInt(Slate slate)
 		{
-			QuestPart_FactionGoodwillForMoodChange questPart_FactionGoodwillForMoodChange = new QuestPart_FactionGoodwillForMoodChange();
-			questPart_FactionGoodwillForMoodChange.pawns.AddRange(pawns.GetValue(slate));
-			questPart_FactionGoodwillForMoodChange.inSignal = QuestGenUtility.HardcodedSignalWithQuestID(inSignal.GetValue(slate));
-			questPart_FactionGoodwillForMoodChange.outSignalSuccess = QuestGenUtility.HardcodedSignalWithQuestID(outSignalSuccess.GetValue(slate));
-			questPart_FactionGoodwillForMoodChange.outSignalFailed = QuestGenUtility.HardcodedSignalWithQuestID(outSignalFailed.GetValue(slate));
-			questPart_FactionGoodwillForMoodChange.inSignalEnable = QuestGenUtility.HardcodedSignalWithQuestID(inSignalEnable.GetValue(slate)) ?? slate.Get<string>("inSignal");
-			QuestGen.quest.AddPart(questPart_FactionGoodwillForMoodChange);
+			return true;
 		}
+
+		// Token: 0x0601483E RID: 84030 RVA: 0x0061F530 File Offset: 0x0061D730
+		protected override void RunInt()
+		{
+			Slate slate = QuestGen.slate;
+			if (this.pawns.GetValue(slate) != null)
+			{
+				QuestPart_FactionGoodwillForMoodChange questPart_FactionGoodwillForMoodChange = new QuestPart_FactionGoodwillForMoodChange();
+				questPart_FactionGoodwillForMoodChange.pawns.AddRange(this.pawns.GetValue(slate));
+				questPart_FactionGoodwillForMoodChange.inSignal = QuestGenUtility.HardcodedSignalWithQuestID(this.inSignal.GetValue(slate));
+				questPart_FactionGoodwillForMoodChange.outSignalSuccess = QuestGenUtility.HardcodedSignalWithQuestID(this.outSignalSuccess.GetValue(slate));
+				questPart_FactionGoodwillForMoodChange.outSignalFailed = QuestGenUtility.HardcodedSignalWithQuestID(this.outSignalFailed.GetValue(slate));
+				questPart_FactionGoodwillForMoodChange.inSignalEnable = (QuestGenUtility.HardcodedSignalWithQuestID(this.inSignalEnable.GetValue(slate)) ?? slate.Get<string>("inSignal", null, false));
+				QuestGen.quest.AddPart(questPart_FactionGoodwillForMoodChange);
+			}
+		}
+
+		// Token: 0x0400E357 RID: 58199
+		[NoTranslate]
+		public SlateRef<string> inSignal;
+
+		// Token: 0x0400E358 RID: 58200
+		[NoTranslate]
+		public SlateRef<string> inSignalEnable;
+
+		// Token: 0x0400E359 RID: 58201
+		[NoTranslate]
+		public SlateRef<string> outSignalSuccess;
+
+		// Token: 0x0400E35A RID: 58202
+		[NoTranslate]
+		public SlateRef<string> outSignalFailed;
+
+		// Token: 0x0400E35B RID: 58203
+		public SlateRef<IEnumerable<Pawn>> pawns;
 	}
 }

@@ -1,118 +1,154 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public class AnimationDef : Def
+namespace Verse
 {
-	public int durationTicks;
-
-	public bool startOnRandomTick;
-
-	public bool playWhenDowned;
-
-	public float posRotScale = 1f;
-
-	public LoopMode loopMode;
-
-	public Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart> keyframeParts;
-
-	public Dictionary<PawnRenderNodeTagDef, CurveKeyAnimationPart> curveParts;
-
-	public bool TryGetPartForNodeTag(PawnRenderNodeTagDef nodeTag, out AnimationPart part)
+	// Token: 0x020001FF RID: 511
+	public class AnimationDef : Def
 	{
-		if (keyframeParts != null && keyframeParts.TryGetValue(nodeTag, out var value))
+		// Token: 0x06000DA6 RID: 3494 RVA: 0x000411BC File Offset: 0x0003F3BC
+		public bool TryGetPartForNodeTag(PawnRenderNodeTagDef nodeTag, out AnimationPart part)
 		{
-			part = value;
-			return true;
+			KeyframeAnimationPart keyframeAnimationPart;
+			if (this.keyframeParts != null && this.keyframeParts.TryGetValue(nodeTag, out keyframeAnimationPart))
+			{
+				part = keyframeAnimationPart;
+				return true;
+			}
+			CurveKeyAnimationPart curveKeyAnimationPart;
+			if (this.curveParts != null && this.curveParts.TryGetValue(nodeTag, out curveKeyAnimationPart))
+			{
+				part = curveKeyAnimationPart;
+				return true;
+			}
+			part = null;
+			return false;
 		}
-		if (curveParts != null && curveParts.TryGetValue(nodeTag, out var value2))
-		{
-			part = value2;
-			return true;
-		}
-		part = null;
-		return false;
-	}
 
-	public override IEnumerable<string> ConfigErrors()
-	{
-		foreach (string item in base.ConfigErrors())
+		// Token: 0x06000DA7 RID: 3495 RVA: 0x00041207 File Offset: 0x0003F407
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return item;
-		}
-		if (keyframeParts == null || curveParts == null)
-		{
+			foreach (string text in base.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			if (this.keyframeParts == null || this.curveParts == null)
+			{
+				yield break;
+			}
+			foreach (KeyValuePair<PawnRenderNodeTagDef, KeyframeAnimationPart> keyValuePair in this.keyframeParts)
+			{
+				PawnRenderNodeTagDef pawnRenderNodeTagDef;
+				KeyframeAnimationPart keyframeAnimationPart;
+				keyValuePair.Deconstruct(out pawnRenderNodeTagDef, out keyframeAnimationPart);
+				PawnRenderNodeTagDef pawnRenderNodeTagDef2 = pawnRenderNodeTagDef;
+				if (this.curveParts.ContainsKey(pawnRenderNodeTagDef2))
+				{
+					yield return string.Format("Animation def has a render node tag {0} which is driven by both keyframes and curve parts. You can only use one or the other for a given node tag", pawnRenderNodeTagDef2);
+				}
+			}
+			Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart>.Enumerator enumerator2 = default(Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart>.Enumerator);
+			yield break;
 			yield break;
 		}
-		foreach (var (pawnRenderNodeTagDef2, _) in keyframeParts)
-		{
-			if (curveParts.ContainsKey(pawnRenderNodeTagDef2))
-			{
-				yield return $"Animation def has a render node tag {pawnRenderNodeTagDef2} which is driven by both keyframes and curve parts. You can only use one or the other for a given node tag";
-			}
-		}
-	}
 
-	public virtual IEnumerable<(GraphicStateDef state, Graphic graphic)> GetGraphicStates(PawnRenderNode node)
-	{
-		PawnRenderNodeTagDef key;
-		if (keyframeParts != null)
+		// Token: 0x06000DA8 RID: 3496 RVA: 0x00041217 File Offset: 0x0003F417
+		[return: TupleElementNames(new string[]
 		{
-			foreach (KeyValuePair<PawnRenderNodeTagDef, KeyframeAnimationPart> keyframePart in keyframeParts)
+			"state",
+			"graphic"
+		})]
+		public virtual IEnumerable<ValueTuple<GraphicStateDef, Graphic>> GetGraphicStates(PawnRenderNode node)
+		{
+			if (this.keyframeParts != null)
 			{
-				keyframePart.Deconstruct(out key, out var value);
-				PawnRenderNodeTagDef pawnRenderNodeTagDef = key;
-				KeyframeAnimationPart keyframeAnimationPart = value;
-				if (pawnRenderNodeTagDef != node.Props.tagDef || keyframeAnimationPart.keyframes.NullOrEmpty())
+				foreach (KeyValuePair<PawnRenderNodeTagDef, KeyframeAnimationPart> keyValuePair in this.keyframeParts)
 				{
-					continue;
-				}
-				foreach (Keyframe keyframe in keyframeAnimationPart.keyframes)
-				{
-					if (keyframe.graphicState == null || !keyframe.graphicState.TryGetDefaultGraphic(out var graphic))
+					PawnRenderNodeTagDef pawnRenderNodeTagDef;
+					KeyframeAnimationPart keyframeAnimationPart;
+					keyValuePair.Deconstruct(out pawnRenderNodeTagDef, out keyframeAnimationPart);
+					PawnRenderNodeTagDef pawnRenderNodeTagDef2 = pawnRenderNodeTagDef;
+					KeyframeAnimationPart keyframeAnimationPart2 = keyframeAnimationPart;
+					if (pawnRenderNodeTagDef2 == node.Props.tagDef && !keyframeAnimationPart2.keyframes.NullOrEmpty<Keyframe>())
 					{
-						continue;
-					}
-					if (keyframe.graphicState.applySkinColorTint)
-					{
-						Color baseColor = graphic.Color;
-						Color baseColor2 = graphic.ColorTwo;
-						Pawn pawn = node.tree.pawn;
-						if (pawn.IsMutant)
+						foreach (Keyframe keyframe in keyframeAnimationPart2.keyframes)
 						{
-							baseColor = MutantUtility.GetMutantSkinColor(pawn, baseColor);
-							baseColor2 = MutantUtility.GetMutantSkinColor(pawn, baseColor2);
+							Graphic coloredVersion;
+							if (keyframe.graphicState != null && keyframe.graphicState.TryGetDefaultGraphic(out coloredVersion))
+							{
+								if (keyframe.graphicState.applySkinColorTint)
+								{
+									Color color = coloredVersion.Color;
+									Color color2 = coloredVersion.ColorTwo;
+									Pawn pawn = node.tree.pawn;
+									if (pawn.IsMutant)
+									{
+										color = MutantUtility.GetMutantSkinColor(pawn, color);
+										color2 = MutantUtility.GetMutantSkinColor(pawn, color2);
+									}
+									color = pawn.health.hediffSet.GetSkinColor(color);
+									color2 = pawn.health.hediffSet.GetSkinColor(color2);
+									coloredVersion = coloredVersion.GetColoredVersion(coloredVersion.Shader, color, color2);
+								}
+								yield return new ValueTuple<GraphicStateDef, Graphic>(keyframe.graphicState, coloredVersion);
+							}
 						}
-						baseColor = pawn.health.hediffSet.GetSkinColor(baseColor);
-						baseColor2 = pawn.health.hediffSet.GetSkinColor(baseColor2);
-						graphic = graphic.GetColoredVersion(graphic.Shader, baseColor, baseColor2);
+						List<Keyframe>.Enumerator enumerator2 = default(List<Keyframe>.Enumerator);
 					}
-					yield return (state: keyframe.graphicState, graphic: graphic);
 				}
+				Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart>.Enumerator enumerator = default(Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart>.Enumerator);
 			}
-		}
-		if (curveParts == null)
-		{
+			if (this.curveParts != null)
+			{
+				foreach (KeyValuePair<PawnRenderNodeTagDef, CurveKeyAnimationPart> keyValuePair2 in this.curveParts)
+				{
+					PawnRenderNodeTagDef pawnRenderNodeTagDef;
+					CurveKeyAnimationPart curveKeyAnimationPart;
+					keyValuePair2.Deconstruct(out pawnRenderNodeTagDef, out curveKeyAnimationPart);
+					PawnRenderNodeTagDef pawnRenderNodeTagDef3 = pawnRenderNodeTagDef;
+					CurveKeyAnimationPart curveKeyAnimationPart2 = curveKeyAnimationPart;
+					if (pawnRenderNodeTagDef3 == node.Props.tagDef && !curveKeyAnimationPart2.keyframes.NullOrEmpty<CurveKey>())
+					{
+						foreach (CurveKey curveKey in curveKeyAnimationPart2.keyframes)
+						{
+							Graphic item;
+							if (curveKey.graphicState != null && curveKey.graphicState.TryGetDefaultGraphic(out item))
+							{
+								yield return new ValueTuple<GraphicStateDef, Graphic>(curveKey.graphicState, item);
+							}
+						}
+						List<CurveKey>.Enumerator enumerator4 = default(List<CurveKey>.Enumerator);
+					}
+				}
+				Dictionary<PawnRenderNodeTagDef, CurveKeyAnimationPart>.Enumerator enumerator3 = default(Dictionary<PawnRenderNodeTagDef, CurveKeyAnimationPart>.Enumerator);
+			}
+			yield break;
 			yield break;
 		}
-		foreach (KeyValuePair<PawnRenderNodeTagDef, CurveKeyAnimationPart> curvePart in curveParts)
-		{
-			curvePart.Deconstruct(out key, out var value2);
-			PawnRenderNodeTagDef pawnRenderNodeTagDef2 = key;
-			CurveKeyAnimationPart curveKeyAnimationPart = value2;
-			if (pawnRenderNodeTagDef2 != node.Props.tagDef || curveKeyAnimationPart.keyframes.NullOrEmpty())
-			{
-				continue;
-			}
-			foreach (CurveKey keyframe2 in curveKeyAnimationPart.keyframes)
-			{
-				if (keyframe2.graphicState != null && keyframe2.graphicState.TryGetDefaultGraphic(out var graphic2))
-				{
-					yield return (state: keyframe2.graphicState, graphic: graphic2);
-				}
-			}
-		}
+
+		// Token: 0x040007FB RID: 2043
+		public int durationTicks;
+
+		// Token: 0x040007FC RID: 2044
+		public bool startOnRandomTick;
+
+		// Token: 0x040007FD RID: 2045
+		public bool playWhenDowned;
+
+		// Token: 0x040007FE RID: 2046
+		public float posRotScale = 1f;
+
+		// Token: 0x040007FF RID: 2047
+		public LoopMode loopMode;
+
+		// Token: 0x04000800 RID: 2048
+		public Dictionary<PawnRenderNodeTagDef, KeyframeAnimationPart> keyframeParts;
+
+		// Token: 0x04000801 RID: 2049
+		public Dictionary<PawnRenderNodeTagDef, CurveKeyAnimationPart> curveParts;
 	}
 }

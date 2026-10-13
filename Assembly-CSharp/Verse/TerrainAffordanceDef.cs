@@ -1,14 +1,21 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public class TerrainAffordanceDef : Def
+namespace Verse
 {
-	public int order;
+	// Token: 0x020002EB RID: 747
+	public class TerrainAffordanceDef : Def
+	{
+		// Token: 0x0400109A RID: 4250
+		public int order;
 
-	public bool visualizeOnAffordanceOverlay;
+		// Token: 0x0400109B RID: 4251
+		public bool visualizeOnAffordanceOverlay;
 
-	public Color affordanceOverlayColor = Color.white;
+		// Token: 0x0400109C RID: 4252
+		public Color affordanceOverlayColor = Color.white;
 
-	public bool blockAffordanceOverlay;
+		// Token: 0x0400109D RID: 4253
+		public bool blockAffordanceOverlay;
+	}
 }

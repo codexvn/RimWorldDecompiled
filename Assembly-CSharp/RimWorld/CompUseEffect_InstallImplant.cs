@@ -1,80 +1,96 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompUseEffect_InstallImplant : CompUseEffect
+namespace RimWorld
 {
-	public CompProperties_UseEffectInstallImplant Props => (CompProperties_UseEffectInstallImplant)props;
-
-	public override void DoEffect(Pawn user)
+	// Token: 0x02002F63 RID: 12131
+	public class CompUseEffect_InstallImplant : CompUseEffect
 	{
-		BodyPartRecord bodyPartRecord = user.RaceProps.body.GetPartsWithDef(Props.bodyPart).FirstOrFallback();
-		if (bodyPartRecord != null)
+		// Token: 0x17002C35 RID: 11317
+		// (get) Token: 0x06011184 RID: 70020 RVA: 0x004E8951 File Offset: 0x004E6B51
+		public CompProperties_UseEffectInstallImplant Props
 		{
-			Hediff firstHediffOfDef = user.health.hediffSet.GetFirstHediffOfDef(Props.hediffDef);
-			if (firstHediffOfDef == null && !Props.requiresExistingHediff)
+			get
 			{
-				user.health.AddHediff(Props.hediffDef, bodyPartRecord);
+				return (CompProperties_UseEffectInstallImplant)this.props;
 			}
-			else if (Props.canUpgrade)
+		}
+
+		// Token: 0x06011185 RID: 70021 RVA: 0x004E8960 File Offset: 0x004E6B60
+		public override void DoEffect(Pawn user)
+		{
+			BodyPartRecord bodyPartRecord = user.RaceProps.body.GetPartsWithDef(this.Props.bodyPart).FirstOrFallback(null);
+			if (bodyPartRecord == null)
+			{
+				return;
+			}
+			Hediff firstHediffOfDef = user.health.hediffSet.GetFirstHediffOfDef(this.Props.hediffDef, false);
+			if (firstHediffOfDef == null && !this.Props.requiresExistingHediff)
+			{
+				user.health.AddHediff(this.Props.hediffDef, bodyPartRecord, null, null);
+				return;
+			}
+			if (this.Props.canUpgrade)
 			{
 				((Hediff_Level)firstHediffOfDef).ChangeLevel(1);
 			}
 		}
-	}
 
-	public override AcceptanceReport CanBeUsedBy(Pawn p)
-	{
-		if ((!p.IsFreeColonist || p.HasExtraHomeFaction()) && !Props.allowNonColonists)
+		// Token: 0x06011186 RID: 70022 RVA: 0x004E89FC File Offset: 0x004E6BFC
+		public override AcceptanceReport CanBeUsedBy(Pawn p)
 		{
-			return "InstallImplantNotAllowedForNonColonists".Translate();
-		}
-		if (p.RaceProps.body.GetPartsWithDef(Props.bodyPart).FirstOrFallback() == null)
-		{
-			return "InstallImplantNoBodyPart".Translate() + ": " + Props.bodyPart.LabelShort;
-		}
-		if (Props.requiresPsychicallySensitive && p.psychicEntropy != null && !p.psychicEntropy.IsPsychicallySensitive)
-		{
-			return "InstallImplantPsychicallyDeaf".Translate();
-		}
-		Hediff existingImplant = GetExistingImplant(p);
-		if (Props.requiresExistingHediff && existingImplant == null)
-		{
-			return "InstallImplantHediffRequired".Translate(Props.hediffDef.label);
-		}
-		if (existingImplant != null)
-		{
-			if (!Props.canUpgrade)
+			if ((!p.IsFreeColonist || p.HasExtraHomeFaction(null)) && !this.Props.allowNonColonists)
 			{
-				return "InstallImplantAlreadyInstalled".Translate();
+				return "InstallImplantNotAllowedForNonColonists".Translate();
 			}
-			Hediff_Level hediff_Level = (Hediff_Level)existingImplant;
-			if ((float)hediff_Level.level >= hediff_Level.def.maxSeverity)
+			if (p.RaceProps.body.GetPartsWithDef(this.Props.bodyPart).FirstOrFallback(null) == null)
 			{
-				return "InstallImplantAlreadyMaxLevel".Translate();
+				return "InstallImplantNoBodyPart".Translate() + ": " + this.Props.bodyPart.LabelShort;
 			}
-			if (Props.maxSeverity <= (float)hediff_Level.level)
+			if (this.Props.requiresPsychicallySensitive && p.psychicEntropy != null && !p.psychicEntropy.IsPsychicallySensitive)
 			{
-				return string.Concat("InstallImplantAlreadyMaxLevel".Translate() + " ", Props.maxSeverity.ToString());
+				return "InstallImplantPsychicallyDeaf".Translate();
 			}
-			if (Props.minSeverity > (float)hediff_Level.level)
+			Hediff existingImplant = this.GetExistingImplant(p);
+			if (this.Props.requiresExistingHediff && existingImplant == null)
 			{
-				return "InstallImplantMinLevel".Translate(Props.minSeverity);
+				return "InstallImplantHediffRequired".Translate(this.Props.hediffDef.label);
 			}
+			if (existingImplant != null)
+			{
+				if (!this.Props.canUpgrade)
+				{
+					return "InstallImplantAlreadyInstalled".Translate();
+				}
+				Hediff_Level hediff_Level = (Hediff_Level)existingImplant;
+				if ((float)hediff_Level.level >= hediff_Level.def.maxSeverity)
+				{
+					return "InstallImplantAlreadyMaxLevel".Translate();
+				}
+				if (this.Props.maxSeverity <= (float)hediff_Level.level)
+				{
+					return "InstallImplantAlreadyMaxLevel".Translate() + " " + this.Props.maxSeverity.ToString();
+				}
+				if (this.Props.minSeverity > (float)hediff_Level.level)
+				{
+					return "InstallImplantMinLevel".Translate(this.Props.minSeverity);
+				}
+			}
+			return true;
 		}
-		return true;
-	}
 
-	public Hediff GetExistingImplant(Pawn p)
-	{
-		for (int i = 0; i < p.health.hediffSet.hediffs.Count; i++)
+		// Token: 0x06011187 RID: 70023 RVA: 0x004E8BCC File Offset: 0x004E6DCC
+		public Hediff GetExistingImplant(Pawn p)
 		{
-			Hediff hediff = p.health.hediffSet.hediffs[i];
-			if (hediff.def == Props.hediffDef && hediff.Part == p.RaceProps.body.GetPartsWithDef(Props.bodyPart).FirstOrFallback())
+			for (int i = 0; i < p.health.hediffSet.hediffs.Count; i++)
 			{
-				return hediff;
+				Hediff hediff = p.health.hediffSet.hediffs[i];
+				if (hediff.def == this.Props.hediffDef && hediff.Part == p.RaceProps.body.GetPartsWithDef(this.Props.bodyPart).FirstOrFallback(null))
+				{
+					return hediff;
+				}
 			}
+			return null;
 		}
-		return null;
 	}
 }

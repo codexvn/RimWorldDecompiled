@@ -1,19 +1,23 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_GameCondition : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001885 RID: 6277
+	public class ThoughtWorker_GameCondition : ThoughtWorker
 	{
-		if (p.SpawnedOrAnyParentSpawned && p.MapHeld.gameConditionManager.ConditionIsActive(def.gameCondition))
+		// Token: 0x06008FF9 RID: 36857 RVA: 0x002A7BCC File Offset: 0x002A5DCC
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return true;
+			if (p.SpawnedOrAnyParentSpawned && p.MapHeld.gameConditionManager.ConditionIsActive(this.def.gameCondition))
+			{
+				return true;
+			}
+			if (Find.World.gameConditionManager.ConditionIsActive(this.def.gameCondition))
+			{
+				return true;
+			}
+			return false;
 		}
-		if (Find.World.gameConditionManager.ConditionIsActive(def.gameCondition))
-		{
-			return true;
-		}
-		return false;
 	}
 }

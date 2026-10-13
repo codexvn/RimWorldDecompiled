@@ -1,22 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_ExtinguishSelf : ThinkNode_JobGiver
+namespace RimWorld
 {
-	private const float ActivateChance = 0.1f;
-
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x02001481 RID: 5249
+	public class JobGiver_ExtinguishSelf : ThinkNode_JobGiver
 	{
-		if (Rand.Value < 0.1f)
+		// Token: 0x06007E65 RID: 32357 RVA: 0x00260B2C File Offset: 0x0025ED2C
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			Fire fire = (Fire)pawn.GetAttachment(ThingDefOf.Fire);
-			if (fire != null)
+			if (Rand.Value < 0.1f)
 			{
-				return JobMaker.MakeJob(JobDefOf.ExtinguishSelf, fire);
+				Fire fire = (Fire)pawn.GetAttachment(ThingDefOf.Fire);
+				if (fire != null)
+				{
+					return JobMaker.MakeJob(JobDefOf.ExtinguishSelf, fire);
+				}
 			}
+			return null;
 		}
-		return null;
+
+		// Token: 0x040054C1 RID: 21697
+		private const float ActivateChance = 0.1f;
 	}
 }

@@ -1,18 +1,25 @@
-using System;
+﻿using System;
 
-namespace RimWorld;
-
-[AttributeUsage(AttributeTargets.Field)]
-public class MayRequireAnyOfAttribute : Attribute
+namespace RimWorld
 {
-	public string[] modIds;
-
-	public MayRequireAnyOfAttribute(string modId)
+	// Token: 0x02003581 RID: 13697
+	[AttributeUsage(AttributeTargets.Field)]
+	public class MayRequireAnyOfAttribute : Attribute
 	{
-		modIds = modId.Split(new char[1] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-		for (int i = 0; i < modIds.Length; i++)
+		// Token: 0x0601336D RID: 78701 RVA: 0x005B5660 File Offset: 0x005B3860
+		public MayRequireAnyOfAttribute(string modId)
 		{
-			modIds[i] = modIds[i].Trim();
+			this.modIds = modId.Split(new char[]
+			{
+				','
+			}, StringSplitOptions.RemoveEmptyEntries);
+			for (int i = 0; i < this.modIds.Length; i++)
+			{
+				this.modIds[i] = this.modIds[i].Trim();
+			}
 		}
+
+		// Token: 0x0400C740 RID: 51008
+		public string[] modIds;
 	}
 }

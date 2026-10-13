@@ -1,54 +1,57 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetRandomFactionForSite : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<IEnumerable<SitePartDef>> sitePartDefs;
-
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<Thing> mustBeHostileToFactionOf;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A75 RID: 14965
+	public class QuestNode_GetRandomFactionForSite : QuestNode
 	{
-		return TrySetVars(slate, test: true);
-	}
-
-	protected override void RunInt()
-	{
-		TrySetVars(QuestGen.slate, test: false);
-	}
-
-	private bool TrySetVars(Slate slate, bool test)
-	{
-		Pawn asker = slate.Get<Pawn>("asker");
-		Thing mustBeHostileToFactionOfResolved = mustBeHostileToFactionOf.GetValue(slate);
-		if (!SiteMakerHelper.TryFindRandomFactionFor(sitePartDefs.GetValue(slate), out var faction, disallowNonHostileFactions: true, delegate(Faction x)
+		// Token: 0x06014735 RID: 83765 RVA: 0x0061BC79 File Offset: 0x00619E79
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (asker != null && asker.Faction == x)
+			return this.TrySetVars(slate, true);
+		}
+
+		// Token: 0x06014736 RID: 83766 RVA: 0x0061BC83 File Offset: 0x00619E83
+		protected override void RunInt()
+		{
+			this.TrySetVars(QuestGen.slate, false);
+		}
+
+		// Token: 0x06014737 RID: 83767 RVA: 0x0061BC94 File Offset: 0x00619E94
+		private bool TrySetVars(Slate slate, bool test)
+		{
+			Pawn asker = slate.Get<Pawn>("asker", null, false);
+			Thing mustBeHostileToFactionOfResolved = this.mustBeHostileToFactionOf.GetValue(slate);
+			Faction faction;
+			if (!SiteMakerHelper.TryFindRandomFactionFor(this.sitePartDefs.GetValue(slate), out faction, true, (Faction x) => (asker == null || asker.Faction != x) && (mustBeHostileToFactionOfResolved == null || mustBeHostileToFactionOfResolved.Faction == null || (x != mustBeHostileToFactionOfResolved.Faction && x.HostileTo(mustBeHostileToFactionOfResolved.Faction)))))
 			{
 				return false;
 			}
-			return (mustBeHostileToFactionOfResolved == null || mustBeHostileToFactionOfResolved.Faction == null || (x != mustBeHostileToFactionOfResolved.Faction && x.HostileTo(mustBeHostileToFactionOfResolved.Faction))) ? true : false;
-		}))
-		{
-			return false;
+			if (!Find.Storyteller.difficulty.allowViolentQuests && faction.HostileTo(Faction.OfPlayer))
+			{
+				return false;
+			}
+			slate.Set<Faction>(this.storeAs.GetValue(slate), faction, false);
+			if (!test && faction != null && !faction.Hidden)
+			{
+				QuestPart_InvolvedFactions questPart_InvolvedFactions = new QuestPart_InvolvedFactions();
+				questPart_InvolvedFactions.factions.Add(faction);
+				QuestGen.quest.AddPart(questPart_InvolvedFactions);
+			}
+			return true;
 		}
-		if (!Find.Storyteller.difficulty.allowViolentQuests && faction.HostileTo(Faction.OfPlayer))
-		{
-			return false;
-		}
-		slate.Set(storeAs.GetValue(slate), faction);
-		if (!test && faction != null && !faction.Hidden)
-		{
-			QuestPart_InvolvedFactions questPart_InvolvedFactions = new QuestPart_InvolvedFactions();
-			questPart_InvolvedFactions.factions.Add(faction);
-			QuestGen.quest.AddPart(questPart_InvolvedFactions);
-		}
-		return true;
+
+		// Token: 0x0400E24D RID: 57933
+		public SlateRef<IEnumerable<SitePartDef>> sitePartDefs;
+
+		// Token: 0x0400E24E RID: 57934
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E24F RID: 57935
+		public SlateRef<Thing> mustBeHostileToFactionOf;
 	}
 }

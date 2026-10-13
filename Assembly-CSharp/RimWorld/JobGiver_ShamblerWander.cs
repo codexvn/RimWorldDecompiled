@@ -1,42 +1,44 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_ShamblerWander : JobGiver_Wander
+namespace RimWorld
 {
-	private static float ChanceToWander = 0.2f;
-
-	public JobGiver_ShamblerWander()
+	// Token: 0x020014CE RID: 5326
+	public class JobGiver_ShamblerWander : JobGiver_Wander
 	{
-		locomotionUrgency = LocomotionUrgency.Amble;
-		ticksBetweenWandersRange = new IntRange(480, 900);
-	}
-
-	protected override Job TryGiveJob(Pawn pawn)
-	{
-		pawn.mindState.nextMoveOrderIsWait = !Rand.Chance(ChanceToWander);
-		return base.TryGiveJob(pawn);
-	}
-
-	protected override IntVec3 GetWanderRoot(Pawn pawn)
-	{
-		if (pawn.IsGhoul)
+		// Token: 0x06007F63 RID: 32611 RVA: 0x00265A9D File Offset: 0x00263C9D
+		public JobGiver_ShamblerWander()
 		{
-			return pawn.Position;
+			this.locomotionUrgency = LocomotionUrgency.Amble;
+			this.ticksBetweenWandersRange = new IntRange(480, 900);
 		}
-		return GetWanderRootHerd(pawn);
-	}
 
-	private IntVec3 GetWanderRootHerd(Pawn pawn)
-	{
-		return WanderUtility.GetHerdWanderRoot(isHerdValidator: delegate(Thing t)
+		// Token: 0x06007F64 RID: 32612 RVA: 0x00265AC1 File Offset: 0x00263CC1
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			if (!((Pawn)t).IsShambler || t == pawn)
+			pawn.mindState.nextMoveOrderIsWait = !Rand.Chance(JobGiver_ShamblerWander.ChanceToWander);
+			return base.TryGiveJob(pawn);
+		}
+
+		// Token: 0x06007F65 RID: 32613 RVA: 0x00265AE2 File Offset: 0x00263CE2
+		protected override IntVec3 GetWanderRoot(Pawn pawn)
+		{
+			if (pawn.IsGhoul)
 			{
-				return false;
+				return pawn.Position;
 			}
-			return (t.Faction == pawn.Faction) ? true : false;
-		}, pawn: pawn);
+			return this.GetWanderRootHerd(pawn);
+		}
+
+		// Token: 0x06007F66 RID: 32614 RVA: 0x00265AFC File Offset: 0x00263CFC
+		private IntVec3 GetWanderRootHerd(Pawn pawn)
+		{
+			Predicate<Thing> isHerdValidator = (Thing t) => ((Pawn)t).IsShambler && t != pawn && t.Faction == pawn.Faction;
+			return WanderUtility.GetHerdWanderRoot(pawn, isHerdValidator);
+		}
+
+		// Token: 0x04005542 RID: 21826
+		private static float ChanceToWander = 0.2f;
 	}
 }

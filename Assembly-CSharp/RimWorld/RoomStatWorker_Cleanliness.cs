@@ -1,26 +1,30 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomStatWorker_Cleanliness : RoomStatWorker
+namespace RimWorld
 {
-	public override float GetScore(Room room)
+	// Token: 0x02002174 RID: 8564
+	public class RoomStatWorker_Cleanliness : RoomStatWorker
 	{
-		float num = 0f;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
+		// Token: 0x0600BAEB RID: 47851 RVA: 0x0035F4B0 File Offset: 0x0035D6B0
+		public override float GetScore(Room room)
 		{
-			Thing thing = containedAndAdjacentThings[i];
-			if (thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Filth || thing.def.category == ThingCategory.Plant)
+			float num = 0f;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				num += (float)thing.stackCount * thing.GetStatValue(StatDefOf.Cleanliness);
+				Thing thing = containedAndAdjacentThings[i];
+				if (thing.def.category == ThingCategory.Building || thing.def.category == ThingCategory.Item || thing.def.category == ThingCategory.Filth || thing.def.category == ThingCategory.Plant)
+				{
+					num += (float)thing.stackCount * thing.GetStatValue(StatDefOf.Cleanliness, true, -1);
+				}
 			}
+			foreach (IntVec3 c in room.Cells)
+			{
+				num += c.GetTerrain(room.Map).GetStatValueAbstract(StatDefOf.Cleanliness, null);
+			}
+			return num / (float)room.CellCount;
 		}
-		foreach (IntVec3 cell in room.Cells)
-		{
-			num += cell.GetTerrain(room.Map).GetStatValueAbstract(StatDefOf.Cleanliness);
-		}
-		return num / (float)room.CellCount;
 	}
 }

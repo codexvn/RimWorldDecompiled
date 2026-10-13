@@ -1,19 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class BrieflyDespawnedUtil
+namespace RimWorld
 {
-	public static bool BrieflyDespawned(this Pawn pawn)
+	// Token: 0x02002B1F RID: 11039
+	public static class BrieflyDespawnedUtil
 	{
-		if (pawn.Spawned)
+		// Token: 0x0600F6B7 RID: 63159 RVA: 0x0047A7E1 File Offset: 0x004789E1
+		public static bool BrieflyDespawned(this Pawn pawn)
 		{
-			return false;
+			return !pawn.Spawned && pawn.ParentHolder is PawnFlyer;
 		}
-		if (pawn.ParentHolder is PawnFlyer)
-		{
-			return true;
-		}
-		return false;
 	}
 }

@@ -1,35 +1,39 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_ExecuteEntity : WorkGiver_EntityOnPlatform
+namespace RimWorld
 {
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	// Token: 0x020015BD RID: 5565
+	public class WorkGiver_ExecuteEntity : WorkGiver_EntityOnPlatform
 	{
-		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		// Token: 0x0600838B RID: 33675 RVA: 0x00277AE8 File Offset: 0x00275CE8
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return false;
+			return pawn.CanReserve(t, 1, -1, null, forced) && this.GetEntity(t) != null;
 		}
-		return GetEntity(t) != null;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		return JobMaker.MakeJob(JobDefOf.ExecuteEntity, t);
-	}
-
-	protected override Pawn GetEntity(Thing potentialPlatform)
-	{
-		if (potentialPlatform is Building_HoldingPlatform { HeldPawn: var heldPawn })
+		// Token: 0x0600838C RID: 33676 RVA: 0x00277B08 File Offset: 0x00275D08
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			CompHoldingPlatformTarget compHoldingPlatformTarget = heldPawn?.TryGetComp<CompHoldingPlatformTarget>();
+			return JobMaker.MakeJob(JobDefOf.ExecuteEntity, t);
+		}
+
+		// Token: 0x0600838D RID: 33677 RVA: 0x00277B1C File Offset: 0x00275D1C
+		protected override Pawn GetEntity(Thing potentialPlatform)
+		{
+			Building_HoldingPlatform building_HoldingPlatform = potentialPlatform as Building_HoldingPlatform;
+			if (building_HoldingPlatform == null)
+			{
+				return null;
+			}
+			Pawn heldPawn = building_HoldingPlatform.HeldPawn;
+			CompHoldingPlatformTarget compHoldingPlatformTarget = (heldPawn != null) ? heldPawn.TryGetComp<CompHoldingPlatformTarget>() : null;
 			if (compHoldingPlatformTarget == null || compHoldingPlatformTarget.containmentMode != EntityContainmentMode.Execute)
 			{
 				return null;
 			}
 			return heldPawn;
 		}
-		return null;
 	}
 }

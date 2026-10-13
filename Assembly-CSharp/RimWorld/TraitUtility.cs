@@ -1,23 +1,26 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public static class TraitUtility
+namespace RimWorld
 {
-	public static void ApplySkillGainFromTrait(Pawn pawn, Trait trait)
+	// Token: 0x02002554 RID: 9556
+	public static class TraitUtility
 	{
-		List<SkillGain> skillGains = trait.CurrentData.skillGains;
-		if (trait.Suppressed || skillGains == null || pawn.skills == null)
+		// Token: 0x0600D141 RID: 53569 RVA: 0x003D8E64 File Offset: 0x003D7064
+		public static void ApplySkillGainFromTrait(Pawn pawn, Trait trait)
 		{
-			return;
-		}
-		foreach (SkillGain item in skillGains)
-		{
-			SkillRecord skill = pawn.skills.GetSkill(item.skill);
-			if (skill != null && !skill.PermanentlyDisabled)
+			List<SkillGain> skillGains = trait.CurrentData.skillGains;
+			if (!trait.Suppressed && skillGains != null && pawn.skills != null)
 			{
-				skill.Level = skill.GetLevel(includeAptitudes: false) + item.amount;
+				foreach (SkillGain skillGain in skillGains)
+				{
+					SkillRecord skill = pawn.skills.GetSkill(skillGain.skill);
+					if (skill != null && !skill.PermanentlyDisabled)
+					{
+						skill.Level = skill.GetLevel(false) + skillGain.amount;
+					}
+				}
 			}
 		}
 	}

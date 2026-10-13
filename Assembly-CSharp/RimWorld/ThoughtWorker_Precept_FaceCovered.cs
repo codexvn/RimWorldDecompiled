@@ -1,33 +1,38 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_Precept_FaceCovered : ThoughtWorker_Precept
+namespace RimWorld
 {
-	protected override ThoughtState ShouldHaveThought(Pawn p)
+	// Token: 0x020017F1 RID: 6129
+	public class ThoughtWorker_Precept_FaceCovered : ThoughtWorker_Precept
 	{
-		return HasCoveredFace(p);
-	}
-
-	public static bool HasCoveredFace(Pawn p)
-	{
-		if (p.apparel == null)
+		// Token: 0x06008E65 RID: 36453 RVA: 0x002A2FC3 File Offset: 0x002A11C3
+		protected override ThoughtState ShouldHaveThought(Pawn p)
 		{
-			return false;
+			return ThoughtWorker_Precept_FaceCovered.HasCoveredFace(p);
 		}
-		List<Apparel> wornApparel = p.apparel.WornApparel;
-		for (int i = 0; i < wornApparel.Count; i++)
+
+		// Token: 0x06008E66 RID: 36454 RVA: 0x002A2FD0 File Offset: 0x002A11D0
+		public static bool HasCoveredFace(Pawn p)
 		{
-			Apparel apparel = wornApparel[i];
-			for (int j = 0; j < apparel.def.apparel.bodyPartGroups.Count; j++)
+			if (p.apparel == null)
 			{
-				if (apparel.def.apparel.bodyPartGroups[j] == BodyPartGroupDefOf.UpperHead)
+				return false;
+			}
+			List<Apparel> wornApparel = p.apparel.WornApparel;
+			for (int i = 0; i < wornApparel.Count; i++)
+			{
+				Apparel apparel = wornApparel[i];
+				for (int j = 0; j < apparel.def.apparel.bodyPartGroups.Count; j++)
 				{
-					return true;
+					if (apparel.def.apparel.bodyPartGroups[j] == BodyPartGroupDefOf.UpperHead)
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

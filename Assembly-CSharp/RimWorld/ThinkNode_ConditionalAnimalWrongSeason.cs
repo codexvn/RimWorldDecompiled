@@ -1,16 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalAnimalWrongSeason : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x0200179F RID: 6047
+	public class ThinkNode_ConditionalAnimalWrongSeason : ThinkNode_Conditional
 	{
-		if (pawn.IsAnimal)
+		// Token: 0x06008D89 RID: 36233 RVA: 0x002A0D04 File Offset: 0x0029EF04
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return !pawn.Map.mapTemperature.SeasonAcceptableFor(pawn.def);
+			return pawn.IsAnimal && !pawn.Map.mapTemperature.SeasonAcceptableFor(pawn.def, 0f);
 		}
-		return false;
 	}
 }

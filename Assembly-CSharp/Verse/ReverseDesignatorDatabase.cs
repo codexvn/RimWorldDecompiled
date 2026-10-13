@@ -1,78 +1,88 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse;
-
-public class ReverseDesignatorDatabase
+namespace Verse
 {
-	private List<Designator> desList;
-
-	public List<Designator> AllDesignators
+	// Token: 0x0200091C RID: 2332
+	public class ReverseDesignatorDatabase
 	{
-		get
+		// Token: 0x17000B34 RID: 2868
+		// (get) Token: 0x06003C83 RID: 15491 RVA: 0x0013D348 File Offset: 0x0013B548
+		public List<Designator> AllDesignators
 		{
-			if (desList == null)
+			get
 			{
-				InitDesignators();
-			}
-			return desList;
-		}
-	}
-
-	public void Reinit()
-	{
-		desList = null;
-	}
-
-	public T Get<T>() where T : Designator
-	{
-		if (desList == null)
-		{
-			InitDesignators();
-		}
-		for (int i = 0; i < desList.Count; i++)
-		{
-			if (desList[i] is T result)
-			{
-				return result;
+				if (this.desList == null)
+				{
+					this.InitDesignators();
+				}
+				return this.desList;
 			}
 		}
-		return null;
-	}
 
-	private void InitDesignators()
-	{
-		desList = new List<Designator>();
-		desList.Add(new Designator_Cancel());
-		desList.Add(new Designator_Claim());
-		desList.Add(new Designator_Deconstruct());
-		desList.Add(new Designator_DeconstructConduit());
-		desList.Add(new Designator_Uninstall());
-		desList.Add(new Designator_Haul());
-		desList.Add(new Designator_Hunt());
-		desList.Add(new Designator_Slaughter());
-		desList.Add(new Designator_Tame());
-		desList.Add(new Designator_PlantsCut());
-		desList.Add(new Designator_PlantsHarvest());
-		desList.Add(new Designator_PlantsHarvestWood());
-		desList.Add(new Designator_Mine());
-		desList.Add(new Designator_MineVein());
-		desList.Add(new Designator_Strip());
-		desList.Add(new Designator_Open());
-		desList.Add(new Designator_EjectFuel());
-		desList.Add(new Designator_SmoothSurface());
-		desList.Add(new Designator_SmoothFloors());
-		desList.Add(new Designator_SmoothWalls());
-		desList.Add(new Designator_ReleaseAnimalToWild());
-		desList.Add(new Designator_ExtractTree());
-		desList.Add(new Designator_RemovePaint());
-		if (ModsConfig.BiotechActive)
+		// Token: 0x06003C84 RID: 15492 RVA: 0x0013D35E File Offset: 0x0013B55E
+		public void Reinit()
 		{
-			desList.Add(new Designator_MechControlGroup());
-			desList.Add(new Designator_Adopt());
+			this.desList = null;
 		}
-		desList.Add(new Designator_FillIn());
-		desList.Add(new Designator_ExtractSkull());
-		desList.RemoveAll((Designator des) => !Current.Game.Rules.DesignatorAllowed(des));
+
+		// Token: 0x06003C85 RID: 15493 RVA: 0x0013D368 File Offset: 0x0013B568
+		public T Get<T>() where T : Designator
+		{
+			if (this.desList == null)
+			{
+				this.InitDesignators();
+			}
+			for (int i = 0; i < this.desList.Count; i++)
+			{
+				T t = this.desList[i] as T;
+				if (t != null)
+				{
+					return t;
+				}
+			}
+			return default(T);
+		}
+
+		// Token: 0x06003C86 RID: 15494 RVA: 0x0013D3C4 File Offset: 0x0013B5C4
+		private void InitDesignators()
+		{
+			this.desList = new List<Designator>();
+			this.desList.Add(new Designator_Cancel());
+			this.desList.Add(new Designator_Claim());
+			this.desList.Add(new Designator_Deconstruct());
+			this.desList.Add(new Designator_DeconstructConduit());
+			this.desList.Add(new Designator_Uninstall());
+			this.desList.Add(new Designator_Haul());
+			this.desList.Add(new Designator_Hunt());
+			this.desList.Add(new Designator_Slaughter());
+			this.desList.Add(new Designator_Tame());
+			this.desList.Add(new Designator_PlantsCut());
+			this.desList.Add(new Designator_PlantsHarvest());
+			this.desList.Add(new Designator_PlantsHarvestWood());
+			this.desList.Add(new Designator_Mine());
+			this.desList.Add(new Designator_MineVein());
+			this.desList.Add(new Designator_Strip());
+			this.desList.Add(new Designator_Open());
+			this.desList.Add(new Designator_EjectFuel());
+			this.desList.Add(new Designator_SmoothSurface());
+			this.desList.Add(new Designator_SmoothFloors());
+			this.desList.Add(new Designator_SmoothWalls());
+			this.desList.Add(new Designator_ReleaseAnimalToWild());
+			this.desList.Add(new Designator_ExtractTree());
+			this.desList.Add(new Designator_RemovePaint());
+			if (ModsConfig.BiotechActive)
+			{
+				this.desList.Add(new Designator_MechControlGroup());
+				this.desList.Add(new Designator_Adopt());
+			}
+			this.desList.Add(new Designator_FillIn());
+			this.desList.Add(new Designator_ExtractSkull());
+			this.desList.RemoveAll((Designator des) => !Current.Game.Rules.DesignatorAllowed(des));
+		}
+
+		// Token: 0x04002B85 RID: 11141
+		private List<Designator> desList;
 	}
 }

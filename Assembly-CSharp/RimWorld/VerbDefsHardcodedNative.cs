@@ -1,37 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public static class VerbDefsHardcodedNative
+namespace RimWorld
 {
-	public static IEnumerable<VerbProperties> AllVerbDefs()
+	// Token: 0x02003675 RID: 13941
+	public static class VerbDefsHardcodedNative
 	{
-		VerbProperties verbProperties = new VerbProperties();
-		verbProperties.verbClass = typeof(Verb_BeatFire);
-		verbProperties.category = VerbCategory.BeatFire;
-		verbProperties.range = 1.42f;
-		verbProperties.noiseRadius = 3f;
-		verbProperties.targetParams.canTargetFires = true;
-		verbProperties.targetParams.canTargetPawns = false;
-		verbProperties.targetParams.canTargetBuildings = false;
-		verbProperties.targetParams.mapObjectTargetsMustBeAutoAttackable = false;
-		verbProperties.warmupTime = 0f;
-		verbProperties.defaultCooldownTime = 1.1f;
-		verbProperties.soundCast = SoundDefOf.Interact_BeatFire;
-		yield return verbProperties;
-		verbProperties = new VerbProperties();
-		verbProperties.verbClass = typeof(Verb_Ignite);
-		verbProperties.category = VerbCategory.Ignite;
-		verbProperties.range = 1.42f;
-		verbProperties.noiseRadius = 3f;
-		verbProperties.targetParams.onlyTargetFlammables = true;
-		verbProperties.targetParams.canTargetBuildings = true;
-		verbProperties.targetParams.canTargetPawns = false;
-		verbProperties.targetParams.mapObjectTargetsMustBeAutoAttackable = false;
-		verbProperties.warmupTime = 3f;
-		verbProperties.defaultCooldownTime = 1.3f;
-		verbProperties.soundCast = SoundDefOf.Interact_Ignite;
-		yield return verbProperties;
+		// Token: 0x06013590 RID: 79248 RVA: 0x005C1918 File Offset: 0x005BFB18
+		public static IEnumerable<VerbProperties> AllVerbDefs()
+		{
+			yield return new VerbProperties
+			{
+				verbClass = typeof(Verb_BeatFire),
+				category = VerbCategory.BeatFire,
+				range = 1.42f,
+				noiseRadius = 3f,
+				targetParams = 
+				{
+					canTargetFires = true,
+					canTargetPawns = false,
+					canTargetBuildings = false,
+					mapObjectTargetsMustBeAutoAttackable = false
+				},
+				warmupTime = 0f,
+				defaultCooldownTime = 1.1f,
+				soundCast = SoundDefOf.Interact_BeatFire
+			};
+			yield return new VerbProperties
+			{
+				verbClass = typeof(Verb_Ignite),
+				category = VerbCategory.Ignite,
+				range = 1.42f,
+				noiseRadius = 3f,
+				targetParams = 
+				{
+					onlyTargetFlammables = true,
+					canTargetBuildings = true,
+					canTargetPawns = false,
+					mapObjectTargetsMustBeAutoAttackable = false
+				},
+				warmupTime = 3f,
+				defaultCooldownTime = 1.3f,
+				soundCast = SoundDefOf.Interact_Ignite
+			};
+			yield break;
+		}
 	}
 }

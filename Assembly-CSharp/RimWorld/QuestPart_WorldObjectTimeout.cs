@@ -1,84 +1,99 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_WorldObjectTimeout : QuestPart_Delay
+namespace RimWorld
 {
-	public WorldObject worldObject;
-
-	public bool destroyOnCleanup;
-
-	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	// Token: 0x02001BE2 RID: 7138
+	public class QuestPart_WorldObjectTimeout : QuestPart_Delay
 	{
-		get
+		// Token: 0x17001874 RID: 6260
+		// (get) Token: 0x06009F05 RID: 40709 RVA: 0x002DF173 File Offset: 0x002DD373
+		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
 		{
-			foreach (GlobalTargetInfo questLookTarget in base.QuestLookTargets)
+			get
 			{
-				yield return questLookTarget;
-			}
-			if (worldObject != null)
-			{
-				yield return worldObject;
+				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
+				{
+					yield return globalTargetInfo;
+				}
+				IEnumerator<GlobalTargetInfo> enumerator = null;
+				if (this.worldObject != null)
+				{
+					yield return this.worldObject;
+				}
+				yield break;
+				yield break;
 			}
 		}
-	}
 
-	public override string ExtraInspectString(ISelectable target)
-	{
-		if (target == worldObject)
+		// Token: 0x06009F06 RID: 40710 RVA: 0x002DF184 File Offset: 0x002DD384
+		public override string ExtraInspectString(ISelectable target)
 		{
-			if (target is Site site)
+			if (target == this.worldObject)
 			{
-				for (int i = 0; i < site.parts.Count; i++)
+				Site site = target as Site;
+				if (site != null)
 				{
-					if (site.parts[i].def.handlesWorldObjectTimeoutInspectString)
+					for (int i = 0; i < site.parts.Count; i++)
 					{
-						return null;
+						if (site.parts[i].def.handlesWorldObjectTimeoutInspectString)
+						{
+							return null;
+						}
 					}
 				}
+				return "WorldObjectTimeout".Translate(base.TicksLeft.ToStringTicksToPeriod(true, false, true, true, false));
 			}
-			return "WorldObjectTimeout".Translate(base.TicksLeft.ToStringTicksToPeriod());
+			return null;
 		}
-		return null;
-	}
 
-	protected override void DelayFinished()
-	{
-		QuestPart_DestroyWorldObject.TryRemove(worldObject);
-		if (worldObject != null)
+		// Token: 0x06009F07 RID: 40711 RVA: 0x002DF1FA File Offset: 0x002DD3FA
+		protected override void DelayFinished()
 		{
-			Complete(worldObject.Named("SUBJECT"));
+			QuestPart_DestroyWorldObject.TryRemove(this.worldObject);
+			if (this.worldObject != null)
+			{
+				base.Complete(this.worldObject.Named("SUBJECT"));
+				return;
+			}
+			base.Complete();
 		}
-		else
-		{
-			Complete();
-		}
-	}
 
-	public override void Cleanup()
-	{
-		base.Cleanup();
-		if (destroyOnCleanup)
+		// Token: 0x06009F08 RID: 40712 RVA: 0x002DF22C File Offset: 0x002DD42C
+		public override void Cleanup()
 		{
-			QuestPart_DestroyWorldObject.TryRemove(worldObject);
+			base.Cleanup();
+			if (this.destroyOnCleanup)
+			{
+				QuestPart_DestroyWorldObject.TryRemove(this.worldObject);
+			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_References.Look(ref worldObject, "worldObject");
-		Scribe_Values.Look(ref destroyOnCleanup, "destroyOnCleanup", defaultValue: false);
-	}
-
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		if (TileFinder.TryFindNewSiteTile(out var tile))
+		// Token: 0x06009F09 RID: 40713 RVA: 0x002DF247 File Offset: 0x002DD447
+		public override void ExposeData()
 		{
-			worldObject = SiteMaker.MakeSite((SitePartDef)null, tile, (Faction)null, ifHostileThenMustRemainHostile: true, (float?)null, (WorldObjectDef)null);
+			base.ExposeData();
+			Scribe_References.Look<WorldObject>(ref this.worldObject, "worldObject", false);
+			Scribe_Values.Look<bool>(ref this.destroyOnCleanup, "destroyOnCleanup", false, false);
 		}
+
+		// Token: 0x06009F0A RID: 40714 RVA: 0x002DF274 File Offset: 0x002DD474
+		public override void AssignDebugData()
+		{
+			base.AssignDebugData();
+			PlanetTile tile;
+			if (TileFinder.TryFindNewSiteTile(out tile, 7, 27, false, null, 0.5f, true, TileFinderMode.Near, false, false, null, null))
+			{
+				this.worldObject = SiteMaker.MakeSite(null, tile, null, true, null, null);
+			}
+		}
+
+		// Token: 0x04006DFD RID: 28157
+		public WorldObject worldObject;
+
+		// Token: 0x04006DFE RID: 28158
+		public bool destroyOnCleanup;
 	}
 }

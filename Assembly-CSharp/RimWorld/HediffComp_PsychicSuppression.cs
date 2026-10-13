@@ -1,33 +1,36 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class HediffComp_PsychicSuppression : HediffComp
+namespace RimWorld
 {
-	public override bool CompShouldRemove
+	// Token: 0x02001D30 RID: 7472
+	public class HediffComp_PsychicSuppression : HediffComp
 	{
-		get
+		// Token: 0x170019D8 RID: 6616
+		// (get) Token: 0x0600A761 RID: 42849 RVA: 0x002FF9DC File Offset: 0x002FDBDC
+		public override bool CompShouldRemove
 		{
-			if (base.Pawn.SpawnedOrAnyParentSpawned)
+			get
 			{
-				GameCondition_PsychicSuppression activeCondition = base.Pawn.MapHeld.gameConditionManager.GetActiveCondition<GameCondition_PsychicSuppression>();
-				if (activeCondition != null && base.Pawn.gender == activeCondition.gender)
+				if (base.Pawn.SpawnedOrAnyParentSpawned)
 				{
-					return false;
+					GameCondition_PsychicSuppression activeCondition = base.Pawn.MapHeld.gameConditionManager.GetActiveCondition<GameCondition_PsychicSuppression>();
+					if (activeCondition != null && base.Pawn.gender == activeCondition.gender)
+					{
+						return false;
+					}
 				}
-			}
-			else if (base.Pawn.IsCaravanMember())
-			{
-				bool result = true;
+				else if (base.Pawn.IsCaravanMember())
 				{
+					bool result = true;
 					foreach (Site site in Find.World.worldObjects.Sites)
 					{
-						foreach (SitePart part in site.parts)
+						foreach (SitePart sitePart in site.parts)
 						{
-							if (part.def.Worker is SitePartWorker_ConditionCauser_PsychicSuppressor)
+							if (sitePart.def.Worker is SitePartWorker_ConditionCauser_PsychicSuppressor)
 							{
-								CompCauseGameCondition_PsychicSuppression compCauseGameCondition_PsychicSuppression = part.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicSuppression>();
+								CompCauseGameCondition_PsychicSuppression compCauseGameCondition_PsychicSuppression = sitePart.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicSuppression>();
 								if (compCauseGameCondition_PsychicSuppression.ConditionDef.conditionClass == typeof(GameCondition_PsychicSuppression) && compCauseGameCondition_PsychicSuppression.InAoE(base.Pawn.GetCaravan().Tile) && compCauseGameCondition_PsychicSuppression.gender == base.Pawn.gender)
 								{
 									result = false;
@@ -37,8 +40,8 @@ public class HediffComp_PsychicSuppression : HediffComp
 					}
 					return result;
 				}
+				return true;
 			}
-			return true;
 		}
 	}
 }

@@ -1,155 +1,194 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public static class RecipeDefGenerator
+namespace RimWorld
 {
-	public static IEnumerable<RecipeDef> ImpliedRecipeDefs(bool hotReload = false)
+	// Token: 0x02001906 RID: 6406
+	public static class RecipeDefGenerator
 	{
-		foreach (RecipeDef item in DefsFromRecipeMakers(hotReload).Concat(DrugAdministerDefs(hotReload)))
+		// Token: 0x06009191 RID: 37265 RVA: 0x002AD773 File Offset: 0x002AB973
+		public static IEnumerable<RecipeDef> ImpliedRecipeDefs(bool hotReload = false)
 		{
-			yield return item;
-		}
-	}
-
-	private static IEnumerable<RecipeDef> DefsFromRecipeMakers(bool hotReload = false)
-	{
-		foreach (ThingDef def in DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.recipeMaker != null))
-		{
-			yield return CreateRecipeDefFromMaker(def, 1, hotReload);
-			if (def.recipeMaker.bulkRecipeCount > 0)
+			foreach (RecipeDef recipeDef in RecipeDefGenerator.DefsFromRecipeMakers(hotReload).Concat(RecipeDefGenerator.DrugAdministerDefs(hotReload)))
 			{
-				yield return CreateRecipeDefFromMaker(def, def.recipeMaker.bulkRecipeCount, hotReload);
+				yield return recipeDef;
+			}
+			IEnumerator<RecipeDef> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06009192 RID: 37266 RVA: 0x002AD783 File Offset: 0x002AB983
+		private static IEnumerable<RecipeDef> DefsFromRecipeMakers(bool hotReload = false)
+		{
+			foreach (ThingDef def in from d in DefDatabase<ThingDef>.AllDefs
+			where d.recipeMaker != null
+			select d)
+			{
+				yield return RecipeDefGenerator.CreateRecipeDefFromMaker(def, 1, hotReload);
+				if (def.recipeMaker.bulkRecipeCount > 0)
+				{
+					yield return RecipeDefGenerator.CreateRecipeDefFromMaker(def, def.recipeMaker.bulkRecipeCount, hotReload);
+				}
+				def = null;
+			}
+			IEnumerator<ThingDef> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06009193 RID: 37267 RVA: 0x002AD794 File Offset: 0x002AB994
+		private static RecipeDef CreateRecipeDefFromMaker(ThingDef def, int adjustedCount = 1, bool hotReload = false)
+		{
+			RecipeMakerProperties recipeMaker = def.recipeMaker;
+			string text = "Make_" + def.defName;
+			if (adjustedCount != 1)
+			{
+				text += "Bulk";
+			}
+			RecipeDef recipeDef = hotReload ? (DefDatabase<RecipeDef>.GetNamed(text, false) ?? new RecipeDef()) : new RecipeDef();
+			recipeDef.defName = text;
+			string text2 = def.label;
+			if (adjustedCount != 1)
+			{
+				text2 = text2 + " x" + adjustedCount.ToString();
+			}
+			if (string.IsNullOrEmpty(recipeMaker.label))
+			{
+				recipeDef.label = "RecipeMake".Translate(text2);
+			}
+			else
+			{
+				recipeDef.label = recipeMaker.label;
+			}
+			recipeDef.jobString = "RecipeMakeJobString".Translate(text2);
+			recipeDef.modContentPack = def.modContentPack;
+			recipeDef.displayPriority = recipeMaker.displayPriority + adjustedCount - 1;
+			recipeDef.workAmount = (float)(recipeMaker.workAmount * adjustedCount);
+			recipeDef.workSpeedStat = recipeMaker.workSpeedStat;
+			recipeDef.efficiencyStat = recipeMaker.efficiencyStat;
+			RecipeDefGenerator.SetIngredients(recipeDef, def, adjustedCount);
+			recipeDef.useIngredientsForColor = recipeMaker.useIngredientsForColor;
+			if (def.costListForDifficulty != null)
+			{
+				recipeDef.regenerateOnDifficultyChange = true;
+			}
+			recipeDef.defaultIngredientFilter = recipeMaker.defaultIngredientFilter;
+			recipeDef.products.Add(new ThingDefCountClass(def, recipeMaker.productCount * adjustedCount));
+			recipeDef.targetCountAdjustment = recipeMaker.targetCountAdjustment * adjustedCount;
+			recipeDef.skillRequirements = recipeMaker.skillRequirements.ListFullCopyOrNull<SkillRequirement>();
+			recipeDef.workSkill = recipeMaker.workSkill;
+			recipeDef.workSkillLearnFactor = recipeMaker.workSkillLearnPerTick;
+			recipeDef.requiredGiverWorkType = recipeMaker.requiredGiverWorkType;
+			recipeDef.unfinishedThingDef = recipeMaker.unfinishedThingDef;
+			recipeDef.recipeUsers = recipeMaker.recipeUsers.ListFullCopyOrNull<ThingDef>();
+			recipeDef.mechanitorOnlyRecipe = recipeMaker.mechanitorOnlyRecipe;
+			recipeDef.effectWorking = recipeMaker.effectWorking;
+			recipeDef.soundWorking = recipeMaker.soundWorking;
+			recipeDef.researchPrerequisite = recipeMaker.researchPrerequisite;
+			recipeDef.memePrerequisitesAny = recipeMaker.memePrerequisitesAny;
+			recipeDef.researchPrerequisites = recipeMaker.researchPrerequisites;
+			recipeDef.factionPrerequisiteTags = recipeMaker.factionPrerequisiteTags;
+			recipeDef.fromIdeoBuildingPreceptOnly = recipeMaker.fromIdeoBuildingPreceptOnly;
+			string[] items = recipeDef.products.Select(delegate(ThingDefCountClass p)
+			{
+				if (p.count != 1)
+				{
+					return p.Label;
+				}
+				return Find.ActiveLanguageWorker.WithIndefiniteArticle(p.thingDef.label, false, false);
+			}).ToArray<string>();
+			recipeDef.description = "RecipeMakeDescription".Translate(items.ToCommaList(true, false));
+			recipeDef.descriptionHyperlinks = (from p in recipeDef.products
+			select new DefHyperlink(p.thingDef)).ToList<DefHyperlink>();
+			if (adjustedCount != 1 && recipeDef.workAmount < 0f)
+			{
+				recipeDef.workAmount = recipeDef.WorkAmountTotal(null) * (float)adjustedCount;
+			}
+			return recipeDef;
+		}
+
+		// Token: 0x06009194 RID: 37268 RVA: 0x002ADA50 File Offset: 0x002ABC50
+		public static void SetIngredients(RecipeDef r, ThingDef def, int adjustedCount = 1)
+		{
+			r.ingredients.Clear();
+			r.adjustedCount = adjustedCount;
+			if (def.MadeFromStuff)
+			{
+				IngredientCount ingredientCount = new IngredientCount();
+				ingredientCount.SetBaseCount((float)(def.CostStuffCount * adjustedCount));
+				ingredientCount.filter.SetAllowAllWhoCanMake(def);
+				ThingFilter filter = ingredientCount.filter;
+				string customSummary;
+				if ((customSummary = def.stuffCategorySummary) == null)
+				{
+					customSummary = (from category in def.stuffCategories
+					select category.noun).ToCommaListOr(false);
+				}
+				filter.customSummary = customSummary;
+				r.ingredients.Add(ingredientCount);
+				r.fixedIngredientFilter.SetAllowAllWhoCanMake(def);
+				r.productHasIngredientStuff = true;
+			}
+			if (def.CostList != null)
+			{
+				foreach (ThingDefCountClass thingDefCountClass in def.CostList)
+				{
+					IngredientCount ingredientCount2 = new IngredientCount();
+					ingredientCount2.SetBaseCount((float)(thingDefCountClass.count * adjustedCount));
+					ingredientCount2.filter.SetAllow(thingDefCountClass.thingDef, true);
+					r.ingredients.Add(ingredientCount2);
+				}
 			}
 		}
-	}
 
-	private static RecipeDef CreateRecipeDefFromMaker(ThingDef def, int adjustedCount = 1, bool hotReload = false)
-	{
-		RecipeMakerProperties recipeMaker = def.recipeMaker;
-		string text = "Make_" + def.defName;
-		if (adjustedCount != 1)
+		// Token: 0x06009195 RID: 37269 RVA: 0x002ADB7C File Offset: 0x002ABD7C
+		public static void ResetRecipeIngredientsForDifficulty()
 		{
-			text += "Bulk";
-		}
-		RecipeDef recipeDef = (hotReload ? (DefDatabase<RecipeDef>.GetNamed(text, errorOnFail: false) ?? new RecipeDef()) : new RecipeDef());
-		recipeDef.defName = text;
-		string text2 = def.label;
-		if (adjustedCount != 1)
-		{
-			text2 = text2 + " x" + adjustedCount;
-		}
-		if (string.IsNullOrEmpty(recipeMaker.label))
-		{
-			recipeDef.label = "RecipeMake".Translate(text2);
-		}
-		else
-		{
-			recipeDef.label = recipeMaker.label;
-		}
-		recipeDef.jobString = "RecipeMakeJobString".Translate(text2);
-		recipeDef.modContentPack = def.modContentPack;
-		recipeDef.displayPriority = recipeMaker.displayPriority + adjustedCount - 1;
-		recipeDef.workAmount = recipeMaker.workAmount * adjustedCount;
-		recipeDef.workSpeedStat = recipeMaker.workSpeedStat;
-		recipeDef.efficiencyStat = recipeMaker.efficiencyStat;
-		SetIngredients(recipeDef, def, adjustedCount);
-		recipeDef.useIngredientsForColor = recipeMaker.useIngredientsForColor;
-		if (def.costListForDifficulty != null)
-		{
-			recipeDef.regenerateOnDifficultyChange = true;
-		}
-		recipeDef.defaultIngredientFilter = recipeMaker.defaultIngredientFilter;
-		recipeDef.products.Add(new ThingDefCountClass(def, recipeMaker.productCount * adjustedCount));
-		recipeDef.targetCountAdjustment = recipeMaker.targetCountAdjustment * adjustedCount;
-		recipeDef.skillRequirements = recipeMaker.skillRequirements.ListFullCopyOrNull();
-		recipeDef.workSkill = recipeMaker.workSkill;
-		recipeDef.workSkillLearnFactor = recipeMaker.workSkillLearnPerTick;
-		recipeDef.requiredGiverWorkType = recipeMaker.requiredGiverWorkType;
-		recipeDef.unfinishedThingDef = recipeMaker.unfinishedThingDef;
-		recipeDef.recipeUsers = recipeMaker.recipeUsers.ListFullCopyOrNull();
-		recipeDef.mechanitorOnlyRecipe = recipeMaker.mechanitorOnlyRecipe;
-		recipeDef.effectWorking = recipeMaker.effectWorking;
-		recipeDef.soundWorking = recipeMaker.soundWorking;
-		recipeDef.researchPrerequisite = recipeMaker.researchPrerequisite;
-		recipeDef.memePrerequisitesAny = recipeMaker.memePrerequisitesAny;
-		recipeDef.researchPrerequisites = recipeMaker.researchPrerequisites;
-		recipeDef.factionPrerequisiteTags = recipeMaker.factionPrerequisiteTags;
-		recipeDef.fromIdeoBuildingPreceptOnly = recipeMaker.fromIdeoBuildingPreceptOnly;
-		string[] items = recipeDef.products.Select((ThingDefCountClass p) => (p.count != 1) ? p.Label : Find.ActiveLanguageWorker.WithIndefiniteArticle(p.thingDef.label)).ToArray();
-		recipeDef.description = "RecipeMakeDescription".Translate(items.ToCommaList(useAnd: true));
-		recipeDef.descriptionHyperlinks = recipeDef.products.Select((ThingDefCountClass p) => new DefHyperlink(p.thingDef)).ToList();
-		if (adjustedCount != 1 && recipeDef.workAmount < 0f)
-		{
-			recipeDef.workAmount = recipeDef.WorkAmountTotal(null) * (float)adjustedCount;
-		}
-		return recipeDef;
-	}
-
-	public static void SetIngredients(RecipeDef r, ThingDef def, int adjustedCount = 1)
-	{
-		r.ingredients.Clear();
-		r.adjustedCount = adjustedCount;
-		if (def.MadeFromStuff)
-		{
-			IngredientCount ingredientCount = new IngredientCount();
-			ingredientCount.SetBaseCount(def.CostStuffCount * adjustedCount);
-			ingredientCount.filter.SetAllowAllWhoCanMake(def);
-			ingredientCount.filter.customSummary = def.stuffCategorySummary ?? def.stuffCategories.Select((StuffCategoryDef category) => category.noun).ToCommaListOr();
-			r.ingredients.Add(ingredientCount);
-			r.fixedIngredientFilter.SetAllowAllWhoCanMake(def);
-			r.productHasIngredientStuff = true;
-		}
-		if (def.CostList == null)
-		{
-			return;
-		}
-		foreach (ThingDefCountClass cost in def.CostList)
-		{
-			IngredientCount ingredientCount2 = new IngredientCount();
-			ingredientCount2.SetBaseCount(cost.count * adjustedCount);
-			ingredientCount2.filter.SetAllow(cost.thingDef, allow: true);
-			r.ingredients.Add(ingredientCount2);
-		}
-	}
-
-	public static void ResetRecipeIngredientsForDifficulty()
-	{
-		foreach (RecipeDef item in DefDatabase<RecipeDef>.AllDefs.Where((RecipeDef x) => x.regenerateOnDifficultyChange))
-		{
-			SetIngredients(item, item.products[0].thingDef, item.adjustedCount);
-		}
-	}
-
-	private static IEnumerable<RecipeDef> DrugAdministerDefs(bool hotReload = false)
-	{
-		foreach (ThingDef item in DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.IsDrug))
-		{
-			string defName = "Administer_" + item.defName;
-			RecipeDef recipeDef = (hotReload ? (DefDatabase<RecipeDef>.GetNamed(defName, errorOnFail: false) ?? new RecipeDef()) : new RecipeDef());
-			recipeDef.defName = defName;
-			recipeDef.label = "RecipeAdminister".Translate(item.label);
-			recipeDef.jobString = "RecipeAdministerJobString".Translate(item.label);
-			recipeDef.workerClass = typeof(Recipe_AdministerIngestible);
-			recipeDef.targetsBodyPart = false;
-			recipeDef.anesthetize = false;
-			recipeDef.surgerySuccessChanceFactor = 99999f;
-			recipeDef.modContentPack = item.modContentPack;
-			recipeDef.workAmount = item.ingestible.baseIngestTicks;
-			recipeDef.humanlikeOnly = item.ingestible.humanlikeOnly;
-			IngredientCount ingredientCount = new IngredientCount();
-			ingredientCount.SetBaseCount(1f);
-			ingredientCount.filter.SetAllow(item, allow: true);
-			recipeDef.ingredients.Add(ingredientCount);
-			recipeDef.fixedIngredientFilter.SetAllow(item, allow: true);
-			recipeDef.recipeUsers = new List<ThingDef>();
-			foreach (ThingDef item2 in DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.category == ThingCategory.Pawn && d.race.IsFlesh))
+			foreach (RecipeDef recipeDef in from x in DefDatabase<RecipeDef>.AllDefs
+			where x.regenerateOnDifficultyChange
+			select x)
 			{
-				recipeDef.recipeUsers.Add(item2);
+				RecipeDefGenerator.SetIngredients(recipeDef, recipeDef.products[0].thingDef, recipeDef.adjustedCount);
 			}
-			yield return recipeDef;
+		}
+
+		// Token: 0x06009196 RID: 37270 RVA: 0x002ADC04 File Offset: 0x002ABE04
+		private static IEnumerable<RecipeDef> DrugAdministerDefs(bool hotReload = false)
+		{
+			foreach (ThingDef thingDef in from d in DefDatabase<ThingDef>.AllDefs
+			where d.IsDrug
+			select d)
+			{
+				string defName = "Administer_" + thingDef.defName;
+				RecipeDef recipeDef = hotReload ? (DefDatabase<RecipeDef>.GetNamed(defName, false) ?? new RecipeDef()) : new RecipeDef();
+				recipeDef.defName = defName;
+				recipeDef.label = "RecipeAdminister".Translate(thingDef.label);
+				recipeDef.jobString = "RecipeAdministerJobString".Translate(thingDef.label);
+				recipeDef.workerClass = typeof(Recipe_AdministerIngestible);
+				recipeDef.targetsBodyPart = false;
+				recipeDef.anesthetize = false;
+				recipeDef.surgerySuccessChanceFactor = 99999f;
+				recipeDef.modContentPack = thingDef.modContentPack;
+				recipeDef.workAmount = (float)thingDef.ingestible.baseIngestTicks;
+				recipeDef.humanlikeOnly = thingDef.ingestible.humanlikeOnly;
+				IngredientCount ingredientCount = new IngredientCount();
+				ingredientCount.SetBaseCount(1f);
+				ingredientCount.filter.SetAllow(thingDef, true);
+				recipeDef.ingredients.Add(ingredientCount);
+				recipeDef.fixedIngredientFilter.SetAllow(thingDef, true);
+				recipeDef.recipeUsers = new List<ThingDef>();
+				foreach (ThingDef item in DefDatabase<ThingDef>.AllDefs.Where((ThingDef d) => d.category == ThingCategory.Pawn && d.race.IsFlesh))
+				{
+					recipeDef.recipeUsers.Add(item);
+				}
+				yield return recipeDef;
+			}
+			IEnumerator<ThingDef> enumerator = null;
+			yield break;
+			yield break;
 		}
 	}
 }

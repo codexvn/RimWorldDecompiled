@@ -1,13 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ConditionalNoConnectedThings : ThinkNode_Conditional
+namespace Verse.AI
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02000FE9 RID: 4073
+	public class ThinkNode_ConditionalNoConnectedThings : ThinkNode_Conditional
 	{
-		if (pawn.connections != null)
+		// Token: 0x0600645D RID: 25693 RVA: 0x001FD448 File Offset: 0x001FB648
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return !pawn.connections.ConnectedThings.Any();
+			return pawn.connections == null || !pawn.connections.ConnectedThings.Any<Thing>();
 		}
-		return true;
 	}
 }

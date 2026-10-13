@@ -1,49 +1,44 @@
-using System;
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_RefugeePodCrash_Ghoul : QuestNode_Root_WandererJoin
+namespace RimWorld.QuestGen
 {
-	private static readonly IntRange ShockTicksRange = new IntRange(10000, 15000);
-
-	private bool wasStartingPawn;
-
-	public override Pawn GeneratePawn()
+	// Token: 0x02003B84 RID: 15236
+	public class QuestNode_Root_RefugeePodCrash_Ghoul : QuestNode_Root_WandererJoin
 	{
-		return GeneratePawn_NewTemp(null);
-	}
-
-	public override Pawn GeneratePawn_NewTemp(Map map)
-	{
-		Pawn pawn;
-		if (Find.World.worldPawns.GetPawnsBySituationCount(WorldPawnSituation.StartingPawnLeftBehind) > 0)
+		// Token: 0x06014B25 RID: 84773 RVA: 0x006303F8 File Offset: 0x0062E5F8
+		public override Pawn GeneratePawn()
 		{
-			pawn = Find.World.worldPawns.GetPawnsBySituation(WorldPawnSituation.StartingPawnLeftBehind).RandomElement();
-			MutantUtility.SetFreshPawnAsMutant(pawn, MutantDefOf.Ghoul);
-			pawn.SetFaction(Faction.OfEntities);
-			wasStartingPawn = true;
+			Pawn pawn;
+			if (Find.World.worldPawns.GetPawnsBySituationCount(WorldPawnSituation.StartingPawnLeftBehind) > 0)
+			{
+				pawn = Find.World.worldPawns.GetPawnsBySituation(WorldPawnSituation.StartingPawnLeftBehind).RandomElement<Pawn>();
+				MutantUtility.SetFreshPawnAsMutant(pawn, MutantDefOf.Ghoul);
+				pawn.SetFaction(Faction.OfEntities, null);
+				this.wasStartingPawn = true;
+			}
+			else
+			{
+				pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Ghoul, Faction.OfEntities, null);
+			}
+			pawn.health.AddHediff(HediffDefOf.DarkPsychicShock, null, null, null).TryGetComp<HediffComp_Disappears>().ticksToDisappear = QuestNode_Root_RefugeePodCrash_Ghoul.ShockTicksRange.RandomInRange;
+			return pawn;
 		}
-		else
+
+		// Token: 0x06014B26 RID: 84774 RVA: 0x0063049C File Offset: 0x0062E69C
+		public override void SendLetter(Quest quest, Pawn pawn)
 		{
-			pawn = PawnGenerator.GeneratePawn(PawnKindDefOf.Ghoul, Faction.OfEntities, map?.Tile);
+			TaggedString label = "GhoulPodCrashLabel".Translate();
+			TaggedString text = this.wasStartingPawn ? "GhoulPodCrashStartingPawnText".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true) : "GhoulPodCrashText".Translate();
+			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref text, ref label, pawn);
+			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.ThreatSmall, new TargetInfo(pawn), null, null, null, null, 0, true);
 		}
-		pawn.health.AddHediff(HediffDefOf.DarkPsychicShock).TryGetComp<HediffComp_Disappears>().ticksToDisappear = ShockTicksRange.RandomInRange;
-		return pawn;
-	}
 
-	[Obsolete]
-	public override void SendLetter(Quest quest, Pawn pawn)
-	{
-		SendLetter_NewTemp(quest, pawn, Find.AnyPlayerHomeMap);
-	}
+		// Token: 0x0400E5F4 RID: 58868
+		private static readonly IntRange ShockTicksRange = new IntRange(10000, 15000);
 
-	public override void SendLetter_NewTemp(Quest quest, Pawn pawn, Map map)
-	{
-		TaggedString title = "GhoulPodCrashLabel".Translate();
-		TaggedString text = (wasStartingPawn ? "GhoulPodCrashStartingPawnText".Translate(pawn.Named("PAWN")).AdjustedFor(pawn) : "GhoulPodCrashText".Translate());
-		PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref text, ref title, pawn);
-		Find.LetterStack.ReceiveLetter(title, text, LetterDefOf.ThreatSmall, new TargetInfo(pawn));
+		// Token: 0x0400E5F5 RID: 58869
+		private bool wasStartingPawn;
 	}
 }

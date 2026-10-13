@@ -1,55 +1,57 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class ITab_Pawn_Needs : ITab
+namespace RimWorld
 {
-	private Vector2 thoughtScrollPosition;
-
-	public override bool IsVisible
+	// Token: 0x020033C1 RID: 13249
+	public class ITab_Pawn_Needs : ITab
 	{
-		get
+		// Token: 0x170030AD RID: 12461
+		// (get) Token: 0x060129E1 RID: 76257 RVA: 0x005825A8 File Offset: 0x005807A8
+		public override bool IsVisible
 		{
-			if (SelPawn.RaceProps.Animal && SelPawn.Faction == null)
+			get
 			{
-				return false;
+				if (this.SelPawn.RaceProps.Animal && this.SelPawn.Faction == null)
+				{
+					return false;
+				}
+				if (this.SelPawn.RaceProps.Insect && this.SelPawn.Faction != Faction.OfPlayer)
+				{
+					return false;
+				}
+				CompHoldingPlatformTarget compHoldingPlatformTarget = this.SelPawn.TryGetComp<CompHoldingPlatformTarget>();
+				return (compHoldingPlatformTarget == null || !compHoldingPlatformTarget.CurrentlyHeldOnPlatform) && this.SelPawn.needs != null && this.SelPawn.needs.AllNeeds.Count > 0;
 			}
-			if (SelPawn.RaceProps.Insect && SelPawn.Faction != Faction.OfPlayer)
-			{
-				return false;
-			}
-			CompHoldingPlatformTarget compHoldingPlatformTarget = SelPawn.TryGetComp<CompHoldingPlatformTarget>();
-			if (compHoldingPlatformTarget != null && compHoldingPlatformTarget.CurrentlyHeldOnPlatform)
-			{
-				return false;
-			}
-			if (SelPawn.needs != null)
-			{
-				return SelPawn.needs.AllNeeds.Count > 0;
-			}
-			return false;
 		}
-	}
 
-	public ITab_Pawn_Needs()
-	{
-		labelKey = "TabNeeds";
-		tutorTag = "Needs";
-	}
+		// Token: 0x060129E2 RID: 76258 RVA: 0x0058263C File Offset: 0x0058083C
+		public ITab_Pawn_Needs()
+		{
+			this.labelKey = "TabNeeds";
+			this.tutorTag = "Needs";
+		}
 
-	public override void OnOpen()
-	{
-		thoughtScrollPosition = default(Vector2);
-	}
+		// Token: 0x060129E3 RID: 76259 RVA: 0x0058265A File Offset: 0x0058085A
+		public override void OnOpen()
+		{
+			this.thoughtScrollPosition = default(Vector2);
+		}
 
-	protected override void FillTab()
-	{
-		NeedsCardUtility.DoNeedsMoodAndThoughts(new Rect(0f, 0f, size.x, size.y), SelPawn, ref thoughtScrollPosition);
-	}
+		// Token: 0x060129E4 RID: 76260 RVA: 0x00582668 File Offset: 0x00580868
+		protected override void FillTab()
+		{
+			NeedsCardUtility.DoNeedsMoodAndThoughts(new Rect(0f, 0f, this.size.x, this.size.y), this.SelPawn, ref this.thoughtScrollPosition);
+		}
 
-	protected override void UpdateSize()
-	{
-		size = NeedsCardUtility.GetSize(SelPawn);
+		// Token: 0x060129E5 RID: 76261 RVA: 0x005826A0 File Offset: 0x005808A0
+		protected override void UpdateSize()
+		{
+			this.size = NeedsCardUtility.GetSize(this.SelPawn);
+		}
+
+		// Token: 0x0400C164 RID: 49508
+		private Vector2 thoughtScrollPosition;
 	}
 }

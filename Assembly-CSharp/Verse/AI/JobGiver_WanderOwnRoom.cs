@@ -1,21 +1,28 @@
-namespace Verse.AI;
+﻿using System;
 
-public class JobGiver_WanderOwnRoom : JobGiver_Wander
+namespace Verse.AI
 {
-	public JobGiver_WanderOwnRoom()
+	// Token: 0x02001027 RID: 4135
+	public class JobGiver_WanderOwnRoom : JobGiver_Wander
 	{
-		wanderRadius = 7f;
-		ticksBetweenWandersRange = new IntRange(300, 600);
-		locomotionUrgency = LocomotionUrgency.Amble;
-		wanderDestValidator = (Pawn pawn, IntVec3 loc, IntVec3 root) => WanderRoomUtility.IsValidWanderDest(pawn, loc, root);
-	}
-
-	protected override IntVec3 GetWanderRoot(Pawn pawn)
-	{
-		if (pawn.MentalState is MentalState_WanderOwnRoom mentalState_WanderOwnRoom)
+		// Token: 0x0600651B RID: 25883 RVA: 0x001FF560 File Offset: 0x001FD760
+		public JobGiver_WanderOwnRoom()
 		{
-			return mentalState_WanderOwnRoom.target;
+			this.wanderRadius = 7f;
+			this.ticksBetweenWandersRange = new IntRange(300, 600);
+			this.locomotionUrgency = LocomotionUrgency.Amble;
+			this.wanderDestValidator = ((Pawn pawn, IntVec3 loc, IntVec3 root) => WanderRoomUtility.IsValidWanderDest(pawn, loc, root));
 		}
-		return pawn.Position;
+
+		// Token: 0x0600651C RID: 25884 RVA: 0x001FF5C0 File Offset: 0x001FD7C0
+		protected override IntVec3 GetWanderRoot(Pawn pawn)
+		{
+			MentalState_WanderOwnRoom mentalState_WanderOwnRoom = pawn.MentalState as MentalState_WanderOwnRoom;
+			if (mentalState_WanderOwnRoom != null)
+			{
+				return mentalState_WanderOwnRoom.target;
+			}
+			return pawn.Position;
+		}
 	}
 }

@@ -1,76 +1,77 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class SmoothSurfaceDesignatorUtility
+namespace RimWorld
 {
-	public static bool CanSmoothFloorUnder(Building b)
+	// Token: 0x020030C4 RID: 12484
+	public static class SmoothSurfaceDesignatorUtility
 	{
-		if (b.def.Fillage == FillCategory.Full)
+		// Token: 0x06011870 RID: 71792 RVA: 0x005088BF File Offset: 0x00506ABF
+		public static bool CanSmoothFloorUnder(Building b)
 		{
-			return b.def.passability != Traversability.Impassable;
+			return b.def.Fillage != FillCategory.Full || b.def.passability != Traversability.Impassable;
 		}
-		return true;
-	}
 
-	public static void Notify_BuildingSpawned(Building b)
-	{
-		if (CanSmoothFloorUnder(b))
+		// Token: 0x06011871 RID: 71793 RVA: 0x005088E4 File Offset: 0x00506AE4
+		public static void Notify_BuildingSpawned(Building b)
 		{
-			return;
-		}
-		foreach (IntVec3 item in b.OccupiedRect())
-		{
-			Designation designation = b.Map.designationManager.DesignationAt(item, DesignationDefOf.SmoothFloor);
-			if (designation != null)
+			if (!SmoothSurfaceDesignatorUtility.CanSmoothFloorUnder(b))
 			{
-				b.Map.designationManager.RemoveDesignation(designation);
+				foreach (IntVec3 c in b.OccupiedRect())
+				{
+					Designation designation = b.Map.designationManager.DesignationAt(c, DesignationDefOf.SmoothFloor);
+					if (designation != null)
+					{
+						b.Map.designationManager.RemoveDesignation(designation);
+					}
+				}
 			}
 		}
-	}
 
-	public static void Notify_BuildingDespawned(Building b, Map map)
-	{
-		foreach (IntVec3 item in b.OccupiedRect())
+		// Token: 0x06011872 RID: 71794 RVA: 0x00508968 File Offset: 0x00506B68
+		public static void Notify_BuildingDespawned(Building b, Map map)
 		{
-			Designation designation = map.designationManager.DesignationAt(item, DesignationDefOf.SmoothWall);
-			if (designation != null)
+			foreach (IntVec3 c in b.OccupiedRect())
 			{
-				map.designationManager.RemoveDesignation(designation);
+				Designation designation = map.designationManager.DesignationAt(c, DesignationDefOf.SmoothWall);
+				if (designation != null)
+				{
+					map.designationManager.RemoveDesignation(designation);
+				}
 			}
 		}
-	}
 
-	public static bool DesignateSmoothWall(Map map, IntVec3 c)
-	{
-		Building edifice = c.GetEdifice(map);
-		if (edifice != null && edifice.def.IsSmoothable)
+		// Token: 0x06011873 RID: 71795 RVA: 0x005089D8 File Offset: 0x00506BD8
+		public static bool DesignateSmoothWall(Map map, IntVec3 c)
+		{
+			Building edifice = c.GetEdifice(map);
+			if (edifice != null && edifice.def.IsSmoothable)
+			{
+				if (DebugSettings.godMode)
+				{
+					SmoothableWallUtility.Notify_SmoothedByPawn(SmoothableWallUtility.SmoothWall(edifice, null), null);
+				}
+				else
+				{
+					map.designationManager.AddDesignation(new Designation(c, DesignationDefOf.SmoothWall, null));
+					map.designationManager.TryRemoveDesignation(c, DesignationDefOf.Mine);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		// Token: 0x06011874 RID: 71796 RVA: 0x00508A44 File Offset: 0x00506C44
+		public static void DesignateSmoothFloor(Map map, IntVec3 c)
 		{
 			if (DebugSettings.godMode)
 			{
-				SmoothableWallUtility.Notify_SmoothedByPawn(SmoothableWallUtility.SmoothWall(edifice, null), null);
+				TerrainDef smoothedTerrain = c.GetTerrain(map).smoothedTerrain;
+				map.terrainGrid.SetTerrain(c, smoothedTerrain);
+				FilthMaker.RemoveAllFilth(c, map);
+				return;
 			}
-			else
-			{
-				map.designationManager.AddDesignation(new Designation(c, DesignationDefOf.SmoothWall));
-				map.designationManager.TryRemoveDesignation(c, DesignationDefOf.Mine);
-			}
-			return true;
-		}
-		return false;
-	}
-
-	public static void DesignateSmoothFloor(Map map, IntVec3 c)
-	{
-		if (DebugSettings.godMode)
-		{
-			TerrainDef smoothedTerrain = c.GetTerrain(map).smoothedTerrain;
-			map.terrainGrid.SetTerrain(c, smoothedTerrain);
-			FilthMaker.RemoveAllFilth(c, map);
-		}
-		else
-		{
-			map.designationManager.AddDesignation(new Designation(c, DesignationDefOf.SmoothFloor));
+			map.designationManager.AddDesignation(new Designation(c, DesignationDefOf.SmoothFloor, null));
 		}
 	}
 }

@@ -1,29 +1,36 @@
-namespace Verse;
+﻿using System;
 
-public class ScattererValidator_Roof : ScattererValidator
+namespace Verse
 {
-	public int radius = 1;
-
-	public RoofDef roofDef;
-
-	public override bool Allows(IntVec3 c, Map map)
+	// Token: 0x020004B7 RID: 1207
+	public class ScattererValidator_Roof : ScattererValidator
 	{
-		CellRect cellRect = CellRect.CenteredOn(c, radius);
-		for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
+		// Token: 0x06001F52 RID: 8018 RVA: 0x000A4A4C File Offset: 0x000A2C4C
+		public override bool Allows(IntVec3 c, Map map)
 		{
-			for (int j = cellRect.minX; j <= cellRect.maxX; j++)
+			CellRect cellRect = CellRect.CenteredOn(c, this.radius);
+			for (int i = cellRect.minZ; i <= cellRect.maxZ; i++)
 			{
-				IntVec3 c2 = new IntVec3(j, 0, i);
-				if (!c2.InBounds(map))
+				for (int j = cellRect.minX; j <= cellRect.maxX; j++)
 				{
-					return false;
-				}
-				if (map.roofGrid.RoofAt(c2) != roofDef)
-				{
-					return false;
+					IntVec3 c2 = new IntVec3(j, 0, i);
+					if (!c2.InBounds(map))
+					{
+						return false;
+					}
+					if (map.roofGrid.RoofAt(c2) != this.roofDef)
+					{
+						return false;
+					}
 				}
 			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x04001B01 RID: 6913
+		public int radius = 1;
+
+		// Token: 0x04001B02 RID: 6914
+		public RoofDef roofDef;
 	}
 }

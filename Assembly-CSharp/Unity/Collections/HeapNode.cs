@@ -1,8 +1,15 @@
-namespace Unity.Collections;
+﻿using System;
+using System.Runtime.CompilerServices;
 
-internal struct HeapNode<T> where T : unmanaged
+namespace Unity.Collections
 {
-	public T Item;
+	// Token: 0x02000066 RID: 102
+	internal struct HeapNode<[IsUnmanaged] T> where T : struct, ValueType
+	{
+		// Token: 0x04000113 RID: 275
+		public T Item;
 
-	public int TableIndex;
+		// Token: 0x04000114 RID: 276
+		public int TableIndex;
+	}
 }

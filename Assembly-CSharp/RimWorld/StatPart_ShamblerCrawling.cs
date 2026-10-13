@@ -1,38 +1,46 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_ShamblerCrawling : StatPart
+namespace RimWorld
 {
-	public float factor;
-
-	private bool ActiveFor(Thing t)
+	// Token: 0x02003722 RID: 14114
+	public class StatPart_ShamblerCrawling : StatPart
 	{
-		if (!t.Spawned)
+		// Token: 0x06013905 RID: 80133 RVA: 0x005CD1E8 File Offset: 0x005CB3E8
+		private bool ActiveFor(Thing t)
 		{
-			return false;
+			if (!t.Spawned)
+			{
+				return false;
+			}
+			Pawn pawn = t as Pawn;
+			return pawn != null && pawn.IsShambler && pawn.Crawling;
 		}
-		if (!(t is Pawn { IsShambler: not false } pawn))
-		{
-			return false;
-		}
-		return pawn.Crawling;
-	}
 
-	public override void TransformValue(StatRequest req, ref float val)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
+		// Token: 0x06013906 RID: 80134 RVA: 0x005CD219 File Offset: 0x005CB419
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val *= factor;
+			if (!req.HasThing)
+			{
+				return;
+			}
+			if (this.ActiveFor(req.Thing))
+			{
+				val *= this.factor;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
+		// Token: 0x06013907 RID: 80135 RVA: 0x005CD240 File Offset: 0x005CB440
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReport_ShamblerCrawling".Translate() + ": x" + factor.ToStringPercent();
+			if (req.HasThing && this.ActiveFor(req.Thing))
+			{
+				return "StatsReport_ShamblerCrawling".Translate() + ": x" + this.factor.ToStringPercent();
+			}
+			return null;
 		}
-		return null;
+
+		// Token: 0x0400D901 RID: 55553
+		public float factor;
 	}
 }

@@ -1,16 +1,20 @@
+﻿using System;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordToil_WanderNest : LordToil
+namespace RimWorld
 {
-	public override void UpdateAllDuties()
+	// Token: 0x0200173B RID: 5947
+	public class LordToil_WanderNest : LordToil
 	{
-		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		// Token: 0x06008BD5 RID: 35797 RVA: 0x0029A0BC File Offset: 0x002982BC
+		public override void UpdateAllDuties()
 		{
-			PawnDuty duty = new PawnDuty(DutyDefOf.WanderNest);
-			lord.ownedPawns[i].mindState.duty = duty;
+			for (int i = 0; i < this.lord.ownedPawns.Count; i++)
+			{
+				PawnDuty duty = new PawnDuty(DutyDefOf.WanderNest);
+				this.lord.ownedPawns[i].mindState.duty = duty;
+			}
 		}
 	}
 }

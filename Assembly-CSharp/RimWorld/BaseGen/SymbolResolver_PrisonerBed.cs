@@ -1,25 +1,29 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_PrisonerBed : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003931 RID: 14641
+	public class SymbolResolver_PrisonerBed : SymbolResolver
 	{
-		ResolveParams resolveParams = rp;
-		Action<Thing> prevPostThingSpawn = resolveParams.postThingSpawn;
-		resolveParams.postThingSpawn = delegate(Thing x)
+		// Token: 0x060142A9 RID: 82601 RVA: 0x006022D4 File Offset: 0x006004D4
+		public override void Resolve(ResolveParams rp)
 		{
-			if (prevPostThingSpawn != null)
+			ResolveParams resolveParams = rp;
+			Action<Thing> prevPostThingSpawn = resolveParams.postThingSpawn;
+			resolveParams.postThingSpawn = delegate(Thing x)
 			{
-				prevPostThingSpawn(x);
-			}
-			if (x is Building_Bed building_Bed)
-			{
-				building_Bed.ForPrisoners = true;
-			}
-		};
-		BaseGen.symbolStack.Push("bed", resolveParams);
+				if (prevPostThingSpawn != null)
+				{
+					prevPostThingSpawn(x);
+				}
+				Building_Bed building_Bed = x as Building_Bed;
+				if (building_Bed != null)
+				{
+					building_Bed.ForPrisoners = true;
+				}
+			};
+			BaseGen.symbolStack.Push("bed", resolveParams, null);
+		}
 	}
 }

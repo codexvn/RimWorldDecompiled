@@ -1,40 +1,46 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Verb_ShootOneUse : Verb_Shoot
+namespace RimWorld
 {
-	protected override bool TryCastShot()
+	// Token: 0x0200378A RID: 14218
+	public class Verb_ShootOneUse : Verb_Shoot
 	{
-		if (base.TryCastShot())
+		// Token: 0x06013B24 RID: 80676 RVA: 0x005DA4C7 File Offset: 0x005D86C7
+		protected override bool TryCastShot()
 		{
-			if (burstShotsLeft <= 1)
+			if (base.TryCastShot())
 			{
-				SelfConsume();
+				if (this.burstShotsLeft <= 1)
+				{
+					this.SelfConsume();
+				}
+				return true;
 			}
-			return true;
+			if (this.burstShotsLeft < base.BurstShotCount)
+			{
+				this.SelfConsume();
+			}
+			return false;
 		}
-		if (burstShotsLeft < base.BurstShotCount)
-		{
-			SelfConsume();
-		}
-		return false;
-	}
 
-	public override void Notify_EquipmentLost()
-	{
-		base.Notify_EquipmentLost();
-		if (state == VerbState.Bursting && burstShotsLeft < base.BurstShotCount)
+		// Token: 0x06013B25 RID: 80677 RVA: 0x005DA4F7 File Offset: 0x005D86F7
+		public override void Notify_EquipmentLost()
 		{
-			SelfConsume();
+			base.Notify_EquipmentLost();
+			if (this.state == VerbState.Bursting && this.burstShotsLeft < base.BurstShotCount)
+			{
+				this.SelfConsume();
+			}
 		}
-	}
 
-	private void SelfConsume()
-	{
-		if (base.EquipmentSource != null && !base.EquipmentSource.Destroyed)
+		// Token: 0x06013B26 RID: 80678 RVA: 0x0003A743 File Offset: 0x00038943
+		private void SelfConsume()
 		{
-			base.EquipmentSource.Destroy();
+			if (base.EquipmentSource != null && !base.EquipmentSource.Destroyed)
+			{
+				base.EquipmentSource.Destroy(DestroyMode.Vanish);
+			}
 		}
 	}
 }

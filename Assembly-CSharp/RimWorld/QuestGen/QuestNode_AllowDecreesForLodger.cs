@@ -1,21 +1,27 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_AllowDecreesForLodger : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<Pawn> lodger;
-
-	protected override void RunInt()
+	// Token: 0x02003AAF RID: 15023
+	public class QuestNode_AllowDecreesForLodger : QuestNode
 	{
-		QuestGen.quest.AddPart(new QuestPart_AllowDecreesForLodger
+		// Token: 0x060147FA RID: 83962 RVA: 0x0061E7DF File Offset: 0x0061C9DF
+		protected override void RunInt()
 		{
-			lodger = lodger.GetValue(QuestGen.slate)
-		});
-	}
+			QuestGen.quest.AddPart(new QuestPart_AllowDecreesForLodger
+			{
+				lodger = this.lodger.GetValue(QuestGen.slate)
+			});
+		}
 
-	protected override bool TestRunInt(Slate slate)
-	{
-		return true;
+		// Token: 0x060147FB RID: 83963 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool TestRunInt(Slate slate)
+		{
+			return true;
+		}
+
+		// Token: 0x0400E305 RID: 58117
+		public SlateRef<Pawn> lodger;
 	}
 }

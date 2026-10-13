@@ -1,67 +1,60 @@
+﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class TileMutatorWorker_AncientUplink : TileMutatorWorker
+namespace RimWorld
 {
-	public TileMutatorWorker_AncientUplink(TileMutatorDef def)
-		: base(def)
+	// Token: 0x020020C7 RID: 8391
+	public class TileMutatorWorker_AncientUplink : TileMutatorWorker
 	{
-	}
-
-	public override void GeneratePostFog(Map map)
-	{
-		if (!ModsConfig.OdysseyActive)
+		// Token: 0x0600B783 RID: 46979 RVA: 0x0034CD7F File Offset: 0x0034AF7F
+		public TileMutatorWorker_AncientUplink(TileMutatorDef def) : base(def)
 		{
-			return;
 		}
-		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-		PrefabDef prefab = PrefabDefOf.AncientUplink;
-		if (!MapGenUtility.TryGetRandomClearRect(prefab.size.x, prefab.size.z, out var rect, -1, -1, Validator))
+
+		// Token: 0x0600B784 RID: 46980 RVA: 0x0034DB38 File Offset: 0x0034BD38
+		public override void GeneratePostFog(Map map)
 		{
-			if (!CellFinder.TryFindRandomCell(map, (IntVec3 c) => Validator(CellRect.CenteredOn(c, prefab.size)), out var result))
+			TileMutatorWorker_AncientUplink.<>c__DisplayClass1_0 CS$<>8__locals1 = new TileMutatorWorker_AncientUplink.<>c__DisplayClass1_0();
+			CS$<>8__locals1.map = map;
+			CS$<>8__locals1.<>4__this = this;
+			if (!ModsConfig.OdysseyActive)
 			{
 				return;
 			}
-			rect = CellRect.CenteredOn(result, prefab.size);
-		}
-		foreach (IntVec3 item in rect)
-		{
-			map.terrainGrid.SetTerrain(item, TerrainDefOf.AncientTile);
-		}
-		PrefabUtility.SpawnPrefab(prefab, map, GetPrefabRoot(rect), Rot4.North);
-		usedRects.Add(rect);
-		bool Validator(CellRect r)
-		{
-			if (!r.InBounds(map))
+			CS$<>8__locals1.usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+			CS$<>8__locals1.prefab = PrefabDefOf.AncientUplink;
+			CellRect cellRect;
+			if (!MapGenUtility.TryGetRandomClearRect(CS$<>8__locals1.prefab.size.x, CS$<>8__locals1.prefab.size.z, out cellRect, -1, -1, new Predicate<CellRect>(CS$<>8__locals1.<GeneratePostFog>g__Validator|0), -1f, 0.7f, MapGenUtility.SearchWeightMode.Largest, 1))
 			{
-				return false;
+				IntVec3 center;
+				if (!CellFinder.TryFindRandomCell(CS$<>8__locals1.map, (IntVec3 c) => base.<GeneratePostFog>g__Validator|0(CellRect.CenteredOn(c, CS$<>8__locals1.prefab.size)), out center))
+				{
+					return;
+				}
+				cellRect = CellRect.CenteredOn(center, CS$<>8__locals1.prefab.size);
 			}
-			if (r.Cells.Any((IntVec3 c) => c.Fogged(map)))
+			foreach (IntVec3 c2 in cellRect)
 			{
-				return false;
+				CS$<>8__locals1.map.terrainGrid.SetTerrain(c2, TerrainDefOf.AncientTile);
 			}
-			if (!PrefabUtility.CanSpawnPrefab(prefab, map, GetPrefabRoot(r), Rot4.North, canWipeEdifices: false))
-			{
-				return false;
-			}
-			return !usedRects.Any((CellRect ur) => ur.Overlaps(r));
+			PrefabUtility.SpawnPrefab(CS$<>8__locals1.prefab, CS$<>8__locals1.map, this.GetPrefabRoot(cellRect), Rot4.North, null, null, null, null, false);
+			CS$<>8__locals1.usedRects.Add(cellRect);
 		}
-	}
 
-	private IntVec3 GetPrefabRoot(CellRect rect)
-	{
-		IntVec3 centerCell = rect.CenterCell;
-		if (rect.Width % 2 == 0)
+		// Token: 0x0600B785 RID: 46981 RVA: 0x0034DC70 File Offset: 0x0034BE70
+		private IntVec3 GetPrefabRoot(CellRect rect)
 		{
-			centerCell.x--;
+			IntVec3 centerCell = rect.CenterCell;
+			if (rect.Width % 2 == 0)
+			{
+				centerCell.x--;
+			}
+			if (rect.Height % 2 == 0)
+			{
+				centerCell.z--;
+			}
+			return centerCell;
 		}
-		if (rect.Height % 2 == 0)
-		{
-			centerCell.z--;
-		}
-		return centerCell;
 	}
 }

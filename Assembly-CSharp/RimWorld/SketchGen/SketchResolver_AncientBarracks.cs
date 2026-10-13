@@ -1,102 +1,110 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_AncientBarracks : SketchResolver
+namespace RimWorld.SketchGen
 {
-	private static List<IntVec3> tmpCells = new List<IntVec3>();
-
-	protected override bool CanResolveInt(SketchResolveParams parms)
+	// Token: 0x020038A1 RID: 14497
+	public class SketchResolver_AncientBarracks : SketchResolver
 	{
-		if (parms.rect.HasValue)
+		// Token: 0x06014071 RID: 82033 RVA: 0x005F3083 File Offset: 0x005F1283
+		protected override bool CanResolveInt(SketchResolveParams parms)
 		{
-			return parms.sketch != null;
+			return parms.rect != null && parms.sketch != null;
 		}
-		return false;
-	}
 
-	protected override void ResolveInt(SketchResolveParams parms)
-	{
-		if (!ModLister.CheckIdeology("Ancient barracks"))
+		// Token: 0x06014072 RID: 82034 RVA: 0x005F3144 File Offset: 0x005F1344
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
-			return;
-		}
-		CellRect rect = parms.rect.Value;
-		SketchResolveParams parms2 = parms;
-		parms2.cornerThing = ThingDefOf.AncientLamp;
-		parms2.requireFloor = true;
-		SketchResolverDefOf.AddCornerThings.Resolve(parms2);
-		ThingDef ancientBed = ThingDefOf.AncientBed;
-		CellRect cellRect = SketchGenUtility.FindBiggestRect(parms.sketch, (IntVec3 p) => rect.Contains(p) && !parms.sketch.ThingsAt(p).Any());
-		if (cellRect == CellRect.Empty)
-		{
-			return;
-		}
-		SketchResolveParams parms3 = parms;
-		parms3.chance = 1f;
-		parms3.wallEdgeThing = ThingDefOf.AncientLockerBank;
-		SketchResolverDefOf.AddWallEdgeThings.Resolve(parms3);
-		tmpCells.Clear();
-		if (cellRect.Width > cellRect.Height)
-		{
-			tmpCells.AddRange(cellRect.GetEdgeCells(Rot4.North));
-			tmpCells.AddRange(cellRect.GetEdgeCells(Rot4.South));
-			foreach (IntVec3 tmpCell in tmpCells)
+			if (!ModLister.CheckIdeology("Ancient barracks"))
 			{
-				if (CanPlaceBedAt(ancientBed, tmpCell, Rot4.North, parms.sketch))
+				return;
+			}
+			CellRect rect = parms.rect.Value;
+			SketchResolveParams parms2 = parms;
+			parms2.cornerThing = ThingDefOf.AncientLamp;
+			parms2.requireFloor = new bool?(true);
+			SketchResolverDefOf.AddCornerThings.Resolve(parms2);
+			ThingDef ancientBed = ThingDefOf.AncientBed;
+			CellRect lhs = SketchGenUtility.FindBiggestRect(parms.sketch, (IntVec3 p) => rect.Contains(p) && !parms.sketch.ThingsAt(p).Any<SketchThing>(), null, 3);
+			if (lhs == CellRect.Empty)
+			{
+				return;
+			}
+			SketchResolveParams parms3 = parms;
+			parms3.chance = new float?(1f);
+			parms3.wallEdgeThing = ThingDefOf.AncientLockerBank;
+			SketchResolverDefOf.AddWallEdgeThings.Resolve(parms3);
+			SketchResolver_AncientBarracks.tmpCells.Clear();
+			if (lhs.Width > lhs.Height)
+			{
+				SketchResolver_AncientBarracks.tmpCells.AddRange(lhs.GetEdgeCells(Rot4.North));
+				SketchResolver_AncientBarracks.tmpCells.AddRange(lhs.GetEdgeCells(Rot4.South));
+				using (List<IntVec3>.Enumerator enumerator = SketchResolver_AncientBarracks.tmpCells.GetEnumerator())
 				{
-					parms.sketch.AddThing(ancientBed, tmpCell, Rot4.North, null, 1, null, null, wipeIfCollides: false);
-				}
-				if (CanPlaceBedAt(ancientBed, tmpCell, Rot4.South, parms.sketch))
-				{
-					parms.sketch.AddThing(ancientBed, tmpCell, Rot4.South, null, 1, null, null, wipeIfCollides: false);
+					while (enumerator.MoveNext())
+					{
+						IntVec3 intVec = enumerator.Current;
+						if (this.CanPlaceBedAt(ancientBed, intVec, Rot4.North, parms.sketch))
+						{
+							parms.sketch.AddThing(ancientBed, intVec, Rot4.North, null, 1, null, null, false, 2f);
+						}
+						if (this.CanPlaceBedAt(ancientBed, intVec, Rot4.South, parms.sketch))
+						{
+							parms.sketch.AddThing(ancientBed, intVec, Rot4.South, null, 1, null, null, false, 2f);
+						}
+					}
+					goto IL_2E3;
 				}
 			}
-		}
-		else
-		{
-			tmpCells.AddRange(cellRect.GetEdgeCells(Rot4.East));
-			tmpCells.AddRange(cellRect.GetEdgeCells(Rot4.West));
-			foreach (IntVec3 tmpCell2 in tmpCells)
+			SketchResolver_AncientBarracks.tmpCells.AddRange(lhs.GetEdgeCells(Rot4.East));
+			SketchResolver_AncientBarracks.tmpCells.AddRange(lhs.GetEdgeCells(Rot4.West));
+			foreach (IntVec3 intVec2 in SketchResolver_AncientBarracks.tmpCells)
 			{
-				if (CanPlaceBedAt(ancientBed, tmpCell2, Rot4.East, parms.sketch))
+				if (this.CanPlaceBedAt(ancientBed, intVec2, Rot4.East, parms.sketch))
 				{
-					parms.sketch.AddThing(ancientBed, tmpCell2, Rot4.East, null, 1, null, null, wipeIfCollides: false);
+					parms.sketch.AddThing(ancientBed, intVec2, Rot4.East, null, 1, null, null, false, 2f);
 				}
-				if (CanPlaceBedAt(ancientBed, tmpCell2, Rot4.West, parms.sketch))
+				if (this.CanPlaceBedAt(ancientBed, intVec2, Rot4.West, parms.sketch))
 				{
-					parms.sketch.AddThing(ancientBed, tmpCell2, Rot4.West, null, 1, null, null, wipeIfCollides: false);
+					parms.sketch.AddThing(ancientBed, intVec2, Rot4.West, null, 1, null, null, false, 2f);
 				}
 			}
+			IL_2E3:
+			SketchResolver_AncientBarracks.tmpCells.Clear();
 		}
-		tmpCells.Clear();
-	}
 
-	private bool CanPlaceBedAt(ThingDef def, IntVec3 position, Rot4 rot, Sketch sketch)
-	{
-		CellRect cellRect = GenAdj.OccupiedRect(position, rot, def.size);
-		foreach (IntVec3 cell in cellRect.Cells)
+		// Token: 0x06014073 RID: 82035 RVA: 0x005F345C File Offset: 0x005F165C
+		private bool CanPlaceBedAt(ThingDef def, IntVec3 position, Rot4 rot, Sketch sketch)
 		{
-			if (sketch.ThingsAt(cell).Any((SketchThing x) => x.def == ThingDefOf.Wall))
+			CellRect cellRect = GenAdj.OccupiedRect(position, rot, def.size);
+			foreach (IntVec3 pos in cellRect.Cells)
 			{
-				return false;
-			}
-		}
-		bool result = false;
-		foreach (IntVec3 edgeCell in cellRect.ExpandedBy(1).EdgeCells)
-		{
-			foreach (SketchThing item in sketch.ThingsAt(edgeCell))
-			{
-				if (item.def == ThingDefOf.Wall)
+				if (sketch.ThingsAt(pos).Any((SketchThing x) => x.def == ThingDefOf.Wall))
 				{
-					result = true;
-					continue;
+					return false;
 				}
-				return false;
 			}
+			bool result = false;
+			foreach (IntVec3 pos2 in cellRect.ExpandedBy(1).EdgeCells)
+			{
+				using (IEnumerator<SketchThing> enumerator2 = sketch.ThingsAt(pos2).GetEnumerator())
+				{
+					while (enumerator2.MoveNext())
+					{
+						if (enumerator2.Current.def != ThingDefOf.Wall)
+						{
+							return false;
+						}
+						result = true;
+					}
+				}
+			}
+			return result;
 		}
-		return result;
+
+		// Token: 0x0400DD54 RID: 56660
+		private static List<IntVec3> tmpCells = new List<IntVec3>();
 	}
 }

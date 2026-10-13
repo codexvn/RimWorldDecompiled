@@ -1,163 +1,186 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_DistressCall : QuestNode
+namespace RimWorld.QuestGen
 {
-	private static List<LandmarkDef> allowedLandmarksCached;
-
-	private const string SitePartTag = "DistressCall";
-
-	private const int MaxDistanceFromColony = 9;
-
-	private const int MinDistanceFromColony = 3;
-
-	private const float MinPoints = 100f;
-
-	private const int TimeoutTicks = 900000;
-
-	private const float EmpireSitePointsThreshold = 2000f;
-
-	private const float AmbushChance = 0.75f;
-
-	private static readonly IntRange AmbushDelayTicks = new IntRange(2400, 4800);
-
-	private static readonly SimpleCurve AmbushPointsCurve = new SimpleCurve
+	// Token: 0x02003B43 RID: 15171
+	public class QuestNode_Root_DistressCall : QuestNode
 	{
-		new CurvePoint(100f, 100f),
-		new CurvePoint(1000f, 400f),
-		new CurvePoint(5000f, 1000f)
-	};
-
-	protected static List<LandmarkDef> AllowedLandmarks
-	{
-		get
+		// Token: 0x17003363 RID: 13155
+		// (get) Token: 0x06014A00 RID: 84480 RVA: 0x00628A80 File Offset: 0x00626C80
+		protected static List<LandmarkDef> AllowedLandmarks
 		{
-			if (ModsConfig.OdysseyActive && allowedLandmarksCached == null)
+			get
 			{
-				allowedLandmarksCached = new List<LandmarkDef>
+				if (ModsConfig.OdysseyActive && QuestNode_Root_DistressCall.allowedLandmarksCached == null)
 				{
-					LandmarkDefOf.Oasis,
-					LandmarkDefOf.Lake,
-					LandmarkDefOf.LakeWithIsland,
-					LandmarkDefOf.LakeWithIslands,
-					LandmarkDefOf.Pond,
-					LandmarkDefOf.DryLake,
-					LandmarkDefOf.ToxicLake,
-					LandmarkDefOf.Wetland,
-					LandmarkDefOf.HotSprings,
-					LandmarkDefOf.CoastalIsland,
-					LandmarkDefOf.Peninsula,
-					LandmarkDefOf.Valley,
-					LandmarkDefOf.Cavern,
-					LandmarkDefOf.Chasm,
-					LandmarkDefOf.Cliffs,
-					LandmarkDefOf.Hollow,
-					LandmarkDefOf.TerraformingScar,
-					LandmarkDefOf.Dunes
-				};
+					QuestNode_Root_DistressCall.allowedLandmarksCached = new List<LandmarkDef>
+					{
+						LandmarkDefOf.Oasis,
+						LandmarkDefOf.Lake,
+						LandmarkDefOf.LakeWithIsland,
+						LandmarkDefOf.LakeWithIslands,
+						LandmarkDefOf.Pond,
+						LandmarkDefOf.DryLake,
+						LandmarkDefOf.ToxicLake,
+						LandmarkDefOf.Wetland,
+						LandmarkDefOf.HotSprings,
+						LandmarkDefOf.CoastalIsland,
+						LandmarkDefOf.Peninsula,
+						LandmarkDefOf.Valley,
+						LandmarkDefOf.Cavern,
+						LandmarkDefOf.Chasm,
+						LandmarkDefOf.Cliffs,
+						LandmarkDefOf.Hollow,
+						LandmarkDefOf.TerraformingScar,
+						LandmarkDefOf.Dunes
+					};
+				}
+				return QuestNode_Root_DistressCall.allowedLandmarksCached;
 			}
-			return allowedLandmarksCached;
 		}
-	}
 
-	protected override bool TestRunInt(Slate slate)
-	{
-		if (!Find.Storyteller.difficulty.allowViolentQuests)
+		// Token: 0x06014A01 RID: 84481 RVA: 0x00628B78 File Offset: 0x00626D78
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			if (!Find.Storyteller.difficulty.allowViolentQuests)
+			{
+				return false;
+			}
+			QuestGenUtility.TestRunAdjustPointsForDistantFight(slate);
+			float num = slate.Get<float>("points", 0f, false);
+			PlanetTile planetTile;
+			Faction faction;
+			return num >= 100f && this.TryFindSiteTile(out planetTile, true) && this.TryFindFaction(num, out faction);
 		}
-		QuestGenUtility.TestRunAdjustPointsForDistantFight(slate);
-		float num = slate.Get("points", 0f);
-		if (num < 100f)
-		{
-			return false;
-		}
-		Faction faction;
-		if (TryFindSiteTile(out var _, exitOnFirstTileFound: true))
-		{
-			return TryFindFaction(num, out faction);
-		}
-		return false;
-	}
 
-	protected override void RunInt()
-	{
-		Quest quest = QuestGen.quest;
-		Slate slate = QuestGen.slate;
-		float num = slate.Get("points", 0f);
-		if (num < 100f)
+		// Token: 0x06014A02 RID: 84482 RVA: 0x00628BD0 File Offset: 0x00626DD0
+		protected override void RunInt()
 		{
-			num = 100f;
-		}
-		TryFindSiteTile(out var tile);
-		TryFindFaction(num, out var faction);
-		slate.Set("faction", faction);
-		IEnumerable<SitePartDef> source = DefDatabase<SitePartDef>.AllDefs.Where((SitePartDef def) => def.tags != null && def.tags.Contains("DistressCall") && typeof(SitePartWorker_DistressCall).IsAssignableFrom(def.workerClass));
-		Site site = QuestGen_Sites.GenerateSite(new SitePartDefWithParams[1]
-		{
-			new SitePartDefWithParams(source.RandomElementByWeight((SitePartDef sp) => sp.selectionWeight), new SitePartParams
+			Quest quest = QuestGen.quest;
+			Slate slate = QuestGen.slate;
+			float num = slate.Get<float>("points", 0f, false);
+			if (num < 100f)
+			{
+				num = 100f;
+			}
+			PlanetTile tile;
+			this.TryFindSiteTile(out tile, false);
+			Faction faction;
+			this.TryFindFaction(num, out faction);
+			slate.Set<Faction>("faction", faction, false);
+			IEnumerable<SitePartDef> source = from def in DefDatabase<SitePartDef>.AllDefs
+			where def.tags != null && def.tags.Contains("DistressCall") && typeof(SitePartWorker_DistressCall).IsAssignableFrom(def.workerClass)
+			select def;
+			SitePartDefWithParams[] array = new SitePartDefWithParams[1];
+			array[0] = new SitePartDefWithParams(source.RandomElementByWeight((SitePartDef sp) => sp.selectionWeight), new SitePartParams
 			{
 				threatPoints = num
-			})
-		}, tile, faction);
-		quest.SpawnWorldObject(site);
-		slate.Set("site", site);
-		string inSignalEnable = QuestGenUtility.HardcodedSignalWithQuestID("site.MapGenerated");
-		string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.NoActiveThreats");
-		string inSignal2 = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
-		string signalAmbush = QuestGenUtility.HardcodedSignalWithQuestID("ambush");
-		quest.Letter(LetterDefOf.NeutralEvent, null, null, label: "DistressSignalLabel".Translate(), text: "DistressSignalText".Translate(site.Faction.Named("FACTION")).Resolve(), lookTargets: Gen.YieldSingle(site), relatedFaction: site.Faction);
-		QuestPart_Choice questPart_Choice = quest.RewardChoice();
-		QuestPart_Choice.Choice item = new QuestPart_Choice.Choice
-		{
-			rewards = { (Reward)new Reward_CampLoot() }
-		};
-		questPart_Choice.choices.Add(item);
-		if (Rand.Chance(0.75f))
-		{
-			quest.Delay(AmbushDelayTicks.RandomInRange, delegate
+			});
+			Site site = QuestGen_Sites.GenerateSite(array, tile, faction, false, null, null);
+			quest.SpawnWorldObject(site, null, null);
+			slate.Set<Site>("site", site, false);
+			string inSignalEnable = QuestGenUtility.HardcodedSignalWithQuestID("site.MapGenerated");
+			string text = QuestGenUtility.HardcodedSignalWithQuestID("site.AllEnemiesDefeated");
+			string inSignal = QuestGenUtility.HardcodedSignalWithQuestID("site.MapRemoved");
+			string signalAmbush = QuestGenUtility.HardcodedSignalWithQuestID("ambush");
+			Quest quest3 = quest;
+			LetterDef neutralEvent = LetterDefOf.NeutralEvent;
+			string inSignal2 = null;
+			string chosenPawnSignal = null;
+			string label = "DistressSignalLabel".Translate();
+			string text2 = "DistressSignalText".Translate(site.Faction.Named("FACTION")).Resolve();
+			IEnumerable<object> lookTargets = Gen.YieldSingle<Site>(site);
+			quest3.Letter(neutralEvent, inSignal2, chosenPawnSignal, site.Faction, null, false, QuestPart.SignalListenMode.OngoingOnly, lookTargets, false, text2, null, label, null, null);
+			QuestPart_Choice questPart_Choice = quest.RewardChoice(null, null);
+			QuestPart_Choice.Choice choice = new QuestPart_Choice.Choice();
+			choice.rewards.Add(new Reward_CampLoot());
+			questPart_Choice.choices.Add(choice);
+			if (Rand.Chance(0.75f))
 			{
-				quest.SignalPass(null, null, signalAmbush);
-			}, inSignalEnable);
-			quest.AddPart(new QuestPart_DistressCallAmbush(signalAmbush, site, AmbushPointsCurve.Evaluate(num)));
+				quest.Delay(QuestNode_Root_DistressCall.AmbushDelayTicks.RandomInRange, delegate
+				{
+					quest.SignalPass(null, null, signalAmbush);
+				}, inSignalEnable, null, null, false, null, null, false, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, false);
+				quest.AddPart(new QuestPart_DistressCallAmbush(signalAmbush, site, QuestNode_Root_DistressCall.AmbushPointsCurve.Evaluate(num)));
+			}
+			quest.WorldObjectTimeout(site, 900000, null, null, false, null, true);
+			quest.Delay(900000, delegate
+			{
+				quest.End(QuestEndOutcome.Fail, 0, null, null, QuestPart.SignalListenMode.OngoingOnly, false, false);
+			}, null, null, null, false, null, null, false, null, null, null, false, QuestPart.SignalListenMode.OngoingOnly, false);
+			Quest quest2 = quest;
+			Map getRaidersFromMap = null;
+			text2 = text;
+			quest2.Notify_PlayerRaidedSomeone(getRaidersFromMap, site, text2);
+			quest.End(QuestEndOutcome.Success, 0, null, inSignal, QuestPart.SignalListenMode.OngoingOnly, false, false);
 		}
-		quest.WorldObjectTimeout(site, 900000);
-		quest.Delay(900000, delegate
-		{
-			QuestGen_End.End(quest, QuestEndOutcome.Fail);
-		});
-		quest.End(QuestEndOutcome.Success, 0, null, inSignal);
-		quest.End(QuestEndOutcome.Fail, 0, null, inSignal2);
-	}
 
-	private bool TryFindFaction(float points, out Faction faction)
-	{
-		return Find.FactionManager.AllFactionsListForReading.Where((Faction f) => FactionUsable(f, points)).TryRandomElement(out faction);
-	}
+		// Token: 0x06014A03 RID: 84483 RVA: 0x00628E68 File Offset: 0x00627068
+		private bool TryFindFaction(float points, out Faction faction)
+		{
+			return (from f in Find.FactionManager.AllFactionsListForReading
+			where this.FactionUsable(f, points)
+			select f).TryRandomElement(out faction);
+		}
 
-	private bool FactionUsable(Faction f, float points)
-	{
-		if (ModsConfig.RoyaltyActive && points < 2000f && f == Faction.OfEmpire)
+		// Token: 0x06014A04 RID: 84484 RVA: 0x00628EAC File Offset: 0x006270AC
+		private bool FactionUsable(Faction f, float points)
 		{
-			return false;
+			return (!ModsConfig.RoyaltyActive || points >= 2000f || f != Faction.OfEmpire) && f.def.canGenerateQuestSites && (f.def.humanlikeFaction && !f.def.pawnGroupMakers.NullOrEmpty<PawnGroupMaker>()) && !f.def.permanentEnemy;
 		}
-		if (!f.def.canGenerateQuestSites)
-		{
-			return false;
-		}
-		if (f.def.humanlikeFaction && !f.def.pawnGroupMakers.NullOrEmpty())
-		{
-			return !f.def.permanentEnemy;
-		}
-		return false;
-	}
 
-	private bool TryFindSiteTile(out PlanetTile tile, bool exitOnFirstTileFound = false)
-	{
-		return TileFinder.TryFindNewSiteTile(out tile, 3, 9, allowCaravans: false, AllowedLandmarks, 0.5f, canSelectComboLandmarks: true, TileFinderMode.Near, exitOnFirstTileFound);
+		// Token: 0x06014A05 RID: 84485 RVA: 0x00628F10 File Offset: 0x00627110
+		private bool TryFindSiteTile(out PlanetTile tile, bool exitOnFirstTileFound = false)
+		{
+			return TileFinder.TryFindNewSiteTile(out tile, 3, 9, false, QuestNode_Root_DistressCall.AllowedLandmarks, 0.5f, true, TileFinderMode.Near, exitOnFirstTileFound, false, null, null);
+		}
+
+		// Token: 0x0400E504 RID: 58628
+		private static List<LandmarkDef> allowedLandmarksCached;
+
+		// Token: 0x0400E505 RID: 58629
+		private const string SitePartTag = "DistressCall";
+
+		// Token: 0x0400E506 RID: 58630
+		private const int MaxDistanceFromColony = 9;
+
+		// Token: 0x0400E507 RID: 58631
+		private const int MinDistanceFromColony = 3;
+
+		// Token: 0x0400E508 RID: 58632
+		private const float MinPoints = 100f;
+
+		// Token: 0x0400E509 RID: 58633
+		private const int TimeoutTicks = 900000;
+
+		// Token: 0x0400E50A RID: 58634
+		private const float EmpireSitePointsThreshold = 2000f;
+
+		// Token: 0x0400E50B RID: 58635
+		private const float AmbushChance = 0.75f;
+
+		// Token: 0x0400E50C RID: 58636
+		private static readonly IntRange AmbushDelayTicks = new IntRange(2400, 4800);
+
+		// Token: 0x0400E50D RID: 58637
+		private static readonly SimpleCurve AmbushPointsCurve = new SimpleCurve
+		{
+			{
+				new CurvePoint(100f, 100f),
+				true
+			},
+			{
+				new CurvePoint(1000f, 400f),
+				true
+			},
+			{
+				new CurvePoint(5000f, 1000f),
+				true
+			}
+		};
 	}
 }

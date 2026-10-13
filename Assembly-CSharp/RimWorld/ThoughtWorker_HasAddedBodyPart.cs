@@ -1,16 +1,20 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_HasAddedBodyPart : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001897 RID: 6295
+	public class ThoughtWorker_HasAddedBodyPart : ThoughtWorker
 	{
-		int num = GeneUtility.AddedAndImplantedPartsWithXenogenesCount(p);
-		if (num > 0)
+		// Token: 0x0600901F RID: 36895 RVA: 0x002A8290 File Offset: 0x002A6490
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.ActiveAtStage(num - 1);
+			int num = GeneUtility.AddedAndImplantedPartsWithXenogenesCount(p);
+			if (num > 0)
+			{
+				return ThoughtState.ActiveAtStage(num - 1);
+			}
+			return false;
 		}
-		return false;
 	}
 }

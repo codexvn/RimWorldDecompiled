@@ -1,126 +1,187 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldComponent_LocationGenerator : WorldComponent
+namespace RimWorld.Planet
 {
-	private const int UpdateInterval = 90000;
-
-	private readonly int worldLocationsTarget;
-
-	private static readonly Dictionary<PlanetLayerDef, List<GeneratedLocationDef>> LayerList = new Dictionary<PlanetLayerDef, List<GeneratedLocationDef>>();
-
-	private static readonly List<GeneratedLocationDef> tmpOptions = new List<GeneratedLocationDef>();
-
-	public WorldComponent_LocationGenerator(World world)
-		: base(world)
+	// Token: 0x02003CD6 RID: 15574
+	public class WorldComponent_LocationGenerator : WorldComponent
 	{
-		float planetCoverage = world.PlanetCoverage;
-		worldLocationsTarget = ((planetCoverage < 0.301f) ? ((!(planetCoverage < 0.051f)) ? 8 : 3) : ((!(planetCoverage < 0.501f)) ? 20 : 12));
-		foreach (GeneratedLocationDef item in DefDatabase<GeneratedLocationDef>.AllDefsListForReading)
+		// Token: 0x060152CD RID: 86733 RVA: 0x00656218 File Offset: 0x00654418
+		public WorldComponent_LocationGenerator(World world) : base(world)
 		{
-			foreach (PlanetLayerDef layerDef in item.LayerDefs)
+			float planetCoverage = world.PlanetCoverage;
+			int num;
+			if (planetCoverage < 0.301f)
 			{
-				if (!LayerList.TryGetValue(layerDef, out var value))
+				if (planetCoverage >= 0.051f)
 				{
-					value = (LayerList[layerDef] = new List<GeneratedLocationDef>());
+					num = 8;
 				}
-				value.Add(item);
-			}
-		}
-	}
-
-	public override void WorldComponentTick()
-	{
-		foreach (var (_, planetLayer2) in Find.WorldGrid.PlanetLayers)
-		{
-			if (GenTicks.IsTickInterval(planetLayer2.GetHashCode().HashOffset(), 90000))
-			{
-				int num2 = Mathf.RoundToInt(planetLayer2.Def.generatedLocationFactor * (float)worldLocationsTarget);
-				if (planetLayer2.Tiles.Count((Tile tile) => world.worldObjects.AnyGeneratedWorldLocationAt(tile.tile)) < num2)
+				else
 				{
-					GenerateUntilTarget(planetLayer2);
+					num = 3;
 				}
 			}
-		}
-	}
-
-	private void GenerateUntilTarget()
-	{
-		foreach (var (_, layer) in Find.WorldGrid.PlanetLayers)
-		{
-			GenerateUntilTarget(layer);
-		}
-	}
-
-	private void GenerateUntilTarget(PlanetLayer layer)
-	{
-		int num = Mathf.RoundToInt(layer.Def.generatedLocationFactor * (float)worldLocationsTarget);
-		for (int i = 0; i < num; i++)
-		{
-			GenerateLocationForLayer(layer);
-		}
-	}
-
-	private void GenerateLocationForLayer(PlanetLayer layer)
-	{
-		if (!LayerList.ContainsKey(layer.Def) || LayerList[layer.Def].Empty() || !TryFindSiteTile(layer, out var tile))
-		{
-			return;
-		}
-		tmpOptions.Clear();
-		tmpOptions.AddRange(LayerList[layer.Def]);
-		foreach (GeneratedLocationDef location in LayerList[layer.Def])
-		{
-			if (location.layerMaximum >= 0 && layer.Tiles.Count((Tile t) => world.worldObjects.WorldObjectOfDefAt(location.worldObjectDef, t.tile) != null) >= location.layerMaximum)
+			else if (planetCoverage >= 0.501f)
 			{
-				tmpOptions.Remove(location);
+				num = 20;
+			}
+			else
+			{
+				num = 12;
+			}
+			this.worldLocationsTarget = num;
+			foreach (GeneratedLocationDef generatedLocationDef in DefDatabase<GeneratedLocationDef>.AllDefsListForReading)
+			{
+				foreach (PlanetLayerDef key in generatedLocationDef.LayerDefs)
+				{
+					List<GeneratedLocationDef> list;
+					if (!WorldComponent_LocationGenerator.LayerList.TryGetValue(key, out list))
+					{
+						list = (WorldComponent_LocationGenerator.LayerList[key] = new List<GeneratedLocationDef>());
+					}
+					list.Add(generatedLocationDef);
+				}
 			}
 		}
-		if (!tmpOptions.Empty())
+
+		// Token: 0x060152CE RID: 86734 RVA: 0x00656310 File Offset: 0x00654510
+		public override void WorldComponentTick()
 		{
-			GeneratedLocationDef generatedLocationDef = tmpOptions.RandomElementByWeight((GeneratedLocationDef def) => def.weight);
+			foreach (KeyValuePair<int, PlanetLayer> keyValuePair in Find.WorldGrid.PlanetLayers)
+			{
+				int num;
+				PlanetLayer planetLayer;
+				keyValuePair.Deconstruct(out num, out planetLayer);
+				PlanetLayer planetLayer2 = planetLayer;
+				if (GenTicks.IsTickInterval(planetLayer2.GetHashCode().HashOffset(), 90000))
+				{
+					int num2 = Mathf.RoundToInt(planetLayer2.Def.generatedLocationFactor * (float)this.worldLocationsTarget);
+					if (planetLayer2.Tiles.Count((Tile tile) => this.world.worldObjects.AnyGeneratedWorldLocationAt(tile.tile)) < num2)
+					{
+						this.GenerateUntilTarget(planetLayer2);
+					}
+				}
+			}
+		}
+
+		// Token: 0x060152CF RID: 86735 RVA: 0x006563BC File Offset: 0x006545BC
+		private void GenerateUntilTarget()
+		{
+			foreach (KeyValuePair<int, PlanetLayer> keyValuePair in Find.WorldGrid.PlanetLayers)
+			{
+				int num;
+				PlanetLayer planetLayer;
+				keyValuePair.Deconstruct(out num, out planetLayer);
+				PlanetLayer layer = planetLayer;
+				this.GenerateUntilTarget(layer);
+			}
+		}
+
+		// Token: 0x060152D0 RID: 86736 RVA: 0x0065641C File Offset: 0x0065461C
+		private void GenerateUntilTarget(PlanetLayer layer)
+		{
+			int num = Mathf.RoundToInt(layer.Def.generatedLocationFactor * (float)this.worldLocationsTarget);
+			for (int i = 0; i < num; i++)
+			{
+				this.GenerateLocationForLayer(layer);
+			}
+		}
+
+		// Token: 0x060152D1 RID: 86737 RVA: 0x00656458 File Offset: 0x00654658
+		private void GenerateLocationForLayer(PlanetLayer layer)
+		{
+			if (!WorldComponent_LocationGenerator.LayerList.ContainsKey(layer.Def) || WorldComponent_LocationGenerator.LayerList[layer.Def].Empty<GeneratedLocationDef>())
+			{
+				return;
+			}
+			PlanetTile tile;
+			if (!WorldComponent_LocationGenerator.TryFindSiteTile(layer, out tile))
+			{
+				return;
+			}
+			WorldComponent_LocationGenerator.tmpOptions.Clear();
+			WorldComponent_LocationGenerator.tmpOptions.AddRange(WorldComponent_LocationGenerator.LayerList[layer.Def]);
+			using (List<GeneratedLocationDef>.Enumerator enumerator = WorldComponent_LocationGenerator.LayerList[layer.Def].GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					GeneratedLocationDef location = enumerator.Current;
+					if (location.layerMaximum >= 0 && layer.Tiles.Count((Tile t) => this.world.worldObjects.WorldObjectOfDefAt(location.worldObjectDef, t.tile) != null) >= location.layerMaximum)
+					{
+						WorldComponent_LocationGenerator.tmpOptions.Remove(location);
+					}
+				}
+			}
+			if (WorldComponent_LocationGenerator.tmpOptions.Empty<GeneratedLocationDef>())
+			{
+				return;
+			}
+			GeneratedLocationDef generatedLocationDef = WorldComponent_LocationGenerator.tmpOptions.RandomElementByWeight((GeneratedLocationDef def) => def.weight);
 			WorldObject worldObject = WorldObjectMaker.MakeWorldObject(generatedLocationDef.worldObjectDef);
-			if (worldObject is INameableWorldObject nameableWorldObject)
+			INameableWorldObject nameableWorldObject = worldObject as INameableWorldObject;
+			if (nameableWorldObject != null)
 			{
-				nameableWorldObject.Name = NameGenerator.GenerateName(worldObject.def.nameMaker, null, appendNumberIfNameUsed: false, "r_name", null, null);
+				nameableWorldObject.Name = NameGenerator.GenerateName(worldObject.def.nameMaker, null, false, "r_name", null, null);
 			}
-			if (worldObject is IResourceWorldObject resourceWorldObject && !generatedLocationDef.preciousResources.NullOrEmpty())
+			IResourceWorldObject resourceWorldObject = worldObject as IResourceWorldObject;
+			if (resourceWorldObject != null && !generatedLocationDef.preciousResources.NullOrEmpty<ThingDef>())
 			{
-				resourceWorldObject.PreciousResource = generatedLocationDef.preciousResources.RandomElement();
+				resourceWorldObject.PreciousResource = generatedLocationDef.preciousResources.RandomElement<ThingDef>();
 			}
-			if (worldObject is IExpirableWorldObject expirableWorldObject && !generatedLocationDef.TimeoutRangeDays.IsZeros)
+			IExpirableWorldObject expirableWorldObject = worldObject as IExpirableWorldObject;
+			if (expirableWorldObject != null && !generatedLocationDef.TimeoutRangeDays.IsZeros)
 			{
 				expirableWorldObject.ExpireAtTicks = GenTicks.TicksGame + (int)(generatedLocationDef.TimeoutRangeDays.RandomInRange * 60000f);
 			}
 			worldObject.isGeneratedLocation = true;
 			worldObject.Tile = tile;
-			world.worldObjects.Add(worldObject);
+			this.world.worldObjects.Add(worldObject);
 		}
-	}
 
-	public static bool TryFindSiteTile(PlanetLayer layer, out PlanetTile tile)
-	{
-		tile = PlanetTile.Invalid;
-		PlanetTile other = new PlanetTile(0, Find.WorldGrid.Surface);
-		if (TileFinder.TryFindRandomPlayerTile(out var tile2, allowCaravans: false))
+		// Token: 0x060152D2 RID: 86738 RVA: 0x00656654 File Offset: 0x00654854
+		public static bool TryFindSiteTile(PlanetLayer layer, out PlanetTile tile)
 		{
-			other = tile2;
+			tile = PlanetTile.Invalid;
+			PlanetTile other = new PlanetTile(0, Find.WorldGrid.Surface);
+			PlanetTile planetTile;
+			if (TileFinder.TryFindRandomPlayerTile(out planetTile, false, null, false, null))
+			{
+				other = planetTile;
+			}
+			return TileFinder.TryFindTileWithDistance(layer.GetClosestTile(other), 0, int.MaxValue, out tile, new Predicate<PlanetTile>(WorldComponent_LocationGenerator.<TryFindSiteTile>g__Validator|9_0), TileFinderMode.Random, false);
 		}
-		return TileFinder.TryFindTileWithDistance(layer.GetClosestTile_NewTemp(other, validSettlement: true), 0, int.MaxValue, out tile, Validator);
-		static bool Validator(PlanetTile x)
+
+		// Token: 0x060152D3 RID: 86739 RVA: 0x006566AE File Offset: 0x006548AE
+		public override void FinalizeInit(bool fromLoad)
+		{
+			if (fromLoad)
+			{
+				return;
+			}
+			this.GenerateUntilTarget();
+		}
+
+		// Token: 0x060152D6 RID: 86742 RVA: 0x006566E8 File Offset: 0x006548E8
+		[CompilerGenerated]
+		internal static bool <TryFindSiteTile>g__Validator|9_0(PlanetTile x)
 		{
 			return !Find.WorldObjects.AnyWorldObjectAt(x);
 		}
-	}
 
-	public override void FinalizeInit(bool fromLoad)
-	{
-		if (!fromLoad)
-		{
-			GenerateUntilTarget();
-		}
+		// Token: 0x0400EC48 RID: 60488
+		private const int UpdateInterval = 90000;
+
+		// Token: 0x0400EC49 RID: 60489
+		private readonly int worldLocationsTarget;
+
+		// Token: 0x0400EC4A RID: 60490
+		private static readonly Dictionary<PlanetLayerDef, List<GeneratedLocationDef>> LayerList = new Dictionary<PlanetLayerDef, List<GeneratedLocationDef>>();
+
+		// Token: 0x0400EC4B RID: 60491
+		private static readonly List<GeneratedLocationDef> tmpOptions = new List<GeneratedLocationDef>();
 	}
 }

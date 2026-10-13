@@ -1,36 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_BrawlerHasRangedWeapon : Alert
+namespace RimWorld
 {
-	private List<Pawn> brawlersWithRangedWeaponResult = new List<Pawn>();
-
-	private List<Pawn> BrawlersWithRangedWeapon
+	// Token: 0x0200301E RID: 12318
+	public class Alert_BrawlerHasRangedWeapon : Alert
 	{
-		get
+		// Token: 0x17002CE7 RID: 11495
+		// (get) Token: 0x0601153E RID: 70974 RVA: 0x004F826C File Offset: 0x004F646C
+		private List<Pawn> BrawlersWithRangedWeapon
 		{
-			brawlersWithRangedWeaponResult.Clear();
-			foreach (Pawn item in PawnsFinder.AllMaps_FreeColonistsSpawned)
+			get
 			{
-				if (item.story.traits.HasTrait(TraitDefOf.Brawler) && item.equipment.Primary != null && item.equipment.Primary.def.IsRangedWeapon)
+				this.brawlersWithRangedWeaponResult.Clear();
+				foreach (Pawn pawn in PawnsFinder.AllMaps_FreeColonistsSpawned)
 				{
-					brawlersWithRangedWeaponResult.Add(item);
+					if (pawn.story.traits.HasTrait(TraitDefOf.Brawler) && pawn.equipment.Primary != null && pawn.equipment.Primary.def.IsRangedWeapon)
+					{
+						this.brawlersWithRangedWeaponResult.Add(pawn);
+					}
 				}
+				return this.brawlersWithRangedWeaponResult;
 			}
-			return brawlersWithRangedWeaponResult;
 		}
-	}
 
-	public Alert_BrawlerHasRangedWeapon()
-	{
-		defaultLabel = "BrawlerHasRangedWeapon".Translate();
-		defaultExplanation = "BrawlerHasRangedWeaponDesc".Translate();
-	}
+		// Token: 0x0601153F RID: 70975 RVA: 0x004F8310 File Offset: 0x004F6510
+		public Alert_BrawlerHasRangedWeapon()
+		{
+			this.defaultLabel = "BrawlerHasRangedWeapon".Translate();
+			this.defaultExplanation = "BrawlerHasRangedWeaponDesc".Translate();
+		}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(BrawlersWithRangedWeapon);
+		// Token: 0x06011540 RID: 70976 RVA: 0x004F834D File Offset: 0x004F654D
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.BrawlersWithRangedWeapon);
+		}
+
+		// Token: 0x0400B384 RID: 45956
+		private List<Pawn> brawlersWithRangedWeaponResult = new List<Pawn>();
 	}
 }

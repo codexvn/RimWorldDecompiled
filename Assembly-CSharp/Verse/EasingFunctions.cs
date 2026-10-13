@@ -1,35 +1,42 @@
+﻿using System;
 using Unity.Mathematics;
 using UnityEngine;
 
-namespace Verse;
-
-public static class EasingFunctions
+namespace Verse
 {
-	public static float EaseInOutQuad(float v)
+	// Token: 0x02000137 RID: 311
+	public static class EasingFunctions
 	{
-		if (!((double)v < 0.5))
+		// Token: 0x06000990 RID: 2448 RVA: 0x0002D70E File Offset: 0x0002B90E
+		public static float EaseInOutQuad(float v)
 		{
-			return 1f - Mathf.Pow(-2f * v + 2f, 4f) / 2f;
+			if ((double)v >= 0.5)
+			{
+				return 1f - Mathf.Pow(-2f * v + 2f, 4f) / 2f;
+			}
+			return 8f * v * v * v * v;
 		}
-		return 8f * v * v * v * v;
-	}
 
-	public static float EaseInOutQuint(float x)
-	{
-		if (!((double)x < 0.5))
+		// Token: 0x06000991 RID: 2449 RVA: 0x0002D750 File Offset: 0x0002B950
+		public static float EaseInOutQuint(float x)
 		{
-			return 1f - Mathf.Pow(-2f * x + 2f, 5f) / 2f;
+			if ((double)x >= 0.5)
+			{
+				return 1f - Mathf.Pow(-2f * x + 2f, 5f) / 2f;
+			}
+			return 16f * x * x * x * x * x;
 		}
-		return 16f * x * x * x * x * x;
-	}
 
-	public static float EaseInCubic(float x)
-	{
-		return x * x * x;
-	}
+		// Token: 0x06000992 RID: 2450 RVA: 0x0002D79D File Offset: 0x0002B99D
+		public static float EaseInCubic(float x)
+		{
+			return x * x * x;
+		}
 
-	public static float EaseOutCubic(float x)
-	{
-		return 1f - math.pow(1f - x, 3f);
+		// Token: 0x06000993 RID: 2451 RVA: 0x0002D7A4 File Offset: 0x0002B9A4
+		public static float EaseOutCubic(float x)
+		{
+			return 1f - math.pow(1f - x, 3f);
+		}
 	}
 }

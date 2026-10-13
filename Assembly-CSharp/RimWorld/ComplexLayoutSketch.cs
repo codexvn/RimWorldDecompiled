@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ComplexLayoutSketch : LayoutSketch
+namespace RimWorld
 {
-	protected override ThingDef GetWallStuff(int roomId)
+	// Token: 0x02001EBB RID: 7867
+	public class ComplexLayoutSketch : LayoutSketch
 	{
-		if (roomId % 2 != 0)
+		// Token: 0x0600AE7F RID: 44671 RVA: 0x0031C818 File Offset: 0x0031AA18
+		protected override ThingDef GetWallStuff(int roomId)
 		{
-			return ThingDefOf.Steel;
+			if (roomId % 2 != 0)
+			{
+				return ThingDefOf.Steel;
+			}
+			return this.wallStuff;
 		}
-		return wallStuff;
 	}
 }

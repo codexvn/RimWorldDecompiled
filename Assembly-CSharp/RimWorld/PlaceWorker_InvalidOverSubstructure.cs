@@ -1,35 +1,39 @@
+﻿using System;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class PlaceWorker_InvalidOverSubstructure : PlaceWorker
+namespace RimWorld
 {
-	public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
+	// Token: 0x02003832 RID: 14386
+	public class PlaceWorker_InvalidOverSubstructure : PlaceWorker
 	{
-		if (!ModsConfig.OdysseyActive)
+		// Token: 0x06013E22 RID: 81442 RVA: 0x005E6FF8 File Offset: 0x005E51F8
+		public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
 		{
-			return AcceptanceReport.WasAccepted;
-		}
-		foreach (IntVec3 item in GenAdj.OccupiedRect(loc, rot, checkingDef.Size))
-		{
-			if (!item.InBounds(map))
+			if (!ModsConfig.OdysseyActive)
 			{
-				continue;
+				return AcceptanceReport.WasAccepted;
 			}
-			TerrainDef terrainDef = map.terrainGrid.FoundationAt(item);
-			if (terrainDef != null && terrainDef.IsSubstructure)
+			foreach (IntVec3 c in GenAdj.OccupiedRect(loc, rot, checkingDef.Size))
 			{
-				return "MessageCannotPlaceOverSubstructure".Translate();
-			}
-			foreach (Blueprint item2 in map.thingGrid.ThingsListAt(item).OfType<Blueprint>())
-			{
-				if (item2.def.entityDefToBuild is TerrainDef { IsSubstructure: not false })
+				if (c.InBounds(map))
 				{
-					return "MessageCannotPlaceOverSubstructure".Translate();
+					TerrainDef terrainDef = map.terrainGrid.FoundationAt(c);
+					if (terrainDef != null && terrainDef.IsSubstructure)
+					{
+						return "MessageCannotPlaceOverSubstructure".Translate();
+					}
+					foreach (Blueprint blueprint in map.thingGrid.ThingsListAt(c).OfType<Blueprint>())
+					{
+						TerrainDef terrainDef2 = blueprint.def.entityDefToBuild as TerrainDef;
+						if (terrainDef2 != null && terrainDef2.IsSubstructure)
+						{
+							return "MessageCannotPlaceOverSubstructure".Translate();
+						}
+					}
 				}
 			}
+			return AcceptanceReport.WasAccepted;
 		}
-		return AcceptanceReport.WasAccepted;
 	}
 }

@@ -1,41 +1,61 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class CompProximityFuse : ThingComp
+namespace RimWorld
 {
-	public CompProperties_ProximityFuse Props => (CompProperties_ProximityFuse)props;
-
-	public override void CompTick()
+	// Token: 0x02002DC1 RID: 11713
+	public class CompProximityFuse : ThingComp
 	{
-		if (Find.TickManager.TicksGame % 250 == 0)
+		// Token: 0x17002A09 RID: 10761
+		// (get) Token: 0x06010793 RID: 67475 RVA: 0x004C0BC5 File Offset: 0x004BEDC5
+		public CompProperties_ProximityFuse Props
 		{
-			CompTickRare();
+			get
+			{
+				return (CompProperties_ProximityFuse)this.props;
+			}
 		}
-	}
 
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		if (DebugSettings.ShowDevGizmos)
+		// Token: 0x06010794 RID: 67476 RVA: 0x004C0BD2 File Offset: 0x004BEDD2
+		public override void CompTick()
 		{
+			if (Find.TickManager.TicksGame % 250 == 0)
+			{
+				this.CompTickRare();
+			}
+		}
+
+		// Token: 0x06010795 RID: 67477 RVA: 0x004C0BEC File Offset: 0x004BEDEC
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		{
+			if (!DebugSettings.ShowDevGizmos)
+			{
+				yield break;
+			}
 			yield return new Command_Action
 			{
 				defaultLabel = "DEV: Trigger",
-				action = delegate
+				action = delegate()
 				{
-					parent.GetComp<CompExplosive>().StartWick();
+					this.parent.GetComp<CompExplosive>().StartWick(null);
 				}
 			};
+			yield break;
 		}
-	}
 
-	public override void CompTickRare()
-	{
-		if (parent.Spawned && GenClosest.ClosestThingReachable(parent.Position, parent.Map, ThingRequest.ForDef(Props.target), PathEndMode.OnCell, TraverseParms.For(TraverseMode.NoPassClosedDoors), Props.radius) != null)
+		// Token: 0x06010796 RID: 67478 RVA: 0x004C0BFC File Offset: 0x004BEDFC
+		public override void CompTickRare()
 		{
-			parent.GetComp<CompExplosive>().StartWick();
+			if (!this.parent.Spawned)
+			{
+				return;
+			}
+			if (GenClosest.ClosestThingReachable(this.parent.Position, this.parent.Map, ThingRequest.ForDef(this.Props.target), PathEndMode.OnCell, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Deadly, false, false, false, true, false), this.Props.radius, null, null, 0, -1, false, RegionType.Set_Passable, false, false) != null)
+			{
+				this.parent.GetComp<CompExplosive>().StartWick(null);
+			}
 		}
 	}
 }

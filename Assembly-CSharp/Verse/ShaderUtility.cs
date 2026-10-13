@@ -1,45 +1,51 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public static class ShaderUtility
+namespace Verse
 {
-	public static bool SupportsMaskTex(this Shader shader)
+	// Token: 0x02000161 RID: 353
+	public static class ShaderUtility
 	{
-		int propertyCount = shader.GetPropertyCount();
-		for (int i = 0; i < propertyCount; i++)
+		// Token: 0x06000A84 RID: 2692 RVA: 0x00031B40 File Offset: 0x0002FD40
+		public static bool SupportsMaskTex(this Shader shader)
 		{
-			if (shader.GetPropertyNameId(i) == ShaderPropertyIDs.MaskTex)
+			int propertyCount = shader.GetPropertyCount();
+			for (int i = 0; i < propertyCount; i++)
 			{
-				return true;
+				if (shader.GetPropertyNameId(i) == ShaderPropertyIDs.MaskTex)
+				{
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
-	}
 
-	public static Shader GetSkinShader(Pawn pawn)
-	{
-		foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
+		// Token: 0x06000A85 RID: 2693 RVA: 0x00031B74 File Offset: 0x0002FD74
+		public static Shader GetSkinShader(Pawn pawn)
 		{
-			if (hediff.def.skinShader != null)
+			foreach (Hediff hediff in pawn.health.hediffSet.hediffs)
 			{
-				return hediff.def.skinShader.Shader;
+				if (hediff.def.skinShader != null)
+				{
+					return hediff.def.skinShader.Shader;
+				}
 			}
+			bool dead = pawn.Dead || (pawn.IsMutant && pawn.mutant.HasTurned && pawn.mutant.Def.useCorpseGraphics);
+			return ShaderUtility.GetSkinShaderAbstract(pawn.story != null && pawn.story.SkinColorOverriden, dead);
 		}
-		bool dead = pawn.Dead || (pawn.IsMutant && pawn.mutant.HasTurned && pawn.mutant.Def.useCorpseGraphics);
-		return GetSkinShaderAbstract(pawn.story != null && pawn.story.SkinColorOverriden, dead);
-	}
 
-	public static Shader GetSkinShaderAbstract(bool skinColorOverriden, bool dead)
-	{
-		if (skinColorOverriden)
+		// Token: 0x06000A86 RID: 2694 RVA: 0x00031C3C File Offset: 0x0002FE3C
+		public static Shader GetSkinShaderAbstract(bool skinColorOverriden, bool dead)
 		{
-			return ShaderDatabase.CutoutSkinColorOverride;
+			if (skinColorOverriden)
+			{
+				return ShaderDatabase.CutoutSkinColorOverride;
+			}
+			if (dead)
+			{
+				return ShaderDatabase.Cutout;
+			}
+			return ShaderDatabase.CutoutSkin;
 		}
-		if (dead)
-		{
-			return ShaderDatabase.Cutout;
-		}
-		return ShaderDatabase.CutoutSkin;
 	}
 }

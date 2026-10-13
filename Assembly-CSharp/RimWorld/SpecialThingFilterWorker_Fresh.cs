@@ -1,47 +1,33 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SpecialThingFilterWorker_Fresh : SpecialThingFilterWorker
+namespace RimWorld
 {
-	public override bool Matches(Thing t)
+	// Token: 0x020036C0 RID: 14016
+	public class SpecialThingFilterWorker_Fresh : SpecialThingFilterWorker
 	{
-		CompRottable compRottable = t.TryGetComp<CompRottable>();
-		if (compRottable == null)
+		// Token: 0x06013766 RID: 79718 RVA: 0x005C8D04 File Offset: 0x005C6F04
+		public override bool Matches(Thing t)
 		{
-			if (t.def.IsIngestible && !t.def.IsDrug)
+			CompRottable compRottable = t.TryGetComp<CompRottable>();
+			if (compRottable == null)
 			{
-				return true;
+				return t.def.IsIngestible && !t.def.IsDrug;
 			}
-			return false;
+			return compRottable.Stage == RotStage.Fresh;
 		}
-		return compRottable.Stage == RotStage.Fresh;
-	}
 
-	public override bool CanEverMatch(ThingDef def)
-	{
-		if (def.GetCompProperties<CompProperties_Rottable>() == null)
+		// Token: 0x06013767 RID: 79719 RVA: 0x005C8D42 File Offset: 0x005C6F42
+		public override bool CanEverMatch(ThingDef def)
 		{
-			if (def.IsIngestible)
-			{
-				return !def.IsDrug;
-			}
-			return false;
+			return def.GetCompProperties<CompProperties_Rottable>() != null || (def.IsIngestible && !def.IsDrug);
 		}
-		return true;
-	}
 
-	public override bool AlwaysMatches(ThingDef def)
-	{
-		CompProperties_Rottable compProperties = def.GetCompProperties<CompProperties_Rottable>();
-		if (compProperties != null && compProperties.rotDestroys)
+		// Token: 0x06013768 RID: 79720 RVA: 0x005C8D64 File Offset: 0x005C6F64
+		public override bool AlwaysMatches(ThingDef def)
 		{
-			return true;
+			CompProperties_Rottable compProperties = def.GetCompProperties<CompProperties_Rottable>();
+			return (compProperties != null && compProperties.rotDestroys) || (compProperties == null && def.IsIngestible && !def.IsDrug);
 		}
-		if (compProperties == null && def.IsIngestible && !def.IsDrug)
-		{
-			return true;
-		}
-		return false;
 	}
 }

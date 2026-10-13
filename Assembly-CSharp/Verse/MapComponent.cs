@@ -1,43 +1,57 @@
-namespace Verse;
+﻿using System;
 
-public abstract class MapComponent : IExposable
+namespace Verse
 {
-	public readonly Map map;
-
-	public MapComponent(Map map)
+	// Token: 0x0200045F RID: 1119
+	public abstract class MapComponent : IExposable
 	{
-		this.map = map;
-	}
+		// Token: 0x06001D57 RID: 7511 RVA: 0x0009462F File Offset: 0x0009282F
+		public MapComponent(Map map)
+		{
+			this.map = map;
+		}
 
-	public virtual void MapComponentUpdate()
-	{
-	}
+		// Token: 0x06001D58 RID: 7512 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapComponentUpdate()
+		{
+		}
 
-	public virtual void MapComponentTick()
-	{
-	}
+		// Token: 0x06001D59 RID: 7513 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapComponentTick()
+		{
+		}
 
-	public virtual void MapComponentOnGUI()
-	{
-	}
+		// Token: 0x06001D5A RID: 7514 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapComponentOnGUI()
+		{
+		}
 
-	public virtual void MapComponentDraw()
-	{
-	}
+		// Token: 0x06001D5B RID: 7515 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapComponentDraw()
+		{
+		}
 
-	public virtual void ExposeData()
-	{
-	}
+		// Token: 0x06001D5C RID: 7516 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void ExposeData()
+		{
+		}
 
-	public virtual void FinalizeInit()
-	{
-	}
+		// Token: 0x06001D5D RID: 7517 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void FinalizeInit()
+		{
+		}
 
-	public virtual void MapGenerated()
-	{
-	}
+		// Token: 0x06001D5E RID: 7518 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapGenerated()
+		{
+		}
 
-	public virtual void MapRemoved()
-	{
+		// Token: 0x06001D5F RID: 7519 RVA: 0x000026EA File Offset: 0x000008EA
+		public virtual void MapRemoved()
+		{
+		}
+
+		// Token: 0x04001988 RID: 6536
+		public readonly Map map;
 	}
 }

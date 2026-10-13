@@ -1,15 +1,28 @@
-namespace Verse.Sound;
+﻿using System;
 
-public class SoundParamSource_AggregateSize : SoundParamSource
+namespace Verse.Sound
 {
-	public override string Label => "Aggregate size";
-
-	public override float ValueFor(Sample samp)
+	// Token: 0x02000E0F RID: 3599
+	public class SoundParamSource_AggregateSize : SoundParamSource
 	{
-		if (samp.ExternalParams.sizeAggregator == null)
+		// Token: 0x17000E89 RID: 3721
+		// (get) Token: 0x06005B36 RID: 23350 RVA: 0x001D3A68 File Offset: 0x001D1C68
+		public override string Label
 		{
-			return 0f;
+			get
+			{
+				return "Aggregate size";
+			}
 		}
-		return samp.ExternalParams.sizeAggregator.AggregateSize;
+
+		// Token: 0x06005B37 RID: 23351 RVA: 0x001D3A6F File Offset: 0x001D1C6F
+		public override float ValueFor(Sample samp)
+		{
+			if (samp.ExternalParams.sizeAggregator == null)
+			{
+				return 0f;
+			}
+			return samp.ExternalParams.sizeAggregator.AggregateSize;
+		}
 	}
 }

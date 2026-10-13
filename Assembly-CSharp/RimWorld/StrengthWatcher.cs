@@ -1,39 +1,46 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StrengthWatcher
+namespace RimWorld
 {
-	private Map map;
-
-	public float StrengthRating
+	// Token: 0x02002194 RID: 8596
+	public class StrengthWatcher
 	{
-		get
+		// Token: 0x17001C87 RID: 7303
+		// (get) Token: 0x0600BBC3 RID: 48067 RVA: 0x00366128 File Offset: 0x00364328
+		public float StrengthRating
 		{
-			float num = 0f;
-			foreach (Pawn freeColonist in map.mapPawns.FreeColonists)
+			get
 			{
-				float num2 = 1f;
-				num2 *= freeColonist.health.summaryHealth.SummaryHealthPercent;
-				if (freeColonist.Downed)
+				float num = 0f;
+				foreach (Pawn pawn in this.map.mapPawns.FreeColonists)
 				{
-					num2 *= 0.3f;
+					float num2 = 1f;
+					num2 *= pawn.health.summaryHealth.SummaryHealthPercent;
+					if (pawn.Downed)
+					{
+						num2 *= 0.3f;
+					}
+					num += num2;
 				}
-				num += num2;
-			}
-			foreach (Building allBuildingsColonistCombatTarget in map.listerBuildings.allBuildingsColonistCombatTargets)
-			{
-				if (allBuildingsColonistCombatTarget.def.building != null && allBuildingsColonistCombatTarget.def.building.IsTurret)
+				foreach (Building building in this.map.listerBuildings.allBuildingsColonistCombatTargets)
 				{
-					num += 0.3f;
+					if (building.def.building != null && building.def.building.IsTurret)
+					{
+						num += 0.3f;
+					}
 				}
+				return num;
 			}
-			return num;
 		}
-	}
 
-	public StrengthWatcher(Map map)
-	{
-		this.map = map;
+		// Token: 0x0600BBC4 RID: 48068 RVA: 0x00366224 File Offset: 0x00364424
+		public StrengthWatcher(Map map)
+		{
+			this.map = map;
+		}
+
+		// Token: 0x04008148 RID: 33096
+		private Map map;
 	}
 }

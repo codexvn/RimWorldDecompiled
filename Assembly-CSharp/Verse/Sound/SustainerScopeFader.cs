@@ -1,33 +1,43 @@
-namespace Verse.Sound;
+﻿using System;
 
-public class SustainerScopeFader
+namespace Verse.Sound
 {
-	public bool inScope = true;
-
-	public float inScopePercent = 1f;
-
-	private const float ScopeMatchFallRate = 0.03f;
-
-	private const float ScopeMatchRiseRate = 0.05f;
-
-	public void SustainerScopeUpdate()
+	// Token: 0x02000E49 RID: 3657
+	public class SustainerScopeFader
 	{
-		if (inScope)
+		// Token: 0x06005C23 RID: 23587 RVA: 0x001D777C File Offset: 0x001D597C
+		public void SustainerScopeUpdate()
 		{
-			float num = inScopePercent + 0.05f;
-			inScopePercent = num;
-			if (inScopePercent > 1f)
+			if (this.inScope)
 			{
-				inScopePercent = 1f;
+				float num = this.inScopePercent + 0.05f;
+				this.inScopePercent = num;
+				if (this.inScopePercent > 1f)
+				{
+					this.inScopePercent = 1f;
+					return;
+				}
+			}
+			else
+			{
+				this.inScopePercent -= 0.03f;
+				if (this.inScopePercent <= 0.001f)
+				{
+					this.inScopePercent = 0f;
+				}
 			}
 		}
-		else
-		{
-			inScopePercent -= 0.03f;
-			if (inScopePercent <= 0.001f)
-			{
-				inScopePercent = 0f;
-			}
-		}
+
+		// Token: 0x040042C1 RID: 17089
+		public bool inScope = true;
+
+		// Token: 0x040042C2 RID: 17090
+		public float inScopePercent = 1f;
+
+		// Token: 0x040042C3 RID: 17091
+		private const float ScopeMatchFallRate = 0.03f;
+
+		// Token: 0x040042C4 RID: 17092
+		private const float ScopeMatchRiseRate = 0.05f;
 	}
 }

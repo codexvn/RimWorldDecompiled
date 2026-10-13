@@ -1,63 +1,43 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public static class KidnapAIUtility
+namespace RimWorld
 {
-	public static bool TryFindGoodKidnapVictim(Pawn kidnapper, float maxDist, out Pawn victim, List<Thing> disallowed = null)
+	// Token: 0x0200145D RID: 5213
+	public static class KidnapAIUtility
 	{
-		if (!kidnapper.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || !kidnapper.Map.reachability.CanReachMapEdge(kidnapper.Position, TraverseParms.For(kidnapper, Danger.Some)))
+		// Token: 0x06007DFD RID: 32253 RVA: 0x0025F13C File Offset: 0x0025D33C
+		public static bool TryFindGoodKidnapVictim(Pawn kidnapper, float maxDist, out Pawn victim, List<Thing> disallowed = null)
 		{
-			victim = null;
-			return false;
+			if (!kidnapper.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || !kidnapper.Map.reachability.CanReachMapEdge(kidnapper.Position, TraverseParms.For(kidnapper, Danger.Some, TraverseMode.ByPawn, false, false, false, true)))
+			{
+				victim = null;
+				return false;
+			}
+			Predicate<Thing> validator = delegate(Thing t)
+			{
+				Pawn pawn = t as Pawn;
+				return pawn.RaceProps.Humanlike && pawn.Downed && pawn.Faction == Faction.OfPlayer && pawn.Faction.HostileTo(kidnapper.Faction) && kidnapper.CanReserve(pawn, 1, -1, null, false) && (disallowed == null || !disallowed.Contains(pawn)) && (!ModsConfig.AnomalyActive || !pawn.IsSubhuman);
+			};
+			victim = (Pawn)GenClosest.ClosestThingReachable(kidnapper.Position, kidnapper.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Some, false, false, false, true, false), maxDist, validator, null, 0, -1, false, RegionType.Set_Passable, false, false);
+			return victim != null;
 		}
-		Predicate<Thing> validator = delegate(Thing t)
-		{
-			Pawn pawn = t as Pawn;
-			if (!pawn.RaceProps.Humanlike)
-			{
-				return false;
-			}
-			if (!pawn.Downed)
-			{
-				return false;
-			}
-			if (pawn.Faction != Faction.OfPlayer)
-			{
-				return false;
-			}
-			if (!pawn.Faction.HostileTo(kidnapper.Faction))
-			{
-				return false;
-			}
-			if (!kidnapper.CanReserve(pawn))
-			{
-				return false;
-			}
-			if (disallowed != null && disallowed.Contains(pawn))
-			{
-				return false;
-			}
-			return (!ModsConfig.AnomalyActive || !pawn.IsSubhuman) ? true : false;
-		};
-		victim = (Pawn)GenClosest.ClosestThingReachable(kidnapper.Position, kidnapper.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(TraverseMode.NoPassClosedDoors, Danger.Some), maxDist, validator);
-		return victim != null;
-	}
 
-	public static Pawn ReachableWoundedGuest(Pawn searcher)
-	{
-		List<Pawn> list = searcher.Map.mapPawns.SpawnedPawnsInFaction(searcher.Faction);
-		for (int i = 0; i < list.Count; i++)
+		// Token: 0x06007DFE RID: 32254 RVA: 0x0025F204 File Offset: 0x0025D404
+		public static Pawn ReachableWoundedGuest(Pawn searcher)
 		{
-			Pawn pawn = list[i];
-			if (pawn.guest != null && !pawn.IsPrisoner && pawn.Downed && searcher.CanReserveAndReach(pawn, PathEndMode.OnCell, Danger.Some))
+			List<Pawn> list = searcher.Map.mapPawns.SpawnedPawnsInFaction(searcher.Faction);
+			for (int i = 0; i < list.Count; i++)
 			{
-				return pawn;
+				Pawn pawn = list[i];
+				if (pawn.guest != null && !pawn.IsPrisoner && pawn.Downed && searcher.CanReserveAndReach(pawn, PathEndMode.OnCell, Danger.Some, 1, -1, null, false))
+				{
+					return pawn;
+				}
 			}
+			return null;
 		}
-		return null;
 	}
 }

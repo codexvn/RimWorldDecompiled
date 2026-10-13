@@ -1,42 +1,53 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using Verse;
 
+// Token: 0x0200003A RID: 58
 public static class MechWorkUtility
 {
+	// Token: 0x06000137 RID: 311 RVA: 0x00008E0F File Offset: 0x0000700F
 	public static IEnumerable<StatDrawEntry> SpecialDisplayStats(ThingDef parentDef, StatRequest req)
 	{
-		if (!parentDef.race.IsMechanoid || parentDef.race.mechEnabledWorkTypes.NullOrEmpty())
+		if (!parentDef.race.IsMechanoid || parentDef.race.mechEnabledWorkTypes.NullOrEmpty<WorkTypeDef>())
 		{
 			yield break;
 		}
 		TaggedString taggedString = "MechWorkActivitiesExplanation".Translate() + ":\n";
-		foreach (WorkTypeDef item in parentDef.race.mechEnabledWorkTypes.OrderBy((WorkTypeDef wt) => wt.label))
+		foreach (WorkTypeDef workTypeDef in from wt in parentDef.race.mechEnabledWorkTypes
+		orderby wt.label
+		select wt)
 		{
-			IEnumerable<WorkGiverDef> source = item.workGiversByPriority.Where((WorkGiverDef wg) => wg.canBeDoneByMechs);
-			if (!source.Any())
+			IEnumerable<WorkGiverDef> source = workTypeDef.workGiversByPriority.Where((WorkGiverDef wg) => wg.canBeDoneByMechs);
+			if (source.Any<WorkGiverDef>())
 			{
-				continue;
-			}
-			taggedString += "\n - " + item.gerundLabel.CapitalizeFirst();
-			foreach (WorkGiverDef item2 in source.OrderBy((WorkGiverDef wg) => wg.label))
-			{
-				taggedString += "\n  - " + item2.LabelCap;
+				taggedString += "\n - " + workTypeDef.gerundLabel.CapitalizeFirst();
+				foreach (WorkGiverDef workGiverDef in source.OrderBy((WorkGiverDef wg) => wg.label))
+				{
+					taggedString += "\n  - " + workGiverDef.LabelCap;
+				}
 			}
 		}
-		yield return new StatDrawEntry(StatCategoryDefOf.PawnWork, "MechWorkActivities".Translate(), parentDef.race.mechEnabledWorkTypes.Select((WorkTypeDef w) => w.gerundLabel).ToCommaList(useAnd: true).CapitalizeFirst(), taggedString, 502);
-		yield return new StatDrawEntry(StatCategoryDefOf.PawnWork, "MechWorkSkill".Translate(), parentDef.race.mechFixedSkillLevel.ToString(), "MechWorkSkillDesc".Translate(), 501);
+		yield return new StatDrawEntry(StatCategoryDefOf.PawnWork, "MechWorkActivities".Translate(), (from w in parentDef.race.mechEnabledWorkTypes
+		select w.gerundLabel).ToCommaList(true, false).CapitalizeFirst(), taggedString, 502, null, null, false, false);
+		yield return new StatDrawEntry(StatCategoryDefOf.PawnWork, "MechWorkSkill".Translate(), parentDef.race.mechFixedSkillLevel.ToString(), "MechWorkSkillDesc".Translate(), 501, null, null, false, false);
+		yield break;
 	}
 
+	// Token: 0x06000138 RID: 312 RVA: 0x00008E20 File Offset: 0x00007020
 	public static bool AnyWorkMechCouldDo(RecipeDef recipe)
 	{
-		IEnumerable<WorkTypeDef> mechEnabledWorkTypes = DefDatabase<PawnKindDef>.AllDefs.Where((PawnKindDef p) => p.RaceProps.IsWorkMech).SelectMany((PawnKindDef p) => p.RaceProps.mechEnabledWorkTypes).Distinct();
+		IEnumerable<WorkTypeDef> mechEnabledWorkTypes = (from p in DefDatabase<PawnKindDef>.AllDefs
+		where p.RaceProps.IsWorkMech
+		select p).SelectMany((PawnKindDef p) => p.RaceProps.mechEnabledWorkTypes).Distinct<WorkTypeDef>();
 		if (recipe.requiredGiverWorkType != null && !mechEnabledWorkTypes.Contains(recipe.requiredGiverWorkType))
 		{
 			return false;
 		}
 		IEnumerable<ThingDef> recipeUsers = recipe.AllRecipeUsers;
-		return DefDatabase<WorkGiverDef>.AllDefs.Where((WorkGiverDef wg) => !wg.fixedBillGiverDefs.NullOrEmpty() && wg.fixedBillGiverDefs.Intersect(recipeUsers).Any()).Any((WorkGiverDef wg) => mechEnabledWorkTypes.Contains(wg.workType));
+		return (from wg in DefDatabase<WorkGiverDef>.AllDefs
+		where !wg.fixedBillGiverDefs.NullOrEmpty<ThingDef>() && wg.fixedBillGiverDefs.Intersect(recipeUsers).Any<ThingDef>()
+		select wg).Any((WorkGiverDef wg) => mechEnabledWorkTypes.Contains(wg.workType));
 	}
 }

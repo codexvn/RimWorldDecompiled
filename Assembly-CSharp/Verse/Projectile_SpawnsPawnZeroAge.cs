@@ -1,29 +1,34 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class Projectile_SpawnsPawnZeroAge : Projectile
+namespace Verse
 {
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
+	// Token: 0x020008C9 RID: 2249
+	public class Projectile_SpawnsPawnZeroAge : Projectile
 	{
-		Map map = base.Map;
-		base.Impact(hitThing, blockedByShield);
-		IntVec3 loc = base.Position;
-		if (def.projectile.tryAdjacentFreeSpaces && base.Position.GetFirstBuilding(map) != null)
+		// Token: 0x060038EC RID: 14572 RVA: 0x0012F9F4 File Offset: 0x0012DBF4
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			foreach (IntVec3 item in GenAdjFast.AdjacentCells8Way(base.Position))
+			Map map = base.Map;
+			base.Impact(hitThing, blockedByShield);
+			IntVec3 loc = base.Position;
+			if (this.def.projectile.tryAdjacentFreeSpaces && base.Position.GetFirstBuilding(map) != null)
 			{
-				if (item.GetFirstBuilding(map) == null && item.Standable(map))
+				foreach (IntVec3 intVec in GenAdjFast.AdjacentCells8Way(base.Position))
 				{
-					loc = item;
-					break;
+					if (intVec.GetFirstBuilding(map) == null && intVec.Standable(map))
+					{
+						loc = intVec;
+						break;
+					}
 				}
 			}
+			PawnKindDef spawnsPawnKind = this.def.projectile.spawnsPawnKind;
+			Faction faction = base.Launcher.Faction;
+			PawnGenerationContext context = PawnGenerationContext.NonPlayer;
+			float? fixedChronologicalAge = new float?(0f);
+			float? fixedBiologicalAge = new float?(0f);
+			GenSpawn.Spawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(spawnsPawnKind, faction, context, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, fixedBiologicalAge, fixedChronologicalAge, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false)), loc, map, WipeMode.Vanish);
 		}
-		PawnKindDef spawnsPawnKind = def.projectile.spawnsPawnKind;
-		Faction faction = base.Launcher.Faction;
-		float? fixedChronologicalAge = 0f;
-		float? fixedBiologicalAge = 0f;
-		GenSpawn.Spawn(PawnGenerator.GeneratePawn(new PawnGenerationRequest(spawnsPawnKind, faction, PawnGenerationContext.NonPlayer, null, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, fixedBiologicalAge, fixedChronologicalAge)), loc, map);
 	}
 }

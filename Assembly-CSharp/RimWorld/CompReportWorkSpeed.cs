@@ -1,90 +1,129 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompReportWorkSpeed : ThingComp
+namespace RimWorld
 {
-	public CompProperties_ReportWorkSpeed Props => (CompProperties_ReportWorkSpeed)props;
-
-	public override string CompInspectStringExtra()
+	// Token: 0x02002DE5 RID: 11749
+	public class CompReportWorkSpeed : ThingComp
 	{
-		if (parent.def.statBases == null)
+		// Token: 0x17002A42 RID: 10818
+		// (get) Token: 0x0601088C RID: 67724 RVA: 0x004C45D2 File Offset: 0x004C27D2
+		public CompProperties_ReportWorkSpeed Props
 		{
-			return null;
-		}
-		bool flag = false;
-		bool flag2 = false;
-		bool flag3 = false;
-		bool flag4 = false;
-		foreach (StatDef item in DefDatabase<StatDef>.AllDefsListForReading)
-		{
-			if (item?.parts == null || item.Worker.IsDisabledFor(parent))
+			get
 			{
-				continue;
-			}
-			foreach (StatPart part in item.parts)
-			{
-				if (part is StatPart_WorkTableOutdoors || part is StatPart_Outdoors)
-				{
-					flag = true;
-				}
-				else if (part is StatPart_WorkTableTemperature)
-				{
-					flag2 = true;
-				}
-				else if (part is StatPart_WorkTableUnpowered)
-				{
-					flag3 = true;
-				}
-				else if (part is StatPart_WorkTableRoomRole)
-				{
-					flag4 = true;
-				}
+				return (CompProperties_ReportWorkSpeed)this.props;
 			}
 		}
-		StatDef statDef = Props.workSpeedStat ?? StatDefOf.WorkTableWorkSpeedFactor;
-		float statValue = parent.GetStatValue(statDef);
-		string text = $"{statDef.LabelCap}: {statValue.ToStringPercent()}";
-		string text2 = string.Empty;
-		bool num = flag && StatPart_WorkTableOutdoors.Applies(parent.def, parent.Map, parent.Position);
-		bool flag5 = flag2 && StatPart_WorkTableTemperature.Applies(parent);
-		bool flag6 = flag3 && StatPart_WorkTableUnpowered.Applies(parent);
-		bool flag7 = flag4 && StatPart_WorkTableRoomRole.Applies(parent);
-		if (num)
+
+		// Token: 0x0601088D RID: 67725 RVA: 0x004C45E0 File Offset: 0x004C27E0
+		public override string CompInspectStringExtra()
 		{
-			text2 += "Outdoors".Translate();
-		}
-		if (flag5)
-		{
-			string text3 = "BadTemperature".Translate();
-			text2 = (text2.NullOrEmpty() ? (text2 + text3) : (text2 + ", " + text3));
-		}
-		if (flag6)
-		{
-			string text4 = "NoPower".Translate();
-			text2 = (text2.NullOrEmpty() ? (text2 + text4) : (text2 + ", " + text4));
-		}
-		if (flag7)
-		{
-			string text5 = "NotInRoomRole".Translate(parent.def.building.workTableRoomRole.label);
-			text2 = (text2.NullOrEmpty() ? (text2 + text5) : (text2 + ", " + text5));
-		}
-		CompAffectedByFacilities comp = parent.GetComp<CompAffectedByFacilities>();
-		if (comp != null)
-		{
-			foreach (Thing item2 in comp.LinkedFacilitiesListForReading)
+			if (this.parent.def.statBases == null)
 			{
-				if (item2.def.GetCompProperties<CompProperties_Facility>().statOffsets.GetStatOffsetFromList(statDef) != 0f)
+				return null;
+			}
+			bool flag = false;
+			bool flag2 = false;
+			bool flag3 = false;
+			bool flag4 = false;
+			foreach (StatDef statDef in DefDatabase<StatDef>.AllDefsListForReading)
+			{
+				if (((statDef != null) ? statDef.parts : null) != null && !statDef.Worker.IsDisabledFor(this.parent))
 				{
-					string label = item2.def.label;
-					text2 = (text2.NullOrEmpty() ? (text2 + label) : (text2 + ", " + label));
+					foreach (StatPart statPart in statDef.parts)
+					{
+						if (statPart is StatPart_WorkTableOutdoors || statPart is StatPart_Outdoors)
+						{
+							flag = true;
+						}
+						else if (statPart is StatPart_WorkTableTemperature)
+						{
+							flag2 = true;
+						}
+						else if (statPart is StatPart_WorkTableUnpowered)
+						{
+							flag3 = true;
+						}
+						else if (statPart is StatPart_WorkTableRoomRole)
+						{
+							flag4 = true;
+						}
+					}
 				}
 			}
+			StatDef statDef2 = this.Props.workSpeedStat ?? StatDefOf.WorkTableWorkSpeedFactor;
+			float statValue = this.parent.GetStatValue(statDef2, true, -1);
+			string text = string.Format("{0}: {1}", statDef2.LabelCap, statValue.ToStringPercent());
+			string text2 = string.Empty;
+			bool flag5 = flag && StatPart_WorkTableOutdoors.Applies(this.parent.def, this.parent.Map, this.parent.Position);
+			bool flag6 = flag2 && StatPart_WorkTableTemperature.Applies(this.parent);
+			bool flag7 = flag3 && StatPart_WorkTableUnpowered.Applies(this.parent);
+			bool flag8 = flag4 && StatPart_WorkTableRoomRole.Applies(this.parent);
+			if (flag5)
+			{
+				text2 += "Outdoors".Translate();
+			}
+			if (flag6)
+			{
+				string text3 = "BadTemperature".Translate();
+				if (!text2.NullOrEmpty())
+				{
+					text2 = text2 + ", " + text3;
+				}
+				else
+				{
+					text2 += text3;
+				}
+			}
+			if (flag7)
+			{
+				string text4 = "NoPower".Translate();
+				if (!text2.NullOrEmpty())
+				{
+					text2 = text2 + ", " + text4;
+				}
+				else
+				{
+					text2 += text4;
+				}
+			}
+			if (flag8)
+			{
+				string text5 = "NotInRoomRole".Translate(this.parent.def.building.workTableRoomRole.label);
+				if (!text2.NullOrEmpty())
+				{
+					text2 = text2 + ", " + text5;
+				}
+				else
+				{
+					text2 += text5;
+				}
+			}
+			CompAffectedByFacilities comp = this.parent.GetComp<CompAffectedByFacilities>();
+			if (comp != null)
+			{
+				foreach (Thing thing in comp.LinkedFacilitiesListForReading)
+				{
+					if (thing.def.GetCompProperties<CompProperties_Facility>().statOffsets.GetStatOffsetFromList(statDef2) != 0f)
+					{
+						string label = thing.def.label;
+						if (!text2.NullOrEmpty())
+						{
+							text2 = text2 + ", " + label;
+						}
+						else
+						{
+							text2 += label;
+						}
+					}
+				}
+			}
+			if (!text2.NullOrEmpty())
+			{
+				text = text + " (" + text2 + ")";
+			}
+			return text;
 		}
-		if (!text2.NullOrEmpty())
-		{
-			text = text + " (" + text2 + ")";
-		}
-		return text;
 	}
 }

@@ -1,181 +1,225 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class Comp_AtmosphericHeater : CompTempControl, IThingGlower
+namespace RimWorld
 {
-	private class Command_GroupedTempChange : Command_Action
+	// Token: 0x02002ED4 RID: 11988
+	public class Comp_AtmosphericHeater : CompTempControl, IThingGlower
 	{
-		private Comp_AtmosphericHeater heater;
-
-		private float offset;
-
-		public Command_GroupedTempChange(Comp_AtmosphericHeater heater, float offset)
+		// Token: 0x17002BA5 RID: 11173
+		// (get) Token: 0x06010ECC RID: 69324 RVA: 0x004DF13C File Offset: 0x004DD33C
+		private GameCondition_UnnaturalHeat Condition
 		{
-			this.heater = heater;
-			this.offset = offset;
-		}
-
-		public override void ProcessInput(Event ev)
-		{
-		}
-
-		public override void ProcessGroupInput(Event ev, List<Gizmo> group)
-		{
-			heater.InterfaceChangeTargetTemperature(offset);
-		}
-	}
-
-	private const int DisabledTextureIndex = 0;
-
-	private const int EnabledTextureIndex = 1;
-
-	private const int MaxOffset = 10;
-
-	private CompPowerTrader powerTraderComp;
-
-	private CompHeatPusher heatPusherComp;
-
-	private CompRefuelable refuelableComp;
-
-	private GameCondition_UnnaturalHeat Condition
-	{
-		get
-		{
-			GameCondition_UnnaturalHeat gameCondition_UnnaturalHeat = parent.Map.gameConditionManager.GetActiveCondition(GameConditionDefOf.UnnaturalHeat) as GameCondition_UnnaturalHeat;
-			if (gameCondition_UnnaturalHeat == null)
+			get
 			{
-				gameCondition_UnnaturalHeat = (GameCondition_UnnaturalHeat)GameConditionMaker.MakeCondition(GameConditionDefOf.UnnaturalHeat);
-				parent.Map.GameConditionManager.RegisterCondition(gameCondition_UnnaturalHeat);
-				gameCondition_UnnaturalHeat.Permanent = true;
+				GameCondition_UnnaturalHeat gameCondition_UnnaturalHeat = this.parent.Map.gameConditionManager.GetActiveCondition(GameConditionDefOf.UnnaturalHeat) as GameCondition_UnnaturalHeat;
+				if (gameCondition_UnnaturalHeat == null)
+				{
+					gameCondition_UnnaturalHeat = (GameCondition_UnnaturalHeat)GameConditionMaker.MakeCondition(GameConditionDefOf.UnnaturalHeat, -1);
+					this.parent.Map.GameConditionManager.RegisterCondition(gameCondition_UnnaturalHeat);
+					gameCondition_UnnaturalHeat.Permanent = true;
+				}
+				return gameCondition_UnnaturalHeat;
 			}
-			return gameCondition_UnnaturalHeat;
 		}
-	}
 
-	public override float TargetTemperature
-	{
-		get
+		// Token: 0x17002BA6 RID: 11174
+		// (get) Token: 0x06010ECD RID: 69325 RVA: 0x004DF19B File Offset: 0x004DD39B
+		// (set) Token: 0x06010ECE RID: 69326 RVA: 0x004DF1A8 File Offset: 0x004DD3A8
+		public override float TargetTemperature
 		{
-			return Condition.heaterTargetTemp;
-		}
-		set
-		{
-			Condition.heaterTargetTemp = value;
-		}
-	}
-
-	private bool Powered => powerTraderComp.PowerOn;
-
-	public int TempOffset
-	{
-		get
-		{
-			if (!Powered || !refuelableComp.HasFuel || !(TargetTemperature > parent.Map.mapTemperature.OutdoorTemp))
+			get
 			{
-				return 0;
+				return this.Condition.heaterTargetTemp;
 			}
-			return 10;
-		}
-	}
-
-	private bool Working
-	{
-		get
-		{
-			if (Powered && refuelableComp.HasFuel)
+			set
 			{
-				return TargetTemperature > parent.Map.mapTemperature.OutdoorTemp - 1f;
+				this.Condition.heaterTargetTemp = value;
 			}
-			return false;
 		}
-	}
 
-	public bool ShouldBeLitNow()
-	{
-		return Working;
-	}
+		// Token: 0x17002BA7 RID: 11175
+		// (get) Token: 0x06010ECF RID: 69327 RVA: 0x004DF1B6 File Offset: 0x004DD3B6
+		private bool Powered
+		{
+			get
+			{
+				return this.powerTraderComp.PowerOn;
+			}
+		}
 
-	public override void PostSpawnSetup(bool respawningAfterLoad)
-	{
-		if (!ModLister.CheckAnomaly("Atmospheric heater"))
+		// Token: 0x17002BA8 RID: 11176
+		// (get) Token: 0x06010ED0 RID: 69328 RVA: 0x004DF1C3 File Offset: 0x004DD3C3
+		public int TempOffset
 		{
-			parent.Destroy();
-			return;
+			get
+			{
+				if (!this.Powered || !this.refuelableComp.HasFuel || this.TargetTemperature <= this.parent.Map.mapTemperature.OutdoorTemp)
+				{
+					return 0;
+				}
+				return 10;
+			}
 		}
-		base.PostSpawnSetup(respawningAfterLoad);
-		powerTraderComp = parent.GetComp<CompPowerTrader>();
-		heatPusherComp = parent.GetComp<CompHeatPusher>();
-		refuelableComp = parent.GetComp<CompRefuelable>();
-	}
 
-	public override void CompTick()
-	{
-		if (Working)
+		// Token: 0x17002BA9 RID: 11177
+		// (get) Token: 0x06010ED1 RID: 69329 RVA: 0x004DF1FB File Offset: 0x004DD3FB
+		private bool Working
 		{
-			powerTraderComp.PowerOutput = 0f - powerTraderComp.Props.PowerConsumption;
-			refuelableComp.Notify_UsedThisTick();
-			heatPusherComp.enabled = true;
+			get
+			{
+				return this.Powered && this.refuelableComp.HasFuel && this.TargetTemperature > this.parent.Map.mapTemperature.OutdoorTemp - 1f;
+			}
 		}
-		else
-		{
-			powerTraderComp.PowerOutput = (0f - powerTraderComp.Props.PowerConsumption) * base.Props.lowPowerConsumptionFactor;
-			heatPusherComp.enabled = false;
-		}
-		int num = (Working ? 1 : 0);
-		if (parent.overrideGraphicIndex != num)
-		{
-			parent.overrideGraphicIndex = num;
-			parent.DirtyMapMesh(parent.Map);
-			parent.TryGetComp<CompGlower>()?.UpdateLit(parent.Map);
-		}
-		operatingAtHighPower = Working;
-	}
 
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		float num = RoundedToCurrentTempModeOffset(-10f);
-		Command_GroupedTempChange command_GroupedTempChange = new Command_GroupedTempChange(this, num);
-		command_GroupedTempChange.defaultLabel = num.ToStringTemperatureOffset("F0");
-		command_GroupedTempChange.defaultDesc = "CommandLowerTempDesc".Translate();
-		command_GroupedTempChange.hotKey = KeyBindingDefOf.Misc5;
-		command_GroupedTempChange.icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower");
-		yield return command_GroupedTempChange;
-		float num2 = RoundedToCurrentTempModeOffset(-1f);
-		Command_GroupedTempChange command_GroupedTempChange2 = new Command_GroupedTempChange(this, num2);
-		command_GroupedTempChange2.defaultLabel = num2.ToStringTemperatureOffset("F0");
-		command_GroupedTempChange2.defaultDesc = "CommandLowerTempDesc".Translate();
-		command_GroupedTempChange2.hotKey = KeyBindingDefOf.Misc4;
-		command_GroupedTempChange2.icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower");
-		yield return command_GroupedTempChange2;
-		Command_Action command_Action = new Command_Action();
-		command_Action.action = delegate
+		// Token: 0x06010ED2 RID: 69330 RVA: 0x004DF237 File Offset: 0x004DD437
+		public bool ShouldBeLitNow()
 		{
-			TargetTemperature = 21f;
-			SoundDefOf.Tick_Tiny.PlayOneShotOnCamera();
-			ThrowCurrentTemperatureText();
-		};
-		command_Action.defaultLabel = "CommandResetTemp".Translate();
-		command_Action.defaultDesc = "CommandResetTempDesc".Translate();
-		command_Action.hotKey = KeyBindingDefOf.Misc1;
-		command_Action.icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset");
-		yield return command_Action;
-		float num3 = RoundedToCurrentTempModeOffset(1f);
-		Command_GroupedTempChange command_GroupedTempChange3 = new Command_GroupedTempChange(this, num3);
-		command_GroupedTempChange3.defaultLabel = "+" + num3.ToStringTemperatureOffset("F0");
-		command_GroupedTempChange3.defaultDesc = "CommandRaiseTempDesc".Translate();
-		command_GroupedTempChange3.hotKey = KeyBindingDefOf.Misc2;
-		command_GroupedTempChange3.icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise");
-		yield return command_GroupedTempChange3;
-		float num4 = RoundedToCurrentTempModeOffset(10f);
-		Command_GroupedTempChange command_GroupedTempChange4 = new Command_GroupedTempChange(this, num4);
-		command_GroupedTempChange4.defaultLabel = "+" + num4.ToStringTemperatureOffset("F0");
-		command_GroupedTempChange4.defaultDesc = "CommandRaiseTempDesc".Translate();
-		command_GroupedTempChange4.hotKey = KeyBindingDefOf.Misc3;
-		command_GroupedTempChange4.icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise");
-		yield return command_GroupedTempChange4;
+			return this.Working;
+		}
+
+		// Token: 0x06010ED3 RID: 69331 RVA: 0x004DF240 File Offset: 0x004DD440
+		public override void PostSpawnSetup(bool respawningAfterLoad)
+		{
+			if (!ModLister.CheckAnomaly("Atmospheric heater"))
+			{
+				this.parent.Destroy(DestroyMode.Vanish);
+				return;
+			}
+			base.PostSpawnSetup(respawningAfterLoad);
+			this.powerTraderComp = this.parent.GetComp<CompPowerTrader>();
+			this.heatPusherComp = this.parent.GetComp<CompHeatPusher>();
+			this.refuelableComp = this.parent.GetComp<CompRefuelable>();
+		}
+
+		// Token: 0x06010ED4 RID: 69332 RVA: 0x004DF2A0 File Offset: 0x004DD4A0
+		public override void CompTick()
+		{
+			if (this.Working)
+			{
+				this.powerTraderComp.PowerOutput = -this.powerTraderComp.Props.PowerConsumption;
+				this.refuelableComp.Notify_UsedThisTick();
+				this.heatPusherComp.enabled = true;
+			}
+			else
+			{
+				this.powerTraderComp.PowerOutput = -this.powerTraderComp.Props.PowerConsumption * base.Props.lowPowerConsumptionFactor;
+				this.heatPusherComp.enabled = false;
+			}
+			int num = this.Working ? 1 : 0;
+			int? overrideGraphicIndex = this.parent.overrideGraphicIndex;
+			int num2 = num;
+			if (!(overrideGraphicIndex.GetValueOrDefault() == num2 & overrideGraphicIndex != null))
+			{
+				this.parent.overrideGraphicIndex = new int?(num);
+				this.parent.DirtyMapMesh(this.parent.Map);
+				CompGlower compGlower = this.parent.TryGetComp<CompGlower>();
+				if (compGlower != null)
+				{
+					compGlower.UpdateLit(this.parent.Map);
+				}
+			}
+			this.operatingAtHighPower = this.Working;
+		}
+
+		// Token: 0x06010ED5 RID: 69333 RVA: 0x004DF3A1 File Offset: 0x004DD5A1
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		{
+			float num = base.RoundedToCurrentTempModeOffset(-10f);
+			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num)
+			{
+				defaultLabel = num.ToStringTemperatureOffset("F0"),
+				defaultDesc = "CommandLowerTempDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc5,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
+			};
+			float num2 = base.RoundedToCurrentTempModeOffset(-1f);
+			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num2)
+			{
+				defaultLabel = num2.ToStringTemperatureOffset("F0"),
+				defaultDesc = "CommandLowerTempDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc4,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempLower", true)
+			};
+			yield return new Command_Action
+			{
+				action = delegate()
+				{
+					this.TargetTemperature = 21f;
+					SoundDefOf.Tick_Tiny.PlayOneShotOnCamera(null);
+					base.ThrowCurrentTemperatureText();
+				},
+				defaultLabel = "CommandResetTemp".Translate(),
+				defaultDesc = "CommandResetTempDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc1,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempReset", true)
+			};
+			float num3 = base.RoundedToCurrentTempModeOffset(1f);
+			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num3)
+			{
+				defaultLabel = "+" + num3.ToStringTemperatureOffset("F0"),
+				defaultDesc = "CommandRaiseTempDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc2,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
+			};
+			float num4 = base.RoundedToCurrentTempModeOffset(10f);
+			yield return new Comp_AtmosphericHeater.Command_GroupedTempChange(this, num4)
+			{
+				defaultLabel = "+" + num4.ToStringTemperatureOffset("F0"),
+				defaultDesc = "CommandRaiseTempDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc3,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/TempRaise", true)
+			};
+			yield break;
+		}
+
+		// Token: 0x0400B00F RID: 45071
+		private const int DisabledTextureIndex = 0;
+
+		// Token: 0x0400B010 RID: 45072
+		private const int EnabledTextureIndex = 1;
+
+		// Token: 0x0400B011 RID: 45073
+		private const int MaxOffset = 10;
+
+		// Token: 0x0400B012 RID: 45074
+		private CompPowerTrader powerTraderComp;
+
+		// Token: 0x0400B013 RID: 45075
+		private CompHeatPusher heatPusherComp;
+
+		// Token: 0x0400B014 RID: 45076
+		private CompRefuelable refuelableComp;
+
+		// Token: 0x02002ED5 RID: 11989
+		private class Command_GroupedTempChange : Command_Action
+		{
+			// Token: 0x06010ED8 RID: 69336 RVA: 0x004DF3B9 File Offset: 0x004DD5B9
+			public Command_GroupedTempChange(Comp_AtmosphericHeater heater, float offset)
+			{
+				this.heater = heater;
+				this.offset = offset;
+			}
+
+			// Token: 0x06010ED9 RID: 69337 RVA: 0x000026EA File Offset: 0x000008EA
+			public override void ProcessInput(Event ev)
+			{
+			}
+
+			// Token: 0x06010EDA RID: 69338 RVA: 0x004DF3CF File Offset: 0x004DD5CF
+			public override void ProcessGroupInput(Event ev, List<Gizmo> group)
+			{
+				this.heater.InterfaceChangeTargetTemperature(this.offset);
+			}
+
+			// Token: 0x0400B015 RID: 45077
+			private Comp_AtmosphericHeater heater;
+
+			// Token: 0x0400B016 RID: 45078
+			private float offset;
+		}
 	}
 }

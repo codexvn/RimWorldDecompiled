@@ -1,8 +1,12 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class GravshipComponentTypeDef : Def
+namespace RimWorld
 {
-	public bool requiredForLaunch = true;
+	// Token: 0x0200365C RID: 13916
+	public class GravshipComponentTypeDef : Def
+	{
+		// Token: 0x0400D66E RID: 54894
+		public bool requiredForLaunch = true;
+	}
 }

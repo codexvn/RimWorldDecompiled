@@ -1,127 +1,155 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public static class GenRecipe
+namespace Verse
 {
-	public static IEnumerable<Thing> MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient, IBillGiver billGiver, Precept_ThingStyle precept = null, ThingStyleDef style = null, int? overrideGraphicIndex = null)
+	// Token: 0x02000D05 RID: 3333
+	public static class GenRecipe
 	{
-		float efficiency = ((recipeDef.efficiencyStat != null) ? worker.GetStatValue(recipeDef.efficiencyStat) : 1f);
-		if (recipeDef.workTableEfficiencyStat != null && billGiver is Building_WorkTable thing)
+		// Token: 0x0600554B RID: 21835 RVA: 0x001B7E44 File Offset: 0x001B6044
+		public static IEnumerable<Thing> MakeRecipeProducts(RecipeDef recipeDef, Pawn worker, List<Thing> ingredients, Thing dominantIngredient, IBillGiver billGiver, Precept_ThingStyle precept = null, ThingStyleDef style = null, int? overrideGraphicIndex = null)
 		{
-			efficiency *= thing.GetStatValue(recipeDef.workTableEfficiencyStat);
-		}
-		if (recipeDef.products != null)
-		{
-			for (int i = 0; i < recipeDef.products.Count; i++)
+			float efficiency;
+			if (recipeDef.efficiencyStat == null)
 			{
-				ThingDefCountClass thingDefCountClass = recipeDef.products[i];
-				ThingDef stuff = (thingDefCountClass.thingDef.MadeFromStuff ? dominantIngredient.def : null);
-				Thing thing2 = ThingMaker.MakeThing(thingDefCountClass.thingDef, stuff);
-				thing2.stackCount = Mathf.CeilToInt((float)thingDefCountClass.count * efficiency);
-				if (dominantIngredient != null && recipeDef.useIngredientsForColor)
-				{
-					thing2.SetColor(dominantIngredient.DrawColor, reportFailure: false);
-				}
-				CompIngredients compIngredients = thing2.TryGetComp<CompIngredients>();
-				if (compIngredients != null)
-				{
-					for (int j = 0; j < ingredients.Count; j++)
-					{
-						compIngredients.RegisterIngredient(ingredients[j].def);
-					}
-				}
-				thing2.Notify_RecipeProduced(worker);
-				yield return PostProcessProduct(thing2, recipeDef, worker, precept, style, overrideGraphicIndex);
+				efficiency = 1f;
 			}
-		}
-		if (recipeDef.specialProducts == null)
-		{
+			else
+			{
+				efficiency = worker.GetStatValue(recipeDef.efficiencyStat, true, -1);
+			}
+			if (recipeDef.workTableEfficiencyStat != null)
+			{
+				Building_WorkTable building_WorkTable = billGiver as Building_WorkTable;
+				if (building_WorkTable != null)
+				{
+					efficiency *= building_WorkTable.GetStatValue(recipeDef.workTableEfficiencyStat, true, -1);
+				}
+			}
+			if (recipeDef.products != null)
+			{
+				int num;
+				for (int i = 0; i < recipeDef.products.Count; i = num + 1)
+				{
+					ThingDefCountClass thingDefCountClass = recipeDef.products[i];
+					ThingDef stuff = thingDefCountClass.thingDef.MadeFromStuff ? dominantIngredient.def : null;
+					Thing thing = ThingMaker.MakeThing(thingDefCountClass.thingDef, stuff);
+					thing.stackCount = Mathf.CeilToInt((float)thingDefCountClass.count * efficiency);
+					if (dominantIngredient != null && recipeDef.useIngredientsForColor)
+					{
+						thing.SetColor(dominantIngredient.DrawColor, false);
+					}
+					CompIngredients compIngredients = thing.TryGetComp<CompIngredients>();
+					if (compIngredients != null)
+					{
+						for (int k = 0; k < ingredients.Count; k++)
+						{
+							compIngredients.RegisterIngredient(ingredients[k].def);
+						}
+					}
+					thing.Notify_RecipeProduced(worker);
+					yield return GenRecipe.PostProcessProduct(thing, recipeDef, worker, precept, style, overrideGraphicIndex);
+					num = i;
+				}
+			}
+			if (recipeDef.specialProducts != null)
+			{
+				int num;
+				for (int i = 0; i < recipeDef.specialProducts.Count; i = num + 1)
+				{
+					for (int j = 0; j < ingredients.Count; j = num + 1)
+					{
+						Thing thing2 = ingredients[j];
+						SpecialProductType specialProductType = recipeDef.specialProducts[i];
+						if (specialProductType != SpecialProductType.Butchery)
+						{
+							if (specialProductType == SpecialProductType.Smelted)
+							{
+								foreach (Thing product in thing2.SmeltProducts(efficiency))
+								{
+									yield return GenRecipe.PostProcessProduct(product, recipeDef, worker, precept, style, overrideGraphicIndex);
+								}
+								IEnumerator<Thing> enumerator = null;
+							}
+						}
+						else
+						{
+							foreach (Thing product2 in thing2.ButcherProducts(worker, efficiency))
+							{
+								yield return GenRecipe.PostProcessProduct(product2, recipeDef, worker, precept, style, overrideGraphicIndex);
+							}
+							IEnumerator<Thing> enumerator = null;
+						}
+						num = j;
+					}
+					num = i;
+				}
+			}
+			yield break;
 			yield break;
 		}
-		for (int i = 0; i < recipeDef.specialProducts.Count; i++)
+
+		// Token: 0x0600554C RID: 21836 RVA: 0x001B7E94 File Offset: 0x001B6094
+		public static IEnumerable<Thing> FinalizeGestatedPawns(Bill_Mech bill, Pawn worker, ThingStyleDef style = null, int? overrideGraphicIndex = null)
 		{
-			for (int k = 0; k < ingredients.Count; k++)
+			yield return GenRecipe.PostProcessProduct(bill.Gestator.GestatingMech, bill.recipe, worker, bill.precept, style, overrideGraphicIndex);
+			yield break;
+		}
+
+		// Token: 0x0600554D RID: 21837 RVA: 0x001B7EBC File Offset: 0x001B60BC
+		private static Thing PostProcessProduct(Thing product, RecipeDef recipeDef, Pawn worker, Precept_ThingStyle precept = null, ThingStyleDef style = null, int? overrideGraphicIndex = null)
+		{
+			CompQuality compQuality = product.TryGetComp<CompQuality>();
+			if (compQuality != null)
 			{
-				Thing thing3 = ingredients[k];
-				switch (recipeDef.specialProducts[i])
+				if (recipeDef.workSkill == null)
 				{
-				case SpecialProductType.Butchery:
-					foreach (Thing item in thing3.ButcherProducts(worker, efficiency))
+					Log.Error(((recipeDef != null) ? recipeDef.ToString() : null) + " needs workSkill because it creates a product with a quality.");
+				}
+				QualityCategory q = QualityUtility.GenerateQualityCreatedByPawn(worker, recipeDef.workSkill, true);
+				compQuality.SetQuality(q, new ArtGenerationContext?(ArtGenerationContext.Colony));
+			}
+			CompArt compArt = product.TryGetComp<CompArt>();
+			if (compArt != null)
+			{
+				compArt.JustCreatedBy(worker);
+				if (compQuality != null && compQuality.Quality >= QualityCategory.Excellent)
+				{
+					TaleRecorder.RecordTale(TaleDefOf.CraftedArt, new object[]
 					{
-						yield return PostProcessProduct(item, recipeDef, worker, precept, style, overrideGraphicIndex);
-					}
-					break;
-				case SpecialProductType.Smelted:
-					foreach (Thing item2 in thing3.SmeltProducts(efficiency))
-					{
-						yield return PostProcessProduct(item2, recipeDef, worker, precept, style, overrideGraphicIndex);
-					}
-					break;
-				case SpecialProductType.StoneBlocks:
-					foreach (Thing item3 in thing3.StoneBlockProducts(worker, efficiency))
-					{
-						yield return PostProcessProduct(item3, recipeDef, worker, precept, style, overrideGraphicIndex);
-					}
-					break;
+						worker,
+						product
+					});
 				}
 			}
-		}
-	}
-
-	public static IEnumerable<Thing> FinalizeGestatedPawns(Bill_Mech bill, Pawn worker, ThingStyleDef style = null, int? overrideGraphicIndex = null)
-	{
-		yield return PostProcessProduct(bill.Gestator.GestatingMech, bill.recipe, worker, bill.precept, style, overrideGraphicIndex);
-	}
-
-	private static Thing PostProcessProduct(Thing product, RecipeDef recipeDef, Pawn worker, Precept_ThingStyle precept = null, ThingStyleDef style = null, int? overrideGraphicIndex = null)
-	{
-		CompQuality compQuality = product.TryGetComp<CompQuality>();
-		if (compQuality != null)
-		{
-			if (recipeDef.workSkill == null)
+			if (compQuality != null)
 			{
-				Log.Error(recipeDef?.ToString() + " needs workSkill because it creates a product with a quality.");
+				QualityUtility.SendCraftNotification(product, worker);
 			}
-			QualityCategory q = QualityUtility.GenerateQualityCreatedByPawn(worker, recipeDef.workSkill);
-			compQuality.SetQuality(q, ArtGenerationContext.Colony);
-		}
-		CompArt compArt = product.TryGetComp<CompArt>();
-		if (compArt != null)
-		{
-			compArt.JustCreatedBy(worker);
-			if (compQuality != null && (int)compQuality.Quality >= 4)
+			if (worker.Ideo != null)
 			{
-				TaleRecorder.RecordTale(TaleDefOf.CraftedArt, worker, product);
+				product.StyleDef = worker.Ideo.GetStyleFor(product.def);
 			}
+			if (precept != null)
+			{
+				product.StyleSourcePrecept = precept;
+			}
+			else if (style != null)
+			{
+				product.StyleDef = style;
+			}
+			else if (!product.def.randomStyle.NullOrEmpty<ThingStyleChance>() && Rand.Chance(product.def.randomStyleChance))
+			{
+				product.SetStyleDef(product.def.randomStyle.RandomElementByWeight((ThingStyleChance x) => x.Chance).StyleDef);
+			}
+			product.overrideGraphicIndex = overrideGraphicIndex;
+			if (product.def.Minifiable)
+			{
+				product = product.MakeMinified(DestroyMode.Vanish);
+			}
+			return product;
 		}
-		if (compQuality != null)
-		{
-			QualityUtility.SendCraftNotification(product, worker);
-		}
-		if (worker.Ideo != null)
-		{
-			product.StyleDef = worker.Ideo.GetStyleFor(product.def);
-		}
-		if (precept != null)
-		{
-			product.StyleSourcePrecept = precept;
-		}
-		else if (style != null)
-		{
-			product.StyleDef = style;
-		}
-		else if (!product.def.randomStyle.NullOrEmpty() && Rand.Chance(product.def.randomStyleChance))
-		{
-			product.SetStyleDef(product.def.randomStyle.RandomElementByWeight((ThingStyleChance x) => x.Chance).StyleDef);
-		}
-		product.overrideGraphicIndex = overrideGraphicIndex;
-		if (product.def.Minifiable)
-		{
-			product = product.MakeMinified();
-		}
-		return product;
 	}
 }

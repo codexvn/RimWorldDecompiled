@@ -1,39 +1,41 @@
+﻿using System;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class IncidentWorker_SeasonalFlooding : IncidentWorker
+namespace RimWorld
 {
-	protected override bool TryExecuteWorker(IncidentParms parms)
+	// Token: 0x02001DC9 RID: 7625
+	public class IncidentWorker_SeasonalFlooding : IncidentWorker
 	{
-		Map map = (Map)parms.target;
-		GenSpawn.Spawn(ThingDefOf.SeasonalFlood, map.Center, map);
-		return true;
-	}
+		// Token: 0x0600AA29 RID: 43561 RVA: 0x0030ADA4 File Offset: 0x00308FA4
+		protected override bool TryExecuteWorker(IncidentParms parms)
+		{
+			Map map = (Map)parms.target;
+			GenSpawn.Spawn(ThingDefOf.SeasonalFlood, map.Center, map, WipeMode.Vanish);
+			return true;
+		}
 
-	protected override bool CanFireNowSub(IncidentParms parms)
-	{
-		Map map = (Map)parms.target;
-		if (!(map.TileInfo is SurfaceTile surfaceTile))
+		// Token: 0x0600AA2A RID: 43562 RVA: 0x0030ADD4 File Offset: 0x00308FD4
+		protected override bool CanFireNowSub(IncidentParms parms)
 		{
-			return false;
+			Map map = (Map)parms.target;
+			SurfaceTile surfaceTile = map.TileInfo as SurfaceTile;
+			if (surfaceTile == null)
+			{
+				return false;
+			}
+			if (surfaceTile.Rivers.NullOrEmpty<SurfaceTile.RiverLink>())
+			{
+				return false;
+			}
+			if (map.mapTemperature.OutdoorTemp < -7f)
+			{
+				return false;
+			}
+			Vector2 longLat = Find.WorldGrid.LongLatOf(Find.WorldSelector.SelectedTile);
+			Season season = GenDate.Season((long)Find.TickManager.TicksGame, longLat);
+			return season == Season.Spring || season == Season.PermanentSummer;
 		}
-		if (surfaceTile.Rivers.NullOrEmpty())
-		{
-			return false;
-		}
-		if (map.mapTemperature.OutdoorTemp < -7f)
-		{
-			return false;
-		}
-		Vector2 longLat = Find.WorldGrid.LongLatOf(Find.WorldSelector.SelectedTile);
-		Season season = GenDate.Season(Find.TickManager.TicksGame, longLat);
-		if (season != Season.Spring && season != Season.PermanentSummer)
-		{
-			return false;
-		}
-		return true;
 	}
 }

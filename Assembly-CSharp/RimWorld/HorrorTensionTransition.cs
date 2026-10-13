@@ -1,55 +1,56 @@
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class HorrorTensionTransition : MusicTransition
+namespace RimWorld
 {
-	public override bool IsTransitionSatisfied()
+	// Token: 0x0200290C RID: 10508
+	public class HorrorTensionTransition : MusicTransition
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x0600E5EA RID: 58858 RVA: 0x004314E4 File Offset: 0x0042F6E4
+		public override bool IsTransitionSatisfied()
 		{
-			return false;
-		}
-		if (!base.IsTransitionSatisfied())
-		{
-			return false;
-		}
-		foreach (Map map in Find.Maps)
-		{
-			if (map.gameConditionManager.ConditionIsActive(GameConditionDefOf.UnnaturalDarkness) || map.gameConditionManager.ConditionIsActive(GameConditionDefOf.DeathPall) || map.gameConditionManager.ConditionIsActive(GameConditionDefOf.BloodRain))
+			if (!ModsConfig.AnomalyActive)
 			{
-				return true;
+				return false;
 			}
-		}
-		foreach (Map map2 in Find.Maps)
-		{
-			if (map2.listerThings.ThingsInGroup(ThingRequestGroup.BuildingGroundSpawner).Any())
+			if (!base.IsTransitionSatisfied())
 			{
-				return true;
+				return false;
 			}
-			foreach (Pawn item in map2.mapPawns.AllPawnsSpawned)
+			foreach (Map map in Find.Maps)
 			{
-				if (IsValidPawn(item))
+				if (map.gameConditionManager.ConditionIsActive(GameConditionDefOf.UnnaturalDarkness) || map.gameConditionManager.ConditionIsActive(GameConditionDefOf.DeathPall) || map.gameConditionManager.ConditionIsActive(GameConditionDefOf.BloodRain))
 				{
 					return true;
 				}
 			}
-		}
-		return false;
-	}
-
-	private static bool IsValidPawn(Pawn pawn)
-	{
-		Lord lord = pawn.GetLord();
-		if (lord != null)
-		{
-			if (!(lord.LordJob is LordJob_PsychicRitual))
+			foreach (Map map2 in Find.Maps)
 			{
-				return lord.LordJob is LordJob_HateChant;
+				if (map2.listerThings.ThingsInGroup(ThingRequestGroup.BuildingGroundSpawner).Any<Thing>())
+				{
+					return true;
+				}
+				using (IEnumerator<Pawn> enumerator2 = map2.mapPawns.AllPawnsSpawned.GetEnumerator())
+				{
+					while (enumerator2.MoveNext())
+					{
+						if (HorrorTensionTransition.IsValidPawn(enumerator2.Current))
+						{
+							return true;
+						}
+					}
+				}
 			}
-			return true;
+			return false;
 		}
-		return false;
+
+		// Token: 0x0600E5EB RID: 58859 RVA: 0x00431620 File Offset: 0x0042F820
+		private static bool IsValidPawn(Pawn pawn)
+		{
+			Lord lord = pawn.GetLord();
+			return lord != null && (lord.LordJob is LordJob_PsychicRitual || lord.LordJob is LordJob_HateChant);
+		}
 	}
 }

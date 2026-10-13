@@ -1,6 +1,11 @@
-namespace RimWorld;
+﻿using System;
 
-public class RitualOutcomeComp_DataRoleChangeParticipants : RitualOutcomeComp_DataThingPresence
+namespace RimWorld
 {
-	public int desiredParticipantCount;
+	// Token: 0x0200275A RID: 10074
+	public class RitualOutcomeComp_DataRoleChangeParticipants : RitualOutcomeComp_DataThingPresence
+	{
+		// Token: 0x04009500 RID: 38144
+		public int desiredParticipantCount;
+	}
 }

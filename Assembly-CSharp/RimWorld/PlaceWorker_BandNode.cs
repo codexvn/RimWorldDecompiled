@@ -1,27 +1,30 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class PlaceWorker_BandNode : PlaceWorker
+namespace RimWorld
 {
-	public override AcceptanceReport AllowsPlacing(BuildableDef def, IntVec3 center, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
+	// Token: 0x02003822 RID: 14370
+	public class PlaceWorker_BandNode : PlaceWorker
 	{
-		foreach (IntVec3 item in GenAdj.OccupiedRect(center, rot, def.Size).ExpandedBy(1))
+		// Token: 0x06013DF3 RID: 81395 RVA: 0x005E6304 File Offset: 0x005E4504
+		public override AcceptanceReport AllowsPlacing(BuildableDef def, IntVec3 center, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
 		{
-			if (!item.InBounds(map))
+			foreach (IntVec3 c in GenAdj.OccupiedRect(center, rot, def.Size).ExpandedBy(1))
 			{
-				continue;
-			}
-			List<Thing> thingList = item.GetThingList(map);
-			for (int i = 0; i < thingList.Count; i++)
-			{
-				if (thingList[i].def == def || thingList[i].def.entityDefToBuild == def)
+				if (c.InBounds(map))
 				{
-					return "MustNotBePlacedCloseToAnother".Translate(def);
+					List<Thing> thingList = c.GetThingList(map);
+					for (int i = 0; i < thingList.Count; i++)
+					{
+						if (thingList[i].def == def || thingList[i].def.entityDefToBuild == def)
+						{
+							return "MustNotBePlacedCloseToAnother".Translate(def);
+						}
+					}
 				}
 			}
+			return true;
 		}
-		return true;
 	}
 }

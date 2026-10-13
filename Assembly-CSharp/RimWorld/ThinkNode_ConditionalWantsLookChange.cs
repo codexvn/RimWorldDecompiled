@@ -1,20 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalWantsLookChange : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017C7 RID: 6087
+	public class ThinkNode_ConditionalWantsLookChange : ThinkNode_Conditional
 	{
-		if (!ModsConfig.IdeologyActive)
+		// Token: 0x06008DE0 RID: 36320 RVA: 0x002A1723 File Offset: 0x0029F923
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return false;
+			return ModsConfig.IdeologyActive && pawn.style != null && pawn.style.LookChangeDesired;
 		}
-		if (pawn.style != null)
-		{
-			return pawn.style.LookChangeDesired;
-		}
-		return false;
 	}
 }

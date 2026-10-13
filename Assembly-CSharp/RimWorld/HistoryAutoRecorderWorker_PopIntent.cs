@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class HistoryAutoRecorderWorker_PopIntent : HistoryAutoRecorderWorker
+namespace RimWorld
 {
-	public override float PullRecord()
+	// Token: 0x02001B69 RID: 7017
+	public class HistoryAutoRecorderWorker_PopIntent : HistoryAutoRecorderWorker
 	{
-		return StorytellerUtilityPopulation.PopulationIntent * 10f;
+		// Token: 0x06009CAA RID: 40106 RVA: 0x002D72BC File Offset: 0x002D54BC
+		public override float PullRecord()
+		{
+			return StorytellerUtilityPopulation.PopulationIntent * 10f;
+		}
 	}
 }

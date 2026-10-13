@@ -1,52 +1,62 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_SleepingMechanoids : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x02003976 RID: 14710
+	public class SymbolResolver_SleepingMechanoids : SymbolResolver
 	{
-		if (base.CanResolve(rp) && rp.threatPoints.HasValue)
+		// Token: 0x0601437A RID: 82810 RVA: 0x0060837B File Offset: 0x0060657B
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return Faction.OfMechanoids != null;
+			return base.CanResolve(rp) && rp.threatPoints != null && Faction.OfMechanoids != null;
 		}
-		return false;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		LordJob_SleepThenAssaultColony lordJob = new LordJob_SleepThenAssaultColony(Faction.OfMechanoids, rp.sendWokenUpMessage ?? true);
-		Lord lord = LordMaker.MakeNewLord(Faction.OfMechanoids, lordJob, BaseGen.globalSettings.map);
-		PawnKindDef[] array = PawnUtility.GetCombatPawnKindsForPoints(MechClusterGenerator.MechKindSuitableForCluster, rp.threatPoints.Value, (PawnKindDef pk) => 1f / pk.combatPower).ToArray();
-		float num = (float)Math.Min(rp.rect.Width, rp.rect.Height) / 2f;
-		Vector3 v = IntVec3.North.ToVector3();
-		List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-		for (int num2 = 0; num2 < array.Length; num2++)
+		// Token: 0x0601437B RID: 82811 RVA: 0x006083A0 File Offset: 0x006065A0
+		public override void Resolve(ResolveParams rp)
 		{
-			ResolveParams resolveParams = rp;
-			IntVec3 spawnCell = IntVec3.Invalid;
-			float angle = 360f / (float)array.Length * (float)num2;
-			Vector3 vect = v.RotatedBy(angle) * num;
-			if (CellFinder.TryFindRandomCellNear(rp.rect.CenterCell + vect.ToIntVec3(), BaseGen.globalSettings.map, 10, (IntVec3 c) => !usedRects.Any((CellRect r) => r.Contains(c)), out var result) && SiteGenStepUtility.TryFindSpawnCellAroundOrNear(rp.rect, result, BaseGen.globalSettings.map, out spawnCell))
+			LordJob_SleepThenAssaultColony lordJob = new LordJob_SleepThenAssaultColony(Faction.OfMechanoids, rp.sendWokenUpMessage ?? true);
+			Lord lord = LordMaker.MakeNewLord(Faction.OfMechanoids, lordJob, BaseGen.globalSettings.map, null);
+			PawnKindDef[] array = PawnUtility.GetCombatPawnKindsForPoints(new Func<PawnKindDef, bool>(MechClusterGenerator.MechKindSuitableForCluster), rp.threatPoints.Value, (PawnKindDef pk) => 1f / pk.combatPower).ToArray<PawnKindDef>();
+			float d = (float)Math.Min(rp.rect.Width, rp.rect.Height) / 2f;
+			Vector3 v = IntVec3.North.ToVector3();
+			List<CellRect> usedRects = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+			Predicate<IntVec3> <>9__1;
+			for (int i = 0; i < array.Length; i++)
 			{
-				resolveParams.rect = CellRect.CenteredOn(spawnCell, 1, 1);
-				resolveParams.singlePawnKindDef = array[num2];
-				resolveParams.singlePawnLord = lord;
-				resolveParams.faction = Faction.OfMechanoids;
-				BaseGen.symbolStack.Push("pawn", resolveParams);
+				ResolveParams resolveParams = rp;
+				IntVec3 invalid = IntVec3.Invalid;
+				float angle = 360f / (float)array.Length * (float)i;
+				Vector3 vect = v.RotatedBy(angle) * d;
+				IntVec3 root = rp.rect.CenterCell + vect.ToIntVec3();
+				Map map = BaseGen.globalSettings.map;
+				int squareRadius = 10;
+				Predicate<IntVec3> validator;
+				if ((validator = <>9__1) == null)
+				{
+					validator = (<>9__1 = ((IntVec3 c) => !usedRects.Any((CellRect r) => r.Contains(c))));
+				}
+				IntVec3 near;
+				if (CellFinder.TryFindRandomCellNear(root, map, squareRadius, validator, out near, -1) && SiteGenStepUtility.TryFindSpawnCellAroundOrNear(rp.rect, near, BaseGen.globalSettings.map, out invalid))
+				{
+					resolveParams.rect = CellRect.CenteredOn(invalid, 1, 1);
+					resolveParams.singlePawnKindDef = array[i];
+					resolveParams.singlePawnLord = lord;
+					resolveParams.faction = Faction.OfMechanoids;
+					BaseGen.symbolStack.Push("pawn", resolveParams, null);
+				}
 			}
-		}
-		if (array.Length != 0 && rp.sleepingMechanoidsWakeupSignalTag != null)
-		{
-			SignalAction_DormancyWakeUp obj = (SignalAction_DormancyWakeUp)ThingMaker.MakeThing(ThingDefOf.SignalAction_DormancyWakeUp);
-			obj.signalTag = rp.sleepingMechanoidsWakeupSignalTag;
-			obj.lord = lord;
-			GenSpawn.Spawn(obj, rp.rect.CenterCell, BaseGen.globalSettings.map);
+			if (array.Length != 0 && rp.sleepingMechanoidsWakeupSignalTag != null)
+			{
+				SignalAction_DormancyWakeUp signalAction_DormancyWakeUp = (SignalAction_DormancyWakeUp)ThingMaker.MakeThing(ThingDefOf.SignalAction_DormancyWakeUp, null);
+				signalAction_DormancyWakeUp.signalTag = rp.sleepingMechanoidsWakeupSignalTag;
+				signalAction_DormancyWakeUp.lord = lord;
+				GenSpawn.Spawn(signalAction_DormancyWakeUp, rp.rect.CenterCell, BaseGen.globalSettings.map, WipeMode.Vanish);
+			}
 		}
 	}
 }

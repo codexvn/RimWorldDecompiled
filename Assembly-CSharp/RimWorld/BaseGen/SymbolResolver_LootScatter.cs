@@ -1,31 +1,45 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_LootScatter : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static readonly IntRange DefaultLootCountRange = new IntRange(3, 10);
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003927 RID: 14631
+	public class SymbolResolver_LootScatter : SymbolResolver
 	{
-		float? lootMarketValue = rp.lootMarketValue;
-		if (!lootMarketValue.HasValue || !(lootMarketValue.GetValueOrDefault() <= 0f))
+		// Token: 0x06014289 RID: 82569 RVA: 0x00601BA0 File Offset: 0x005FFDA0
+		public override void Resolve(ResolveParams rp)
 		{
+			float? lootMarketValue = rp.lootMarketValue;
+			if (lootMarketValue != null && lootMarketValue.GetValueOrDefault() <= 0f)
+			{
+				return;
+			}
 			Map map = BaseGen.globalSettings.map;
 			IList<Thing> list = rp.lootConcereteContents;
 			if (list == null)
 			{
-				ThingSetMakerParams parms = ((!rp.thingSetMakerParams.HasValue) ? new ThingSetMakerParams
+				ThingSetMakerParams parms;
+				if (rp.thingSetMakerParams != null)
 				{
-					countRange = DefaultLootCountRange,
-					techLevel = ((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined)
-				} : rp.thingSetMakerParams.Value);
+					parms = rp.thingSetMakerParams.Value;
+				}
+				else
+				{
+					parms = new ThingSetMakerParams
+					{
+						countRange = new IntRange?(SymbolResolver_LootScatter.DefaultLootCountRange),
+						techLevel = new TechLevel?((rp.faction != null) ? rp.faction.def.techLevel : TechLevel.Undefined)
+					};
+				}
 				parms.makingFaction = rp.faction;
-				parms.totalMarketValueRange = new FloatRange(rp.lootMarketValue.Value, rp.lootMarketValue.Value);
+				parms.totalMarketValueRange = new FloatRange?(new FloatRange(rp.lootMarketValue.Value, rp.lootMarketValue.Value));
 				list = rp.thingSetMakerDef.root.Generate(parms);
 			}
-			MapGenUtility.GenerateLoot(map, rp.rect, list);
+			MapGenUtility.GenerateLoot(map, rp.rect, list, false);
 		}
+
+		// Token: 0x0400DEF1 RID: 57073
+		private static readonly IntRange DefaultLootCountRange = new IntRange(3, 10);
 	}
 }

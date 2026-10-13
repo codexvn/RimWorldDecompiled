@@ -1,67 +1,94 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class Projectile_Liquid : Projectile
+namespace RimWorld
 {
-	private Material materialResolved;
-
-	public override Material DrawMat => materialResolved;
-
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
+	// Token: 0x02002B41 RID: 11073
+	public class Projectile_Liquid : Projectile
 	{
-		DoImpact(hitThing, base.Position);
-		if (!blockedByShield && !def.projectile.soundImpact.NullOrUndefined())
+		// Token: 0x170026DC RID: 9948
+		// (get) Token: 0x0600F798 RID: 63384 RVA: 0x0047FA41 File Offset: 0x0047DC41
+		public override Material DrawMat
 		{
-			def.projectile.soundImpact.PlayOneShot(SoundInfo.InMap(this));
-		}
-		for (int i = 0; i < def.projectile.numExtraHitCells; i++)
-		{
-			IntVec3 intVec = base.Position + GenAdj.AdjacentCellsAndInside[i];
-			if (intVec.InBounds(base.Map))
+			get
 			{
-				DoImpact(hitThing, intVec);
+				return this.materialResolved;
 			}
 		}
-		base.Impact(hitThing, blockedByShield);
-	}
 
-	private void DoImpact(Thing hitThing, IntVec3 cell)
-	{
-		if (def.projectile.filth != null && def.projectile.filthCount.TrueMax > 0 && Rand.Chance(def.projectile.filthChance) && !cell.Filled(base.Map))
+		// Token: 0x0600F799 RID: 63385 RVA: 0x0047FA4C File Offset: 0x0047DC4C
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			FilthMaker.TryMakeFilth(cell, base.Map, def.projectile.filth, def.projectile.filthCount.RandomInRange);
-		}
-		TerrainDef terrain = cell.GetTerrain(base.Map);
-		Frame firstThing = cell.GetFirstThing<Frame>(base.Map);
-		Plant plant = cell.GetPlant(base.Map);
-		if (def.projectile.spawnTerrain != null && Rand.Chance(def.projectile.terrainChance) && (def.projectile.terrainReplacesFloors || terrain.natural || !terrain.IsFloor) && (def.projectile.terrainReplacesFloors || !(firstThing?.def.entityDefToBuild is TerrainDef)) && (plant == null || plant.def.plant.treeCategory != TreeCategory.Super) && GenConstruct.CanBuildOnTerrain(def.projectile.spawnTerrain, cell, base.Map, Rot4.North))
-		{
-			firstThing?.Destroy();
-			base.Map.terrainGrid.SetTerrain(cell, def.projectile.spawnTerrain);
-		}
-		List<Thing> thingList = cell.GetThingList(base.Map);
-		for (int i = 0; i < thingList.Count; i++)
-		{
-			Thing thing = thingList[i];
-			if (!(thing is Mote) && !(thing is Filth) && thing != hitThing && (!preventFriendlyFire || !(thing is Pawn a) || a.HostileTo(launcher)))
+			this.DoImpact(hitThing, base.Position);
+			if (!blockedByShield && !this.def.projectile.soundImpact.NullOrUndefined())
 			{
-				Find.BattleLog.Add(new BattleLogEntry_RangedImpact(launcher, thing, thing, equipmentDef, def, targetCoverDef));
-				DamageInfo dinfo = new DamageInfo(base.DamageDef, def.projectile.GetDamageAmount(null), def.projectile.GetArmorPenetration(), -1f, launcher);
-				thing.TakeDamage(dinfo);
+				this.def.projectile.soundImpact.PlayOneShot(SoundInfo.InMap(this, MaintenanceType.None));
+			}
+			for (int i = 0; i < this.def.projectile.numExtraHitCells; i++)
+			{
+				IntVec3 intVec = base.Position + GenAdj.AdjacentCellsAndInside[i];
+				if (intVec.InBounds(base.Map))
+				{
+					this.DoImpact(hitThing, intVec);
+				}
+			}
+			base.Impact(hitThing, blockedByShield);
+		}
+
+		// Token: 0x0600F79A RID: 63386 RVA: 0x0047FAF4 File Offset: 0x0047DCF4
+		private void DoImpact(Thing hitThing, IntVec3 cell)
+		{
+			if (this.def.projectile.filth != null && this.def.projectile.filthCount.TrueMax > 0 && Rand.Chance(this.def.projectile.filthChance) && !cell.Filled(base.Map))
+			{
+				FilthMaker.TryMakeFilth(cell, base.Map, this.def.projectile.filth, this.def.projectile.filthCount.RandomInRange, FilthSourceFlags.None, true);
+			}
+			TerrainDef terrain = cell.GetTerrain(base.Map);
+			Frame firstThing = cell.GetFirstThing(base.Map);
+			Plant plant = cell.GetPlant(base.Map);
+			if (this.def.projectile.spawnTerrain != null && Rand.Chance(this.def.projectile.terrainChance) && (this.def.projectile.terrainReplacesFloors || terrain.natural || !terrain.IsFloor) && (this.def.projectile.terrainReplacesFloors || !(((firstThing != null) ? firstThing.def.entityDefToBuild : null) is TerrainDef)) && (plant == null || plant.def.plant.treeCategory != TreeCategory.Super) && GenConstruct.CanBuildOnTerrain(this.def.projectile.spawnTerrain, cell, base.Map, Rot4.North, null, null))
+			{
+				if (firstThing != null)
+				{
+					firstThing.Destroy(DestroyMode.Vanish);
+				}
+				base.Map.terrainGrid.SetTerrain(cell, this.def.projectile.spawnTerrain);
+			}
+			List<Thing> thingList = cell.GetThingList(base.Map);
+			for (int i = 0; i < thingList.Count; i++)
+			{
+				Thing thing = thingList[i];
+				if (!(thing is Mote) && !(thing is Filth) && thing != hitThing)
+				{
+					if (this.preventFriendlyFire)
+					{
+						Pawn pawn = thing as Pawn;
+						if (pawn != null && !pawn.HostileTo(this.launcher))
+						{
+							goto IL_274;
+						}
+					}
+					Find.BattleLog.Add(new BattleLogEntry_RangedImpact(this.launcher, thing, thing, this.equipmentDef, this.def, this.targetCoverDef));
+					DamageInfo dinfo = new DamageInfo(base.DamageDef, (float)this.def.projectile.GetDamageAmount(null, null), this.def.projectile.GetArmorPenetration(null, null), -1f, this.launcher, null, null, DamageInfo.SourceCategory.ThingOrUnknown, null, true, true, QualityCategory.Normal, true, false);
+					thing.TakeDamage(dinfo);
+				}
+				IL_274:;
 			}
 		}
-	}
 
-	protected override void DrawAt(Vector3 drawLoc, bool flip = false)
-	{
-		if (materialResolved == null)
+		// Token: 0x0600F79B RID: 63387 RVA: 0x0047FD88 File Offset: 0x0047DF88
+		protected override void DrawAt(Vector3 drawLoc, bool flip = false)
 		{
-			materialResolved = def.DrawMatSingle;
+			if (this.materialResolved == null)
+			{
+				this.materialResolved = this.def.DrawMatSingle;
+			}
+			base.DrawAt(drawLoc, flip);
 		}
-		base.DrawAt(drawLoc, flip);
+
+		// Token: 0x0400A2E9 RID: 41705
+		private Material materialResolved;
 	}
 }

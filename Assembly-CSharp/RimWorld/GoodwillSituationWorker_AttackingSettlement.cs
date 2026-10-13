@@ -1,27 +1,29 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class GoodwillSituationWorker_AttackingSettlement : GoodwillSituationWorker
+namespace RimWorld
 {
-	private const int MaxGoodwill = -80;
-
-	public override int GetMaxGoodwill(Faction other)
+	// Token: 0x0200259B RID: 9627
+	public class GoodwillSituationWorker_AttackingSettlement : GoodwillSituationWorker
 	{
-		if (!IsAttackingSettlement(other))
+		// Token: 0x0600D306 RID: 54022 RVA: 0x003E28DC File Offset: 0x003E0ADC
+		public override int GetMaxGoodwill(Faction other)
 		{
-			return 100;
+			if (!this.IsAttackingSettlement(other))
+			{
+				return 100;
+			}
+			return -80;
 		}
-		return -80;
-	}
 
-	private bool IsAttackingSettlement(Faction other)
-	{
-		if (Current.ProgramState == ProgramState.Entry)
+		// Token: 0x0600D307 RID: 54023 RVA: 0x003E28EC File Offset: 0x003E0AEC
+		private bool IsAttackingSettlement(Faction other)
 		{
-			return false;
+			return Current.ProgramState != ProgramState.Entry && SettlementUtility.IsPlayerAttackingAnySettlementOf(other);
 		}
-		return SettlementUtility.IsPlayerAttackingAnySettlementOf(other);
+
+		// Token: 0x04008F3C RID: 36668
+		private const int MaxGoodwill = -80;
 	}
 }

@@ -1,9 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ChancePerDay_Roam : ThinkNode_ChancePerHour
+namespace Verse.AI
 {
-	protected override float MtbHours(Pawn pawn)
+	// Token: 0x02000FD9 RID: 4057
+	public class ThinkNode_ChancePerDay_Roam : ThinkNode_ChancePerHour
 	{
-		return (pawn.RoamMtbDays ?? 0f) * 24f;
+		// Token: 0x06006435 RID: 25653 RVA: 0x001FD105 File Offset: 0x001FB305
+		protected override float MtbHours(Pawn pawn)
+		{
+			return pawn.RaceProps.roamMtbDays.GetValueOrDefault(0f) * 24f;
+		}
 	}
 }

@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_LookChangeDesired : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x020018B4 RID: 6324
+	public class ThoughtWorker_LookChangeDesired : ThoughtWorker
 	{
-		if (p.style == null || !ModsConfig.IdeologyActive)
+		// Token: 0x0600907E RID: 36990 RVA: 0x002A96B1 File Offset: 0x002A78B1
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (p.style == null || !ModsConfig.IdeologyActive)
+			{
+				return ThoughtState.Inactive;
+			}
+			return p.style.LookChangeDesired;
 		}
-		return p.style.LookChangeDesired;
 	}
 }

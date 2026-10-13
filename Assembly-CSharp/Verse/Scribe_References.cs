@@ -1,93 +1,137 @@
+﻿using System;
+using System.Xml;
 using RimWorld.Planet;
 
-namespace Verse;
-
-public static class Scribe_References
+namespace Verse
 {
-	public static void Look<T>(ref T refee, string label, bool saveDestroyedThings = false) where T : ILoadReferenceable
+	// Token: 0x02000865 RID: 2149
+	public static class Scribe_References
 	{
-		if (Scribe.mode == LoadSaveMode.Saving)
+		// Token: 0x06003639 RID: 13881 RVA: 0x00122920 File Offset: 0x00120B20
+		public static void Look<T>(ref T refee, string label, bool saveDestroyedThings = false) where T : ILoadReferenceable
 		{
-			if (refee == null)
+			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				Scribe.saver.WriteElement(label, "null");
-			}
-			else if ((!(refee is Thing th) || !CheckSaveReferenceToDestroyedThing(th, label, saveDestroyedThings)) && (!(refee is WorldObject w) || !CheckSaveReferenceToDestroyedWorldObject(w, label, saveDestroyedThings)))
-			{
+				if (refee == null)
+				{
+					Scribe.saver.WriteElement(label, "null");
+					return;
+				}
+				Thing thing = refee as Thing;
+				if (thing != null && Scribe_References.CheckSaveReferenceToDestroyedThing(thing, label, saveDestroyedThings))
+				{
+					return;
+				}
+				WorldObject worldObject = refee as WorldObject;
+				if (worldObject != null && Scribe_References.CheckSaveReferenceToDestroyedWorldObject(worldObject, label, saveDestroyedThings))
+				{
+					return;
+				}
 				string uniqueLoadID = refee.GetUniqueLoadID();
 				Scribe.saver.WriteElement(label, uniqueLoadID);
 				Scribe.saver.loadIDsErrorsChecker.RegisterReferenced(refee, label);
+				return;
 			}
-		}
-		else if (Scribe.mode == LoadSaveMode.LoadingVars)
-		{
-			if (Scribe.loader.curParent != null && Scribe.loader.curParent.GetType().IsValueType)
+			else
 			{
-				Log.Warning("Trying to load reference of an object of type " + typeof(T)?.ToString() + " with label " + label + ", but our current node is a value type. The reference won't be loaded properly. curParent=" + Scribe.loader.curParent);
+				if (Scribe.mode == LoadSaveMode.LoadingVars)
+				{
+					if (Scribe.loader.curParent != null && Scribe.loader.curParent.GetType().IsValueType)
+					{
+						string[] array = new string[6];
+						array[0] = "Trying to load reference of an object of type ";
+						int num = 1;
+						Type typeFromHandle = typeof(T);
+						array[num] = ((typeFromHandle != null) ? typeFromHandle.ToString() : null);
+						array[2] = " with label ";
+						array[3] = label;
+						array[4] = ", but our current node is a value type. The reference won't be loaded properly. curParent=";
+						int num2 = 5;
+						IExposable curParent = Scribe.loader.curParent;
+						array[num2] = ((curParent != null) ? curParent.ToString() : null);
+						Log.Warning(string.Concat(array));
+					}
+					XmlNode xmlNode = Scribe.loader.curXmlParent[label];
+					string targetLoadID;
+					if (xmlNode != null)
+					{
+						targetLoadID = xmlNode.InnerText;
+					}
+					else
+					{
+						targetLoadID = null;
+					}
+					Scribe.loader.crossRefs.loadIDs.RegisterLoadIDReadFromXml(targetLoadID, typeof(T), label);
+					return;
+				}
+				if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+				{
+					refee = Scribe.loader.crossRefs.TakeResolvedRef<T>(label);
+				}
+				return;
 			}
-			string targetLoadID = Scribe.loader.curXmlParent[label]?.InnerText;
-			Scribe.loader.crossRefs.loadIDs.RegisterLoadIDReadFromXml(targetLoadID, typeof(T), label);
 		}
-		else if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
-		{
-			refee = Scribe.loader.crossRefs.TakeResolvedRef<T>(label);
-		}
-	}
 
-	public static void Look<T>(ref WeakReference<T> refee, string label, bool saveDestroyedThings = false) where T : class, ILoadReferenceable
-	{
-		if (Scribe.mode == LoadSaveMode.Saving)
+		// Token: 0x0600363A RID: 13882 RVA: 0x00122AB8 File Offset: 0x00120CB8
+		public static void Look<T>(ref WeakReference<T> refee, string label, bool saveDestroyedThings = false) where T : class, ILoadReferenceable
 		{
-			T refee2 = ((refee != null) ? refee.Target : null);
-			Look(ref refee2, label, saveDestroyedThings);
-		}
-		else if (Scribe.mode == LoadSaveMode.LoadingVars)
-		{
-			T refee3 = null;
-			Look(ref refee3, label, saveDestroyedThings);
-		}
-		else if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
-		{
-			T refee4 = null;
-			Look(ref refee4, label, saveDestroyedThings);
-			if (refee4 != null)
+			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				refee = new WeakReference<T>(refee4);
+				T t = (refee != null) ? refee.Target : default(T);
+				Scribe_References.Look<T>(ref t, label, saveDestroyedThings);
+				return;
+			}
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				T t2 = default(T);
+				Scribe_References.Look<T>(ref t2, label, saveDestroyedThings);
+				return;
+			}
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			{
+				T t3 = default(T);
+				Scribe_References.Look<T>(ref t3, label, saveDestroyedThings);
+				if (t3 != null)
+				{
+					refee = new WeakReference<T>(t3);
+				}
 			}
 		}
-	}
 
-	public static bool CheckSaveReferenceToDestroyedThing(Thing th, string label, bool saveDestroyedThings)
-	{
-		if (!th.Destroyed)
+		// Token: 0x0600363B RID: 13883 RVA: 0x00122B34 File Offset: 0x00120D34
+		public static bool CheckSaveReferenceToDestroyedThing(Thing th, string label, bool saveDestroyedThings)
 		{
+			if (!th.Destroyed)
+			{
+				return false;
+			}
+			if (!saveDestroyedThings)
+			{
+				Scribe.saver.WriteElement(label, "null");
+				return true;
+			}
+			if (th.Discarded)
+			{
+				Log.Warning("Trying to save reference to a discarded thing " + ((th != null) ? th.ToString() : null) + " with saveDestroyedThings=true. This means that it's not deep-saved anywhere and is no longer managed by anything in the code, so saving its reference will always fail. , label=" + label);
+				Scribe.saver.WriteElement(label, "null");
+				return true;
+			}
 			return false;
 		}
-		if (!saveDestroyedThings)
-		{
-			Scribe.saver.WriteElement(label, "null");
-			return true;
-		}
-		if (th.Discarded)
-		{
-			Log.Warning("Trying to save reference to a discarded thing " + th?.ToString() + " with saveDestroyedThings=true. This means that it's not deep-saved anywhere and is no longer managed by anything in the code, so saving its reference will always fail. , label=" + label);
-			Scribe.saver.WriteElement(label, "null");
-			return true;
-		}
-		return false;
-	}
 
-	public static bool CheckSaveReferenceToDestroyedWorldObject(WorldObject w, string label, bool saveDestroyedWorldObjects)
-	{
-		if (!w.Destroyed)
+		// Token: 0x0600363C RID: 13884 RVA: 0x00122B9D File Offset: 0x00120D9D
+		public static bool CheckSaveReferenceToDestroyedWorldObject(WorldObject w, string label, bool saveDestroyedWorldObjects)
 		{
+			if (!w.Destroyed)
+			{
+				return false;
+			}
+			if (!saveDestroyedWorldObjects)
+			{
+				Scribe.saver.WriteElement(label, "null");
+				return true;
+			}
 			return false;
 		}
-		if (!saveDestroyedWorldObjects)
-		{
-			Scribe.saver.WriteElement(label, "null");
-			return true;
-		}
-		return false;
 	}
 }

@@ -1,25 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalTrainableCompleted : ThinkNode_Conditional
+namespace RimWorld
 {
-	private TrainableDef trainable;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x02001797 RID: 6039
+	public class ThinkNode_ConditionalTrainableCompleted : ThinkNode_Conditional
 	{
-		ThinkNode_ConditionalTrainableCompleted obj = (ThinkNode_ConditionalTrainableCompleted)base.DeepCopy(resolve);
-		obj.trainable = trainable;
-		return obj;
-	}
-
-	protected override bool Satisfied(Pawn pawn)
-	{
-		if (pawn.training != null)
+		// Token: 0x06008D77 RID: 36215 RVA: 0x002A0B54 File Offset: 0x0029ED54
+		public override ThinkNode DeepCopy(bool resolve = true)
 		{
-			return pawn.training.HasLearned(trainable);
+			ThinkNode_ConditionalTrainableCompleted thinkNode_ConditionalTrainableCompleted = (ThinkNode_ConditionalTrainableCompleted)base.DeepCopy(resolve);
+			thinkNode_ConditionalTrainableCompleted.trainable = this.trainable;
+			return thinkNode_ConditionalTrainableCompleted;
 		}
-		return false;
+
+		// Token: 0x06008D78 RID: 36216 RVA: 0x002A0B6E File Offset: 0x0029ED6E
+		protected override bool Satisfied(Pawn pawn)
+		{
+			return pawn.training != null && pawn.training.HasLearned(this.trainable);
+		}
+
+		// Token: 0x04005BCD RID: 23501
+		private TrainableDef trainable;
 	}
 }

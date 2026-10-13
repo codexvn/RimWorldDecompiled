@@ -1,71 +1,75 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_PawnsKilled : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> inSignalEnable;
-
-	[NoTranslate]
-	public SlateRef<string> outSignalComplete;
-
-	[NoTranslate]
-	public SlateRef<string> outSignalPawnsNotAvailable;
-
-	public SlateRef<ThingDef> race;
-
-	public SlateRef<int> count;
-
-	public QuestNode node;
-
-	private const string PawnOfRaceKilledSignal = "PawnOfRaceKilled";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AE1 RID: 15073
+	public class QuestNode_PawnsKilled : QuestNode
 	{
-		if (!Find.Storyteller.difficulty.allowViolentQuests)
+		// Token: 0x06014899 RID: 84121 RVA: 0x00620C60 File Offset: 0x0061EE60
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			return Find.Storyteller.difficulty.allowViolentQuests && (this.node == null || this.node.TestRun(slate));
 		}
-		if (node != null)
-		{
-			return node.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		MapParent parent = slate.Get<Map>("map").Parent;
-		string text = QuestGen.GenerateNewSignal("PawnOfRaceKilled");
-		QuestPart_PawnsKilled questPart_PawnsKilled = new QuestPart_PawnsKilled();
-		questPart_PawnsKilled.inSignalEnable = QuestGenUtility.HardcodedSignalWithQuestID(inSignalEnable.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal");
-		questPart_PawnsKilled.race = race.GetValue(slate);
-		questPart_PawnsKilled.requiredInstigatorFaction = Faction.OfPlayer;
-		questPart_PawnsKilled.count = count.GetValue(slate);
-		questPart_PawnsKilled.mapParent = parent;
-		questPart_PawnsKilled.outSignalPawnKilled = text;
-		if (node != null)
+		// Token: 0x0601489A RID: 84122 RVA: 0x00620C8C File Offset: 0x0061EE8C
+		protected override void RunInt()
 		{
-			QuestGenUtility.RunInnerNode(node, questPart_PawnsKilled);
+			Slate slate = QuestGen.slate;
+			MapParent parent = slate.Get<Map>("map", null, false).Parent;
+			string text = QuestGen.GenerateNewSignal("PawnOfRaceKilled", true);
+			QuestPart_PawnsKilled questPart_PawnsKilled = new QuestPart_PawnsKilled();
+			questPart_PawnsKilled.inSignalEnable = (QuestGenUtility.HardcodedSignalWithQuestID(this.inSignalEnable.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal", null, false));
+			questPart_PawnsKilled.race = this.race.GetValue(slate);
+			questPart_PawnsKilled.requiredInstigatorFaction = Faction.OfPlayer;
+			questPart_PawnsKilled.count = this.count.GetValue(slate);
+			questPart_PawnsKilled.mapParent = parent;
+			questPart_PawnsKilled.outSignalPawnKilled = text;
+			if (this.node != null)
+			{
+				QuestGenUtility.RunInnerNode(this.node, questPart_PawnsKilled);
+			}
+			if (!this.outSignalComplete.GetValue(slate).NullOrEmpty())
+			{
+				questPart_PawnsKilled.outSignalsCompleted.Add(QuestGenUtility.HardcodedSignalWithQuestID(this.outSignalComplete.GetValue(slate)));
+			}
+			QuestGen.quest.AddPart(questPart_PawnsKilled);
+			QuestPart_PawnsAvailable questPart_PawnsAvailable = new QuestPart_PawnsAvailable();
+			questPart_PawnsAvailable.inSignalEnable = (QuestGenUtility.HardcodedSignalWithQuestID(this.inSignalEnable.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal", null, false));
+			if (!this.outSignalPawnsNotAvailable.GetValue(slate).NullOrEmpty())
+			{
+				questPart_PawnsAvailable.outSignalPawnsNotAvailable = QuestGenUtility.HardcodedSignalWithQuestID(this.outSignalPawnsNotAvailable.GetValue(slate));
+			}
+			questPart_PawnsAvailable.race = this.race.GetValue(slate);
+			questPart_PawnsAvailable.requiredCount = this.count.GetValue(slate);
+			questPart_PawnsAvailable.mapParent = parent;
+			questPart_PawnsAvailable.inSignalDecrement = text;
+			QuestGen.quest.AddPart(questPart_PawnsAvailable);
 		}
-		if (!outSignalComplete.GetValue(slate).NullOrEmpty())
-		{
-			questPart_PawnsKilled.outSignalsCompleted.Add(QuestGenUtility.HardcodedSignalWithQuestID(outSignalComplete.GetValue(slate)));
-		}
-		QuestGen.quest.AddPart(questPart_PawnsKilled);
-		QuestPart_PawnsAvailable questPart_PawnsAvailable = new QuestPart_PawnsAvailable();
-		questPart_PawnsAvailable.inSignalEnable = QuestGenUtility.HardcodedSignalWithQuestID(inSignalEnable.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal");
-		if (!outSignalPawnsNotAvailable.GetValue(slate).NullOrEmpty())
-		{
-			questPart_PawnsAvailable.outSignalPawnsNotAvailable = QuestGenUtility.HardcodedSignalWithQuestID(outSignalPawnsNotAvailable.GetValue(slate));
-		}
-		questPart_PawnsAvailable.race = race.GetValue(slate);
-		questPart_PawnsAvailable.requiredCount = count.GetValue(slate);
-		questPart_PawnsAvailable.mapParent = parent;
-		questPart_PawnsAvailable.inSignalDecrement = text;
-		QuestGen.quest.AddPart(questPart_PawnsAvailable);
+
+		// Token: 0x0400E3E2 RID: 58338
+		[NoTranslate]
+		public SlateRef<string> inSignalEnable;
+
+		// Token: 0x0400E3E3 RID: 58339
+		[NoTranslate]
+		public SlateRef<string> outSignalComplete;
+
+		// Token: 0x0400E3E4 RID: 58340
+		[NoTranslate]
+		public SlateRef<string> outSignalPawnsNotAvailable;
+
+		// Token: 0x0400E3E5 RID: 58341
+		public SlateRef<ThingDef> race;
+
+		// Token: 0x0400E3E6 RID: 58342
+		public SlateRef<int> count;
+
+		// Token: 0x0400E3E7 RID: 58343
+		public QuestNode node;
+
+		// Token: 0x0400E3E8 RID: 58344
+		private const string PawnOfRaceKilledSignal = "PawnOfRaceKilled";
 	}
 }

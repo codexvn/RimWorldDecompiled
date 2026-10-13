@@ -1,88 +1,105 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_AddColumns : SketchResolver
+namespace RimWorld.SketchGen
 {
-	private List<CellRect> rects = new List<CellRect>();
-
-	private HashSet<IntVec3> processed = new HashSet<IntVec3>();
-
-	private const float Chance = 0.8f;
-
-	protected override void ResolveInt(SketchResolveParams parms)
+	// Token: 0x020038B7 RID: 14519
+	public class SketchResolver_AddColumns : SketchResolver
 	{
-		CellRect outerRect = parms.rect ?? parms.sketch.OccupiedRect;
-		bool allowWood = parms.allowWood ?? true;
-		bool valueOrDefault = parms.requireFloor == true;
-		rects.Clear();
-		processed.Clear();
-		foreach (IntVec3 item2 in outerRect.Cells.InRandomOrder())
+		// Token: 0x060140D9 RID: 82137 RVA: 0x005F4BC8 File Offset: 0x005F2DC8
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
-			CellRect item = SketchGenUtility.FindBiggestRectAt(item2, outerRect, parms.sketch, processed, (IntVec3 x) => !AnyColumnBlockerAt(x, parms.sketch));
-			if (!item.IsEmpty)
+			CellRect cellRect = parms.rect ?? parms.sketch.OccupiedRect;
+			bool allowWood = parms.allowWood ?? true;
+			bool valueOrDefault = parms.requireFloor.GetValueOrDefault();
+			this.rects.Clear();
+			this.processed.Clear();
+			Predicate<IntVec3> <>9__1;
+			foreach (IntVec3 c in cellRect.Cells.InRandomOrder(null))
 			{
-				rects.Add(item);
+				CellRect outerRect = cellRect;
+				Sketch sketch = parms.sketch;
+				HashSet<IntVec3> hashSet = this.processed;
+				Predicate<IntVec3> canTraverse;
+				if ((canTraverse = <>9__1) == null)
+				{
+					canTraverse = (<>9__1 = ((IntVec3 x) => !this.AnyColumnBlockerAt(x, parms.sketch)));
+				}
+				CellRect item = SketchGenUtility.FindBiggestRectAt(c, outerRect, sketch, hashSet, canTraverse);
+				if (!item.IsEmpty)
+				{
+					this.rects.Add(item);
+				}
 			}
+			ThingDef stuff = GenStuff.RandomStuffInexpensiveFor(ThingDefOf.Column, null, (ThingDef x) => SketchGenUtility.IsStuffAllowed(x, allowWood, parms.useOnlyStonesAvailableOnMap, true, ThingDefOf.Column));
+			for (int i = 0; i < this.rects.Count; i++)
+			{
+				if (this.rects[i].Width >= 3 && this.rects[i].Height >= 3 && Rand.Chance(0.8f))
+				{
+					CellRect cellRect2 = this.rects[i].ContractedBy(1);
+					Sketch sketch2 = new Sketch();
+					if (Rand.Bool)
+					{
+						int newZ = Rand.RangeInclusive(cellRect2.minZ, cellRect2.CenterCell.z);
+						int num = (cellRect2.Width >= 4) ? Rand.Element<int>(2, 3) : 2;
+						for (int j = cellRect2.minX; j <= cellRect2.maxX; j += num)
+						{
+							if (!valueOrDefault || parms.sketch.AnyTerrainAt(new IntVec3(j, 0, newZ)))
+							{
+								sketch2.AddThing(ThingDefOf.Column, new IntVec3(j, 0, newZ), Rot4.North, stuff, 1, null, null, true, 2f);
+							}
+						}
+						SketchResolveParams parms2 = parms;
+						parms2.sketch = sketch2;
+						parms2.symmetryOrigin = new int?(this.rects[i].minZ + this.rects[i].Height / 2);
+						parms2.symmetryOriginIncluded = new bool?(this.rects[i].Height % 2 == 1);
+						SketchResolverDefOf.Symmetry.Resolve(parms2);
+					}
+					else
+					{
+						int newX = Rand.RangeInclusive(cellRect2.minX, cellRect2.CenterCell.x);
+						int num2 = (cellRect2.Height >= 4) ? Rand.Element<int>(2, 3) : 2;
+						for (int k = cellRect2.minZ; k <= cellRect2.maxZ; k += num2)
+						{
+							if (!valueOrDefault || parms.sketch.AnyTerrainAt(new IntVec3(newX, 0, k)))
+							{
+								sketch2.AddThing(ThingDefOf.Column, new IntVec3(newX, 0, k), Rot4.North, stuff, 1, null, null, true, 2f);
+							}
+						}
+						SketchResolveParams parms3 = parms;
+						parms3.sketch = sketch2;
+						parms3.symmetryOrigin = new int?(this.rects[i].minX + this.rects[i].Width / 2);
+						parms3.symmetryOriginIncluded = new bool?(this.rects[i].Width % 2 == 1);
+						SketchResolverDefOf.Symmetry.Resolve(parms3);
+					}
+					parms.sketch.Merge(sketch2, false);
+				}
+			}
+			this.rects.Clear();
+			this.processed.Clear();
 		}
-		ThingDef stuff = GenStuff.RandomStuffInexpensiveFor(ThingDefOf.Column, null, (ThingDef x) => SketchGenUtility.IsStuffAllowed(x, allowWood, parms.useOnlyStonesAvailableOnMap, allowFlammableWalls: true, ThingDefOf.Column));
-		for (int num = 0; num < rects.Count; num++)
+
+		// Token: 0x060140DA RID: 82138 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool CanResolveInt(SketchResolveParams parms)
 		{
-			if (rects[num].Width < 3 || rects[num].Height < 3 || !Rand.Chance(0.8f))
-			{
-				continue;
-			}
-			CellRect cellRect = rects[num].ContractedBy(1);
-			Sketch sketch = new Sketch();
-			if (Rand.Bool)
-			{
-				int newZ = Rand.RangeInclusive(cellRect.minZ, cellRect.CenterCell.z);
-				int num2 = ((cellRect.Width >= 4) ? Rand.Element(2, 3) : 2);
-				for (int num3 = cellRect.minX; num3 <= cellRect.maxX; num3 += num2)
-				{
-					if (!valueOrDefault || parms.sketch.AnyTerrainAt(new IntVec3(num3, 0, newZ)))
-					{
-						sketch.AddThing(ThingDefOf.Column, new IntVec3(num3, 0, newZ), Rot4.North, stuff);
-					}
-				}
-				SketchResolveParams parms2 = parms;
-				parms2.sketch = sketch;
-				parms2.symmetryOrigin = rects[num].minZ + rects[num].Height / 2;
-				parms2.symmetryOriginIncluded = rects[num].Height % 2 == 1;
-				SketchResolverDefOf.Symmetry.Resolve(parms2);
-			}
-			else
-			{
-				int newX = Rand.RangeInclusive(cellRect.minX, cellRect.CenterCell.x);
-				int num4 = ((cellRect.Height >= 4) ? Rand.Element(2, 3) : 2);
-				for (int num5 = cellRect.minZ; num5 <= cellRect.maxZ; num5 += num4)
-				{
-					if (!valueOrDefault || parms.sketch.AnyTerrainAt(new IntVec3(newX, 0, num5)))
-					{
-						sketch.AddThing(ThingDefOf.Column, new IntVec3(newX, 0, num5), Rot4.North, stuff);
-					}
-				}
-				SketchResolveParams parms3 = parms;
-				parms3.sketch = sketch;
-				parms3.symmetryOrigin = rects[num].minX + rects[num].Width / 2;
-				parms3.symmetryOriginIncluded = rects[num].Width % 2 == 1;
-				SketchResolverDefOf.Symmetry.Resolve(parms3);
-			}
-			parms.sketch.Merge(sketch, wipeIfCollides: false);
+			return true;
 		}
-		rects.Clear();
-		processed.Clear();
-	}
 
-	protected override bool CanResolveInt(SketchResolveParams parms)
-	{
-		return true;
-	}
+		// Token: 0x060140DB RID: 82139 RVA: 0x005F5010 File Offset: 0x005F3210
+		private bool AnyColumnBlockerAt(IntVec3 c, Sketch sketch)
+		{
+			return sketch.ThingsAt(c).Any((SketchThing x) => x.def.passability == Traversability.Impassable);
+		}
 
-	private bool AnyColumnBlockerAt(IntVec3 c, Sketch sketch)
-	{
-		return sketch.ThingsAt(c).Any((SketchThing x) => x.def.passability == Traversability.Impassable);
+		// Token: 0x0400DD76 RID: 56694
+		private List<CellRect> rects = new List<CellRect>();
+
+		// Token: 0x0400DD77 RID: 56695
+		private HashSet<IntVec3> processed = new HashSet<IntVec3>();
+
+		// Token: 0x0400DD78 RID: 56696
+		private const float Chance = 0.8f;
 	}
 }

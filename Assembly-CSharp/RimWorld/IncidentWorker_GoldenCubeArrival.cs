@@ -1,38 +1,40 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class IncidentWorker_GoldenCubeArrival : IncidentWorker_MeteoriteImpact
+namespace RimWorld
 {
-	private Pawn affectedPawn;
-
-	protected override List<Thing> GenerateMeteorContents(IncidentParms parms)
+	// Token: 0x02001DA2 RID: 7586
+	public class IncidentWorker_GoldenCubeArrival : IncidentWorker_MeteoriteImpact
 	{
-		Thing item = ThingMaker.MakeThing(ThingDefOf.GoldenCube);
-		if (!QuestUtility.TryGetIdealColonist(out affectedPawn, (Map)parms.target, ValidatePawn))
+		// Token: 0x0600A9A5 RID: 43429 RVA: 0x00308D9C File Offset: 0x00306F9C
+		protected override List<Thing> GenerateMeteorContents(IncidentParms parms)
 		{
-			return null;
+			Thing item = ThingMaker.MakeThing(ThingDefOf.GoldenCube, null);
+			if (!QuestUtility.TryGetIdealColonist(out this.affectedPawn, (Map)parms.target, new Func<Pawn, bool>(this.ValidatePawn)))
+			{
+				return null;
+			}
+			this.affectedPawn.health.AddHediff(HediffDefOf.CubeInterest, null, null, null);
+			return new List<Thing>
+			{
+				item
+			};
 		}
-		affectedPawn.health.AddHediff(HediffDefOf.CubeInterest);
-		return new List<Thing> { item };
-	}
 
-	protected override Letter MakeLetter(Skyfaller meteorite, List<Thing> contents)
-	{
-		return LetterMaker.MakeLetter("GoldenCubeArrivalLabel".Translate(), "GoldenCubeArrivalText".Translate(affectedPawn.Named("PAWN")), LetterDefOf.ThreatSmall, new TargetInfo(meteorite.Position, meteorite.Map));
-	}
+		// Token: 0x0600A9A6 RID: 43430 RVA: 0x00308E08 File Offset: 0x00307008
+		protected override Letter MakeLetter(Skyfaller meteorite, List<Thing> contents)
+		{
+			return LetterMaker.MakeLetter("GoldenCubeArrivalLabel".Translate(), "GoldenCubeArrivalText".Translate(this.affectedPawn.Named("PAWN")), LetterDefOf.ThreatSmall, new TargetInfo(meteorite.Position, meteorite.Map, false), null, null, null);
+		}
 
-	private bool ValidatePawn(Pawn pawn)
-	{
-		if (!pawn.IsColonist && !pawn.IsSlaveOfColony)
+		// Token: 0x0600A9A7 RID: 43431 RVA: 0x00308E60 File Offset: 0x00307060
+		private bool ValidatePawn(Pawn pawn)
 		{
-			return false;
+			return (pawn.IsColonist || pawn.IsSlaveOfColony) && !pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false) && !pawn.health.hediffSet.HasHediff(HediffDefOf.CubeComa, false);
 		}
-		if (!pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))
-		{
-			return !pawn.health.hediffSet.HasHediff(HediffDefOf.CubeComa);
-		}
-		return false;
+
+		// Token: 0x04007548 RID: 30024
+		private Pawn affectedPawn;
 	}
 }

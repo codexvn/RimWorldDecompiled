@@ -1,18 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Blueprint_StorageWithRoomHighlight : Blueprint_Storage
+namespace RimWorld
 {
-	public override void DrawExtraSelectionOverlays()
+	// Token: 0x02002957 RID: 10583
+	public class Blueprint_StorageWithRoomHighlight : Blueprint_Storage
 	{
-		base.DrawExtraSelectionOverlays();
-		if (Find.Selector.SingleSelectedThing == this)
+		// Token: 0x0600E819 RID: 59417 RVA: 0x00439604 File Offset: 0x00437804
+		public override void DrawExtraSelectionOverlays()
 		{
-			Room room = this.GetRoom();
-			if (room != null && room.ProperRoom && !room.PsychologicallyOutdoors)
+			base.DrawExtraSelectionOverlays();
+			if (Find.Selector.SingleSelectedThing == this)
 			{
-				room.DrawFieldEdges();
+				Room room = this.GetRoom(RegionType.Set_All);
+				if (room != null && room.ProperRoom && !room.PsychologicallyOutdoors)
+				{
+					room.DrawFieldEdges();
+				}
 			}
 		}
 	}

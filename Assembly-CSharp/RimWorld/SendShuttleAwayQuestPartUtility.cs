@@ -1,23 +1,25 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class SendShuttleAwayQuestPartUtility
+namespace RimWorld
 {
-	public static void SendAway(Thing shuttle, bool dropEverything)
+	// Token: 0x02001CA2 RID: 7330
+	public static class SendShuttleAwayQuestPartUtility
 	{
-		CompShuttle compShuttle = shuttle.TryGetComp<CompShuttle>();
-		if (compShuttle.shipParent == null)
+		// Token: 0x0600A34B RID: 41803 RVA: 0x002EE084 File Offset: 0x002EC284
+		public static void SendAway(Thing shuttle, bool dropEverything)
 		{
-			compShuttle.shipParent = TransportShipMaker.MakeTransportShip(TransportShipDefOf.Ship_Shuttle, null, shuttle);
-		}
-		if (dropEverything)
-		{
-			compShuttle.shipParent.ForceJob(ShipJobDefOf.Unload);
-			compShuttle.shipParent.AddJob(ShipJobDefOf.FlyAway);
-		}
-		else
-		{
+			CompShuttle compShuttle = shuttle.TryGetComp<CompShuttle>();
+			if (compShuttle.shipParent == null)
+			{
+				compShuttle.shipParent = TransportShipMaker.MakeTransportShip(TransportShipDefOf.Ship_Shuttle, null, shuttle);
+			}
+			if (dropEverything)
+			{
+				compShuttle.shipParent.ForceJob(ShipJobDefOf.Unload);
+				compShuttle.shipParent.AddJob(ShipJobDefOf.FlyAway);
+				return;
+			}
 			compShuttle.shipParent.ForceJob(ShipJobDefOf.FlyAway);
 		}
 	}

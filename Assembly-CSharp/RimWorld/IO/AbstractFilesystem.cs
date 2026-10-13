@@ -1,71 +1,78 @@
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 
-namespace RimWorld.IO;
-
-public static class AbstractFilesystem
+namespace RimWorld.IO
 {
-	public static void ClearAllCache()
+	// Token: 0x02003E8B RID: 16011
+	public static class AbstractFilesystem
 	{
-		TarDirectory.ClearCache();
-	}
-
-	public static List<VirtualDirectory> GetDirectories(string filesystemPath, string searchPattern, SearchOption searchOption, bool allowArchiveAndRealFolderDuplicates = false)
-	{
-		List<VirtualDirectory> list = new List<VirtualDirectory>();
-		string[] directories = Directory.GetDirectories(filesystemPath, searchPattern, searchOption);
-		foreach (string text in directories)
+		// Token: 0x06015E9B RID: 89755 RVA: 0x0068E51B File Offset: 0x0068C71B
+		public static void ClearAllCache()
 		{
-			string text2 = text + ".tar";
-			if (!allowArchiveAndRealFolderDuplicates && File.Exists(text2))
-			{
-				list.Add(TarDirectory.ReadFromFileOrCache(text2));
-			}
-			else
-			{
-				list.Add(new FilesystemDirectory(text));
-			}
+			TarDirectory.ClearCache();
 		}
-		directories = Directory.GetFiles(filesystemPath, searchPattern, searchOption);
-		foreach (string text3 in directories)
+
+		// Token: 0x06015E9C RID: 89756 RVA: 0x0068E524 File Offset: 0x0068C724
+		public static List<VirtualDirectory> GetDirectories(string filesystemPath, string searchPattern, SearchOption searchOption, bool allowArchiveAndRealFolderDuplicates = false)
 		{
-			if (Path.GetExtension(text3) != ".tar")
+			List<VirtualDirectory> list = new List<VirtualDirectory>();
+			foreach (string text in Directory.GetDirectories(filesystemPath, searchPattern, searchOption))
 			{
-				continue;
-			}
-			if (!allowArchiveAndRealFolderDuplicates)
-			{
-				string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(text3);
-				bool flag = false;
-				foreach (VirtualDirectory item in list)
+				string text2 = text + ".tar";
+				if (!allowArchiveAndRealFolderDuplicates && File.Exists(text2))
 				{
-					if (item.Name == fileNameWithoutExtension)
+					list.Add(TarDirectory.ReadFromFileOrCache(text2));
+				}
+				else
+				{
+					list.Add(new FilesystemDirectory(text));
+				}
+			}
+			foreach (string text3 in Directory.GetFiles(filesystemPath, searchPattern, searchOption))
+			{
+				if (!(Path.GetExtension(text3) != ".tar"))
+				{
+					if (!allowArchiveAndRealFolderDuplicates)
 					{
-						flag = true;
-						break;
+						string fileNameWithoutExtension = Path.GetFileNameWithoutExtension(text3);
+						bool flag = false;
+						using (List<VirtualDirectory>.Enumerator enumerator = list.GetEnumerator())
+						{
+							while (enumerator.MoveNext())
+							{
+								if (enumerator.Current.Name == fileNameWithoutExtension)
+								{
+									flag = true;
+									break;
+								}
+							}
+						}
+						if (flag)
+						{
+							goto IL_D7;
+						}
 					}
+					list.Add(TarDirectory.ReadFromFileOrCache(text3));
 				}
-				if (flag)
-				{
-					continue;
-				}
+				IL_D7:;
 			}
-			list.Add(TarDirectory.ReadFromFileOrCache(text3));
+			return list;
 		}
-		return list;
-	}
 
-	public static VirtualDirectory GetDirectory(string filesystemPath)
-	{
-		if (Path.GetExtension(filesystemPath) == ".tar")
+		// Token: 0x06015E9D RID: 89757 RVA: 0x0068E624 File Offset: 0x0068C824
+		public static VirtualDirectory GetDirectory(string filesystemPath)
 		{
-			return TarDirectory.ReadFromFileOrCache(filesystemPath);
+			if (Path.GetExtension(filesystemPath) == ".tar")
+			{
+				return TarDirectory.ReadFromFileOrCache(filesystemPath);
+			}
+			string text = filesystemPath + ".tar";
+			if (File.Exists(text))
+			{
+				return TarDirectory.ReadFromFileOrCache(text);
+			}
+			return new FilesystemDirectory(filesystemPath);
 		}
-		string text = filesystemPath + ".tar";
-		if (File.Exists(text))
-		{
-			return TarDirectory.ReadFromFileOrCache(text);
-		}
-		return new FilesystemDirectory(filesystemPath);
 	}
 }

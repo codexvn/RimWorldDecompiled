@@ -1,33 +1,42 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ForbidOutsideFlagRadius : ThinkNode_Priority
+namespace Verse.AI
 {
-	public float maxDistToSquadFlag = -1f;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x02000FF9 RID: 4089
+	public class ThinkNode_ForbidOutsideFlagRadius : ThinkNode_Priority
 	{
-		ThinkNode_ForbidOutsideFlagRadius obj = (ThinkNode_ForbidOutsideFlagRadius)base.DeepCopy(resolve);
-		obj.maxDistToSquadFlag = maxDistToSquadFlag;
-		return obj;
-	}
-
-	public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
-	{
-		try
+		// Token: 0x06006481 RID: 25729 RVA: 0x001FD766 File Offset: 0x001FB966
+		public override ThinkNode DeepCopy(bool resolve = true)
 		{
-			if (maxDistToSquadFlag > 0f)
+			ThinkNode_ForbidOutsideFlagRadius thinkNode_ForbidOutsideFlagRadius = (ThinkNode_ForbidOutsideFlagRadius)base.DeepCopy(resolve);
+			thinkNode_ForbidOutsideFlagRadius.maxDistToSquadFlag = this.maxDistToSquadFlag;
+			return thinkNode_ForbidOutsideFlagRadius;
+		}
+
+		// Token: 0x06006482 RID: 25730 RVA: 0x001FD780 File Offset: 0x001FB980
+		public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
+		{
+			ThinkResult result;
+			try
 			{
-				if (pawn.mindState.maxDistToSquadFlag > 0f)
+				if (this.maxDistToSquadFlag > 0f)
 				{
-					Log.Error("Squad flag was not reset properly; raiders may behave strangely");
+					if (pawn.mindState.maxDistToSquadFlag > 0f)
+					{
+						Log.Error("Squad flag was not reset properly; raiders may behave strangely");
+					}
+					pawn.mindState.maxDistToSquadFlag = this.maxDistToSquadFlag;
 				}
-				pawn.mindState.maxDistToSquadFlag = maxDistToSquadFlag;
+				result = base.TryIssueJobPackage(pawn, jobParams);
 			}
-			return base.TryIssueJobPackage(pawn, jobParams);
+			finally
+			{
+				pawn.mindState.maxDistToSquadFlag = -1f;
+			}
+			return result;
 		}
-		finally
-		{
-			pawn.mindState.maxDistToSquadFlag = -1f;
-		}
+
+		// Token: 0x040047D7 RID: 18391
+		public float maxDistToSquadFlag = -1f;
 	}
 }

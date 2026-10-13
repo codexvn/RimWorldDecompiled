@@ -1,13 +1,18 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ChancePerHour_Forage : ThinkNode_ChancePerHour
+namespace Verse.AI
 {
-	protected override float MtbHours(Pawn pawn)
+	// Token: 0x02000FDD RID: 4061
+	public class ThinkNode_ChancePerHour_Forage : ThinkNode_ChancePerHour
 	{
-		if (pawn.Map.Biome.forageability == 0f)
+		// Token: 0x0600643D RID: 25661 RVA: 0x001FD1BC File Offset: 0x001FB3BC
+		protected override float MtbHours(Pawn pawn)
 		{
-			return 0f;
+			if (pawn.Map.Biome.forageability == 0f)
+			{
+				return 0f;
+			}
+			return 72f / pawn.Map.Biome.forageability;
 		}
-		return 72f / pawn.Map.Biome.forageability;
 	}
 }

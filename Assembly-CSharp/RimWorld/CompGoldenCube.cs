@@ -1,269 +1,349 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class CompGoldenCube : CompInteractable, IRoofCollapseAlert
+namespace RimWorld
 {
-	private CompStudyUnlocks studyUnlocksInt;
-
-	private const float EnthrallMTBDays = 12f;
-
-	private static readonly IntRange GoldRange = new IntRange(125, 175);
-
-	public new CompProperties_GoldenCube Props => (CompProperties_GoldenCube)props;
-
-	public CompStudyUnlocks StudyUnlocks => studyUnlocksInt ?? (studyUnlocksInt = parent.GetComp<CompStudyUnlocks>());
-
-	public bool Deactivatable => StudyUnlocks.Completed;
-
-	public override void OrderForceTarget(LocalTargetInfo target)
+	// Token: 0x02002CBC RID: 11452
+	public class CompGoldenCube : CompInteractable, IRoofCollapseAlert
 	{
-		if (ValidateTarget(target, showMessages: false))
+		// Token: 0x170028A8 RID: 10408
+		// (get) Token: 0x06010123 RID: 65827 RVA: 0x004A6724 File Offset: 0x004A4924
+		public new CompProperties_GoldenCube Props
 		{
-			OrderDeactivation(target.Pawn);
-		}
-	}
-
-	public override void CompTickInterval(int delta)
-	{
-		base.CompTickInterval(delta);
-		if (parent.IsHashIntervalTick(2500, delta) && (!AnyPawnHasHediff() || Rand.MTBEventOccurs(12f, 60000f, 2500f)) && QuestUtility.TryGetIdealColonist(out var pawn, parent.MapHeld, ValidatePawn))
-		{
-			GiveHediff(pawn);
-		}
-	}
-
-	private void GiveHediff(Pawn pawn)
-	{
-		pawn.health.AddHediff(HediffDefOf.CubeInterest);
-		Messages.Message("MessageGoldenCubeInterest".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent);
-	}
-
-	public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
-	{
-		if (Deactivatable)
-		{
-			AcceptanceReport acceptanceReport = CanInteract(selPawn);
-			FloatMenuOption floatMenuOption = new FloatMenuOption(Props.jobString.CapitalizeFirst(), delegate
+			get
 			{
-				OrderDeactivation(selPawn);
-			});
+				return (CompProperties_GoldenCube)this.props;
+			}
+		}
+
+		// Token: 0x170028A9 RID: 10409
+		// (get) Token: 0x06010124 RID: 65828 RVA: 0x004A6734 File Offset: 0x004A4934
+		public CompStudyUnlocks StudyUnlocks
+		{
+			get
+			{
+				CompStudyUnlocks result;
+				if ((result = this.studyUnlocksInt) == null)
+				{
+					result = (this.studyUnlocksInt = this.parent.GetComp<CompStudyUnlocks>());
+				}
+				return result;
+			}
+		}
+
+		// Token: 0x170028AA RID: 10410
+		// (get) Token: 0x06010125 RID: 65829 RVA: 0x004A675F File Offset: 0x004A495F
+		public bool Deactivatable
+		{
+			get
+			{
+				return this.StudyUnlocks.Completed;
+			}
+		}
+
+		// Token: 0x06010126 RID: 65830 RVA: 0x004A676C File Offset: 0x004A496C
+		public override void OrderForceTarget(LocalTargetInfo target)
+		{
+			if (base.ValidateTarget(target, false))
+			{
+				this.OrderDeactivation(target.Pawn);
+			}
+		}
+
+		// Token: 0x06010127 RID: 65831 RVA: 0x004A6788 File Offset: 0x004A4988
+		public override void CompTickInterval(int delta)
+		{
+			base.CompTickInterval(delta);
+			if (!this.parent.IsHashIntervalTick(2500, delta))
+			{
+				return;
+			}
+			Pawn pawn;
+			if ((!this.AnyPawnHasHediff() || Rand.MTBEventOccurs(12f, 60000f, 2500f)) && QuestUtility.TryGetIdealColonist(out pawn, this.parent.MapHeld, new Func<Pawn, bool>(this.ValidatePawn)))
+			{
+				this.GiveHediff(pawn);
+			}
+		}
+
+		// Token: 0x06010128 RID: 65832 RVA: 0x004A67F8 File Offset: 0x004A49F8
+		private void GiveHediff(Pawn pawn)
+		{
+			pawn.health.AddHediff(HediffDefOf.CubeInterest, null, null, null);
+			Messages.Message("MessageGoldenCubeInterest".Translate(pawn.Named("PAWN")), pawn, MessageTypeDefOf.NeutralEvent, true);
+		}
+
+		// Token: 0x06010129 RID: 65833 RVA: 0x004A684C File Offset: 0x004A4A4C
+		public override IEnumerable<FloatMenuOption> CompFloatMenuOptions(Pawn selPawn)
+		{
+			if (!this.Deactivatable)
+			{
+				yield break;
+			}
+			AcceptanceReport acceptanceReport = this.CanInteract(selPawn, true);
+			FloatMenuOption floatMenuOption = new FloatMenuOption(this.Props.jobString.CapitalizeFirst(), delegate()
+			{
+				this.OrderDeactivation(selPawn);
+			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
 			if (!acceptanceReport.Accepted)
 			{
 				floatMenuOption.Disabled = true;
 				floatMenuOption.Label = floatMenuOption.Label + " (" + acceptanceReport.Reason + ")";
 			}
 			yield return floatMenuOption;
-		}
-	}
-
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		if (!Deactivatable)
-		{
 			yield break;
 		}
-		foreach (Gizmo item in base.CompGetGizmosExtra())
-		{
-			yield return item;
-		}
-	}
 
-	public override string CompInspectStringExtra()
-	{
-		return "";
-	}
-
-	protected override void OnInteracted(Pawn caster)
-	{
-		List<string> list = new List<string>();
-		List<string> list2 = new List<string>();
-		foreach (Pawn item in Find.WorldPawns.AllPawnsAlive)
+		// Token: 0x0601012A RID: 65834 RVA: 0x004A6863 File Offset: 0x004A4A63
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
-			if (item.health.hediffSet.HasHediff(HediffDefOf.CubeInterest) && item.IsCaravanMember() && item.Faction == Faction.OfPlayer)
+			if (!this.Deactivatable)
 			{
-				PawnBanishUtility.Banish(item, giveThoughts: false);
-				list2.Add(item.LabelShort);
+				yield break;
 			}
-			CurePawn(item);
-		}
-		foreach (Map map in Find.Maps)
-		{
-			for (int num = map.mapPawns.AllPawns.Count - 1; num >= 0; num--)
+			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
 			{
-				Pawn pawn = map.mapPawns.AllPawns[num];
-				if (pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))
+				yield return gizmo;
+			}
+			IEnumerator<Gizmo> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0601012B RID: 65835 RVA: 0x00035ADE File Offset: 0x00033CDE
+		public override string CompInspectStringExtra()
+		{
+			return "";
+		}
+
+		// Token: 0x0601012C RID: 65836 RVA: 0x004A6874 File Offset: 0x004A4A74
+		protected override void OnInteracted(Pawn caster)
+		{
+			List<string> list = new List<string>();
+			List<string> list2 = new List<string>();
+			foreach (Pawn pawn in Find.WorldPawns.AllPawnsAlive)
+			{
+				if (pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false) && pawn.IsCaravanMember() && pawn.Faction == Faction.OfPlayer)
 				{
-					PawnUtility.ForceEjectFromContainer(pawn);
-					pawn.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.Berserk, null, forced: true, forceWake: false, causedByMood: false, null, transitionSilently: true);
-					list.Add(pawn.LabelShort);
+					PawnBanishUtility.Banish(pawn, false);
+					list2.Add(pawn.LabelShort);
 				}
-				CurePawn(pawn);
+				this.CurePawn(pawn);
 			}
-		}
-		if (list.Any() || list2.Any())
-		{
-			TaggedString text = "CubeDeactivationBerserkDesc".Translate(caster.Named("PAWN"));
-			if (list.Any())
+			foreach (Map map in Find.Maps)
 			{
-				text += "\n\n" + "CubeDeactivationBerserkPawns".Translate() + ":\n" + list.ToLineList("- ");
+				for (int i = map.mapPawns.AllPawns.Count - 1; i >= 0; i--)
+				{
+					Pawn pawn2 = map.mapPawns.AllPawns[i];
+					if (pawn2.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false))
+					{
+						PawnUtility.ForceEjectFromContainer(pawn2);
+						pawn2.mindState.mentalStateHandler.TryStartMentalState(MentalStateDefOf.Berserk, null, true, false, false, null, true, false, false);
+						list.Add(pawn2.LabelShort);
+					}
+					this.CurePawn(pawn2);
+				}
 			}
-			if (list2.Any())
+			if (list.Any<string>() || list2.Any<string>())
 			{
-				text += "\n\n" + "CubeDeactivationLostPawns".Translate() + ":\n" + list2.ToLineList("- ");
+				TaggedString taggedString = "CubeDeactivationBerserkDesc".Translate(caster.Named("PAWN"));
+				if (list.Any<string>())
+				{
+					taggedString += "\n\n" + "CubeDeactivationBerserkPawns".Translate() + ":\n" + list.ToLineList("- ");
+				}
+				if (list2.Any<string>())
+				{
+					taggedString += "\n\n" + "CubeDeactivationLostPawns".Translate() + ":\n" + list2.ToLineList("- ");
+				}
+				Find.LetterStack.ReceiveLetter("CubeDeactivationBerserk".Translate(), taggedString, list.Any<string>() ? LetterDefOf.ThreatBig : LetterDefOf.NegativeEvent, null, 0, true);
 			}
-			Find.LetterStack.ReceiveLetter("CubeDeactivationBerserk".Translate(), text, list.Any() ? LetterDefOf.ThreatBig : LetterDefOf.NegativeEvent);
+			this.parent.Kill(null, null);
 		}
-		parent.Kill();
-	}
 
-	private bool AnyPawnHasHediff()
-	{
-		if (parent.SpawnedOrAnyParentSpawned)
+		// Token: 0x0601012D RID: 65837 RVA: 0x004A6AD0 File Offset: 0x004A4CD0
+		private bool AnyPawnHasHediff()
 		{
-			foreach (Pawn allPawn in parent.MapHeld.mapPawns.AllPawns)
+			if (this.parent.SpawnedOrAnyParentSpawned)
 			{
-				if (allPawn.IsColonist && allPawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))
+				foreach (Pawn pawn in this.parent.MapHeld.mapPawns.AllPawns)
+				{
+					if (pawn.IsColonist && pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false))
+					{
+						return true;
+					}
+				}
+			}
+			foreach (Map map in Find.Maps)
+			{
+				if (map != this.parent.MapHeld)
+				{
+					foreach (Pawn pawn2 in map.mapPawns.AllPawns)
+					{
+						Hediff hediff;
+						if (pawn2.IsColonist && pawn2.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out hediff))
+						{
+							return true;
+						}
+					}
+				}
+			}
+			foreach (Pawn pawn3 in Find.WorldPawns.AllPawnsAlive)
+			{
+				Hediff hediff;
+				if (pawn3.IsColonist && pawn3.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out hediff))
 				{
 					return true;
 				}
 			}
+			return false;
 		}
-		Hediff hediff;
-		foreach (Map map in Find.Maps)
+
+		// Token: 0x0601012E RID: 65838 RVA: 0x004A6C84 File Offset: 0x004A4E84
+		public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
 		{
-			if (map == parent.MapHeld)
+			Thing thing = ThingMaker.MakeThing(ThingDefOf.Gold, null);
+			thing.stackCount = CompGoldenCube.GoldRange.RandomInRange;
+			GenPlace.TryPlaceThing(thing, this.parent.PositionHeld, prevMap, ThingPlaceMode.Near, null, null, null, 1);
+		}
+
+		// Token: 0x0601012F RID: 65839 RVA: 0x004A6CD0 File Offset: 0x004A4ED0
+		private void CurePawn(Pawn pawn)
+		{
+			Hediff hediff;
+			if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out hediff))
 			{
-				continue;
+				pawn.health.RemoveHediff(hediff);
 			}
-			foreach (Pawn allPawn2 in map.mapPawns.AllPawns)
+			Hediff hediff2;
+			if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeWithdrawal, out hediff2))
 			{
-				if (allPawn2.IsColonist && allPawn2.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out hediff))
+				pawn.health.RemoveHediff(hediff2);
+			}
+			Hediff hediff3;
+			if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeComa, out hediff3))
+			{
+				pawn.health.RemoveHediff(hediff3);
+			}
+		}
+
+		// Token: 0x06010130 RID: 65840 RVA: 0x004A6D4C File Offset: 0x004A4F4C
+		public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
+		{
+			AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
+			if (!result.Accepted)
+			{
+				return result;
+			}
+			if (activateBy != null)
+			{
+				if (activateBy.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false))
 				{
-					return true;
+					return "CannotDisableCube".Translate(activateBy.Named("PAWN"));
+				}
+				if (checkOptionalItems && !activateBy.HasReserved(ThingDefOf.Shard) && !activateBy.CanReserveAndReachableOfDef(ThingDefOf.Shard, PathEndMode.Touch, Danger.None, 1, -1, null, false))
+				{
+					return "NoItemReservedOrReachable".Translate(ThingDefOf.Shard.label);
 				}
 			}
-		}
-		foreach (Pawn item in Find.WorldPawns.AllPawnsAlive)
-		{
-			if (item.IsColonist && item.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out hediff))
+			else if (checkOptionalItems && !ReservationUtility.ExistsUnreservedAmountOfDef(this.parent.MapHeld, ThingDefOf.Shard, Faction.OfPlayer, 1, null))
 			{
-				return true;
+				return "NoItemReserved".Translate(ThingDefOf.Shard.label);
 			}
+			return true;
 		}
-		return false;
-	}
 
-	public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
-	{
-		Thing thing = ThingMaker.MakeThing(ThingDefOf.Gold);
-		thing.stackCount = GoldRange.RandomInRange;
-		GenPlace.TryPlaceThing(thing, parent.PositionHeld, prevMap, ThingPlaceMode.Near);
-	}
-
-	private void CurePawn(Pawn pawn)
-	{
-		if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeInterest, out var hediff))
+		// Token: 0x06010131 RID: 65841 RVA: 0x004A6E2C File Offset: 0x004A502C
+		private void OrderDeactivation(Pawn pawn)
 		{
-			pawn.health.RemoveHediff(hediff);
-		}
-		if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeWithdrawal, out var hediff2))
-		{
-			pawn.health.RemoveHediff(hediff2);
-		}
-		if (pawn.health.hediffSet.TryGetHediff(HediffDefOf.CubeComa, out var hediff3))
-		{
-			pawn.health.RemoveHediff(hediff3);
-		}
-	}
-
-	public override AcceptanceReport CanInteract(Pawn activateBy = null, bool checkOptionalItems = true)
-	{
-		AcceptanceReport result = base.CanInteract(activateBy, checkOptionalItems);
-		if (!result.Accepted)
-		{
-			return result;
-		}
-		if (activateBy != null)
-		{
-			if (activateBy.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))
+			TaggedString taggedString = "CubeDeactivationConfirmation".Translate();
+			List<Pawn> list = Find.Maps.SelectMany((Map m) => from p in m.mapPawns.AllPawns
+			where p.Faction == Faction.OfPlayer && p.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false)
+			select p).ToList<Pawn>();
+			List<Pawn> list2 = Find.WorldObjects.Caravans.SelectMany((Caravan c) => from p in c.pawns.InnerListForReading
+			where p.Faction == Faction.OfPlayer && p.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false)
+			select p).ToList<Pawn>();
+			if (list.Any<Pawn>())
 			{
-				return "CannotDisableCube".Translate(activateBy.Named("PAWN"));
+				taggedString += "\n\n" + "CubeDeactivationConfirmationPawnsBerserk".Translate() + ":\n" + (from p in list
+				select p.LabelShort).ToLineList("- ", false);
 			}
-			if (checkOptionalItems && !activateBy.HasReserved(ThingDefOf.Shard) && !activateBy.CanReserveAndReachableOfDef(ThingDefOf.Shard))
+			if (list2.Any<Pawn>())
 			{
-				return "NoItemReservedOrReachable".Translate(ThingDefOf.Shard.label);
+				taggedString += "\n\n" + "CubeDeactivationConfirmationPawnsLost".Translate() + ":\n" + (from p in list2
+				select p.LabelShort).ToLineList("- ", false);
 			}
-		}
-		else if (checkOptionalItems && !ReservationUtility.ExistsUnreservedAmountOfDef(parent.MapHeld, ThingDefOf.Shard, Faction.OfPlayer, 1))
-		{
-			return "NoItemReserved".Translate(ThingDefOf.Shard.label);
-		}
-		return true;
-	}
-
-	private void OrderDeactivation(Pawn pawn)
-	{
-		TaggedString text = "CubeDeactivationConfirmation".Translate();
-		List<Pawn> list = Find.Maps.SelectMany((Map m) => m.mapPawns.AllPawns.Where((Pawn p) => p.Faction == Faction.OfPlayer && p.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))).ToList();
-		List<Pawn> list2 = Find.WorldObjects.Caravans.SelectMany((Caravan c) => c.pawns.InnerListForReading.Where((Pawn p) => p.Faction == Faction.OfPlayer && p.health.hediffSet.HasHediff(HediffDefOf.CubeInterest))).ToList();
-		if (list.Any())
-		{
-			text += "\n\n" + "CubeDeactivationConfirmationPawnsBerserk".Translate() + ":\n" + list.Select((Pawn p) => p.LabelShort).ToLineList("- ");
-		}
-		if (list2.Any())
-		{
-			text += "\n\n" + "CubeDeactivationConfirmationPawnsLost".Translate() + ":\n" + list2.Select((Pawn p) => p.LabelShort).ToLineList("- ");
-		}
-		text += "\n\n" + "CubeDeactivationConfirmationEnd".Translate();
-		Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, delegate
-		{
-			if (pawn.TryFindReserveAndReachableOfDef(ThingDefOf.Shard, out var thing))
+			taggedString += "\n\n" + "CubeDeactivationConfirmationEnd".Translate();
+			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(taggedString, delegate()
 			{
-				Job job = JobMaker.MakeJob(JobDefOf.InteractThing, parent, thing);
+				Thing t;
+				if (!pawn.TryFindReserveAndReachableOfDef(ThingDefOf.Shard, out t, PathEndMode.Touch, Danger.None, 1, -1, null, false))
+				{
+					return;
+				}
+				Job job = JobMaker.MakeJob(JobDefOf.InteractThing, this.parent, t);
 				job.count = 1;
 				job.playerForced = true;
-				pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
+				pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+			}, false, null, WindowLayer.Dialog));
+		}
+
+		// Token: 0x06010132 RID: 65842 RVA: 0x004A6FBC File Offset: 0x004A51BC
+		private bool ValidatePawn(Pawn pawn)
+		{
+			if (pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest, false) || pawn.health.hediffSet.HasHediff(HediffDefOf.CubeComa, false))
+			{
+				return false;
 			}
-		}));
-	}
+			if (pawn.MapHeld != this.parent.MapHeld)
+			{
+				return false;
+			}
+			if (this.parent.IsInCaravan())
+			{
+				Caravan caravan = pawn.GetCaravan();
+				bool? flag;
+				if (caravan == null)
+				{
+					flag = null;
+				}
+				else
+				{
+					IEnumerable<Thing> allThings = caravan.AllThings;
+					flag = ((allThings != null) ? new bool?(allThings.Contains(this.parent)) : null);
+				}
+				bool? flag2 = flag;
+				return flag2.GetValueOrDefault();
+			}
+			return true;
+		}
 
-	private bool ValidatePawn(Pawn pawn)
-	{
-		if (pawn.health.hediffSet.HasHediff(HediffDefOf.CubeInterest) || pawn.health.hediffSet.HasHediff(HediffDefOf.CubeComa))
+		// Token: 0x06010133 RID: 65843 RVA: 0x004A7060 File Offset: 0x004A5260
+		public RoofCollapseResponse Notify_OnBeforeRoofCollapse()
 		{
-			return false;
+			IntVec3 cell;
+			if (RCellFinder.TryFindRandomCellNearWith(this.parent.Position, (IntVec3 c) => CompGoldenCube.IsValidCell(c, this.parent.MapHeld), this.parent.MapHeld, out cell, 10, 2147483647))
+			{
+				SkipUtility.SkipTo(this.parent, cell, this.parent.MapHeld);
+			}
+			return RoofCollapseResponse.RemoveThing;
 		}
-		if (pawn.MapHeld != parent.MapHeld)
-		{
-			return false;
-		}
-		if (parent.IsInCaravan())
-		{
-			return pawn.GetCaravan()?.AllThings?.Contains(parent) == true;
-		}
-		return true;
-	}
 
-	public RoofCollapseResponse Notify_OnBeforeRoofCollapse()
-	{
-		if (RCellFinder.TryFindRandomCellNearWith(parent.Position, (IntVec3 c) => IsValidCell(c, parent.MapHeld), parent.MapHeld, out var result, 10))
+		// Token: 0x06010134 RID: 65844 RVA: 0x004A433E File Offset: 0x004A253E
+		private static bool IsValidCell(IntVec3 cell, Map map)
 		{
-			SkipUtility.SkipTo(parent, result, parent.MapHeld);
+			return cell.InBounds(map) && cell.Walkable(map);
 		}
-		return RoofCollapseResponse.RemoveThing;
-	}
 
-	private static bool IsValidCell(IntVec3 cell, Map map)
-	{
-		if (cell.InBounds(map))
-		{
-			return cell.Walkable(map);
-		}
-		return false;
+		// Token: 0x0400A7EF RID: 42991
+		private CompStudyUnlocks studyUnlocksInt;
+
+		// Token: 0x0400A7F0 RID: 42992
+		private const float EnthrallMTBDays = 12f;
+
+		// Token: 0x0400A7F1 RID: 42993
+		private static readonly IntRange GoldRange = new IntRange(125, 175);
 	}
 }

@@ -1,84 +1,89 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualOutcomeComp_ParticipantCount : RitualOutcomeComp_Quality
+namespace RimWorld
 {
-	public override RitualOutcomeComp_Data MakeData()
+	// Token: 0x02002747 RID: 10055
+	public class RitualOutcomeComp_ParticipantCount : RitualOutcomeComp_Quality
 	{
-		return new RitualOutcomeComp_DataThingPresence();
-	}
-
-	public override void Tick(LordJob_Ritual ritual, RitualOutcomeComp_Data data, float progressAmount)
-	{
-		base.Tick(ritual, data, progressAmount);
-		RitualOutcomeComp_DataThingPresence ritualOutcomeComp_DataThingPresence = (RitualOutcomeComp_DataThingPresence)data;
-		foreach (Pawn item in ritual.PawnsToCountTowardsPresence)
+		// Token: 0x0600DC9A RID: 56474 RVA: 0x0040EC26 File Offset: 0x0040CE26
+		public override RitualOutcomeComp_Data MakeData()
 		{
-			if (ritual.Ritual != null)
+			return new RitualOutcomeComp_DataThingPresence();
+		}
+
+		// Token: 0x0600DC9B RID: 56475 RVA: 0x0040EC30 File Offset: 0x0040CE30
+		public override void Tick(LordJob_Ritual ritual, RitualOutcomeComp_Data data, float progressAmount)
+		{
+			base.Tick(ritual, data, progressAmount);
+			RitualOutcomeComp_DataThingPresence ritualOutcomeComp_DataThingPresence = (RitualOutcomeComp_DataThingPresence)data;
+			foreach (Pawn pawn in ritual.PawnsToCountTowardsPresence)
 			{
-				RitualRole ritualRole = ritual.RoleFor(item, includeForced: true);
-				if (ritualRole != null && !ritualRole.countsAsParticipant)
+				if (ritual.Ritual != null)
 				{
-					continue;
+					RitualRole ritualRole = ritual.RoleFor(pawn, true);
+					if (ritualRole != null && !ritualRole.countsAsParticipant)
+					{
+						continue;
+					}
+				}
+				if (GatheringsUtility.InGatheringArea(pawn.Position, ritual.Spot, pawn.MapHeld))
+				{
+					if (!ritualOutcomeComp_DataThingPresence.presentForTicks.ContainsKey(pawn))
+					{
+						ritualOutcomeComp_DataThingPresence.presentForTicks.Add(pawn, 0f);
+					}
+					Dictionary<Thing, float> presentForTicks = ritualOutcomeComp_DataThingPresence.presentForTicks;
+					Thing key = pawn;
+					presentForTicks[key] += progressAmount;
 				}
 			}
-			if (GatheringsUtility.InGatheringArea(item.Position, ritual.Spot, item.MapHeld))
+		}
+
+		// Token: 0x0600DC9C RID: 56476 RVA: 0x0040ECFC File Offset: 0x0040CEFC
+		public override float Count(LordJob_Ritual ritual, RitualOutcomeComp_Data data)
+		{
+			int num = 0;
+			RitualOutcomeComp_DataThingPresence ritualOutcomeComp_DataThingPresence = (RitualOutcomeComp_DataThingPresence)data;
+			float num2 = (ritual.DurationTicks != 0) ? ((float)ritual.DurationTicks) : ritual.TicksPassedWithProgress;
+			foreach (KeyValuePair<Thing, float> keyValuePair in ritualOutcomeComp_DataThingPresence.presentForTicks)
 			{
-				if (!ritualOutcomeComp_DataThingPresence.presentForTicks.ContainsKey(item))
+				Pawn p = (Pawn)keyValuePair.Key;
+				if (this.Counts(ritual.assignments, p) && keyValuePair.Value >= num2 / 2f)
 				{
-					ritualOutcomeComp_DataThingPresence.presentForTicks.Add(item, 0f);
+					num++;
 				}
-				ritualOutcomeComp_DataThingPresence.presentForTicks[item] += progressAmount;
 			}
+			return (float)((this.curve != null) ? ((int)Math.Min((float)num, this.curve.Points[this.curve.PointsCount - 1].x)) : num);
 		}
-	}
 
-	public override float Count(LordJob_Ritual ritual, RitualOutcomeComp_Data data)
-	{
-		int num = 0;
-		RitualOutcomeComp_DataThingPresence obj = (RitualOutcomeComp_DataThingPresence)data;
-		float num2 = ((ritual.DurationTicks != 0) ? ((float)ritual.DurationTicks) : ritual.TicksPassedWithProgress);
-		foreach (KeyValuePair<Thing, float> presentForTick in obj.presentForTicks)
+		// Token: 0x0600DC9D RID: 56477 RVA: 0x0040EDD4 File Offset: 0x0040CFD4
+		protected bool Counts(RitualRoleAssignments assignments, Pawn p)
 		{
-			Pawn p = (Pawn)presentForTick.Key;
-			if (Counts(ritual.assignments, p) && presentForTick.Value >= num2 / 2f)
+			if (assignments != null && assignments.Ritual == null && assignments.Required(p))
 			{
-				num++;
+				return false;
 			}
+			RitualRole ritualRole = (assignments != null) ? assignments.RoleForPawn(p, true) : null;
+			return (ritualRole == null || ritualRole.countsAsParticipant) && p.RaceProps.Humanlike;
 		}
-		return (curve != null) ? ((int)Math.Min(num, curve.Points[curve.PointsCount - 1].x)) : num;
-	}
 
-	protected bool Counts(RitualRoleAssignments assignments, Pawn p)
-	{
-		if (assignments != null && assignments.Ritual == null && assignments.Required(p))
+		// Token: 0x0600DC9E RID: 56478 RVA: 0x0040EE20 File Offset: 0x0040D020
+		public override QualityFactor GetQualityFactor(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments, RitualOutcomeComp_Data data)
 		{
-			return false;
+			int num = assignments.Participants.Count((Pawn p) => this.Counts(assignments, p));
+			float quality = this.curve.Evaluate((float)num);
+			return new QualityFactor
+			{
+				label = this.label.CapitalizeFirst(),
+				count = num.ToString() + " / " + Mathf.Max(base.MaxValue, (float)num).ToString(),
+				qualityChange = this.ExpectedOffsetDesc(true, quality),
+				quality = quality,
+				positive = true,
+				priority = 4f
+			};
 		}
-		RitualRole ritualRole = assignments?.RoleForPawn(p);
-		if (ritualRole != null && !ritualRole.countsAsParticipant)
-		{
-			return false;
-		}
-		return p.RaceProps.Humanlike;
-	}
-
-	public override QualityFactor GetQualityFactor(Precept_Ritual ritual, TargetInfo ritualTarget, RitualObligation obligation, RitualRoleAssignments assignments, RitualOutcomeComp_Data data)
-	{
-		int num = assignments.Participants.Count((Pawn p) => Counts(assignments, p));
-		float quality = curve.Evaluate(num);
-		return new QualityFactor
-		{
-			label = label.CapitalizeFirst(),
-			count = num + " / " + Mathf.Max(base.MaxValue, num),
-			qualityChange = ExpectedOffsetDesc(positive: true, quality),
-			quality = quality,
-			positive = true,
-			priority = 4f
-		};
 	}
 }

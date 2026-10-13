@@ -1,30 +1,38 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public static class AnimationUtility
+namespace Verse
 {
-	public static Vector3 AdjustOffsetForRotationMode(RotationMode mode, Vector3 offset, Pawn pawn)
+	// Token: 0x020005E2 RID: 1506
+	public static class AnimationUtility
 	{
-		switch (mode)
+		// Token: 0x06002699 RID: 9881 RVA: 0x000CC7C0 File Offset: 0x000CA9C0
+		public static Vector3 AdjustOffsetForRotationMode(RotationMode mode, Vector3 offset, Pawn pawn)
 		{
-		case RotationMode.None:
-			return offset;
-		case RotationMode.OneD:
-			if (!(pawn.Rotation == Rot4.South))
+			if (mode == RotationMode.None)
 			{
 				return offset;
 			}
-			return offset * -1f;
-		case RotationMode.TwoD:
-			return offset.RotatedBy(pawn.Rotation);
-		case RotationMode.PawnAimTarget:
-			if (pawn.TargetCurrentlyAimingAt.IsValid)
+			if (mode == RotationMode.OneD)
 			{
-				return offset.RotatedBy((pawn.TargetCurrentlyAimingAt.CenterVector3 - pawn.Position.ToVector3()).ToAngleFlat());
+				if (!(pawn.Rotation == Rot4.South))
+				{
+					return offset;
+				}
+				return offset * -1f;
 			}
-			break;
+			else
+			{
+				if (mode == RotationMode.TwoD)
+				{
+					return offset.RotatedBy(pawn.Rotation);
+				}
+				if (mode == RotationMode.PawnAimTarget && pawn.TargetCurrentlyAimingAt.IsValid)
+				{
+					return offset.RotatedBy((pawn.TargetCurrentlyAimingAt.CenterVector3 - pawn.Position.ToVector3()).ToAngleFlat());
+				}
+				return offset;
+			}
 		}
-		return offset;
 	}
 }

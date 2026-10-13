@@ -1,73 +1,87 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbilityEffect_GiveMentalState : CompAbilityEffect
+namespace RimWorld
 {
-	public new CompProperties_AbilityGiveMentalState Props => (CompProperties_AbilityGiveMentalState)props;
-
-	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	// Token: 0x0200223F RID: 8767
+	public class CompAbilityEffect_GiveMentalState : CompAbilityEffect
 	{
-		base.Apply(target, dest);
-		Pawn pawn = (Props.applyToSelf ? parent.pawn : (target.Thing as Pawn));
-		if (pawn != null && !pawn.InMentalState)
+		// Token: 0x17001D3B RID: 7483
+		// (get) Token: 0x0600BF75 RID: 49013 RVA: 0x0037822A File Offset: 0x0037642A
+		public new CompProperties_AbilityGiveMentalState Props
 		{
-			TryGiveMentalState(pawn.RaceProps.IsMechanoid ? (Props.stateDefForMechs ?? Props.stateDef) : Props.stateDef, pawn, parent.def, Props.durationMultiplier, parent.pawn, Props.forced);
-			RestUtility.WakeUp(pawn);
-			if (Props.casterEffect != null)
+			get
 			{
-				Effecter effecter = Props.casterEffect.SpawnAttached(parent.pawn, parent.pawn.MapHeld);
-				effecter.Trigger(parent.pawn, null);
-				effecter.Cleanup();
-			}
-			if (Props.targetEffect != null)
-			{
-				Effecter effecter2 = Props.targetEffect.SpawnAttached(parent.pawn, parent.pawn.MapHeld);
-				effecter2.Trigger(pawn, null);
-				effecter2.Cleanup();
+				return (CompProperties_AbilityGiveMentalState)this.props;
 			}
 		}
-	}
 
-	public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
-	{
-		if (!base.Valid(target, throwMessages))
+		// Token: 0x0600BF76 RID: 49014 RVA: 0x00378238 File Offset: 0x00376438
+		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
 		{
-			return false;
-		}
-		Pawn pawn = target.Pawn;
-		if (pawn != null)
-		{
-			if (!AbilityUtility.ValidateNoMentalState(pawn, throwMessages, parent))
+			base.Apply(target, dest);
+			Pawn pawn = this.Props.applyToSelf ? this.parent.pawn : (target.Thing as Pawn);
+			if (pawn != null && !pawn.InMentalState)
 			{
-				return false;
-			}
-			if (Props.excludeNPCFactions && pawn.Faction != null && !pawn.Faction.IsPlayer)
-			{
-				if (throwMessages)
+				CompAbilityEffect_GiveMentalState.TryGiveMentalState(pawn.RaceProps.IsMechanoid ? (this.Props.stateDefForMechs ?? this.Props.stateDef) : this.Props.stateDef, pawn, this.parent.def, this.Props.durationMultiplier, this.parent.pawn, this.Props.forced);
+				RestUtility.WakeUp(pawn, true);
+				if (this.Props.casterEffect != null)
 				{
-					Messages.Message("CannotUseAbility".Translate(parent.def.label) + ": " + "TargetBelongsToNPCFaction".Translate(), pawn, MessageTypeDefOf.RejectInput, historical: false);
+					Effecter effecter = this.Props.casterEffect.SpawnAttached(this.parent.pawn, this.parent.pawn.MapHeld, 1f);
+					effecter.Trigger(this.parent.pawn, null, -1);
+					effecter.Cleanup();
 				}
-				return false;
+				if (this.Props.targetEffect != null)
+				{
+					Effecter effecter2 = this.Props.targetEffect.SpawnAttached(this.parent.pawn, this.parent.pawn.MapHeld, 1f);
+					effecter2.Trigger(pawn, null, -1);
+					effecter2.Cleanup();
+				}
 			}
 		}
-		return true;
-	}
 
-	public static void TryGiveMentalState(MentalStateDef def, Pawn p, AbilityDef ability, StatDef multiplierStat, Pawn caster, bool forced = false)
-	{
-		if (p.mindState.mentalStateHandler.TryStartMentalState(def, null, forced, forceWake: true, causedByMood: false, caster, transitionSilently: false, causedByDamage: false, ability.IsPsycast))
+		// Token: 0x0600BF77 RID: 49015 RVA: 0x003783A8 File Offset: 0x003765A8
+		public override bool Valid(LocalTargetInfo target, bool throwMessages = false)
 		{
-			float num = ability.GetStatValueAbstract(StatDefOf.Ability_Duration, caster);
-			if (multiplierStat != null)
+			if (!base.Valid(target, throwMessages))
 			{
-				num *= p.GetStatValue(multiplierStat);
+				return false;
 			}
-			if (num > 0f)
+			Pawn pawn = target.Pawn;
+			if (pawn != null)
 			{
-				p.mindState.mentalStateHandler.CurState.forceRecoverAfterTicks = num.SecondsToTicks();
+				if (!AbilityUtility.ValidateNoMentalState(pawn, throwMessages, this.parent))
+				{
+					return false;
+				}
+				if (this.Props.excludeNPCFactions && pawn.Faction != null && !pawn.Faction.IsPlayer)
+				{
+					if (throwMessages)
+					{
+						Messages.Message("CannotUseAbility".Translate(this.parent.def.label) + ": " + "TargetBelongsToNPCFaction".Translate(), pawn, MessageTypeDefOf.RejectInput, false);
+					}
+					return false;
+				}
 			}
-			p.mindState.mentalStateHandler.CurState.sourceFaction = caster.Faction;
+			return true;
+		}
+
+		// Token: 0x0600BF78 RID: 49016 RVA: 0x00378458 File Offset: 0x00376658
+		public static void TryGiveMentalState(MentalStateDef def, Pawn p, AbilityDef ability, StatDef multiplierStat, Pawn caster, bool forced = false)
+		{
+			if (p.mindState.mentalStateHandler.TryStartMentalState(def, null, forced, true, false, caster, false, false, ability.IsPsycast))
+			{
+				float num = ability.GetStatValueAbstract(StatDefOf.Ability_Duration, caster);
+				if (multiplierStat != null)
+				{
+					num *= p.GetStatValue(multiplierStat, true, -1);
+				}
+				if (num > 0f)
+				{
+					p.mindState.mentalStateHandler.CurState.forceRecoverAfterTicks = num.SecondsToTicks();
+				}
+				p.mindState.mentalStateHandler.CurState.sourceFaction = caster.Faction;
+			}
 		}
 	}
 }

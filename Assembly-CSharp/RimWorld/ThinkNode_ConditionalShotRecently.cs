@@ -1,18 +1,19 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalShotRecently : ThinkNode_Conditional
+namespace RimWorld
 {
-	public int thresholdTicks = 2500;
-
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017CC RID: 6092
+	public class ThinkNode_ConditionalShotRecently : ThinkNode_Conditional
 	{
-		if (pawn.mindState.lastRangedHarmTick > 0 && Find.TickManager.TicksGame < pawn.mindState.lastRangedHarmTick + thresholdTicks)
+		// Token: 0x06008DEC RID: 36332 RVA: 0x002A1881 File Offset: 0x0029FA81
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return true;
+			return pawn.mindState.lastRangedHarmTick > 0 && Find.TickManager.TicksGame < pawn.mindState.lastRangedHarmTick + this.thresholdTicks;
 		}
-		return false;
+
+		// Token: 0x04005BDF RID: 23519
+		public int thresholdTicks = 2500;
 	}
 }

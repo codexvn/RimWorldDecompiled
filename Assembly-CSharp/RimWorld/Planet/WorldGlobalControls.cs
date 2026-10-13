@@ -1,70 +1,76 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldGlobalControls
+namespace RimWorld.Planet
 {
-	private WidgetRow rowVisibility = new WidgetRow();
-
-	public const float Width = 250f;
-
-	public void WorldGlobalControlsOnGUI()
+	// Token: 0x02003E7A RID: 15994
+	public class WorldGlobalControls
 	{
-		if (Event.current.type == EventType.Layout)
+		// Token: 0x06015E10 RID: 89616 RVA: 0x0068BA9C File Offset: 0x00689C9C
+		public void WorldGlobalControlsOnGUI()
 		{
-			return;
-		}
-		float leftX = (float)UI.screenWidth - 250f;
-		float curBaseY = (float)UI.screenHeight - 4f;
-		if (Current.ProgramState == ProgramState.Playing)
-		{
-			curBaseY -= 35f;
-		}
-		GlobalControlsUtility.DoPlaySettings(rowVisibility, worldView: true, ref curBaseY);
-		if (Current.ProgramState == ProgramState.Playing)
-		{
-			curBaseY -= 4f;
-			GlobalControlsUtility.DoTimespeedControls(leftX, 250f, ref curBaseY);
-			if (Find.CurrentMap != null || Find.WorldSelector.AnyObjectOrTileSelected)
+			if (Event.current.type == EventType.Layout)
 			{
-				curBaseY -= 4f;
-				GlobalControlsUtility.DoDate(leftX, 250f, ref curBaseY);
+				return;
 			}
-			float num = 154f;
-			float num2 = Find.World.gameConditionManager.TotalHeightAt(num);
-			Rect rect = new Rect((float)UI.screenWidth - num, curBaseY - num2, num, num2);
-			Find.World.gameConditionManager.DoConditionsUI(rect);
-			curBaseY -= num2;
+			float leftX = (float)UI.screenWidth - 250f;
+			float num = (float)UI.screenHeight - 4f;
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				num -= 35f;
+			}
+			GlobalControlsUtility.DoPlaySettings(this.rowVisibility, true, ref num);
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				num -= 4f;
+				GlobalControlsUtility.DoTimespeedControls(leftX, 250f, ref num);
+				if (Find.CurrentMap != null || Find.WorldSelector.AnyObjectOrTileSelected)
+				{
+					num -= 4f;
+					GlobalControlsUtility.DoDate(leftX, 250f, ref num);
+				}
+				float num2 = 154f;
+				float num3 = Find.World.gameConditionManager.TotalHeightAt(num2);
+				Rect rect = new Rect((float)UI.screenWidth - num2, num - num3, num2, num3);
+				Find.World.gameConditionManager.DoConditionsUI(rect);
+				num -= num3;
+			}
+			if (DebugViewSettings.showMemoryInfo)
+			{
+				GlobalControlsUtility.DrawMemoryInfo(leftX, 250f, ref num);
+			}
+			if (DebugViewSettings.showTpsCounter)
+			{
+				GlobalControlsUtility.DrawTpsCounter(leftX, 250f, ref num);
+			}
+			if (DebugViewSettings.showFpsCounter)
+			{
+				GlobalControlsUtility.DrawFpsCounter(leftX, 250f, ref num);
+			}
+			if (Prefs.ShowRealtimeClock)
+			{
+				GlobalControlsUtility.DoRealtimeClock(leftX, 250f, ref num);
+			}
+			if (!Find.WorldTargeter.IsTargeting)
+			{
+				Find.WorldRoutePlanner.DoRoutePlannerButton(ref num);
+			}
+			if (!Find.PlaySettings.lockNorthUp)
+			{
+				CompassWidget.CompassOnGUI(ref num);
+			}
+			if (Current.ProgramState == ProgramState.Playing)
+			{
+				num -= 10f;
+				Find.LetterStack.LettersOnGUI(num);
+			}
 		}
-		if (DebugViewSettings.showMemoryInfo)
-		{
-			GlobalControlsUtility.DrawMemoryInfo(leftX, 250f, ref curBaseY);
-		}
-		if (DebugViewSettings.showTpsCounter)
-		{
-			GlobalControlsUtility.DrawTpsCounter(leftX, 250f, ref curBaseY);
-		}
-		if (DebugViewSettings.showFpsCounter)
-		{
-			GlobalControlsUtility.DrawFpsCounter(leftX, 250f, ref curBaseY);
-		}
-		if (Prefs.ShowRealtimeClock)
-		{
-			GlobalControlsUtility.DoRealtimeClock(leftX, 250f, ref curBaseY);
-		}
-		if (!Find.WorldTargeter.IsTargeting)
-		{
-			Find.WorldRoutePlanner.DoRoutePlannerButton(ref curBaseY);
-		}
-		if (!Find.PlaySettings.lockNorthUp)
-		{
-			CompassWidget.CompassOnGUI(ref curBaseY);
-		}
-		if (Current.ProgramState == ProgramState.Playing)
-		{
-			curBaseY -= 10f;
-			Find.LetterStack.LettersOnGUI(curBaseY);
-		}
+
+		// Token: 0x0400F2BF RID: 62143
+		private WidgetRow rowVisibility = new WidgetRow();
+
+		// Token: 0x0400F2C0 RID: 62144
+		public const float Width = 250f;
 	}
 }

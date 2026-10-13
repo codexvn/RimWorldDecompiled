@@ -1,110 +1,140 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using RimWorld;
 using Steamworks;
 
-namespace Verse.Steam;
-
-public static class WorkshopItems
+namespace Verse.Steam
 {
-	private static List<WorkshopItem> subbedItems;
-
-	private static List<WorkshopItem_Downloading> downloadingItems;
-
-	public static IEnumerable<WorkshopItem> AllSubscribedItems => subbedItems;
-
-	public static IEnumerable<WorkshopItem_Downloading> AllDownloadingItems => downloadingItems;
-
-	public static int DownloadingItemsCount
+	// Token: 0x02000D97 RID: 3479
+	public static class WorkshopItems
 	{
-		get
+		// Token: 0x17000E17 RID: 3607
+		// (get) Token: 0x060058CB RID: 22731 RVA: 0x001C9C41 File Offset: 0x001C7E41
+		public static IEnumerable<WorkshopItem> AllSubscribedItems
 		{
-			int num = 0;
-			for (int i = 0; i < subbedItems.Count; i++)
+			get
 			{
-				if (subbedItems[i] is WorkshopItem_Downloading)
+				return WorkshopItems.subbedItems;
+			}
+		}
+
+		// Token: 0x17000E18 RID: 3608
+		// (get) Token: 0x060058CC RID: 22732 RVA: 0x001C9C48 File Offset: 0x001C7E48
+		public static IEnumerable<WorkshopItem_Downloading> AllDownloadingItems
+		{
+			get
+			{
+				return WorkshopItems.downloadingItems;
+			}
+		}
+
+		// Token: 0x17000E19 RID: 3609
+		// (get) Token: 0x060058CD RID: 22733 RVA: 0x001C9C50 File Offset: 0x001C7E50
+		public static int DownloadingItemsCount
+		{
+			get
+			{
+				int num = 0;
+				for (int i = 0; i < WorkshopItems.subbedItems.Count; i++)
 				{
-					num++;
+					if (WorkshopItems.subbedItems[i] is WorkshopItem_Downloading)
+					{
+						num++;
+					}
+				}
+				return num;
+			}
+		}
+
+		// Token: 0x060058CE RID: 22734 RVA: 0x001C9C8B File Offset: 0x001C7E8B
+		static WorkshopItems()
+		{
+			WorkshopItems.RebuildItemsList();
+		}
+
+		// Token: 0x060058CF RID: 22735 RVA: 0x000026EA File Offset: 0x000008EA
+		public static void EnsureInit()
+		{
+		}
+
+		// Token: 0x060058D0 RID: 22736 RVA: 0x001C9CA8 File Offset: 0x001C7EA8
+		public static WorkshopItem GetItem(PublishedFileId_t pfid)
+		{
+			for (int i = 0; i < WorkshopItems.subbedItems.Count; i++)
+			{
+				if (WorkshopItems.subbedItems[i].PublishedFileId == pfid)
+				{
+					return WorkshopItems.subbedItems[i];
 				}
 			}
-			return num;
+			return null;
 		}
-	}
 
-	static WorkshopItems()
-	{
-		subbedItems = new List<WorkshopItem>();
-		downloadingItems = new List<WorkshopItem_Downloading>();
-		RebuildItemsList();
-	}
-
-	public static void EnsureInit()
-	{
-	}
-
-	public static WorkshopItem GetItem(PublishedFileId_t pfid)
-	{
-		for (int i = 0; i < subbedItems.Count; i++)
+		// Token: 0x060058D1 RID: 22737 RVA: 0x001C9CEF File Offset: 0x001C7EEF
+		public static bool HasItem(PublishedFileId_t pfid)
 		{
-			if (subbedItems[i].PublishedFileId == pfid)
+			return WorkshopItems.GetItem(pfid) != null;
+		}
+
+		// Token: 0x060058D2 RID: 22738 RVA: 0x001C9CFC File Offset: 0x001C7EFC
+		private static void RebuildItemsList()
+		{
+			if (!SteamManager.Initialized)
 			{
-				return subbedItems[i];
+				return;
 			}
-		}
-		return null;
-	}
-
-	public static bool HasItem(PublishedFileId_t pfid)
-	{
-		return GetItem(pfid) != null;
-	}
-
-	private static void RebuildItemsList()
-	{
-		if (!SteamManager.Initialized)
-		{
-			return;
-		}
-		subbedItems.Clear();
-		downloadingItems.Clear();
-		foreach (PublishedFileId_t item in Workshop.AllSubscribedItems())
-		{
-			WorkshopItem workshopItem = WorkshopItem.MakeFrom(item);
-			if (workshopItem != null)
+			WorkshopItems.subbedItems.Clear();
+			WorkshopItems.downloadingItems.Clear();
+			foreach (PublishedFileId_t pfid in Workshop.AllSubscribedItems())
 			{
-				subbedItems.Add(workshopItem);
-				if (workshopItem is WorkshopItem_Downloading)
+				WorkshopItem workshopItem = WorkshopItem.MakeFrom(pfid);
+				if (workshopItem != null)
 				{
-					downloadingItems.Add(workshopItem as WorkshopItem_Downloading);
+					WorkshopItems.subbedItems.Add(workshopItem);
+					if (workshopItem is WorkshopItem_Downloading)
+					{
+						WorkshopItems.downloadingItems.Add(workshopItem as WorkshopItem_Downloading);
+					}
 				}
 			}
+			ScenarioLister.MarkDirty();
 		}
-		ScenarioLister.MarkDirty();
-	}
 
-	internal static void Notify_Subscribed(PublishedFileId_t pfid)
-	{
-		RebuildItemsList();
-	}
-
-	internal static void Notify_Installed(PublishedFileId_t pfid)
-	{
-		RebuildItemsList();
-	}
-
-	internal static void Notify_Unsubscribed(PublishedFileId_t pfid)
-	{
-		RebuildItemsList();
-	}
-
-	public static string DebugOutput()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.AppendLine("Subscribed items:");
-		foreach (WorkshopItem subbedItem in subbedItems)
+		// Token: 0x060058D3 RID: 22739 RVA: 0x001C9D90 File Offset: 0x001C7F90
+		internal static void Notify_Subscribed(PublishedFileId_t pfid)
 		{
-			stringBuilder.AppendLine("  " + subbedItem.ToString());
+			WorkshopItems.RebuildItemsList();
 		}
-		return stringBuilder.ToString();
+
+		// Token: 0x060058D4 RID: 22740 RVA: 0x001C9D90 File Offset: 0x001C7F90
+		internal static void Notify_Installed(PublishedFileId_t pfid)
+		{
+			WorkshopItems.RebuildItemsList();
+		}
+
+		// Token: 0x060058D5 RID: 22741 RVA: 0x001C9D90 File Offset: 0x001C7F90
+		internal static void Notify_Unsubscribed(PublishedFileId_t pfid)
+		{
+			WorkshopItems.RebuildItemsList();
+		}
+
+		// Token: 0x060058D6 RID: 22742 RVA: 0x001C9D98 File Offset: 0x001C7F98
+		public static string DebugOutput()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.AppendLine("Subscribed items:");
+			foreach (WorkshopItem workshopItem in WorkshopItems.subbedItems)
+			{
+				stringBuilder.AppendLine("  " + workshopItem.ToString());
+			}
+			return stringBuilder.ToString();
+		}
+
+		// Token: 0x0400405E RID: 16478
+		private static List<WorkshopItem> subbedItems = new List<WorkshopItem>();
+
+		// Token: 0x0400405F RID: 16479
+		private static List<WorkshopItem_Downloading> downloadingItems = new List<WorkshopItem_Downloading>();
 	}
 }

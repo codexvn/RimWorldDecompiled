@@ -1,39 +1,62 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualRoleColonistConnectable : RitualRoleColonist
+namespace RimWorld
 {
-	public override bool AppliesToPawn(Pawn p, out string reason, TargetInfo selectedTarget, LordJob_Ritual ritual = null, RitualRoleAssignments assignments = null, Precept_Ritual precept = null, bool skipReason = false)
+	// Token: 0x020027BA RID: 10170
+	public class RitualRoleColonistConnectable : RitualRoleColonist
 	{
-		if (!base.AppliesToPawn(p, out reason, selectedTarget, ritual, assignments, precept, skipReason: false))
+		// Token: 0x0600DED7 RID: 57047 RVA: 0x004185E0 File Offset: 0x004167E0
+		public override bool AppliesToPawn(Pawn p, out string reason, TargetInfo selectedTarget, LordJob_Ritual ritual = null, RitualRoleAssignments assignments = null, Precept_Ritual precept = null, bool skipReason = false)
 		{
-			return false;
-		}
-		if (precept?.ideo != null && precept.ritualOnlyForIdeoMembers && p.Ideo != precept.ideo)
-		{
-			if (!skipReason)
+			if (!base.AppliesToPawn(p, out reason, selectedTarget, ritual, assignments, precept, false))
 			{
-				reason = "CantStartRitualSelectedPawnMustBeMember".Translate(p.Named("PAWN"), precept.ideo.Named("IDEO"));
+				return false;
 			}
-			return false;
-		}
-		if (StatDefOf.PsychicSensitivity.Worker.IsDisabledFor(p) || p.GetStatValue(StatDefOf.PsychicSensitivity) <= 0f)
-		{
-			if (!skipReason)
+			if (((precept != null) ? precept.ideo : null) != null && precept.ritualOnlyForIdeoMembers && p.Ideo != precept.ideo)
 			{
-				reason = "CantStartRitualSelectedPawnPsychicallyDeaf".Translate(p.Named("PAWN"));
+				if (!skipReason)
+				{
+					reason = "CantStartRitualSelectedPawnMustBeMember".Translate(p.Named("PAWN"), precept.ideo.Named("IDEO"));
+				}
+				return false;
 			}
-			return false;
-		}
-		if (p.needs?.mood?.thoughts?.memories != null && p.needs.mood.thoughts.memories.GetFirstMemoryOfDef(ThoughtDefOf.ConnectedTreeDied) != null)
-		{
-			if (!skipReason)
+			if (StatDefOf.PsychicSensitivity.Worker.IsDisabledFor(p) || p.GetStatValue(StatDefOf.PsychicSensitivity, true, -1) <= 0f)
 			{
-				reason = "MessageRitualRolePawnRecentlyTornConnection".Translate(p);
+				if (!skipReason)
+				{
+					reason = "CantStartRitualSelectedPawnPsychicallyDeaf".Translate(p.Named("PAWN"));
+				}
+				return false;
 			}
-			return false;
+			Pawn_NeedsTracker needs = p.needs;
+			bool flag;
+			if (needs == null)
+			{
+				flag = (null != null);
+			}
+			else
+			{
+				Need_Mood mood = needs.mood;
+				if (mood == null)
+				{
+					flag = (null != null);
+				}
+				else
+				{
+					ThoughtHandler thoughts = mood.thoughts;
+					flag = (((thoughts != null) ? thoughts.memories : null) != null);
+				}
+			}
+			if (flag && p.needs.mood.thoughts.memories.GetFirstMemoryOfDef(ThoughtDefOf.ConnectedTreeDied) != null)
+			{
+				if (!skipReason)
+				{
+					reason = "MessageRitualRolePawnRecentlyTornConnection".Translate(p);
+				}
+				return false;
+			}
+			return true;
 		}
-		return true;
 	}
 }

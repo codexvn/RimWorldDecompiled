@@ -1,6 +1,11 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public abstract class LordToilData : IExposable
+namespace Verse.AI.Group
 {
-	public abstract void ExposeData();
+	// Token: 0x0200109C RID: 4252
+	public abstract class LordToilData : IExposable
+	{
+		// Token: 0x06006885 RID: 26757
+		public abstract void ExposeData();
+	}
 }

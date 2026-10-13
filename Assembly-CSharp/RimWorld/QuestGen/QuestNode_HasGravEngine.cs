@@ -1,37 +1,49 @@
-namespace RimWorld.QuestGen;
+﻿using System;
 
-public class QuestNode_HasGravEngine : QuestNode
+namespace RimWorld.QuestGen
 {
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x020039EA RID: 14826
+	public class QuestNode_HasGravEngine : QuestNode
 	{
-		if (GravshipUtility.PlayerHasGravEngine())
+		// Token: 0x06014562 RID: 83298 RVA: 0x006146C4 File Offset: 0x006128C4
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (GravshipUtility.PlayerHasGravEngine())
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		if (GravshipUtility.PlayerHasGravEngine())
+		// Token: 0x06014563 RID: 83299 RVA: 0x006146FA File Offset: 0x006128FA
+		protected override void RunInt()
 		{
-			node?.Run();
+			if (GravshipUtility.PlayerHasGravEngine())
+			{
+				QuestNode questNode = this.node;
+				if (questNode == null)
+				{
+					return;
+				}
+				questNode.Run();
+				return;
+			}
+			else
+			{
+				QuestNode questNode2 = this.elseNode;
+				if (questNode2 == null)
+				{
+					return;
+				}
+				questNode2.Run();
+				return;
+			}
 		}
-		else
-		{
-			elseNode?.Run();
-		}
+
+		// Token: 0x0400E064 RID: 57444
+		public QuestNode node;
+
+		// Token: 0x0400E065 RID: 57445
+		public QuestNode elseNode;
 	}
 }

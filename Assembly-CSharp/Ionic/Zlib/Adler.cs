@@ -1,71 +1,78 @@
-namespace Ionic.Zlib;
+﻿using System;
 
-public sealed class Adler
+namespace Ionic.Zlib
 {
-	private static readonly uint BASE = 65521u;
-
-	private static readonly int NMAX = 5552;
-
-	public static uint Adler32(uint adler, byte[] buf, int index, int len)
+	// Token: 0x02003EC3 RID: 16067
+	public sealed class Adler
 	{
-		if (buf == null)
+		// Token: 0x0601608E RID: 90254 RVA: 0x00698CBC File Offset: 0x00696EBC
+		public static uint Adler32(uint adler, byte[] buf, int index, int len)
 		{
-			return 1u;
-		}
-		uint num = adler & 0xFFFF;
-		uint num2 = (adler >> 16) & 0xFFFF;
-		while (len > 0)
-		{
-			int num3 = ((len < NMAX) ? len : NMAX);
-			len -= num3;
-			while (num3 >= 16)
+			if (buf == null)
 			{
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num += buf[index++];
-				num2 += num;
-				num3 -= 16;
+				return 1U;
 			}
-			if (num3 != 0)
+			uint num = adler & 65535U;
+			uint num2 = adler >> 16 & 65535U;
+			while (len > 0)
 			{
-				do
+				int i = (len < Adler.NMAX) ? len : Adler.NMAX;
+				len -= i;
+				while (i >= 16)
 				{
-					num += buf[index++];
+					num += (uint)buf[index++];
 					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					num += (uint)buf[index++];
+					num2 += num;
+					i -= 16;
 				}
-				while (--num3 != 0);
+				if (i != 0)
+				{
+					do
+					{
+						num += (uint)buf[index++];
+						num2 += num;
+					}
+					while (--i != 0);
+				}
+				num %= Adler.BASE;
+				num2 %= Adler.BASE;
 			}
-			num %= BASE;
-			num2 %= BASE;
+			return num2 << 16 | num;
 		}
-		return (num2 << 16) | num;
+
+		// Token: 0x0400F4C9 RID: 62665
+		private static readonly uint BASE = 65521U;
+
+		// Token: 0x0400F4CA RID: 62666
+		private static readonly int NMAX = 5552;
 	}
 }

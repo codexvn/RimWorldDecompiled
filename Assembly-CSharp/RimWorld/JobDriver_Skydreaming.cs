@@ -1,32 +1,38 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_Skydreaming : JobDriver
+namespace RimWorld
 {
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x0200120C RID: 4620
+	public class JobDriver_Skydreaming : JobDriver
 	{
-		return true;
-	}
+		// Token: 0x060070DA RID: 28890 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return true;
+		}
 
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnChildLearningConditions();
-		yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.initAction = delegate
+		// Token: 0x060070DB RID: 28891 RVA: 0x0022F867 File Offset: 0x0022DA67
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
-		};
-		toil.tickIntervalAction = delegate(int delta)
-		{
-			LearningUtility.LearningTickCheckEnd(pawn, delta);
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Delay;
-		toil.defaultDuration = job.def.learningDuration;
-		toil.FailOn(() => pawn.Position.Roofed(pawn.Map));
-		yield return toil;
+			this.FailOnChildLearningConditions<JobDriver_Skydreaming>();
+			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+			Toil toil = ToilMaker.MakeToil("MakeNewToils");
+			toil.initAction = delegate()
+			{
+				this.pawn.jobs.posture = PawnPosture.LayingOnGroundFaceUp;
+			};
+			toil.tickIntervalAction = delegate(int delta)
+			{
+				LearningUtility.LearningTickCheckEnd(this.pawn, delta, false);
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Delay;
+			toil.defaultDuration = this.job.def.learningDuration;
+			toil.FailOn(() => this.pawn.Position.Roofed(this.pawn.Map));
+			yield return toil;
+			yield break;
+		}
 	}
 }

@@ -1,89 +1,106 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_PlantsCut : WorkGiver_Scanner
+namespace RimWorld
 {
-	public override PathEndMode PathEndMode => PathEndMode.Touch;
-
-	public override Danger MaxPathDanger(Pawn pawn)
+	// Token: 0x020015FF RID: 5631
+	public class WorkGiver_PlantsCut : WorkGiver_Scanner
 	{
-		return Danger.Deadly;
-	}
+		// Token: 0x060084DF RID: 34015 RVA: 0x00075162 File Offset: 0x00073362
+		public override Danger MaxPathDanger(Pawn pawn)
+		{
+			return Danger.Deadly;
+		}
 
-	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-	{
-		foreach (Designation item in pawn.Map.designationManager.designationsByDef[DesignationDefOf.CutPlant])
+		// Token: 0x060084E0 RID: 34016 RVA: 0x0027CB1D File Offset: 0x0027AD1D
+		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			yield return item.target.Thing;
-		}
-		foreach (Designation item2 in pawn.Map.designationManager.designationsByDef[DesignationDefOf.HarvestPlant])
-		{
-			yield return item2.target.Thing;
-		}
-	}
-
-	public override bool ShouldSkip(Pawn pawn, bool forced = false)
-	{
-		if (!pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.CutPlant))
-		{
-			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.HarvestPlant);
-		}
-		return false;
-	}
-
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		if (t.def.category != ThingCategory.Plant)
-		{
-			return null;
-		}
-		if (!pawn.CanReserve(t, 1, -1, null, forced))
-		{
-			return null;
-		}
-		if (t.IsBurning())
-		{
-			return null;
-		}
-		if (!PlantUtility.PawnWillingToCutPlant_Job(t, pawn))
-		{
-			return null;
-		}
-		if (!forced && t.TryGetComp(out CompPlantPreventCutting comp) && comp.PreventCutting)
-		{
-			return null;
-		}
-		foreach (Designation item in pawn.Map.designationManager.AllDesignationsOn(t))
-		{
-			if (item.def == DesignationDefOf.HarvestPlant)
+			foreach (Designation designation in pawn.Map.designationManager.designationsByDef[DesignationDefOf.CutPlant])
 			{
-				if (!((Plant)t).HarvestableNow)
+				yield return designation.target.Thing;
+			}
+			List<Designation>.Enumerator enumerator = default(List<Designation>.Enumerator);
+			foreach (Designation designation2 in pawn.Map.designationManager.designationsByDef[DesignationDefOf.HarvestPlant])
+			{
+				yield return designation2.target.Thing;
+			}
+			enumerator = default(List<Designation>.Enumerator);
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x060084E1 RID: 34017 RVA: 0x0027CB2D File Offset: 0x0027AD2D
+		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		{
+			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.CutPlant) && !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.HarvestPlant);
+		}
+
+		// Token: 0x1700145D RID: 5213
+		// (get) Token: 0x060084E2 RID: 34018 RVA: 0x000E96BB File Offset: 0x000E78BB
+		public override PathEndMode PathEndMode
+		{
+			get
+			{
+				return PathEndMode.Touch;
+			}
+		}
+
+		// Token: 0x060084E3 RID: 34019 RVA: 0x0027CB60 File Offset: 0x0027AD60
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			if (t.def.category != ThingCategory.Plant)
+			{
+				return null;
+			}
+			if (!pawn.CanReserve(t, 1, -1, null, forced))
+			{
+				return null;
+			}
+			if (t.IsBurning())
+			{
+				return null;
+			}
+			if (!PlantUtility.PawnWillingToCutPlant_Job(t, pawn))
+			{
+				return null;
+			}
+			CompPlantPreventCutting compPlantPreventCutting;
+			if (!forced && t.TryGetComp(out compPlantPreventCutting) && compPlantPreventCutting.PreventCutting)
+			{
+				return null;
+			}
+			foreach (Designation designation in pawn.Map.designationManager.AllDesignationsOn(t))
+			{
+				if (designation.def == DesignationDefOf.HarvestPlant)
 				{
-					return null;
+					if (!((Plant)t).HarvestableNow)
+					{
+						return null;
+					}
+					return JobMaker.MakeJob(JobDefOf.HarvestDesignated, t);
 				}
-				return JobMaker.MakeJob(JobDefOf.HarvestDesignated, t);
+				else if (designation.def == DesignationDefOf.CutPlant)
+				{
+					return JobMaker.MakeJob(JobDefOf.CutPlantDesignated, t);
+				}
 			}
-			if (item.def == DesignationDefOf.CutPlant)
-			{
-				return JobMaker.MakeJob(JobDefOf.CutPlantDesignated, t);
-			}
+			return null;
 		}
-		return null;
-	}
 
-	public override string PostProcessedGerund(Job job)
-	{
-		if (job.def == JobDefOf.HarvestDesignated)
+		// Token: 0x060084E4 RID: 34020 RVA: 0x0027CC5C File Offset: 0x0027AE5C
+		public override string PostProcessedGerund(Job job)
 		{
-			return "HarvestGerund".Translate();
+			if (job.def == JobDefOf.HarvestDesignated)
+			{
+				return "HarvestGerund".Translate();
+			}
+			if (job.def == JobDefOf.CutPlantDesignated)
+			{
+				return "CutGerund".Translate();
+			}
+			return this.def.gerund;
 		}
-		if (job.def == JobDefOf.CutPlantDesignated)
-		{
-			return "CutGerund".Translate();
-		}
-		return def.gerund;
 	}
 }

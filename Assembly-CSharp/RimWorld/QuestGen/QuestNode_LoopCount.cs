@@ -1,56 +1,64 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_LoopCount : QuestNode
+namespace RimWorld.QuestGen
 {
-	public QuestNode node;
-
-	public SlateRef<int> loopCount;
-
-	[NoTranslate]
-	public SlateRef<string> storeLoopCounterAs;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AD8 RID: 15064
+	public class QuestNode_LoopCount : QuestNode
 	{
-		for (int i = 0; i < loopCount.GetValue(slate); i++)
+		// Token: 0x0601487F RID: 84095 RVA: 0x00620528 File Offset: 0x0061E728
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (storeLoopCounterAs.GetValue(slate) != null)
+			for (int i = 0; i < this.loopCount.GetValue(slate); i++)
 			{
-				slate.Set(storeLoopCounterAs.GetValue(slate), i);
-			}
-			try
-			{
-				if (!node.TestRun(slate))
+				if (this.storeLoopCounterAs.GetValue(slate) != null)
 				{
-					return false;
+					slate.Set<int>(this.storeLoopCounterAs.GetValue(slate), i, false);
+				}
+				try
+				{
+					if (!this.node.TestRun(slate))
+					{
+						return false;
+					}
+				}
+				finally
+				{
+					slate.PopPrefix();
 				}
 			}
-			finally
-			{
-				slate.PopPrefix();
-			}
+			return true;
 		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		for (int i = 0; i < loopCount.GetValue(slate); i++)
+		// Token: 0x06014880 RID: 84096 RVA: 0x006205A0 File Offset: 0x0061E7A0
+		protected override void RunInt()
 		{
-			if (storeLoopCounterAs.GetValue(slate) != null)
+			Slate slate = QuestGen.slate;
+			for (int i = 0; i < this.loopCount.GetValue(slate); i++)
 			{
-				QuestGen.slate.Set(storeLoopCounterAs.GetValue(slate), i);
-			}
-			try
-			{
-				node.Run();
-			}
-			finally
-			{
-				QuestGen.slate.PopPrefix();
+				if (this.storeLoopCounterAs.GetValue(slate) != null)
+				{
+					QuestGen.slate.Set<int>(this.storeLoopCounterAs.GetValue(slate), i, false);
+				}
+				try
+				{
+					this.node.Run();
+				}
+				finally
+				{
+					QuestGen.slate.PopPrefix();
+				}
 			}
 		}
+
+		// Token: 0x0400E3BB RID: 58299
+		public QuestNode node;
+
+		// Token: 0x0400E3BC RID: 58300
+		public SlateRef<int> loopCount;
+
+		// Token: 0x0400E3BD RID: 58301
+		[NoTranslate]
+		public SlateRef<string> storeLoopCounterAs;
 	}
 }

@@ -1,15 +1,15 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalStateWorker_EntityKiller : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000FA8 RID: 4008
+	public class MentalStateWorker_EntityKiller : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x0600629A RID: 25242 RVA: 0x001F15AF File Offset: 0x001EF7AF
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			return base.StateCanOccur(pawn) && AnomalyUtility.FindEntityOnPlatform(pawn.Map, EntityQueryType.ForSlaughter) != null;
 		}
-		return AnomalyUtility.FindEntityOnPlatform(pawn.Map, EntityQueryType.ForSlaughter) != null;
 	}
 }

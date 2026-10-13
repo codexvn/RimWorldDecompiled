@@ -1,196 +1,290 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class CompMetalhorror : ThingComp
+namespace RimWorld
 {
-	public ImplantSource implantSource;
-
-	public Pawn emergedFrom;
-
-	private Pawn lastDamagedBy;
-
-	private int filthTimer;
-
-	private int speedBoostTimer;
-
-	private CompCanBeDormant intDormantComp;
-
-	private LordJob_Metalhorror intLordJob;
-
-	private static readonly IntRange DropFilthTicksRange = new IntRange(600, 1800);
-
-	private static readonly IntRange SpeedBoostTicksRange = new IntRange(1200, 2400);
-
-	private const int FilthSearchRadius = 4;
-
-	private const int MaxFilth = 12;
-
-	private static readonly List<IntVec3> filthOptions = new List<IntVec3>();
-
-	public CompCanBeDormant DormantComp => intDormantComp ?? (intDormantComp = parent.GetComp<CompCanBeDormant>());
-
-	public LordJob_Metalhorror LordJob => intLordJob ?? (intLordJob = (LordJob_Metalhorror)Pawn.GetLord().LordJob);
-
-	public bool Hibernating => DormantComp.Awake;
-
-	public int Biosignature => implantSource?.Biosignature ?? 0;
-
-	public string BiosignatureName => implantSource?.BiosignatureName ?? "INVALID";
-
-	public CompProperties_Metalhorror Props => (CompProperties_Metalhorror)props;
-
-	public Pawn Pawn => (Pawn)parent;
-
-	public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+	// Token: 0x02002D61 RID: 11617
+	public class CompMetalhorror : ThingComp
 	{
-		if (!(totalDamageDealt <= 0f) && dinfo.Instigator is Pawn pawn)
+		// Token: 0x1700297C RID: 10620
+		// (get) Token: 0x0601051C RID: 66844 RVA: 0x004B6388 File Offset: 0x004B4588
+		public CompCanBeDormant DormantComp
 		{
-			lastDamagedBy = pawn;
-		}
-	}
-
-	public override void PostPostMake()
-	{
-		speedBoostTimer = SpeedBoostTicksRange.RandomInRange;
-	}
-
-	public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
-	{
-		FilthMaker.TryMakeFilth(Pawn.PositionHeld, prevMap, ThingDefOf.Filth_MetalhorrorDebris);
-	}
-
-	public void FindOrCreateEmergedLord()
-	{
-		foreach (Lord lord2 in Pawn.MapHeld.lordManager.lords)
-		{
-			if (lord2.LordJob is LordJob_Metalhorror lordJob_Metalhorror && lordJob_Metalhorror.biosignature == implantSource.Biosignature)
+			get
 			{
-				lord2.AddPawn(Pawn);
-				intLordJob = (LordJob_Metalhorror)lord2.LordJob;
+				CompCanBeDormant result;
+				if ((result = this.intDormantComp) == null)
+				{
+					result = (this.intDormantComp = this.parent.GetComp<CompCanBeDormant>());
+				}
+				return result;
+			}
+		}
+
+		// Token: 0x1700297D RID: 10621
+		// (get) Token: 0x0601051D RID: 66845 RVA: 0x004B63B4 File Offset: 0x004B45B4
+		public LordJob_Metalhorror LordJob
+		{
+			get
+			{
+				LordJob_Metalhorror result;
+				if ((result = this.intLordJob) == null)
+				{
+					result = (this.intLordJob = (LordJob_Metalhorror)this.Pawn.GetLord().LordJob);
+				}
+				return result;
+			}
+		}
+
+		// Token: 0x1700297E RID: 10622
+		// (get) Token: 0x0601051E RID: 66846 RVA: 0x004B63E9 File Offset: 0x004B45E9
+		public bool Hibernating
+		{
+			get
+			{
+				return this.DormantComp.Awake;
+			}
+		}
+
+		// Token: 0x1700297F RID: 10623
+		// (get) Token: 0x0601051F RID: 66847 RVA: 0x004B63F6 File Offset: 0x004B45F6
+		public int Biosignature
+		{
+			get
+			{
+				ImplantSource implantSource = this.implantSource;
+				if (implantSource == null)
+				{
+					return 0;
+				}
+				return implantSource.Biosignature;
+			}
+		}
+
+		// Token: 0x17002980 RID: 10624
+		// (get) Token: 0x06010520 RID: 66848 RVA: 0x004B6409 File Offset: 0x004B4609
+		public string BiosignatureName
+		{
+			get
+			{
+				ImplantSource implantSource = this.implantSource;
+				return ((implantSource != null) ? implantSource.BiosignatureName : null) ?? "INVALID";
+			}
+		}
+
+		// Token: 0x17002981 RID: 10625
+		// (get) Token: 0x06010521 RID: 66849 RVA: 0x004B6426 File Offset: 0x004B4626
+		public CompProperties_Metalhorror Props
+		{
+			get
+			{
+				return (CompProperties_Metalhorror)this.props;
+			}
+		}
+
+		// Token: 0x17002982 RID: 10626
+		// (get) Token: 0x06010522 RID: 66850 RVA: 0x0049B545 File Offset: 0x00499745
+		public Pawn Pawn
+		{
+			get
+			{
+				return (Pawn)this.parent;
+			}
+		}
+
+		// Token: 0x06010523 RID: 66851 RVA: 0x004B6434 File Offset: 0x004B4634
+		public override void PostPostApplyDamage(DamageInfo dinfo, float totalDamageDealt)
+		{
+			if (totalDamageDealt <= 0f)
+			{
 				return;
 			}
-		}
-		Lord lord = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_Metalhorror(), Pawn.MapHeld);
-		intLordJob = (LordJob_Metalhorror)lord.LordJob;
-		intLordJob.biosignature = implantSource.Biosignature;
-		lord.AddPawn(Pawn);
-	}
-
-	public override void CompTick()
-	{
-		if (!Hibernating)
-		{
-			FilthTick();
-			SpeedBoostTick();
-		}
-	}
-
-	public override void PostPreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
-	{
-		absorbed = false;
-		float amount = 0.2f * dinfo.Amount;
-		if (dinfo.Def == DamageDefOf.Burn)
-		{
-			amount = 2f * dinfo.Amount;
-		}
-		dinfo.SetAmount(amount);
-	}
-
-	public override string CompInspectStringExtra()
-	{
-		if (implantSource == null)
-		{
-			return null;
-		}
-		StringBuilder stringBuilder = new StringBuilder();
-		if (emergedFrom != null)
-		{
-			stringBuilder.AppendLine(string.Format("{0}: {1}", "EmergedFrom".Translate(), emergedFrom.LabelShort));
-		}
-		stringBuilder.Append(implantSource.GetSourceDesc().CapitalizeFirst() ?? "");
-		if (Prefs.DevMode && DebugSettings.godMode && Pawn.GetLord() != null)
-		{
-			stringBuilder.Append($"\nDEV: Biosignature: {BiosignatureName} ({Pawn.GetLord().ownedPawns.Count - 1} siblings)");
-		}
-		return stringBuilder.ToString();
-	}
-
-	private void SpeedBoostTick()
-	{
-		speedBoostTimer--;
-		if (speedBoostTimer <= 0)
-		{
-			speedBoostTimer = SpeedBoostTicksRange.RandomInRange;
-			if (!Pawn.health.hediffSet.HasHediff(HediffDefOf.MetalhorrorSpeedBoost))
+			Pawn pawn = dinfo.Instigator as Pawn;
+			if (pawn != null)
 			{
-				Pawn.health.AddHediff(HediffDefOf.MetalhorrorSpeedBoost);
+				this.lastDamagedBy = pawn;
 			}
 		}
-	}
 
-	private void FilthTick()
-	{
-		if (!Pawn.Spawned)
+		// Token: 0x06010524 RID: 66852 RVA: 0x004B6464 File Offset: 0x004B4664
+		public override void PostPostMake()
 		{
-			return;
+			this.speedBoostTimer = CompMetalhorror.SpeedBoostTicksRange.RandomInRange;
 		}
-		filthTimer--;
-		if (filthTimer > 0)
+
+		// Token: 0x06010525 RID: 66853 RVA: 0x004B6484 File Offset: 0x004B4684
+		public override void Notify_Killed(Map prevMap, DamageInfo? dinfo = null)
 		{
-			return;
+			FilthMaker.TryMakeFilth(this.Pawn.PositionHeld, prevMap, ThingDefOf.Filth_MetalhorrorDebris, 1, FilthSourceFlags.None, true);
 		}
-		filthOptions.Clear();
-		filthTimer = DropFilthTicksRange.RandomInRange;
-		int found = 0;
-		Pawn.Map.floodFiller.FloodFill(Pawn.Position, delegate(IntVec3 x)
+
+		// Token: 0x06010526 RID: 66854 RVA: 0x004B64A0 File Offset: 0x004B46A0
+		public void FindOrCreateEmergedLord()
 		{
-			if (!x.WalkableBy(Pawn.Map, Pawn))
+			foreach (Lord lord in this.Pawn.MapHeld.lordManager.lords)
 			{
-				return false;
-			}
-			if (x.InHorDistOf(Pawn.Position, 4f))
-			{
-				return false;
-			}
-			return !PawnUtility.AnyPawnBlockingPathAt(x, Pawn, actAsIfHadCollideWithPawnsJob: true);
-		}, delegate(IntVec3 cell)
-		{
-			List<Thing> thingList = cell.GetThingList(Pawn.Map);
-			for (int i = 0; i < thingList.Count; i++)
-			{
-				if (thingList[i].def == ThingDefOf.Filth_GrayFleshNoticeable || thingList[i].def == ThingDefOf.Filth_GrayFlesh)
+				LordJob_Metalhorror lordJob_Metalhorror = lord.LordJob as LordJob_Metalhorror;
+				if (lordJob_Metalhorror != null && lordJob_Metalhorror.biosignature == this.implantSource.Biosignature)
 				{
-					found++;
-					if (found >= 12)
+					lord.AddPawn(this.Pawn);
+					this.intLordJob = (LordJob_Metalhorror)lord.LordJob;
+					return;
+				}
+			}
+			Lord lord2 = LordMaker.MakeNewLord(Faction.OfEntities, new LordJob_Metalhorror(), this.Pawn.MapHeld, null);
+			this.intLordJob = (LordJob_Metalhorror)lord2.LordJob;
+			this.intLordJob.biosignature = this.implantSource.Biosignature;
+			lord2.AddPawn(this.Pawn);
+		}
+
+		// Token: 0x06010527 RID: 66855 RVA: 0x004B658C File Offset: 0x004B478C
+		public override void CompTick()
+		{
+			if (this.Hibernating)
+			{
+				return;
+			}
+			this.FilthTick();
+			this.SpeedBoostTick();
+		}
+
+		// Token: 0x06010528 RID: 66856 RVA: 0x004B65A4 File Offset: 0x004B47A4
+		public override void PostPreApplyDamage(ref DamageInfo dinfo, out bool absorbed)
+		{
+			absorbed = false;
+			float amount = 0.2f * dinfo.Amount;
+			if (dinfo.Def == DamageDefOf.Burn)
+			{
+				amount = 2f * dinfo.Amount;
+			}
+			dinfo.SetAmount(amount);
+		}
+
+		// Token: 0x06010529 RID: 66857 RVA: 0x004B65E4 File Offset: 0x004B47E4
+		public override string CompInspectStringExtra()
+		{
+			if (this.implantSource == null)
+			{
+				return null;
+			}
+			StringBuilder stringBuilder = new StringBuilder();
+			if (this.emergedFrom != null)
+			{
+				stringBuilder.AppendLine(string.Format("{0}: {1}", "EmergedFrom".Translate(), this.emergedFrom.LabelShort));
+			}
+			stringBuilder.Append(this.implantSource.GetSourceDesc().CapitalizeFirst() ?? "");
+			if (Prefs.DevMode && DebugSettings.godMode && this.Pawn.GetLord() != null)
+			{
+				stringBuilder.Append(string.Format("\nDEV: Biosignature: {0} ({1} siblings)", this.BiosignatureName, this.Pawn.GetLord().ownedPawns.Count - 1));
+			}
+			return stringBuilder.ToString();
+		}
+
+		// Token: 0x0601052A RID: 66858 RVA: 0x004B66A8 File Offset: 0x004B48A8
+		private void SpeedBoostTick()
+		{
+			this.speedBoostTimer--;
+			if (this.speedBoostTimer <= 0)
+			{
+				this.speedBoostTimer = CompMetalhorror.SpeedBoostTicksRange.RandomInRange;
+				if (this.Pawn.health.hediffSet.HasHediff(HediffDefOf.MetalhorrorSpeedBoost, false))
+				{
+					return;
+				}
+				this.Pawn.health.AddHediff(HediffDefOf.MetalhorrorSpeedBoost, null, null, null);
+			}
+		}
+
+		// Token: 0x0601052B RID: 66859 RVA: 0x004B6720 File Offset: 0x004B4920
+		private void FilthTick()
+		{
+			if (!this.Pawn.Spawned)
+			{
+				return;
+			}
+			this.filthTimer--;
+			if (this.filthTimer <= 0)
+			{
+				CompMetalhorror.filthOptions.Clear();
+				this.filthTimer = CompMetalhorror.DropFilthTicksRange.RandomInRange;
+				int found = 0;
+				this.Pawn.Map.floodFiller.FloodFill(this.Pawn.Position, (IntVec3 x) => x.WalkableBy(this.Pawn.Map, this.Pawn) && !x.InHorDistOf(this.Pawn.Position, 4f) && !PawnUtility.AnyPawnBlockingPathAt(x, this.Pawn, true, false, false, false), delegate(IntVec3 cell)
+				{
+					List<Thing> thingList = cell.GetThingList(this.Pawn.Map);
+					for (int i = 0; i < thingList.Count; i++)
 					{
-						return true;
+						if (thingList[i].def == ThingDefOf.Filth_GrayFleshNoticeable || thingList[i].def == ThingDefOf.Filth_GrayFlesh)
+						{
+							int found = found;
+							found++;
+							if (found >= 12)
+							{
+								return true;
+							}
+						}
+						else
+						{
+							CompMetalhorror.filthOptions.Add(cell);
+						}
 					}
-				}
-				else
+					return false;
+				}, int.MaxValue, false, null);
+				if (found < 12 && CompMetalhorror.filthOptions.Any<IntVec3>())
 				{
-					filthOptions.Add(cell);
+					FilthMaker.TryMakeFilth(CompMetalhorror.filthOptions.RandomElement<IntVec3>(), this.Pawn.Map, ThingDefOf.Filth_GrayFlesh, 1, FilthSourceFlags.None, true);
 				}
+				CompMetalhorror.filthOptions.Clear();
 			}
-			return false;
-		});
-		if (found < 12 && filthOptions.Any())
-		{
-			FilthMaker.TryMakeFilth(filthOptions.RandomElement(), Pawn.Map, ThingDefOf.Filth_GrayFlesh);
 		}
-		filthOptions.Clear();
-	}
 
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Values.Look(ref filthTimer, "filthTimer", 0);
-		Scribe_Values.Look(ref speedBoostTimer, "speedBoostTimer", 0);
-		Scribe_References.Look(ref lastDamagedBy, "lastDamagedBy");
-		Scribe_References.Look(ref emergedFrom, "emergedFrom", saveDestroyedThings: true);
-		Scribe_Deep.Look(ref implantSource, "implantSource");
+		// Token: 0x0601052C RID: 66860 RVA: 0x004B6808 File Offset: 0x004B4A08
+		public override void PostExposeData()
+		{
+			base.PostExposeData();
+			Scribe_Values.Look<int>(ref this.filthTimer, "filthTimer", 0, false);
+			Scribe_Values.Look<int>(ref this.speedBoostTimer, "speedBoostTimer", 0, false);
+			Scribe_References.Look<Pawn>(ref this.lastDamagedBy, "lastDamagedBy", false);
+			Scribe_References.Look<Pawn>(ref this.emergedFrom, "emergedFrom", true);
+			Scribe_Deep.Look<ImplantSource>(ref this.implantSource, "implantSource", Array.Empty<object>());
+		}
+
+		// Token: 0x0400AA40 RID: 43584
+		public ImplantSource implantSource;
+
+		// Token: 0x0400AA41 RID: 43585
+		public Pawn emergedFrom;
+
+		// Token: 0x0400AA42 RID: 43586
+		private Pawn lastDamagedBy;
+
+		// Token: 0x0400AA43 RID: 43587
+		private int filthTimer;
+
+		// Token: 0x0400AA44 RID: 43588
+		private int speedBoostTimer;
+
+		// Token: 0x0400AA45 RID: 43589
+		private CompCanBeDormant intDormantComp;
+
+		// Token: 0x0400AA46 RID: 43590
+		private LordJob_Metalhorror intLordJob;
+
+		// Token: 0x0400AA47 RID: 43591
+		private static readonly IntRange DropFilthTicksRange = new IntRange(600, 1800);
+
+		// Token: 0x0400AA48 RID: 43592
+		private static readonly IntRange SpeedBoostTicksRange = new IntRange(1200, 2400);
+
+		// Token: 0x0400AA49 RID: 43593
+		private const int FilthSearchRadius = 4;
+
+		// Token: 0x0400AA4A RID: 43594
+		private const int MaxFilth = 12;
+
+		// Token: 0x0400AA4B RID: 43595
+		private static readonly List<IntVec3> filthOptions = new List<IntVec3>();
 	}
 }

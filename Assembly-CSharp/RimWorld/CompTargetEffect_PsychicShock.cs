@@ -1,37 +1,45 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompTargetEffect_PsychicShock : CompTargetEffect
+namespace RimWorld
 {
-	public override void DoEffectOn(Pawn user, Thing target)
+	// Token: 0x02002F3D RID: 12093
+	public class CompTargetEffect_PsychicShock : CompTargetEffect
 	{
-		Pawn pawn = (Pawn)target;
-		if (!pawn.Dead)
+		// Token: 0x060110EB RID: 69867 RVA: 0x004E6BC8 File Offset: 0x004E4DC8
+		public override void DoEffectOn(Pawn user, Thing target)
 		{
-			Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.PsychicShock, pawn);
-			pawn.RaceProps.body.GetPartsWithTag(BodyPartTagDefOf.ConsciousnessSource).TryRandomElement(out var result);
-			BattleLogEntry_ItemUsed battleLogEntry_ItemUsed = new BattleLogEntry_ItemUsed(user, target, parent.def, RulePackDefOf.Event_ItemUsed);
-			hediff.combatLogEntry = new WeakReference<LogEntry>(battleLogEntry_ItemUsed);
-			hediff.combatLogText = battleLogEntry_ItemUsed.ToGameStringFromPOV(null);
-			pawn.health.AddHediff(hediff, result);
+			Pawn pawn = (Pawn)target;
+			if (pawn.Dead)
+			{
+				return;
+			}
+			Hediff hediff = HediffMaker.MakeHediff(HediffDefOf.PsychicShock, pawn, null);
+			BodyPartRecord part;
+			pawn.RaceProps.body.GetPartsWithTag(BodyPartTagDefOf.ConsciousnessSource).TryRandomElement(out part);
+			BattleLogEntry_ItemUsed battleLogEntry_ItemUsed = new BattleLogEntry_ItemUsed(user, target, this.parent.def, RulePackDefOf.Event_ItemUsed);
+			hediff.combatLogEntry = new Verse.WeakReference<LogEntry>(battleLogEntry_ItemUsed);
+			hediff.combatLogText = battleLogEntry_ItemUsed.ToGameStringFromPOV(null, false);
+			pawn.health.AddHediff(hediff, part, null, null);
 			Find.BattleLog.Add(battleLogEntry_ItemUsed);
 		}
-	}
 
-	public override bool CanApplyOn(Thing target)
-	{
-		if (target is Pawn pawn)
+		// Token: 0x060110EC RID: 69868 RVA: 0x004E6C64 File Offset: 0x004E4E64
+		public override bool CanApplyOn(Thing target)
 		{
-			if (pawn.kindDef.forceDeathOnDowned)
+			Pawn pawn = target as Pawn;
+			if (pawn != null)
 			{
-				return false;
+				if (pawn.kindDef.forceDeathOnDowned)
+				{
+					return false;
+				}
+				if (pawn.IsMutant && pawn.mutant.Def.psychicShockUntargetable)
+				{
+					return false;
+				}
 			}
-			if (pawn.IsMutant && pawn.mutant.Def.psychicShockUntargetable)
-			{
-				return false;
-			}
+			return true;
 		}
-		return true;
 	}
 }

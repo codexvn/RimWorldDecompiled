@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.SketchGen;
@@ -6,377 +6,490 @@ using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class GenStep_OrbitalMechhive : GenStep_LargeRuins
+namespace RimWorld
 {
-	private const int NumStabilizers = 3;
-
-	private static readonly IntRange NumStandaloneRooms = new IntRange(10, 12);
-
-	private static readonly IntRange StandaloneRoomSize = new IntRange(8, 25);
-
-	private static readonly IntRange NumLaunchPads = new IntRange(8, 10);
-
-	private static readonly IntRange NumProcessorArrays = new IntRange(8, 12);
-
-	private static readonly IntRange NumGuardOutposts = new IntRange(10, 12);
-
-	private static readonly IntRange GuardOutpostPointsRange = new IntRange(200, 350);
-
-	private const int MapBorderPadding = 20;
-
-	private const int PlatformRegionSize = 22;
-
-	private static readonly IntRange PlatformPadBorderLumpLengthRange = new IntRange(8, 12);
-
-	private static readonly IntRange PlatformPadBorderLumpOffsetRange = new IntRange(-2, 3);
-
-	private static readonly FloatRange DamagedMaxPercentageRange = new FloatRange(0.5f, 0.5f);
-
-	private int stabilizerCount;
-
-	private static Chunks chunks;
-
-	private static List<IntVec3> tmpHoleCells = new List<IntVec3>();
-
-	protected override int RegionSize => 65;
-
-	protected override FloatRange DefaultMapFillPercentRange { get; } = new FloatRange(0.5f, 0.6f);
-
-	protected override FloatRange MergeRange { get; } = new FloatRange(1f, 1f);
-
-	protected override IntRange RuinsMinMaxRange { get; } = new IntRange(3, 4);
-
-	protected override int MoveRangeLimit => 6;
-
-	protected override int ContractLimit => 6;
-
-	protected override int MinRegionSize => 40;
-
-	protected override bool UseUsedRects => true;
-
-	protected override LayoutDef LayoutDef => LayoutDefOf.Mechhive;
-
-	protected override Faction Faction => Faction.OfMechanoids;
-
-	public override int SeedPart => 345879234;
-
-	public override void Generate(Map map, GenStepParams parms)
+	// Token: 0x02001FC5 RID: 8133
+	public class GenStep_OrbitalMechhive : GenStep_LargeRuins
 	{
-		if (!ModLister.CheckOdyssey("Orbital Mechhive"))
+		// Token: 0x17001B4F RID: 6991
+		// (get) Token: 0x0600B349 RID: 45897 RVA: 0x00335B54 File Offset: 0x00333D54
+		protected override int RegionSize
 		{
-			return;
-		}
-		List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
-		stabilizerCount = 0;
-		chunks = new Chunks(map.BoundsRect(20), 22);
-		using (ProfilerBlock.Scope("CreatePlatform"))
-		{
-			try
+			get
 			{
-				CreatePlatform(map);
-			}
-			catch (Exception ex)
-			{
-				Log.Error("Error in CreatePlatform " + ex);
+				return 65;
 			}
 		}
-		using (ProfilerBlock.Scope("GenerateCerebrexCore"))
-		{
-			try
-			{
-				GenerateCerebrexCore(map, orGenerateVar);
-			}
-			catch (Exception ex2)
-			{
-				Log.Error("Error in GenerateCerebrexCore " + ex2);
-			}
-		}
-		using (ProfilerBlock.Scope("SetupPlayerStartSpot"))
-		{
-			try
-			{
-				SetupPlayerStartSpot(map, parms, orGenerateVar);
-			}
-			catch (Exception ex3)
-			{
-				Log.Error("Error in SetupPlayerStartSpot " + ex3);
-			}
-		}
-		using (ProfilerBlock.Scope("GenerateGaussCannons"))
-		{
-			try
-			{
-				GenerateCannons(map, orGenerateVar);
-			}
-			catch (Exception ex4)
-			{
-				Log.Error("Error in GenerateGaussCannons " + ex4);
-			}
-		}
-		using (ProfilerBlock.Scope("GenerateRuins"))
-		{
-			try
-			{
-				GenerateRuins(map, parms, DefaultMapFillPercentRange);
-			}
-			catch (Exception ex5)
-			{
-				Log.Error("Error in GenerateRuins " + ex5);
-			}
-		}
-		using (ProfilerBlock.Scope("GenerateStandaloneRooms"))
-		{
-			try
-			{
-				GenerateStandaloneRooms(map, parms, orGenerateVar);
-			}
-			catch (Exception ex6)
-			{
-				Log.Error("Error in GenerateStandaloneRooms " + ex6);
-			}
-		}
-		using (ProfilerBlock.Scope("CreateHoles"))
-		{
-			try
-			{
-				CreateHoles(map, orGenerateVar);
-			}
-			catch (Exception ex7)
-			{
-				Log.Error("Error in CreateHoles " + ex7);
-			}
-		}
-		using (ProfilerBlock.Scope("GenerateMiniStructures"))
-		{
-			try
-			{
-				GenerateMiniStructures(map, orGenerateVar);
-			}
-			catch (Exception ex8)
-			{
-				Log.Error("Error in GenerateMiniStructures " + ex8);
-			}
-		}
-		map.FogOfWarColor = ColorLibrary.SpaceMechFog;
-		map.OrbitalDebris = OrbitalDebrisDefOf.Mechanoid;
-	}
 
-	protected override LayoutStructureSketch GenerateAndSpawn(CellRect rect, Map map, GenStepParams parms, LayoutDef layoutDef)
-	{
-		GeneratePlatformBorder(rect, map);
-		return base.GenerateAndSpawn(rect, map, parms, layoutDef);
-	}
+		// Token: 0x17001B50 RID: 6992
+		// (get) Token: 0x0600B34A RID: 45898 RVA: 0x00335B58 File Offset: 0x00333D58
+		protected override FloatRange DefaultMapFillPercentRange { get; } = new FloatRange(0.5f, 0.6f);
 
-	private void GeneratePlatformBorder(CellRect rect, Map map)
-	{
-		foreach (IntVec3 edgeCell in rect.ExpandedBy(1).EdgeCells)
+		// Token: 0x17001B51 RID: 6993
+		// (get) Token: 0x0600B34B RID: 45899 RVA: 0x00335B60 File Offset: 0x00333D60
+		protected override FloatRange MergeRange { get; } = new FloatRange(1f, 1f);
+
+		// Token: 0x17001B52 RID: 6994
+		// (get) Token: 0x0600B34C RID: 45900 RVA: 0x00335B68 File Offset: 0x00333D68
+		protected override IntRange RuinsMinMaxRange { get; } = new IntRange(3, 4);
+
+		// Token: 0x17001B53 RID: 6995
+		// (get) Token: 0x0600B34D RID: 45901 RVA: 0x00123991 File Offset: 0x00121B91
+		protected override int MoveRangeLimit
 		{
-			if (edgeCell.GetTerrain(map) == TerrainDefOf.Space)
+			get
 			{
-				map.terrainGrid.SetTerrain(edgeCell, TerrainDefOf.MechanoidPlatform);
+				return 6;
 			}
 		}
-	}
 
-	private static void CreatePlatform(Map map)
-	{
-		using (map.pathing.DisableIncrementalScope())
+		// Token: 0x17001B54 RID: 6996
+		// (get) Token: 0x0600B34E RID: 45902 RVA: 0x00123991 File Offset: 0x00121B91
+		protected override int ContractLimit
 		{
-			SpaceGenUtility.ChunksSetSparsley(chunks, FloatRange.One);
-			foreach (CellRect enumeratedRect in chunks.EnumeratedRects)
+			get
 			{
-				foreach (IntVec3 cell in enumeratedRect.Cells)
+				return 6;
+			}
+		}
+
+		// Token: 0x17001B55 RID: 6997
+		// (get) Token: 0x0600B34F RID: 45903 RVA: 0x00335B70 File Offset: 0x00333D70
+		protected override int MinRegionSize
+		{
+			get
+			{
+				return 40;
+			}
+		}
+
+		// Token: 0x17001B56 RID: 6998
+		// (get) Token: 0x0600B350 RID: 45904 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool UseUsedRects
+		{
+			get
+			{
+				return true;
+			}
+		}
+
+		// Token: 0x17001B57 RID: 6999
+		// (get) Token: 0x0600B351 RID: 45905 RVA: 0x00335B74 File Offset: 0x00333D74
+		protected override LayoutDef LayoutDef
+		{
+			get
+			{
+				return LayoutDefOf.Mechhive;
+			}
+		}
+
+		// Token: 0x17001B58 RID: 7000
+		// (get) Token: 0x0600B352 RID: 45906 RVA: 0x00003764 File Offset: 0x00001964
+		protected override Faction Faction
+		{
+			get
+			{
+				return Faction.OfMechanoids;
+			}
+		}
+
+		// Token: 0x17001B59 RID: 7001
+		// (get) Token: 0x0600B353 RID: 45907 RVA: 0x00335B7B File Offset: 0x00333D7B
+		public override int SeedPart
+		{
+			get
+			{
+				return 345879234;
+			}
+		}
+
+		// Token: 0x0600B354 RID: 45908 RVA: 0x00335B84 File Offset: 0x00333D84
+		public override void Generate(Map map, GenStepParams parms)
+		{
+			if (!ModLister.CheckOdyssey("Orbital Mechhive"))
+			{
+				return;
+			}
+			List<CellRect> orGenerateVar = MapGenerator.GetOrGenerateVar<List<CellRect>>("UsedRects");
+			this.stabilizerCount = 0;
+			GenStep_OrbitalMechhive.chunks = new Chunks(map.BoundsRect(20), 22);
+			using (ProfilerBlock.Scope("CreatePlatform"))
+			{
+				try
 				{
-					map.terrainGrid.SetTerrain(cell, TerrainDefOf.MechanoidPlatform);
+					GenStep_OrbitalMechhive.CreatePlatform(map);
 				}
-				CellRect rect = enumeratedRect;
-				MapGenUtility.DoRectEdgeLumps(map, TerrainDefOf.MechanoidPlatform, ref rect, PlatformPadBorderLumpLengthRange, PlatformPadBorderLumpOffsetRange);
-			}
-		}
-	}
-
-	private void GenerateCerebrexCore(Map map, List<CellRect> usedRects)
-	{
-		RimWorld.SketchGen.SketchGen.Generate(parms: new SketchResolveParams
-		{
-			sketch = new Sketch()
-		}, root: SketchResolverDefOf.CerebrexCore).Spawn(map, map.Center, Faction.OfMechanoids, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, wipeIfCollides: true, forceTerrainAffordance: true, clearEdificeWhereFloor: true);
-		CellRect cellRect = CellRect.CenteredOn(map.Center, Mathf.FloorToInt(30.5f));
-		foreach (IntVec3 cell in cellRect.Cells)
-		{
-			map.roofGrid.SetRoof(cell, RoofDefOf.RoofConstructed);
-		}
-		cellRect = cellRect.ExpandedBy(4);
-		usedRects.Add(cellRect);
-	}
-
-	private void SetupPlayerStartSpot(Map map, GenStepParams parms, List<CellRect> usedRects)
-	{
-		if (parms.gravship == null)
-		{
-			return;
-		}
-		HashSet<IntVec3> cellsAdjacentToSubstructure = GravshipPlacementUtility.GetCellsAdjacentToSubstructure(parms.gravship.OccupiedRects, 2);
-		bool enabled = map.regionAndRoomUpdater.Enabled;
-		map.regionAndRoomUpdater.Enabled = true;
-		GenStep_ReserveGravshipArea.SetStartSpot(map, cellsAdjacentToSubstructure, usedRects);
-		map.regionAndRoomUpdater.Enabled = enabled;
-		IntVec3 playerStartSpot = MapGenerator.PlayerStartSpot;
-		foreach (CellRect occupiedRect in parms.gravship.OccupiedRects)
-		{
-			usedRects.Add(occupiedRect.MovedBy(playerStartSpot).ExpandedBy(2));
-		}
-		foreach (IntVec3 corner in parms.gravship.Bounds.MovedBy(playerStartSpot).ContractedBy(2).Corners)
-		{
-			GenSpawn.Spawn(ThingDefOf.AncientShipBeacon, corner, map);
-		}
-		MapGenerator.SetVar("DontGenerateClearedGravShipTerrain", var: true);
-	}
-
-	private void GenerateCannons(Map map, List<CellRect> usedRects)
-	{
-		CellRect boundary = chunks.boundary;
-		List<IntVec3> list = boundary.Corners.ToList();
-		for (int i = 0; i < 4; i++)
-		{
-			CellRect item = CellRect.CenteredOn(list[i], 13, 13);
-			foreach (IntVec3 cell in item.Cells)
-			{
-				if (cell.InHorDistOf(list[i], 5.9f))
+				catch (Exception ex)
 				{
-					map.terrainGrid.SetTerrain(cell, TerrainDefOf.AncientTile);
-				}
-				else if (cell.InHorDistOf(list[i], 8f))
-				{
-					map.terrainGrid.SetTerrain(cell, TerrainDefOf.MechanoidPlatform);
+					string str = "Error in CreatePlatform ";
+					Exception ex2 = ex;
+					Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
 				}
 			}
-			GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AnticraftBeam), list[i], map, new Rot4((i + 2) % 4));
+			using (ProfilerBlock.Scope("GenerateCerebrexCore"))
+			{
+				try
+				{
+					this.GenerateCerebrexCore(map, orGenerateVar);
+				}
+				catch (Exception ex3)
+				{
+					string str2 = "Error in GenerateCerebrexCore ";
+					Exception ex4 = ex3;
+					Log.Error(str2 + ((ex4 != null) ? ex4.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("SetupPlayerStartSpot"))
+			{
+				try
+				{
+					this.SetupPlayerStartSpot(map, parms, orGenerateVar);
+				}
+				catch (Exception ex5)
+				{
+					string str3 = "Error in SetupPlayerStartSpot ";
+					Exception ex6 = ex5;
+					Log.Error(str3 + ((ex6 != null) ? ex6.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("GenerateGaussCannons"))
+			{
+				try
+				{
+					this.GenerateCannons(map, orGenerateVar);
+				}
+				catch (Exception ex7)
+				{
+					string str4 = "Error in GenerateGaussCannons ";
+					Exception ex8 = ex7;
+					Log.Error(str4 + ((ex8 != null) ? ex8.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("GenerateRuins"))
+			{
+				try
+				{
+					this.GenerateRuins(map, parms, this.DefaultMapFillPercentRange);
+				}
+				catch (Exception ex9)
+				{
+					string str5 = "Error in GenerateRuins ";
+					Exception ex10 = ex9;
+					Log.Error(str5 + ((ex10 != null) ? ex10.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("GenerateStandaloneRooms"))
+			{
+				try
+				{
+					this.GenerateStandaloneRooms(map, parms, orGenerateVar);
+				}
+				catch (Exception ex11)
+				{
+					string str6 = "Error in GenerateStandaloneRooms ";
+					Exception ex12 = ex11;
+					Log.Error(str6 + ((ex12 != null) ? ex12.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("CreateHoles"))
+			{
+				try
+				{
+					GenStep_OrbitalMechhive.CreateHoles(map, orGenerateVar);
+				}
+				catch (Exception ex13)
+				{
+					string str7 = "Error in CreateHoles ";
+					Exception ex14 = ex13;
+					Log.Error(str7 + ((ex14 != null) ? ex14.ToString() : null));
+				}
+			}
+			using (ProfilerBlock.Scope("GenerateMiniStructures"))
+			{
+				try
+				{
+					this.GenerateMiniStructures(map, orGenerateVar);
+				}
+				catch (Exception ex15)
+				{
+					string str8 = "Error in GenerateMiniStructures ";
+					Exception ex16 = ex15;
+					Log.Error(str8 + ((ex16 != null) ? ex16.ToString() : null));
+				}
+			}
+			map.FogOfWarColor = new Color?(ColorLibrary.SpaceMechFog);
+			map.OrbitalDebris = OrbitalDebrisDefOf.Mechanoid;
+		}
+
+		// Token: 0x0600B355 RID: 45909 RVA: 0x00335EC4 File Offset: 0x003340C4
+		private static void CreatePlatform(Map map)
+		{
+			using (map.pathing.DisableIncrementalScope())
+			{
+				SpaceGenUtility.ChunksSetSparsley(GenStep_OrbitalMechhive.chunks, FloatRange.One);
+				foreach (CellRect cellRect in GenStep_OrbitalMechhive.chunks.EnumeratedRects)
+				{
+					foreach (IntVec3 c in cellRect.Cells)
+					{
+						map.terrainGrid.SetTerrain(c, TerrainDefOf.MechanoidPlatform);
+					}
+					CellRect cellRect2 = cellRect;
+					MapGenUtility.DoRectEdgeLumps(map, TerrainDefOf.MechanoidPlatform, ref cellRect2, GenStep_OrbitalMechhive.PlatformPadBorderLumpLengthRange, GenStep_OrbitalMechhive.PlatformPadBorderLumpOffsetRange, null);
+				}
+			}
+		}
+
+		// Token: 0x0600B356 RID: 45910 RVA: 0x00335FA8 File Offset: 0x003341A8
+		private void GenerateCerebrexCore(Map map, List<CellRect> usedRects)
+		{
+			SketchResolveParams parms = default(SketchResolveParams);
+			parms.sketch = new Sketch();
+			SketchGen.Generate(SketchResolverDefOf.CerebrexCore, parms).Spawn(map, map.Center, Faction.OfMechanoids, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, true, true, true, null, false, false, null, null, null);
+			CellRect item = CellRect.CenteredOn(map.Center, Mathf.FloorToInt(30.5f));
+			foreach (IntVec3 c in item.Cells)
+			{
+				map.roofGrid.SetRoof(c, RoofDefOf.RoofConstructed);
+			}
+			item = item.ExpandedBy(4);
 			usedRects.Add(item);
 		}
-	}
 
-	private void GenerateStandaloneRooms(Map map, GenStepParams parms, List<CellRect> usedRects)
-	{
-		int randomInRange = NumStandaloneRooms.RandomInRange;
-		for (int i = 0; i < randomInRange; i++)
+		// Token: 0x0600B357 RID: 45911 RVA: 0x00336064 File Offset: 0x00334264
+		private void SetupPlayerStartSpot(Map map, GenStepParams parms, List<CellRect> usedRects)
 		{
-			CellRect rect = CellRect.Empty;
-			if (TryGetFreeRect(map, StandaloneRoomSize.RandomInRange, StandaloneRoomSize.RandomInRange, usedRects, out rect))
+			if (parms.gravship == null)
 			{
-				GeneratePlatformBorder(rect, map);
-				StructureGenParams parms2 = new StructureGenParams
+				return;
+			}
+			IntVec2 size = parms.gravship.Bounds.ExpandedBy(5).Size;
+			Func<IntVec3, bool> <>9__1;
+			CellRect item;
+			map.BoundsRect(5).TryFindRandomInnerRect(size, out item, delegate(CellRect r)
+			{
+				IEnumerable<IntVec3> cells = r.Cells;
+				Func<IntVec3, bool> predicate;
+				if ((predicate = <>9__1) == null)
 				{
-					size = rect.Size
-				};
-				LayoutWorker worker = LayoutDefOf.Mechhive_SingleRoom.Worker;
-				LayoutStructureSketch layoutStructureSketch = worker.GenerateStructureSketch(parms2);
-				map.layoutStructureSketches.Add(layoutStructureSketch);
-				structureSketches.Add(layoutStructureSketch);
-				float? threatPoints = null;
-				if (parms.sitePart != null)
-				{
-					threatPoints = parms.sitePart.parms.points;
+					predicate = (<>9__1 = ((IntVec3 c) => c.GetTerrain(map) != TerrainDefOf.Space));
 				}
-				worker.Spawn(layoutStructureSketch, map, rect.Min, threatPoints, null, roofs: true, canReuseSketch: false, Faction.OfMechanoids);
-				usedRects.Add(rect.ExpandedBy(1));
-			}
-		}
-	}
-
-	private static void CreateHoles(Map map, List<CellRect> usedRects)
-	{
-		int cells = chunks.ApproximateArea;
-		int maximum = Mathf.RoundToInt((float)cells * DamagedMaxPercentageRange.RandomInRange);
-		List<CellRect> list = new List<CellRect>();
-		Chunks obj = chunks;
-		List<CellRect> spaces = list;
-		SpaceGenUtility.DamageHoles(obj, map, maximum, ref cells, null, null, 1f, (CellRect r) => !usedRects.Any((CellRect ur) => ur.Overlaps(r)), spaces);
-		foreach (CellRect item in list)
-		{
-			usedRects.Add(item);
-		}
-	}
-
-	private void GenerateMiniStructures(Map map, List<CellRect> usedRects)
-	{
-		for (int i = 0; i < NumLaunchPads.RandomInRange; i++)
-		{
-			if (TryGetFreeRect(map, 5, 5, usedRects, out var rect))
-			{
-				GenerateSketch(SketchResolverDefOf.MechhiveLaunchPad, map, rect);
-				usedRects.Add(rect);
-			}
-		}
-		for (int j = 0; j < NumGuardOutposts.RandomInRange; j++)
-		{
-			if (!TryGetFreeRect(map, 5, 5, usedRects, out var rect2))
-			{
-				continue;
-			}
-			GenerateSketch(SketchResolverDefOf.MechhiveGuardOutpost, map, rect2);
-			usedRects.Add(rect2);
-			IEnumerable<Pawn> enumerable = PawnGroupMakerUtility.GeneratePawns(new PawnGroupMakerParms
-			{
-				groupKind = PawnGroupKindDefOf.Combat,
-				tile = map.Tile,
-				faction = Faction.OfMechanoids,
-				points = GuardOutpostPointsRange.RandomInRange
+				return cells.All(predicate) && usedRects.All((CellRect ur) => !ur.Overlaps(r));
 			});
-			if (!enumerable.Any())
+			foreach (IntVec3 loc in item.ContractedBy(2).Corners)
 			{
-				continue;
+				GenSpawn.Spawn(ThingDefOf.AncientShipBeacon, loc, map, WipeMode.Vanish);
 			}
-			Lord lord = LordMaker.MakeNewLord(Faction.OfMechanoids, new LordJob_DefendPoint(rect2.CenterCell), map);
-			foreach (Pawn item in enumerable)
+			MapGenerator.PlayerStartSpot = item.CenterCell;
+			usedRects.Add(item);
+			MapGenerator.SetVar<bool>("DontGenerateClearedGravShipTerrain", true);
+		}
+
+		// Token: 0x0600B358 RID: 45912 RVA: 0x00336150 File Offset: 0x00334350
+		private void GenerateCannons(Map map, List<CellRect> usedRects)
+		{
+			List<IntVec3> list = GenStep_OrbitalMechhive.chunks.boundary.Corners.ToList<IntVec3>();
+			for (int i = 0; i < 4; i++)
 			{
-				GenSpawn.Spawn(item, CellFinder.RandomClosewalkCellNear(rect2.CenterCell, map, 5), map);
-				lord.AddPawn(item);
+				CellRect item = CellRect.CenteredOn(list[i], 13, 13);
+				foreach (IntVec3 c in item.Cells)
+				{
+					if (c.InHorDistOf(list[i], 5.9f))
+					{
+						map.terrainGrid.SetTerrain(c, TerrainDefOf.AncientTile);
+					}
+					else if (c.InHorDistOf(list[i], 8f))
+					{
+						map.terrainGrid.SetTerrain(c, TerrainDefOf.MechanoidPlatform);
+					}
+				}
+				GenSpawn.Spawn(ThingMaker.MakeThing(ThingDefOf.AnticraftBeam, null), list[i], map, new Rot4((i + 2) % 4), WipeMode.Vanish, false, false);
+				usedRects.Add(item);
 			}
 		}
-		for (int k = 0; k < NumProcessorArrays.RandomInRange; k++)
+
+		// Token: 0x0600B359 RID: 45913 RVA: 0x00336258 File Offset: 0x00334458
+		private void GenerateStandaloneRooms(Map map, GenStepParams parms, List<CellRect> usedRects)
 		{
-			int width = Rand.RangeInclusive(2, 3) * (ThingDefOf.MechanoidProcessor.size.x + 1) + 1;
-			int height = Rand.RangeInclusive(2, 3) * (ThingDefOf.MechanoidProcessor.size.z + 1) + 1;
-			if (TryGetFreeRect(map, width, height, usedRects, out var rect3))
+			int randomInRange = GenStep_OrbitalMechhive.NumStandaloneRooms.RandomInRange;
+			for (int i = 0; i < randomInRange; i++)
 			{
-				GenerateSketch(SketchResolverDefOf.MechhiveProcessorArray, map, rect3);
-				usedRects.Add(rect3);
+				CellRect empty = CellRect.Empty;
+				if (this.TryGetFreeRect(map, GenStep_OrbitalMechhive.StandaloneRoomSize.RandomInRange, GenStep_OrbitalMechhive.StandaloneRoomSize.RandomInRange, usedRects, out empty))
+				{
+					StructureGenParams parms2 = new StructureGenParams
+					{
+						size = empty.Size
+					};
+					LayoutWorker worker = LayoutDefOf.Mechhive_SingleRoom.Worker;
+					LayoutStructureSketch layoutStructureSketch = worker.GenerateStructureSketch(parms2);
+					map.layoutStructureSketches.Add(layoutStructureSketch);
+					this.structureSketches.Add(layoutStructureSketch);
+					float? threatPoints = null;
+					if (parms.sitePart != null)
+					{
+						threatPoints = new float?(parms.sitePart.parms.points);
+					}
+					worker.Spawn(layoutStructureSketch, map, empty.Min, threatPoints, null, true, false, Faction.OfMechanoids);
+					usedRects.Add(empty.ExpandedBy(1));
+				}
 			}
 		}
-	}
 
-	private void GenerateSketch(SketchResolverDef sketchDef, Map map, CellRect rect)
-	{
-		RimWorld.SketchGen.SketchGen.Generate(sketchDef, new SketchResolveParams
+		// Token: 0x0600B35A RID: 45914 RVA: 0x00336344 File Offset: 0x00334544
+		private static void CreateHoles(Map map, List<CellRect> usedRects)
 		{
-			sketch = new Sketch(),
-			rect = new CellRect(0, 0, rect.Width, rect.Height)
-		}).Spawn(map, rect.CenterCell, Faction.OfMechanoids, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, wipeIfCollides: true, forceTerrainAffordance: true, clearEdificeWhereFloor: true);
-	}
-
-	private bool TryGetFreeRect(Map map, int width, int height, List<CellRect> usedRects, out CellRect rect)
-	{
-		rect = CellRect.Empty;
-		if (!CellFinder.TryFindRandomCell(map, delegate(IntVec3 c)
-		{
-			CellRect tmpRect = CellRect.CenteredOn(c, width, height);
-			return tmpRect.InBounds(map) && usedRects.All((CellRect ur) => !ur.Overlaps(tmpRect)) && tmpRect.Cells.All((IntVec3 cell) => cell.GetTerrain(map) == TerrainDefOf.MechanoidPlatform);
-		}, out var result))
-		{
-			return false;
+			int approximateArea = GenStep_OrbitalMechhive.chunks.ApproximateArea;
+			int num = Mathf.RoundToInt((float)approximateArea * GenStep_OrbitalMechhive.DamagedMaxPercentageRange.RandomInRange);
+			List<CellRect> list = new List<CellRect>();
+			Chunks chunks = GenStep_OrbitalMechhive.chunks;
+			int maximum = num;
+			List<CellRect> spaces = list;
+			SpaceGenUtility.DamageHoles(chunks, map, maximum, ref approximateArea, null, null, 1f, (CellRect r) => !usedRects.Any((CellRect ur) => ur.Overlaps(r)), spaces);
+			foreach (CellRect item in list)
+			{
+				usedRects.Add(item);
+			}
 		}
-		rect = CellRect.CenteredOn(result, width, height);
-		return true;
-	}
 
-	protected override StructureGenParams GetStructureGenParams(CellRect rect, Map map, GenStepParams parms, LayoutDef layoutDef)
-	{
-		StructureGenParams structureGenParams = base.GetStructureGenParams(rect, map, parms, layoutDef);
-		structureGenParams.spawnImportantRoom = stabilizerCount < 3;
-		stabilizerCount++;
-		return structureGenParams;
+		// Token: 0x0600B35B RID: 45915 RVA: 0x00336408 File Offset: 0x00334608
+		private void GenerateMiniStructures(Map map, List<CellRect> usedRects)
+		{
+			for (int i = 0; i < GenStep_OrbitalMechhive.NumLaunchPads.RandomInRange; i++)
+			{
+				CellRect cellRect;
+				if (this.TryGetFreeRect(map, 5, 5, usedRects, out cellRect))
+				{
+					this.GenerateSketch(SketchResolverDefOf.MechhiveLaunchPad, map, cellRect);
+					usedRects.Add(cellRect);
+				}
+			}
+			for (int j = 0; j < GenStep_OrbitalMechhive.NumGuardOutposts.RandomInRange; j++)
+			{
+				CellRect cellRect2;
+				if (this.TryGetFreeRect(map, 5, 5, usedRects, out cellRect2))
+				{
+					this.GenerateSketch(SketchResolverDefOf.MechhiveGuardOutpost, map, cellRect2);
+					usedRects.Add(cellRect2);
+					IEnumerable<Pawn> enumerable = PawnGroupMakerUtility.GeneratePawns(new PawnGroupMakerParms
+					{
+						groupKind = PawnGroupKindDefOf.Combat,
+						tile = map.Tile,
+						faction = Faction.OfMechanoids,
+						points = (float)GenStep_OrbitalMechhive.GuardOutpostPointsRange.RandomInRange
+					}, true);
+					if (enumerable.Any<Pawn>())
+					{
+						Lord lord = LordMaker.MakeNewLord(Faction.OfMechanoids, new LordJob_DefendPoint(cellRect2.CenterCell, null, null, false, true), map, null);
+						foreach (Pawn pawn in enumerable)
+						{
+							GenSpawn.Spawn(pawn, CellFinder.RandomClosewalkCellNear(cellRect2.CenterCell, map, 5, null), map, WipeMode.Vanish);
+							lord.AddPawn(pawn);
+						}
+					}
+				}
+			}
+			for (int k = 0; k < GenStep_OrbitalMechhive.NumProcessorArrays.RandomInRange; k++)
+			{
+				int width = Rand.RangeInclusive(2, 3) * (ThingDefOf.MechanoidProcessor.size.x + 1) + 1;
+				int height = Rand.RangeInclusive(2, 3) * (ThingDefOf.MechanoidProcessor.size.z + 1) + 1;
+				CellRect cellRect3;
+				if (this.TryGetFreeRect(map, width, height, usedRects, out cellRect3))
+				{
+					this.GenerateSketch(SketchResolverDefOf.MechhiveProcessorArray, map, cellRect3);
+					usedRects.Add(cellRect3);
+				}
+			}
+		}
+
+		// Token: 0x0600B35C RID: 45916 RVA: 0x003365EC File Offset: 0x003347EC
+		private void GenerateSketch(SketchResolverDef sketchDef, Map map, CellRect rect)
+		{
+			SketchGen.Generate(sketchDef, new SketchResolveParams
+			{
+				sketch = new Sketch(),
+				rect = new CellRect?(new CellRect(0, 0, rect.Width, rect.Height))
+			}).Spawn(map, rect.CenterCell, Faction.OfMechanoids, Sketch.SpawnPosType.OccupiedCenter, Sketch.SpawnMode.Normal, true, true, true, null, false, false, null, null, null);
+		}
+
+		// Token: 0x0600B35D RID: 45917 RVA: 0x00336654 File Offset: 0x00334854
+		private bool TryGetFreeRect(Map map, int width, int height, List<CellRect> usedRects, out CellRect rect)
+		{
+			rect = CellRect.Empty;
+			Func<IntVec3, bool> <>9__2;
+			IntVec3 center;
+			if (!CellFinder.TryFindRandomCell(map, delegate(IntVec3 c)
+			{
+				CellRect tmpRect = CellRect.CenteredOn(c, width, height);
+				if (tmpRect.InBounds(map) && usedRects.All((CellRect ur) => !ur.Overlaps(tmpRect)))
+				{
+					IEnumerable<IntVec3> cells = tmpRect.Cells;
+					Func<IntVec3, bool> predicate;
+					if ((predicate = <>9__2) == null)
+					{
+						predicate = (<>9__2 = ((IntVec3 cell) => cell.GetTerrain(map) == TerrainDefOf.MechanoidPlatform));
+					}
+					return cells.All(predicate);
+				}
+				return false;
+			}, out center))
+			{
+				return false;
+			}
+			rect = CellRect.CenteredOn(center, width, height);
+			return true;
+		}
+
+		// Token: 0x0600B35E RID: 45918 RVA: 0x003366C7 File Offset: 0x003348C7
+		protected override StructureGenParams GetStructureGenParams(CellRect rect, Map map, GenStepParams parms, LayoutDef layoutDef)
+		{
+			StructureGenParams structureGenParams = base.GetStructureGenParams(rect, map, parms, layoutDef);
+			structureGenParams.spawnImportantRoom = (this.stabilizerCount < 3);
+			this.stabilizerCount++;
+			return structureGenParams;
+		}
+
+		// Token: 0x04007ACB RID: 31435
+		private const int NumStabilizers = 3;
+
+		// Token: 0x04007ACC RID: 31436
+		private static readonly IntRange NumStandaloneRooms = new IntRange(10, 12);
+
+		// Token: 0x04007ACD RID: 31437
+		private static readonly IntRange StandaloneRoomSize = new IntRange(8, 25);
+
+		// Token: 0x04007ACE RID: 31438
+		private static readonly IntRange NumLaunchPads = new IntRange(8, 10);
+
+		// Token: 0x04007ACF RID: 31439
+		private static readonly IntRange NumProcessorArrays = new IntRange(8, 12);
+
+		// Token: 0x04007AD0 RID: 31440
+		private static readonly IntRange NumGuardOutposts = new IntRange(10, 12);
+
+		// Token: 0x04007AD1 RID: 31441
+		private static readonly IntRange GuardOutpostPointsRange = new IntRange(200, 350);
+
+		// Token: 0x04007AD2 RID: 31442
+		private const int MapBorderPadding = 20;
+
+		// Token: 0x04007AD3 RID: 31443
+		private const int PlatformRegionSize = 22;
+
+		// Token: 0x04007AD4 RID: 31444
+		private static readonly IntRange PlatformPadBorderLumpLengthRange = new IntRange(8, 12);
+
+		// Token: 0x04007AD5 RID: 31445
+		private static readonly IntRange PlatformPadBorderLumpOffsetRange = new IntRange(-2, 3);
+
+		// Token: 0x04007AD6 RID: 31446
+		private static readonly FloatRange DamagedMaxPercentageRange = new FloatRange(0.5f, 0.5f);
+
+		// Token: 0x04007AD7 RID: 31447
+		private int stabilizerCount;
+
+		// Token: 0x04007AD8 RID: 31448
+		private static Chunks chunks;
+
+		// Token: 0x04007ADC RID: 31452
+		private static List<IntVec3> tmpHoleCells = new List<IntVec3>();
 	}
 }

@@ -1,37 +1,47 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbilityEffect_RandomAlliedMilitaryAid : CompAbilityEffect_WithDest
+namespace RimWorld
 {
-	public new CompProperties_RandomAlliedMilitaryAid Props => (CompProperties_RandomAlliedMilitaryAid)props;
-
-	public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
+	// Token: 0x0200225E RID: 8798
+	public class CompAbilityEffect_RandomAlliedMilitaryAid : CompAbilityEffect_WithDest
 	{
-		base.Apply(target, dest);
-		IncidentParms incidentParms = new IncidentParms();
-		incidentParms.target = parent.pawn.Map;
-		incidentParms.faction = GetRandomAlliedFaction();
-		incidentParms.raidArrivalModeForQuickMilitaryAid = true;
-		incidentParms.points = Props.points;
-		incidentParms.spawnCenter = target.Cell;
-		if (!IncidentDefOf.RaidFriendly.Worker.TryExecute(incidentParms))
+		// Token: 0x17001D4D RID: 7501
+		// (get) Token: 0x0600BFD8 RID: 49112 RVA: 0x003799CA File Offset: 0x00377BCA
+		public new CompProperties_RandomAlliedMilitaryAid Props
 		{
-			Log.Error("Failed to request military aid");
+			get
+			{
+				return (CompProperties_RandomAlliedMilitaryAid)this.props;
+			}
 		}
-	}
 
-	private Faction GetRandomAlliedFaction()
-	{
-		return Find.FactionManager.RandomAlliedFaction(allowHidden: true);
-	}
-
-	public override bool CanApplyOn(LocalTargetInfo target, LocalTargetInfo dest)
-	{
-		if (GetRandomAlliedFaction() == null)
+		// Token: 0x0600BFD9 RID: 49113 RVA: 0x003799D8 File Offset: 0x00377BD8
+		public override void Apply(LocalTargetInfo target, LocalTargetInfo dest)
 		{
-			return false;
+			base.Apply(target, dest);
+			IncidentParms incidentParms = new IncidentParms();
+			incidentParms.target = this.parent.pawn.Map;
+			incidentParms.faction = this.GetRandomAlliedFaction();
+			incidentParms.raidArrivalModeForQuickMilitaryAid = true;
+			incidentParms.points = this.Props.points;
+			incidentParms.spawnCenter = target.Cell;
+			if (!IncidentDefOf.RaidFriendly.Worker.TryExecute(incidentParms))
+			{
+				Log.Error("Failed to request military aid");
+			}
 		}
-		return base.CanApplyOn(target, dest);
+
+		// Token: 0x0600BFDA RID: 49114 RVA: 0x00379A56 File Offset: 0x00377C56
+		private Faction GetRandomAlliedFaction()
+		{
+			return Find.FactionManager.RandomAlliedFaction(true, false, true, TechLevel.Undefined);
+		}
+
+		// Token: 0x0600BFDB RID: 49115 RVA: 0x00379A66 File Offset: 0x00377C66
+		public override bool CanApplyOn(LocalTargetInfo target, LocalTargetInfo dest)
+		{
+			return this.GetRandomAlliedFaction() != null && base.CanApplyOn(target, dest);
+		}
 	}
 }

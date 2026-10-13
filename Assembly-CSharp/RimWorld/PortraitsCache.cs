@@ -1,289 +1,360 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public static class PortraitsCache
+namespace RimWorld
 {
-	private struct CachedPortrait
+	// Token: 0x02003075 RID: 12405
+	[StaticConstructorOnStartup]
+	public static class PortraitsCache
 	{
-		private const float CacheDuration = 1f;
-
-		public RenderTexture RenderTexture { get; private set; }
-
-		public bool Dirty { get; private set; }
-
-		public float LastUseTime { get; private set; }
-
-		public bool Expired => Time.time - LastUseTime > 1f;
-
-		public CachedPortrait(RenderTexture renderTexture, bool dirty, float lastUseTime)
+		// Token: 0x060116A5 RID: 71333 RVA: 0x00500FCC File Offset: 0x004FF1CC
+		public static RenderTexture Get(Pawn pawn, Vector2 size, Rot4 rotation, Vector3 cameraOffset = default(Vector3), float cameraZoom = 1f, bool supersample = true, bool compensateForUIScale = true, bool renderHeadgear = true, bool renderClothes = true, IReadOnlyDictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false, PawnHealthState? healthStateOverride = null)
 		{
-			this = default(CachedPortrait);
-			RenderTexture = renderTexture;
-			Dirty = dirty;
-			LastUseTime = lastUseTime;
-		}
-	}
-
-	private class PortraitParamsEqualityComparer : IEqualityComparer<PortraitParams>
-	{
-		public bool Equals(PortraitParams x, PortraitParams y)
-		{
-			return x.Equals(y);
-		}
-
-		public int GetHashCode(PortraitParams obj)
-		{
-			return obj.GetHashCode();
-		}
-	}
-
-	private readonly struct PortraitParams : IEquatable<PortraitParams>
-	{
-		public readonly Vector2 size;
-
-		public readonly Vector3 cameraOffset;
-
-		public readonly float cameraZoom;
-
-		public readonly Rot4 rotation;
-
-		public readonly bool renderHeadgear;
-
-		public readonly bool renderClothes;
-
-		public readonly bool stylingStation;
-
-		public readonly IReadOnlyDictionary<Apparel, Color> overrideApparelColors;
-
-		public readonly Color? overrideHairColor;
-
-		public readonly PawnHealthState? overrideHealthState;
-
-		private readonly int cachedHashCode;
-
-		public PortraitParams(Vector2 size, Vector3 cameraOffset, float cameraZoom, Rot4 rotation, bool renderHeadgear = true, bool renderClothes = true, IReadOnlyDictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false, PawnHealthState? overrideHealthState = null)
-		{
-			this.size = size;
-			this.cameraOffset = cameraOffset;
-			this.cameraZoom = cameraZoom;
-			this.rotation = rotation;
-			this.renderHeadgear = renderHeadgear;
-			this.renderClothes = renderClothes;
-			this.overrideApparelColors = overrideApparelColors;
-			this.overrideHairColor = overrideHairColor;
-			this.stylingStation = stylingStation;
-			this.overrideHealthState = overrideHealthState;
-			cachedHashCode = size.GetHashCode() ^ cameraOffset.GetHashCode() ^ cameraZoom.GetHashCode() ^ rotation.GetHashCode() ^ renderHeadgear.GetHashCode() ^ renderClothes.GetHashCode() ^ stylingStation.GetHashCode() ^ (overrideHairColor?.GetHashCode() ?? 0) ^ (overrideHealthState?.GetHashCode() ?? 0) ^ GenCollection.DictHashCode(overrideApparelColors);
-		}
-
-		public override bool Equals(object obj)
-		{
-			if (obj is PortraitParams other)
+			if (supersample)
 			{
-				return Equals(other);
+				size *= 1.25f;
 			}
-			return false;
+			if (compensateForUIScale)
+			{
+				size *= Prefs.UIScale;
+			}
+			PortraitsCache.PortraitParams portraitParams = new PortraitsCache.PortraitParams(size, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation, healthStateOverride);
+			Dictionary<Pawn, PortraitsCache.CachedPortrait> orCreateCachedPortraitsWithParams = PortraitsCache.GetOrCreateCachedPortraitsWithParams(portraitParams);
+			PortraitsCache.CachedPortrait cachedPortrait;
+			if (orCreateCachedPortraitsWithParams.TryGetValue(pawn, out cachedPortrait))
+			{
+				if (!cachedPortrait.RenderTexture.IsCreated())
+				{
+					cachedPortrait.RenderTexture.Create();
+					portraitParams.RenderPortrait(pawn, cachedPortrait.RenderTexture);
+				}
+				else if (cachedPortrait.Dirty)
+				{
+					portraitParams.RenderPortrait(pawn, cachedPortrait.RenderTexture);
+				}
+				orCreateCachedPortraitsWithParams.Remove(pawn);
+				orCreateCachedPortraitsWithParams.Add(pawn, new PortraitsCache.CachedPortrait(cachedPortrait.RenderTexture, false, Time.time));
+				return cachedPortrait.RenderTexture;
+			}
+			RenderTexture renderTexture = PortraitsCache.NewRenderTexture(size);
+			portraitParams.RenderPortrait(pawn, renderTexture);
+			orCreateCachedPortraitsWithParams.Add(pawn, new PortraitsCache.CachedPortrait(renderTexture, false, Time.time));
+			return renderTexture;
 		}
 
-		public bool Equals(PortraitParams other)
+		// Token: 0x060116A6 RID: 71334 RVA: 0x005010B8 File Offset: 0x004FF2B8
+		public static void SetDirty(Pawn pawn)
 		{
-			if (other.size == size && other.cameraOffset == cameraOffset && other.cameraZoom == cameraZoom && other.rotation == rotation && other.renderHeadgear == renderHeadgear && other.renderClothes == renderClothes && other.stylingStation == stylingStation)
+			foreach (KeyValuePair<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>> keyValuePair in PortraitsCache.cachedPortraits)
 			{
-				Color? color = other.overrideHairColor;
-				Color? color2 = overrideHairColor;
-				if (color.HasValue == color2.HasValue && (!color.HasValue || color.GetValueOrDefault() == color2.GetValueOrDefault()) && other.overrideHealthState == overrideHealthState)
+				PortraitsCache.PortraitParams portraitParams;
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary;
+				keyValuePair.Deconstruct(out portraitParams, out dictionary);
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary2 = dictionary;
+				PortraitsCache.CachedPortrait cachedPortrait;
+				if (dictionary2.TryGetValue(pawn, out cachedPortrait) && !cachedPortrait.Dirty)
 				{
-					return GenCollection.DictsEqual(other.overrideApparelColors, overrideApparelColors);
+					dictionary2.Remove(pawn);
+					dictionary2.Add(pawn, new PortraitsCache.CachedPortrait(cachedPortrait.RenderTexture, true, cachedPortrait.LastUseTime));
 				}
 			}
-			return false;
 		}
 
-		public override int GetHashCode()
+		// Token: 0x060116A7 RID: 71335 RVA: 0x00501148 File Offset: 0x004FF348
+		public static void PortraitsCacheUpdate()
 		{
-			return cachedHashCode;
+			PortraitsCache.RemoveExpiredCachedPortraits();
+			PortraitsCache.SetAnimatedPortraitsDirty();
 		}
 
-		public void RenderPortrait(Pawn pawn, RenderTexture renderTexture)
+		// Token: 0x060116A8 RID: 71336 RVA: 0x00501154 File Offset: 0x004FF354
+		public static void Clear()
 		{
-			float angle = 0f;
-			Vector3 positionOffset = default(Vector3);
-			if ((overrideHealthState ?? pawn.health.State) != PawnHealthState.Mobile && !pawn.ageTracker.CurLifeStage.alwaysDowned)
+			foreach (KeyValuePair<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>> keyValuePair in PortraitsCache.cachedPortraits)
 			{
-				angle = 85f;
-				positionOffset.x -= 0.18f;
-				positionOffset.z -= 0.18f;
-			}
-			Find.PawnCacheRenderer.RenderPawn(pawn, renderTexture, cameraOffset, cameraZoom, angle, rotation, pawn.health.hediffSet.HasHead, renderHeadgear, renderClothes, portrait: true, positionOffset, overrideApparelColors, overrideHairColor, stylingStation);
-		}
-	}
-
-	private static List<RenderTexture> renderTexturesPool = new List<RenderTexture>();
-
-	private static Dictionary<PortraitParams, Dictionary<Pawn, CachedPortrait>> cachedPortraits = new Dictionary<PortraitParams, Dictionary<Pawn, CachedPortrait>>(new PortraitParamsEqualityComparer());
-
-	private const float SupersampleScale = 1.25f;
-
-	private static List<Pawn> toRemove = new List<Pawn>();
-
-	private static List<Pawn> toSetDirty = new List<Pawn>();
-
-	public static RenderTexture Get(Pawn pawn, Vector2 size, Rot4 rotation, Vector3 cameraOffset = default(Vector3), float cameraZoom = 1f, bool supersample = true, bool compensateForUIScale = true, bool renderHeadgear = true, bool renderClothes = true, IReadOnlyDictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false, PawnHealthState? healthStateOverride = null)
-	{
-		if (supersample)
-		{
-			size *= 1.25f;
-		}
-		if (compensateForUIScale)
-		{
-			size *= Prefs.UIScale;
-		}
-		PortraitParams portraitParams = new PortraitParams(size, cameraOffset, cameraZoom, rotation, renderHeadgear, renderClothes, overrideApparelColors, overrideHairColor, stylingStation, healthStateOverride);
-		Dictionary<Pawn, CachedPortrait> orCreateCachedPortraitsWithParams = GetOrCreateCachedPortraitsWithParams(portraitParams);
-		if (orCreateCachedPortraitsWithParams.TryGetValue(pawn, out var value))
-		{
-			if (!value.RenderTexture.IsCreated())
-			{
-				value.RenderTexture.Create();
-				portraitParams.RenderPortrait(pawn, value.RenderTexture);
-			}
-			else if (value.Dirty)
-			{
-				portraitParams.RenderPortrait(pawn, value.RenderTexture);
-			}
-			orCreateCachedPortraitsWithParams.Remove(pawn);
-			orCreateCachedPortraitsWithParams.Add(pawn, new CachedPortrait(value.RenderTexture, dirty: false, Time.time));
-			return value.RenderTexture;
-		}
-		RenderTexture renderTexture = NewRenderTexture(size);
-		portraitParams.RenderPortrait(pawn, renderTexture);
-		orCreateCachedPortraitsWithParams.Add(pawn, new CachedPortrait(renderTexture, dirty: false, Time.time));
-		return renderTexture;
-	}
-
-	public static void SetDirty(Pawn pawn)
-	{
-		foreach (var (_, dictionary2) in cachedPortraits)
-		{
-			if (dictionary2.TryGetValue(pawn, out var value) && !value.Dirty)
-			{
-				dictionary2.Remove(pawn);
-				dictionary2.Add(pawn, new CachedPortrait(value.RenderTexture, dirty: true, value.LastUseTime));
-			}
-		}
-	}
-
-	public static void PortraitsCacheUpdate()
-	{
-		RemoveExpiredCachedPortraits();
-		SetAnimatedPortraitsDirty();
-	}
-
-	public static void Clear()
-	{
-		foreach (KeyValuePair<PortraitParams, Dictionary<Pawn, CachedPortrait>> cachedPortrait in cachedPortraits)
-		{
-			cachedPortrait.Deconstruct(out var _, out var value);
-			foreach (KeyValuePair<Pawn, CachedPortrait> item in value)
-			{
-				DestroyRenderTexture(item.Value.RenderTexture);
-			}
-		}
-		cachedPortraits.Clear();
-		for (int i = 0; i < renderTexturesPool.Count; i++)
-		{
-			DestroyRenderTexture(renderTexturesPool[i]);
-		}
-		renderTexturesPool.Clear();
-	}
-
-	private static Dictionary<Pawn, CachedPortrait> GetOrCreateCachedPortraitsWithParams(PortraitParams portraitParams)
-	{
-		if (!cachedPortraits.TryGetValue(portraitParams, out var value))
-		{
-			value = new Dictionary<Pawn, CachedPortrait>(new PawnEqualityComparer());
-			cachedPortraits.Add(portraitParams, value);
-		}
-		return value;
-	}
-
-	private static void DestroyRenderTexture(RenderTexture rt)
-	{
-		rt.DiscardContents();
-		UnityEngine.Object.Destroy(rt);
-	}
-
-	private static void RemoveExpiredCachedPortraits()
-	{
-		foreach (var (_, dictionary2) in cachedPortraits)
-		{
-			toRemove.Clear();
-			foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary2)
-			{
-				if (item.Value.Expired)
+				PortraitsCache.PortraitParams portraitParams;
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary;
+				keyValuePair.Deconstruct(out portraitParams, out dictionary);
+				foreach (KeyValuePair<Pawn, PortraitsCache.CachedPortrait> keyValuePair2 in dictionary)
 				{
-					toRemove.Add(item.Key);
-					renderTexturesPool.Add(item.Value.RenderTexture);
+					PortraitsCache.DestroyRenderTexture(keyValuePair2.Value.RenderTexture);
 				}
 			}
-			for (int i = 0; i < toRemove.Count; i++)
+			PortraitsCache.cachedPortraits.Clear();
+			for (int i = 0; i < PortraitsCache.renderTexturesPool.Count; i++)
 			{
-				dictionary2.Remove(toRemove[i]);
+				PortraitsCache.DestroyRenderTexture(PortraitsCache.renderTexturesPool[i]);
 			}
-			toRemove.Clear();
+			PortraitsCache.renderTexturesPool.Clear();
 		}
-	}
 
-	private static void SetAnimatedPortraitsDirty()
-	{
-		foreach (var (_, dictionary2) in cachedPortraits)
+		// Token: 0x060116A9 RID: 71337 RVA: 0x00501238 File Offset: 0x004FF438
+		private static Dictionary<Pawn, PortraitsCache.CachedPortrait> GetOrCreateCachedPortraitsWithParams(PortraitsCache.PortraitParams portraitParams)
 		{
-			toSetDirty.Clear();
-			foreach (KeyValuePair<Pawn, CachedPortrait> item in dictionary2)
+			Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary;
+			if (!PortraitsCache.cachedPortraits.TryGetValue(portraitParams, out dictionary))
 			{
-				if (IsAnimated(item.Key) && !item.Value.Dirty)
+				dictionary = new Dictionary<Pawn, PortraitsCache.CachedPortrait>(new PawnEqualityComparer());
+				PortraitsCache.cachedPortraits.Add(portraitParams, dictionary);
+			}
+			return dictionary;
+		}
+
+		// Token: 0x060116AA RID: 71338 RVA: 0x0050126C File Offset: 0x004FF46C
+		private static void DestroyRenderTexture(RenderTexture rt)
+		{
+			rt.DiscardContents();
+			UnityEngine.Object.Destroy(rt);
+		}
+
+		// Token: 0x060116AB RID: 71339 RVA: 0x0050127C File Offset: 0x004FF47C
+		private static void RemoveExpiredCachedPortraits()
+		{
+			foreach (KeyValuePair<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>> keyValuePair in PortraitsCache.cachedPortraits)
+			{
+				PortraitsCache.PortraitParams portraitParams;
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary;
+				keyValuePair.Deconstruct(out portraitParams, out dictionary);
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary2 = dictionary;
+				PortraitsCache.toRemove.Clear();
+				foreach (KeyValuePair<Pawn, PortraitsCache.CachedPortrait> keyValuePair2 in dictionary2)
 				{
-					toSetDirty.Add(item.Key);
+					if (keyValuePair2.Value.Expired)
+					{
+						PortraitsCache.toRemove.Add(keyValuePair2.Key);
+						PortraitsCache.renderTexturesPool.Add(keyValuePair2.Value.RenderTexture);
+					}
+				}
+				for (int i = 0; i < PortraitsCache.toRemove.Count; i++)
+				{
+					dictionary2.Remove(PortraitsCache.toRemove[i]);
+				}
+				PortraitsCache.toRemove.Clear();
+			}
+		}
+
+		// Token: 0x060116AC RID: 71340 RVA: 0x00501390 File Offset: 0x004FF590
+		private static void SetAnimatedPortraitsDirty()
+		{
+			foreach (KeyValuePair<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>> keyValuePair in PortraitsCache.cachedPortraits)
+			{
+				PortraitsCache.PortraitParams portraitParams;
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary;
+				keyValuePair.Deconstruct(out portraitParams, out dictionary);
+				Dictionary<Pawn, PortraitsCache.CachedPortrait> dictionary2 = dictionary;
+				PortraitsCache.toSetDirty.Clear();
+				foreach (KeyValuePair<Pawn, PortraitsCache.CachedPortrait> keyValuePair2 in dictionary2)
+				{
+					if (PortraitsCache.IsAnimated(keyValuePair2.Key) && !keyValuePair2.Value.Dirty)
+					{
+						PortraitsCache.toSetDirty.Add(keyValuePair2.Key);
+					}
+				}
+				for (int i = 0; i < PortraitsCache.toSetDirty.Count; i++)
+				{
+					PortraitsCache.CachedPortrait cachedPortrait = dictionary2[PortraitsCache.toSetDirty[i]];
+					dictionary2.Remove(PortraitsCache.toSetDirty[i]);
+					dictionary2.Add(PortraitsCache.toSetDirty[i], new PortraitsCache.CachedPortrait(cachedPortrait.RenderTexture, true, cachedPortrait.LastUseTime));
+				}
+				PortraitsCache.toSetDirty.Clear();
+			}
+		}
+
+		// Token: 0x060116AD RID: 71341 RVA: 0x005014EC File Offset: 0x004FF6EC
+		private static RenderTexture NewRenderTexture(Vector2 size)
+		{
+			int num = PortraitsCache.renderTexturesPool.FindLastIndex((RenderTexture x) => x.width == (int)size.x && x.height == (int)size.y);
+			if (num != -1)
+			{
+				RenderTexture result = PortraitsCache.renderTexturesPool[num];
+				PortraitsCache.renderTexturesPool.RemoveAt(num);
+				return result;
+			}
+			return new RenderTexture((int)size.x, (int)size.y, 24)
+			{
+				name = "Portrait",
+				useMipMap = false,
+				filterMode = FilterMode.Bilinear
+			};
+		}
+
+		// Token: 0x060116AE RID: 71342 RVA: 0x00501570 File Offset: 0x004FF770
+		private static bool IsAnimated(Pawn pawn)
+		{
+			return Current.ProgramState == ProgramState.Playing && pawn.Drawer.renderer.flasher.FlashingNowOrRecently;
+		}
+
+		// Token: 0x0400B46D RID: 46189
+		private static List<RenderTexture> renderTexturesPool = new List<RenderTexture>();
+
+		// Token: 0x0400B46E RID: 46190
+		private static Dictionary<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>> cachedPortraits = new Dictionary<PortraitsCache.PortraitParams, Dictionary<Pawn, PortraitsCache.CachedPortrait>>(new PortraitsCache.PortraitParamsEqualityComparer());
+
+		// Token: 0x0400B46F RID: 46191
+		private const float SupersampleScale = 1.25f;
+
+		// Token: 0x0400B470 RID: 46192
+		private static List<Pawn> toRemove = new List<Pawn>();
+
+		// Token: 0x0400B471 RID: 46193
+		private static List<Pawn> toSetDirty = new List<Pawn>();
+
+		// Token: 0x02003076 RID: 12406
+		private struct CachedPortrait
+		{
+			// Token: 0x17002D11 RID: 11537
+			// (get) Token: 0x060116B0 RID: 71344 RVA: 0x005015C0 File Offset: 0x004FF7C0
+			// (set) Token: 0x060116B1 RID: 71345 RVA: 0x005015C8 File Offset: 0x004FF7C8
+			public RenderTexture RenderTexture { readonly get; private set; }
+
+			// Token: 0x17002D12 RID: 11538
+			// (get) Token: 0x060116B2 RID: 71346 RVA: 0x005015D1 File Offset: 0x004FF7D1
+			// (set) Token: 0x060116B3 RID: 71347 RVA: 0x005015D9 File Offset: 0x004FF7D9
+			public bool Dirty { readonly get; private set; }
+
+			// Token: 0x17002D13 RID: 11539
+			// (get) Token: 0x060116B4 RID: 71348 RVA: 0x005015E2 File Offset: 0x004FF7E2
+			// (set) Token: 0x060116B5 RID: 71349 RVA: 0x005015EA File Offset: 0x004FF7EA
+			public float LastUseTime { readonly get; private set; }
+
+			// Token: 0x17002D14 RID: 11540
+			// (get) Token: 0x060116B6 RID: 71350 RVA: 0x005015F3 File Offset: 0x004FF7F3
+			public bool Expired
+			{
+				get
+				{
+					return Time.time - this.LastUseTime > 1f;
 				}
 			}
-			for (int i = 0; i < toSetDirty.Count; i++)
+
+			// Token: 0x060116B7 RID: 71351 RVA: 0x00501608 File Offset: 0x004FF808
+			public CachedPortrait(RenderTexture renderTexture, bool dirty, float lastUseTime)
 			{
-				CachedPortrait cachedPortrait = dictionary2[toSetDirty[i]];
-				dictionary2.Remove(toSetDirty[i]);
-				dictionary2.Add(toSetDirty[i], new CachedPortrait(cachedPortrait.RenderTexture, dirty: true, cachedPortrait.LastUseTime));
+				this = default(PortraitsCache.CachedPortrait);
+				this.RenderTexture = renderTexture;
+				this.Dirty = dirty;
+				this.LastUseTime = lastUseTime;
 			}
-			toSetDirty.Clear();
-		}
-	}
 
-	private static RenderTexture NewRenderTexture(Vector2 size)
-	{
-		int num = renderTexturesPool.FindLastIndex((RenderTexture x) => x.width == (int)size.x && x.height == (int)size.y);
-		if (num != -1)
-		{
-			RenderTexture result = renderTexturesPool[num];
-			renderTexturesPool.RemoveAt(num);
-			return result;
+			// Token: 0x0400B475 RID: 46197
+			private const float CacheDuration = 1f;
 		}
-		return new RenderTexture((int)size.x, (int)size.y, 24)
-		{
-			name = "Portrait",
-			useMipMap = false,
-			filterMode = FilterMode.Bilinear
-		};
-	}
 
-	private static bool IsAnimated(Pawn pawn)
-	{
-		if (Current.ProgramState == ProgramState.Playing)
+		// Token: 0x02003077 RID: 12407
+		private class PortraitParamsEqualityComparer : IEqualityComparer<PortraitsCache.PortraitParams>
 		{
-			return pawn.Drawer.renderer.flasher.FlashingNowOrRecently;
+			// Token: 0x060116B8 RID: 71352 RVA: 0x00501626 File Offset: 0x004FF826
+			public bool Equals(PortraitsCache.PortraitParams x, PortraitsCache.PortraitParams y)
+			{
+				return x.Equals(y);
+			}
+
+			// Token: 0x060116B9 RID: 71353 RVA: 0x00501630 File Offset: 0x004FF830
+			public int GetHashCode(PortraitsCache.PortraitParams obj)
+			{
+				return obj.GetHashCode();
+			}
 		}
-		return false;
+
+		// Token: 0x02003078 RID: 12408
+		private readonly struct PortraitParams : IEquatable<PortraitsCache.PortraitParams>
+		{
+			// Token: 0x060116BB RID: 71355 RVA: 0x00501640 File Offset: 0x004FF840
+			public PortraitParams(Vector2 size, Vector3 cameraOffset, float cameraZoom, Rot4 rotation, bool renderHeadgear = true, bool renderClothes = true, IReadOnlyDictionary<Apparel, Color> overrideApparelColors = null, Color? overrideHairColor = null, bool stylingStation = false, PawnHealthState? overrideHealthState = null)
+			{
+				this.size = size;
+				this.cameraOffset = cameraOffset;
+				this.cameraZoom = cameraZoom;
+				this.rotation = rotation;
+				this.renderHeadgear = renderHeadgear;
+				this.renderClothes = renderClothes;
+				this.overrideApparelColors = overrideApparelColors;
+				this.overrideHairColor = overrideHairColor;
+				this.stylingStation = stylingStation;
+				this.overrideHealthState = overrideHealthState;
+				this.cachedHashCode = (size.GetHashCode() ^ cameraOffset.GetHashCode() ^ cameraZoom.GetHashCode() ^ rotation.GetHashCode() ^ renderHeadgear.GetHashCode() ^ renderClothes.GetHashCode() ^ stylingStation.GetHashCode() ^ ((overrideHairColor != null) ? overrideHairColor.GetValueOrDefault().GetHashCode() : 0) ^ ((overrideHealthState != null) ? overrideHealthState.GetValueOrDefault().GetHashCode() : 0) ^ GenCollection.DictHashCode<Apparel, Color>(overrideApparelColors));
+			}
+
+			// Token: 0x060116BC RID: 71356 RVA: 0x00501738 File Offset: 0x004FF938
+			public override bool Equals(object obj)
+			{
+				if (obj is PortraitsCache.PortraitParams)
+				{
+					PortraitsCache.PortraitParams other = (PortraitsCache.PortraitParams)obj;
+					return this.Equals(other);
+				}
+				return false;
+			}
+
+			// Token: 0x060116BD RID: 71357 RVA: 0x00501760 File Offset: 0x004FF960
+			public bool Equals(PortraitsCache.PortraitParams other)
+			{
+				if (other.size == this.size && other.cameraOffset == this.cameraOffset && other.cameraZoom == this.cameraZoom && other.rotation == this.rotation && other.renderHeadgear == this.renderHeadgear && other.renderClothes == this.renderClothes && other.stylingStation == this.stylingStation && other.overrideHairColor == this.overrideHairColor)
+				{
+					PawnHealthState? pawnHealthState = other.overrideHealthState;
+					PawnHealthState? pawnHealthState2 = this.overrideHealthState;
+					if (pawnHealthState.GetValueOrDefault() == pawnHealthState2.GetValueOrDefault() & pawnHealthState != null == (pawnHealthState2 != null))
+					{
+						return GenCollection.DictsEqual<Apparel, Color>(other.overrideApparelColors, this.overrideApparelColors);
+					}
+				}
+				return false;
+			}
+
+			// Token: 0x060116BE RID: 71358 RVA: 0x00501879 File Offset: 0x004FFA79
+			public override int GetHashCode()
+			{
+				return this.cachedHashCode;
+			}
+
+			// Token: 0x060116BF RID: 71359 RVA: 0x00501884 File Offset: 0x004FFA84
+			public void RenderPortrait(Pawn pawn, RenderTexture renderTexture)
+			{
+				float angle = 0f;
+				Vector3 positionOffset = default(Vector3);
+				if ((this.overrideHealthState ?? pawn.health.State) != PawnHealthState.Mobile && !pawn.ageTracker.CurLifeStage.alwaysDowned)
+				{
+					angle = 85f;
+					positionOffset.x -= 0.18f;
+					positionOffset.z -= 0.18f;
+				}
+				Find.PawnCacheRenderer.RenderPawn(pawn, renderTexture, this.cameraOffset, this.cameraZoom, angle, this.rotation, pawn.health.hediffSet.HasHead, this.renderHeadgear, this.renderClothes, true, positionOffset, this.overrideApparelColors, this.overrideHairColor, this.stylingStation);
+			}
+
+			// Token: 0x0400B476 RID: 46198
+			public readonly Vector2 size;
+
+			// Token: 0x0400B477 RID: 46199
+			public readonly Vector3 cameraOffset;
+
+			// Token: 0x0400B478 RID: 46200
+			public readonly float cameraZoom;
+
+			// Token: 0x0400B479 RID: 46201
+			public readonly Rot4 rotation;
+
+			// Token: 0x0400B47A RID: 46202
+			public readonly bool renderHeadgear;
+
+			// Token: 0x0400B47B RID: 46203
+			public readonly bool renderClothes;
+
+			// Token: 0x0400B47C RID: 46204
+			public readonly bool stylingStation;
+
+			// Token: 0x0400B47D RID: 46205
+			public readonly IReadOnlyDictionary<Apparel, Color> overrideApparelColors;
+
+			// Token: 0x0400B47E RID: 46206
+			public readonly Color? overrideHairColor;
+
+			// Token: 0x0400B47F RID: 46207
+			public readonly PawnHealthState? overrideHealthState;
+
+			// Token: 0x0400B480 RID: 46208
+			private readonly int cachedHashCode;
+		}
 	}
 }

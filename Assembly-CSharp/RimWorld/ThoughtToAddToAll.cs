@@ -1,36 +1,41 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public struct ThoughtToAddToAll
+namespace RimWorld
 {
-	public ThoughtDef thoughtDef;
-
-	public Pawn otherPawn;
-
-	public ThoughtToAddToAll(ThoughtDef thoughtDef, Pawn otherPawn = null)
+	// Token: 0x02002335 RID: 9013
+	public struct ThoughtToAddToAll
 	{
-		if (thoughtDef == null)
+		// Token: 0x0600C396 RID: 50070 RVA: 0x0038BB0A File Offset: 0x00389D0A
+		public ThoughtToAddToAll(ThoughtDef thoughtDef, Pawn otherPawn = null)
 		{
-			throw new NullReferenceException("Thought def cant be null!");
+			if (thoughtDef == null)
+			{
+				throw new NullReferenceException("Thought def cant be null!");
+			}
+			this.thoughtDef = thoughtDef;
+			this.otherPawn = otherPawn;
 		}
-		this.thoughtDef = thoughtDef;
-		this.otherPawn = otherPawn;
-	}
 
-	public void Add(Pawn to)
-	{
-		if (to.needs != null && to.needs.mood != null)
+		// Token: 0x0600C397 RID: 50071 RVA: 0x0038BB28 File Offset: 0x00389D28
+		public void Add(Pawn to)
 		{
-			if (otherPawn == null)
+			if (to.needs == null || to.needs.mood == null)
 			{
-				to.needs.mood.thoughts.memories.TryGainMemory(thoughtDef);
+				return;
 			}
-			else
+			if (this.otherPawn == null)
 			{
-				to.needs.mood.thoughts.memories.TryGainMemory(thoughtDef, otherPawn);
+				to.needs.mood.thoughts.memories.TryGainMemory(this.thoughtDef, null, null);
+				return;
 			}
+			to.needs.mood.thoughts.memories.TryGainMemory(this.thoughtDef, this.otherPawn, null);
 		}
+
+		// Token: 0x04008543 RID: 34115
+		public ThoughtDef thoughtDef;
+
+		// Token: 0x04008544 RID: 34116
+		public Pawn otherPawn;
 	}
 }

@@ -1,22 +1,34 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbilityEffect_MustBeCapableOf : CompAbilityEffect
+namespace RimWorld
 {
-	public new CompProperties_AbilityMustBeCapableOf Props => (CompProperties_AbilityMustBeCapableOf)props;
-
-	public override bool GizmoDisabled(out string reason)
+	// Token: 0x0200224F RID: 8783
+	public class CompAbilityEffect_MustBeCapableOf : CompAbilityEffect
 	{
-		foreach (WorkTags allSelectedItem in Props.workTags.GetAllSelectedItems<WorkTags>())
+		// Token: 0x17001D46 RID: 7494
+		// (get) Token: 0x0600BFB1 RID: 49073 RVA: 0x00378EA3 File Offset: 0x003770A3
+		public new CompProperties_AbilityMustBeCapableOf Props
 		{
-			if (parent.pawn.WorkTagIsDisabled(allSelectedItem))
+			get
 			{
-				reason = "AbilityDisabled_IncapableOfWorkTag".Translate(parent.pawn.Named("PAWN"), allSelectedItem.LabelTranslated());
-				return true;
+				return (CompProperties_AbilityMustBeCapableOf)this.props;
 			}
 		}
-		reason = null;
-		return false;
+
+		// Token: 0x0600BFB2 RID: 49074 RVA: 0x00378EB0 File Offset: 0x003770B0
+		public override bool GizmoDisabled(out string reason)
+		{
+			foreach (WorkTags workTags in this.Props.workTags.GetAllSelectedItems<WorkTags>())
+			{
+				if (this.parent.pawn.WorkTagIsDisabled(workTags))
+				{
+					reason = "AbilityDisabled_IncapableOfWorkTag".Translate(this.parent.pawn.Named("PAWN"), workTags.LabelTranslated());
+					return true;
+				}
+			}
+			reason = null;
+			return false;
+		}
 	}
 }

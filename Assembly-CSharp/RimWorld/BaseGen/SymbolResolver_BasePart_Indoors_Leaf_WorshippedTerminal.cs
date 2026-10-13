@@ -1,47 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_BasePart_Indoors_Leaf_WorshippedTerminal : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public static bool CanResolve(string symbol, ResolveParams rp)
+	// Token: 0x020038F4 RID: 14580
+	public class SymbolResolver_BasePart_Indoors_Leaf_WorshippedTerminal : SymbolResolver
 	{
-		List<RuleDef> allDefsListForReading = DefDatabase<RuleDef>.AllDefsListForReading;
-		for (int i = 0; i < allDefsListForReading.Count; i++)
+		// Token: 0x060141D9 RID: 82393 RVA: 0x005FD50C File Offset: 0x005FB70C
+		public static bool CanResolve(string symbol, ResolveParams rp)
 		{
-			RuleDef ruleDef = allDefsListForReading[i];
-			if (ruleDef.symbol != symbol)
+			List<RuleDef> allDefsListForReading = DefDatabase<RuleDef>.AllDefsListForReading;
+			for (int i = 0; i < allDefsListForReading.Count; i++)
 			{
-				continue;
-			}
-			for (int j = 0; j < ruleDef.resolvers.Count; j++)
-			{
-				if (ruleDef.resolvers[j] is SymbolResolver_BasePart_Indoors_Leaf_WorshippedTerminal && ruleDef.resolvers[j].CanResolve(rp))
+				RuleDef ruleDef = allDefsListForReading[i];
+				if (!(ruleDef.symbol != symbol))
 				{
-					return true;
+					for (int j = 0; j < ruleDef.resolvers.Count; j++)
+					{
+						if (ruleDef.resolvers[j] is SymbolResolver_BasePart_Indoors_Leaf_WorshippedTerminal && ruleDef.resolvers[j].CanResolve(rp))
+						{
+							return true;
+						}
+					}
 				}
 			}
-		}
-		return false;
-	}
-
-	public override bool CanResolve(ResolveParams rp)
-	{
-		if (!base.CanResolve(rp))
-		{
 			return false;
 		}
-		if (BaseGen.globalSettings.basePart_worshippedTerminalsResolved >= BaseGen.globalSettings.requiredWorshippedTerminalRooms)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		BaseGen.symbolStack.Push("worshippedTerminal", rp);
-		BaseGen.globalSettings.basePart_worshippedTerminalsResolved++;
+		// Token: 0x060141DA RID: 82394 RVA: 0x005FD586 File Offset: 0x005FB786
+		public override bool CanResolve(ResolveParams rp)
+		{
+			return base.CanResolve(rp) && BaseGen.globalSettings.basePart_worshippedTerminalsResolved < BaseGen.globalSettings.requiredWorshippedTerminalRooms;
+		}
+
+		// Token: 0x060141DB RID: 82395 RVA: 0x005FD5AC File Offset: 0x005FB7AC
+		public override void Resolve(ResolveParams rp)
+		{
+			BaseGen.symbolStack.Push("worshippedTerminal", rp, null);
+			BaseGen.globalSettings.basePart_worshippedTerminalsResolved++;
+		}
 	}
 }

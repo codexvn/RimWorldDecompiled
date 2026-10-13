@@ -1,14 +1,15 @@
-namespace Verse.AI;
+﻿using System;
 
-public static class WanderRoomUtility
+namespace Verse.AI
 {
-	public static bool IsValidWanderDest(Pawn pawn, IntVec3 loc, IntVec3 root)
+	// Token: 0x0200101E RID: 4126
+	public static class WanderRoomUtility
 	{
-		Room room = root.GetRoom(pawn.Map);
-		if (room == null || room.IsDoorway)
+		// Token: 0x06006504 RID: 25860 RVA: 0x001FF0C8 File Offset: 0x001FD2C8
+		public static bool IsValidWanderDest(Pawn pawn, IntVec3 loc, IntVec3 root)
 		{
-			return true;
+			Room room = root.GetRoom(pawn.Map);
+			return room == null || room.IsDoorway || WanderUtility.InSameRoom(root, loc, pawn.Map);
 		}
-		return WanderUtility.InSameRoom(root, loc, pawn.Map);
 	}
 }

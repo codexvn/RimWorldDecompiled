@@ -1,42 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class Alert_BestowerWaiting : Alert
+namespace RimWorld
 {
-	private List<Pawn> bestowersWaitingResult = new List<Pawn>();
-
-	private List<Pawn> BestowersWaiting
+	// Token: 0x02002FE5 RID: 12261
+	public class Alert_BestowerWaiting : Alert
 	{
-		get
+		// Token: 0x17002CCA RID: 11466
+		// (get) Token: 0x0601145B RID: 70747 RVA: 0x004F2AD8 File Offset: 0x004F0CD8
+		private List<Pawn> BestowersWaiting
 		{
-			bestowersWaitingResult.Clear();
-			foreach (Map map in Find.Maps)
+			get
 			{
-				foreach (Lord lord in map.lordManager.lords)
+				this.bestowersWaitingResult.Clear();
+				foreach (Map map in Find.Maps)
 				{
-					if (lord.CurLordToil is LordToil_BestowingCeremony_Wait)
+					foreach (Lord lord in map.lordManager.lords)
 					{
-						bestowersWaitingResult.Add(lord.ownedPawns[0]);
+						if (lord.CurLordToil is LordToil_BestowingCeremony_Wait)
+						{
+							this.bestowersWaitingResult.Add(lord.ownedPawns[0]);
+						}
 					}
 				}
+				return this.bestowersWaitingResult;
 			}
-			return bestowersWaitingResult;
 		}
-	}
 
-	public Alert_BestowerWaiting()
-	{
-		defaultPriority = AlertPriority.High;
-		defaultLabel = "BestowerWaitingAlert".Translate();
-		defaultExplanation = "BestowerWaitingAlertDesc".Translate();
-		requireRoyalty = true;
-	}
+		// Token: 0x0601145C RID: 70748 RVA: 0x004F2B98 File Offset: 0x004F0D98
+		public Alert_BestowerWaiting()
+		{
+			this.defaultPriority = AlertPriority.High;
+			this.defaultLabel = "BestowerWaitingAlert".Translate();
+			this.defaultExplanation = "BestowerWaitingAlertDesc".Translate();
+			this.requireRoyalty = true;
+		}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(BestowersWaiting);
+		// Token: 0x0601145D RID: 70749 RVA: 0x004F2BEE File Offset: 0x004F0DEE
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.BestowersWaiting);
+		}
+
+		// Token: 0x0400B31D RID: 45853
+		private List<Pawn> bestowersWaitingResult = new List<Pawn>();
 	}
 }

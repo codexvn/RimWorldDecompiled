@@ -1,88 +1,104 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class RitualTargetFilter_Altar : RitualTargetFilter
+namespace RimWorld
 {
-	public RitualTargetFilter_Altar()
+	// Token: 0x020027DC RID: 10204
+	public class RitualTargetFilter_Altar : RitualTargetFilter
 	{
-	}
-
-	public RitualTargetFilter_Altar(RitualTargetFilterDef def)
-		: base(def)
-	{
-	}
-
-	public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
-	{
-		TargetInfo targetInfo = BestTarget(initiator, selectedTarget);
-		rejectionReason = "";
-		if (!targetInfo.IsValid)
+		// Token: 0x0600DF58 RID: 57176 RVA: 0x00419458 File Offset: 0x00417658
+		public RitualTargetFilter_Altar()
 		{
-			rejectionReason = "AbilityDisabledNoAltarOrRitualsSpot".Translate();
-			return false;
 		}
-		return true;
-	}
 
-	public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
-	{
-		if (!(initiator.Thing is Pawn pawn))
+		// Token: 0x0600DF59 RID: 57177 RVA: 0x00419460 File Offset: 0x00417660
+		public RitualTargetFilter_Altar(RitualTargetFilterDef def) : base(def)
 		{
-			return null;
 		}
-		Thing thing = null;
-		float num = 99999f;
-		foreach (Building item in CandidateBuildings(pawn.Ideo, initiator.Thing.Map))
+
+		// Token: 0x0600DF5A RID: 57178 RVA: 0x00419C48 File Offset: 0x00417E48
+		public override bool CanStart(TargetInfo initiator, TargetInfo selectedTarget, out string rejectionReason)
 		{
-			if (item.def.isAltar && pawn.CanReach(item, PathEndMode.Touch, pawn.NormalMaxDanger()))
+			TargetInfo targetInfo = this.BestTarget(initiator, selectedTarget);
+			rejectionReason = "";
+			if (!targetInfo.IsValid)
 			{
-				int lengthHorizontalSquared = (pawn.Position - item.Position).LengthHorizontalSquared;
-				if ((float)lengthHorizontalSquared < num)
-				{
-					thing = item;
-					num = lengthHorizontalSquared;
-				}
+				rejectionReason = "AbilityDisabledNoAltarOrRitualsSpot".Translate();
+				return false;
 			}
+			return true;
 		}
-		if (thing == null && def.fallbackToRitualSpot && pawn.Map != null)
+
+		// Token: 0x0600DF5B RID: 57179 RVA: 0x00419C84 File Offset: 0x00417E84
+		public override TargetInfo BestTarget(TargetInfo initiator, TargetInfo selectedTarget)
 		{
-			foreach (Thing item2 in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot))
+			Pawn pawn = initiator.Thing as Pawn;
+			if (pawn == null)
 			{
-				if (pawn.CanReach(item2, PathEndMode.Touch, pawn.NormalMaxDanger()))
+				return null;
+			}
+			Thing thing = null;
+			float num = 99999f;
+			foreach (Building building in this.CandidateBuildings(pawn.Ideo, initiator.Thing.Map))
+			{
+				if (building.def.isAltar && pawn.CanReach(building, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
 				{
-					int lengthHorizontalSquared2 = (pawn.Position - item2.Position).LengthHorizontalSquared;
-					if ((float)lengthHorizontalSquared2 < num)
+					int lengthHorizontalSquared = (pawn.Position - building.Position).LengthHorizontalSquared;
+					if ((float)lengthHorizontalSquared < num)
 					{
-						thing = item2;
-						num = lengthHorizontalSquared2;
+						thing = building;
+						num = (float)lengthHorizontalSquared;
 					}
 				}
 			}
+			if (thing == null && this.def.fallbackToRitualSpot && pawn.Map != null)
+			{
+				foreach (Thing thing2 in pawn.Map.listerThings.ThingsOfDef(ThingDefOf.RitualSpot))
+				{
+					if (pawn.CanReach(thing2, PathEndMode.Touch, pawn.NormalMaxDanger(), false, false, TraverseMode.ByPawn))
+					{
+						int lengthHorizontalSquared2 = (pawn.Position - thing2.Position).LengthHorizontalSquared;
+						if ((float)lengthHorizontalSquared2 < num)
+						{
+							thing = thing2;
+							num = (float)lengthHorizontalSquared2;
+						}
+					}
+				}
+			}
+			return thing;
 		}
-		return thing;
-	}
 
-	public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
-	{
-		yield return "RitualTargetGatherAltarOrRitualSpotInfo".Translate();
-	}
-
-	protected virtual IEnumerable<Building> CandidateBuildings(Ideo ideo, Map map)
-	{
-		if (map == null)
+		// Token: 0x0600DF5C RID: 57180 RVA: 0x00419E04 File Offset: 0x00418004
+		public override IEnumerable<string> GetTargetInfos(TargetInfo initiator)
 		{
+			yield return "RitualTargetGatherAltarOrRitualSpotInfo".Translate();
 			yield break;
 		}
-		foreach (Precept_Building item in ideo.cachedPossibleBuildings.Where((Precept_Building b) => b.ThingDef.isAltar))
+
+		// Token: 0x0600DF5D RID: 57181 RVA: 0x00419E0D File Offset: 0x0041800D
+		protected virtual IEnumerable<Building> CandidateBuildings(Ideo ideo, Map map)
 		{
-			foreach (Building item2 in map.listerBuildings.AllBuildingsColonistOfDef(item.ThingDef))
+			if (map == null)
 			{
-				yield return item2;
+				yield break;
 			}
+			foreach (Precept_Building precept_Building in from b in ideo.cachedPossibleBuildings
+			where b.ThingDef.isAltar
+			select b)
+			{
+				foreach (Building building in map.listerBuildings.AllBuildingsColonistOfDef(precept_Building.ThingDef))
+				{
+					yield return building;
+				}
+				List<Building>.Enumerator enumerator2 = default(List<Building>.Enumerator);
+			}
+			IEnumerator<Precept_Building> enumerator = null;
+			yield break;
+			yield break;
 		}
 	}
 }

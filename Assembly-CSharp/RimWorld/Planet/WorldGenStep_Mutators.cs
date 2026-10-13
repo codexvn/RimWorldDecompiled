@@ -1,99 +1,128 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldGenStep_Mutators : WorldGenStep
+namespace RimWorld.Planet
 {
-	private const float MixedBiomeChance = 0.2f;
-
-	private const float CaveChanceMountainous = 0.5f;
-
-	private const float CaveChanceLargeHills = 0.25f;
-
-	private const float RiverIslandChance = 0.05f;
-
-	public override int SeedPart => 897213645;
-
-	public override void GenerateFresh(string seed, PlanetLayer layer)
+	// Token: 0x02003CF7 RID: 15607
+	public class WorldGenStep_Mutators : WorldGenStep
 	{
-		using (ProfilerBlock.Scope("Generate Mutators"))
+		// Token: 0x170034EE RID: 13550
+		// (get) Token: 0x060153C6 RID: 86982 RVA: 0x0065A2F2 File Offset: 0x006584F2
+		public override int SeedPart
 		{
-			AddMutatorsFromTile(layer);
+			get
+			{
+				return 897213645;
+			}
 		}
-	}
 
-	public static void AddMutatorsFromTile(PlanetLayer layer)
-	{
-		List<TileMutatorDef> list = DefDatabase<TileMutatorDef>.AllDefsListForReading.Where((TileMutatorDef m) => m.chanceOnNonLandmarkTile > 0f).ToList();
-		foreach (Tile tile2 in layer.Tiles)
+		// Token: 0x060153C7 RID: 86983 RVA: 0x0065A2FC File Offset: 0x006584FC
+		public override void GenerateFresh(string seed, PlanetLayer layer)
 		{
-			PlanetTile tile = tile2.tile;
-			if (tile2.hilliness == Hilliness.Mountainous || tile2.hilliness == Hilliness.Impassable)
+			using (ProfilerBlock.Scope("Generate Mutators"))
 			{
-				TryAddMutator(tile2, layer, TileMutatorDefOf.Mountain);
+				WorldGenStep_Mutators.AddMutatorsFromTile(layer);
 			}
-			if (ModsConfig.OdysseyActive && Find.World.LakeDirectionAt(tile).IsValid)
+		}
+
+		// Token: 0x060153C8 RID: 86984 RVA: 0x0065A33C File Offset: 0x0065853C
+		public static void AddMutatorsFromTile(PlanetLayer layer)
+		{
+			List<TileMutatorDef> list = (from m in DefDatabase<TileMutatorDef>.AllDefsListForReading
+			where m.chanceOnNonLandmarkTile > 0f
+			select m).ToList<TileMutatorDef>();
+			foreach (Tile tile in layer.Tiles)
 			{
-				TryAddMutator(tile2, layer, TileMutatorDefOf.Lakeshore);
-			}
-			else if (Find.World.CoastDirectionAt(tile).IsValid)
-			{
-				TryAddMutator(tile2, layer, TileMutatorDefOf.Coast);
-			}
-			if (tile2 is SurfaceTile surfaceTile && !surfaceTile.Rivers.NullOrEmpty())
-			{
-				if (!ModsConfig.OdysseyActive)
+				PlanetTile tile2 = tile.tile;
+				if (tile.hilliness == Hilliness.Mountainous || tile.hilliness == Hilliness.Impassable)
 				{
-					TryAddMutator(tile2, layer, TileMutatorDefOf.River);
+					WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.Mountain);
 				}
-				else if ((!surfaceTile.IsCoastal || surfaceTile.Rivers.Count <= 2 || !TryAddMutator(tile2, layer, TileMutatorDefOf.RiverDelta)) && (surfaceTile.Rivers.Count != 1 || !TryAddMutator(tile2, layer, TileMutatorDefOf.Headwater)) && (surfaceTile.Rivers.Count <= 2 || !TryAddMutator(tile2, layer, TileMutatorDefOf.RiverConfluence)) && (!Rand.Chance(0.05f) || !TryAddMutator(tile2, layer, TileMutatorDefOf.RiverIsland)))
+				if (ModsConfig.OdysseyActive && Find.World.LakeDirectionAt(tile2).IsValid)
 				{
-					TryAddMutator(tile2, layer, TileMutatorDefOf.River);
+					WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.Lakeshore);
 				}
-			}
-			if ((tile2.hilliness == Hilliness.Mountainous && Rand.Chance(0.5f)) || (tile2.hilliness == Hilliness.LargeHills && Rand.Chance(0.25f)))
-			{
-				TryAddMutator(tile2, layer, TileMutatorDefOf.Caves);
-			}
-			if (tile2.Landmark == null)
-			{
-				foreach (TileMutatorDef item in list)
+				else if (Find.World.CoastDirectionAt(tile2).IsValid)
 				{
-					if (Rand.Chance(item.chanceOnNonLandmarkTile))
+					WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.Coast);
+				}
+				SurfaceTile surfaceTile = tile as SurfaceTile;
+				if (surfaceTile != null && !surfaceTile.Rivers.NullOrEmpty<SurfaceTile.RiverLink>())
+				{
+					if (!ModsConfig.OdysseyActive)
 					{
-						TryAddMutator(tile2, layer, item);
+						WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.River);
+					}
+					else if ((!surfaceTile.IsCoastal || surfaceTile.Rivers.Count <= 2 || !WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.RiverDelta)) && (surfaceTile.Rivers.Count != 1 || !WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.Headwater)) && (surfaceTile.Rivers.Count <= 2 || !WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.RiverConfluence)) && (!Rand.Chance(0.05f) || !WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.RiverIsland)))
+					{
+						WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.River);
 					}
 				}
-			}
-			if (ModsConfig.OdysseyActive && Rand.Chance(0.2f))
-			{
-				TryAddMutator(tile2, layer, TileMutatorDefOf.MixedBiome);
+				if ((tile.hilliness == Hilliness.Mountainous && Rand.Chance(0.5f)) || (tile.hilliness == Hilliness.LargeHills && Rand.Chance(0.25f)))
+				{
+					WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.Caves);
+				}
+				if (tile.Landmark == null)
+				{
+					foreach (TileMutatorDef tileMutatorDef in list)
+					{
+						if (Rand.Chance(tileMutatorDef.chanceOnNonLandmarkTile))
+						{
+							WorldGenStep_Mutators.TryAddMutator(tile, layer, tileMutatorDef);
+						}
+					}
+				}
+				if (ModsConfig.OdysseyActive && Rand.Chance(0.2f))
+				{
+					WorldGenStep_Mutators.TryAddMutator(tile, layer, TileMutatorDefOf.MixedBiome);
+				}
 			}
 		}
-	}
 
-	private static bool TryAddMutator(Tile tile, PlanetLayer layer, TileMutatorDef mutator)
-	{
-		if (tile.Mutators.Contains(mutator))
+		// Token: 0x060153C9 RID: 86985 RVA: 0x0065A5BC File Offset: 0x006587BC
+		private static bool TryAddMutator(Tile tile, PlanetLayer layer, TileMutatorDef mutator)
 		{
-			return false;
+			if (tile.Mutators.Contains(mutator))
+			{
+				return false;
+			}
+			if (!mutator.IsValidTile(tile.tile, layer))
+			{
+				return false;
+			}
+			try
+			{
+				tile.AddMutator(mutator);
+			}
+			catch (Exception ex)
+			{
+				string[] array = new string[6];
+				array[0] = "Error adding mutator ";
+				array[1] = ((mutator != null) ? mutator.ToString() : null);
+				array[2] = " to tile ";
+				array[3] = ((tile != null) ? tile.ToString() : null);
+				array[4] = ": ";
+				int num = 5;
+				Exception ex2 = ex;
+				array[num] = ((ex2 != null) ? ex2.ToString() : null);
+				Log.Error(string.Concat(array));
+				return false;
+			}
+			return true;
 		}
-		if (!mutator.IsValidTile(tile.tile, layer))
-		{
-			return false;
-		}
-		try
-		{
-			tile.AddMutator(mutator);
-		}
-		catch (Exception ex)
-		{
-			Log.Error("Error adding mutator " + mutator?.ToString() + " to tile " + tile?.ToString() + ": " + ex);
-			return false;
-		}
-		return true;
+
+		// Token: 0x0400ECC2 RID: 60610
+		private const float MixedBiomeChance = 0.2f;
+
+		// Token: 0x0400ECC3 RID: 60611
+		private const float CaveChanceMountainous = 0.5f;
+
+		// Token: 0x0400ECC4 RID: 60612
+		private const float CaveChanceLargeHills = 0.25f;
+
+		// Token: 0x0400ECC5 RID: 60613
+		private const float RiverIslandChance = 0.05f;
 	}
 }

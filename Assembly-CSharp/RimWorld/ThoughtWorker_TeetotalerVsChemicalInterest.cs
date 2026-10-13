@@ -1,31 +1,35 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_TeetotalerVsChemicalInterest : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentSocialStateInternal(Pawn p, Pawn other)
+	// Token: 0x02001860 RID: 6240
+	public class ThoughtWorker_TeetotalerVsChemicalInterest : ThoughtWorker
 	{
-		if (!p.RaceProps.Humanlike)
+		// Token: 0x06008FA6 RID: 36774 RVA: 0x002A6990 File Offset: 0x002A4B90
+		protected override ThoughtState CurrentSocialStateInternal(Pawn p, Pawn other)
 		{
-			return false;
+			if (!p.RaceProps.Humanlike)
+			{
+				return false;
+			}
+			if (p.story == null || p.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) >= 0)
+			{
+				return false;
+			}
+			if (!other.RaceProps.Humanlike)
+			{
+				return false;
+			}
+			if (!RelationsUtility.PawnsKnowEachOther(p, other))
+			{
+				return false;
+			}
+			if (other.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) <= 0)
+			{
+				return false;
+			}
+			return true;
 		}
-		if (p.story == null || p.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) >= 0)
-		{
-			return false;
-		}
-		if (!other.RaceProps.Humanlike)
-		{
-			return false;
-		}
-		if (!RelationsUtility.PawnsKnowEachOther(p, other))
-		{
-			return false;
-		}
-		if (other.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) <= 0)
-		{
-			return false;
-		}
-		return true;
 	}
 }

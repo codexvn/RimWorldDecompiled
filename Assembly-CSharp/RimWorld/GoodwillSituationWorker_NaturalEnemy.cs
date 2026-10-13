@@ -1,13 +1,18 @@
-namespace RimWorld;
+﻿using System;
 
-public class GoodwillSituationWorker_NaturalEnemy : GoodwillSituationWorker
+namespace RimWorld
 {
-	public override int GetNaturalGoodwillOffset(Faction other)
+	// Token: 0x0200259D RID: 9629
+	public class GoodwillSituationWorker_NaturalEnemy : GoodwillSituationWorker
 	{
-		if (!other.def.naturalEnemy)
+		// Token: 0x0600D30E RID: 54030 RVA: 0x003E2A2B File Offset: 0x003E0C2B
+		public override int GetNaturalGoodwillOffset(Faction other)
 		{
-			return 0;
+			if (!other.def.naturalEnemy)
+			{
+				return 0;
+			}
+			return -130;
 		}
-		return -130;
 	}
 }

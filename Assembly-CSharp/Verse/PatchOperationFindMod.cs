@@ -1,43 +1,51 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Xml;
 
-namespace Verse;
-
-public class PatchOperationFindMod : PatchOperation
+namespace Verse
 {
-	private List<string> mods;
-
-	private PatchOperation match;
-
-	private PatchOperation nomatch;
-
-	protected override bool ApplyWorker(XmlDocument xml)
+	// Token: 0x020005A2 RID: 1442
+	public class PatchOperationFindMod : PatchOperation
 	{
-		bool flag = false;
-		for (int i = 0; i < mods.Count; i++)
+		// Token: 0x0600256B RID: 9579 RVA: 0x000C124C File Offset: 0x000BF44C
+		protected override bool ApplyWorker(XmlDocument xml)
 		{
-			if (ModLister.HasActiveModWithName(mods[i]))
+			bool flag = false;
+			for (int i = 0; i < this.mods.Count; i++)
 			{
-				flag = true;
-				break;
+				if (ModLister.HasActiveModWithName(this.mods[i]))
+				{
+					flag = true;
+					break;
+				}
 			}
-		}
-		if (flag)
-		{
-			if (match != null)
+			if (flag)
 			{
-				return match.Apply(xml);
+				if (this.match != null)
+				{
+					return this.match.Apply(xml);
+				}
 			}
+			else if (this.nomatch != null)
+			{
+				return this.nomatch.Apply(xml);
+			}
+			return true;
 		}
-		else if (nomatch != null)
-		{
-			return nomatch.Apply(xml);
-		}
-		return true;
-	}
 
-	public override string ToString()
-	{
-		return $"{base.ToString()}({mods.ToCommaList()})";
+		// Token: 0x0600256C RID: 9580 RVA: 0x000C12B6 File Offset: 0x000BF4B6
+		public override string ToString()
+		{
+			return string.Format("{0}({1})", base.ToString(), this.mods.ToCommaList(false, false));
+		}
+
+		// Token: 0x04001EB4 RID: 7860
+		private List<string> mods;
+
+		// Token: 0x04001EB5 RID: 7861
+		private PatchOperation match;
+
+		// Token: 0x04001EB6 RID: 7862
+		private PatchOperation nomatch;
 	}
 }

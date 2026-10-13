@@ -1,20 +1,21 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class PawnRenderNodeWorker_OverlayWounds : PawnRenderNodeWorker_Overlay
+namespace Verse
 {
-	protected override PawnOverlayDrawer OverlayDrawer(Pawn pawn)
+	// Token: 0x02000643 RID: 1603
+	public class PawnRenderNodeWorker_OverlayWounds : PawnRenderNodeWorker_Overlay
 	{
-		return pawn.Drawer.renderer.WoundOverlays;
-	}
-
-	public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
-	{
-		if (base.CanDrawNow(node, parms))
+		// Token: 0x06002876 RID: 10358 RVA: 0x000D60F5 File Offset: 0x000D42F5
+		protected override PawnOverlayDrawer OverlayDrawer(Pawn pawn)
 		{
-			return parms.rotDrawMode != RotDrawMode.Dessicated;
+			return pawn.Drawer.renderer.WoundOverlays;
 		}
-		return false;
+
+		// Token: 0x06002877 RID: 10359 RVA: 0x000D6107 File Offset: 0x000D4307
+		public override bool CanDrawNow(PawnRenderNode node, PawnDrawParms parms)
+		{
+			return base.CanDrawNow(node, parms) && parms.rotDrawMode != RotDrawMode.Dessicated;
+		}
 	}
 }

@@ -1,9 +1,14 @@
-namespace RimWorld.Planet;
+﻿using System;
 
-public class WorldDrawLayer_WorldObjects_NonExpandable : WorldDrawLayer_WorldObjects
+namespace RimWorld.Planet
 {
-	protected override bool ShouldSkip(WorldObject worldObject)
+	// Token: 0x02003CA5 RID: 15525
+	public class WorldDrawLayer_WorldObjects_NonExpandable : WorldDrawLayer_WorldObjects
 	{
-		return worldObject.def.expandingIcon;
+		// Token: 0x0601519D RID: 86429 RVA: 0x00650923 File Offset: 0x0064EB23
+		protected override bool ShouldSkip(WorldObject worldObject)
+		{
+			return worldObject.def.expandingIcon;
+		}
 	}
 }

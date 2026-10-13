@@ -1,28 +1,32 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SitePartWorker_ConditionCauser_SunBlocker : SitePartWorker_ConditionCauser
+namespace RimWorld
 {
-	public override bool IsAvailable()
+	// Token: 0x02002846 RID: 10310
+	public class SitePartWorker_ConditionCauser_SunBlocker : SitePartWorker_ConditionCauser
 	{
-		if (ModsConfig.IdeologyActive)
+		// Token: 0x0600E180 RID: 57728 RVA: 0x00421C5C File Offset: 0x0041FE5C
+		public override bool IsAvailable()
 		{
-			foreach (Map map in Find.Maps)
+			if (ModsConfig.IdeologyActive)
 			{
-				foreach (Pawn freeColonistsAndPrisoner in map.mapPawns.FreeColonistsAndPrisoners)
+				foreach (Map map in Find.Maps)
 				{
-					if ((freeColonistsAndPrisoner.IsFreeNonSlaveColonist || freeColonistsAndPrisoner.IsPrisonerOfColony) && !freeColonistsAndPrisoner.IsQuestLodger())
+					foreach (Pawn pawn in map.mapPawns.FreeColonistsAndPrisoners)
 					{
-						Ideo ideo = freeColonistsAndPrisoner.Ideo;
-						if (ideo != null && (ideo.HasMeme(MemeDefOf.Darkness) || ideo.HasMeme(MemeDefOf.Tunneler)))
+						if ((pawn.IsFreeNonSlaveColonist || pawn.IsPrisonerOfColony) && !pawn.IsQuestLodger())
 						{
-							return false;
+							Ideo ideo = pawn.Ideo;
+							if (ideo != null && (ideo.HasMeme(MemeDefOf.Darkness) || ideo.HasMeme(MemeDefOf.Tunneler)))
+							{
+								return false;
+							}
 						}
 					}
 				}
 			}
+			return base.IsAvailable();
 		}
-		return base.IsAvailable();
 	}
 }

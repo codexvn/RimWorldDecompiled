@@ -1,12 +1,17 @@
-namespace Verse;
+﻿using System;
 
-public class CameraMapConfig_ContinuousPan : CameraMapConfig
+namespace Verse
 {
-	public CameraMapConfig_ContinuousPan()
+	// Token: 0x020001D7 RID: 471
+	public class CameraMapConfig_ContinuousPan : CameraMapConfig
 	{
-		dollyRateKeys = 10f;
-		dollyRateScreenEdge = 5f;
-		camSpeedDecayFactor = 1f;
-		moveSpeedScale = 1f;
+		// Token: 0x06000CEA RID: 3306 RVA: 0x0003D299 File Offset: 0x0003B499
+		public CameraMapConfig_ContinuousPan()
+		{
+			this.dollyRateKeys = 10f;
+			this.dollyRateScreenEdge = 5f;
+			this.camSpeedDecayFactor = 1f;
+			this.moveSpeedScale = 1f;
+		}
 	}
 }

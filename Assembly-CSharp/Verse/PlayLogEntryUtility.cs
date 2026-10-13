@@ -1,79 +1,88 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse.Grammar;
 
-namespace Verse;
-
-public static class PlayLogEntryUtility
+namespace Verse
 {
-	public static IEnumerable<Rule> RulesForOptionalWeapon(string prefix, ThingDef weaponDef, ThingDef projectileDef)
+	// Token: 0x02000342 RID: 834
+	public static class PlayLogEntryUtility
 	{
-		if (weaponDef == null)
+		// Token: 0x0600153D RID: 5437 RVA: 0x00064471 File Offset: 0x00062671
+		public static IEnumerable<Rule> RulesForOptionalWeapon(string prefix, ThingDef weaponDef, ThingDef projectileDef)
 		{
-			yield break;
-		}
-		foreach (Rule item in GrammarUtility.RulesForDef(prefix, weaponDef))
-		{
-			yield return item;
-		}
-		ThingDef thingDef = projectileDef;
-		if (thingDef == null && !weaponDef.Verbs.NullOrEmpty())
-		{
-			thingDef = weaponDef.Verbs[0].defaultProjectile;
-		}
-		if (thingDef == null)
-		{
-			yield break;
-		}
-		foreach (Rule item2 in GrammarUtility.RulesForDef(prefix + "_projectile", thingDef))
-		{
-			yield return item2;
-		}
-	}
-
-	public static IEnumerable<Rule> RulesForDamagedParts(string prefix, BodyDef body, List<BodyPartRecord> bodyParts, List<bool> bodyPartsDestroyed, Dictionary<string, string> constants)
-	{
-		if (bodyParts != null)
-		{
-			int destroyedIndex = 0;
-			int damagedIndex = 0;
-			int i = 0;
-			while (i < bodyParts.Count)
+			if (weaponDef != null)
 			{
-				yield return new Rule_String(string.Format(prefix + "{0}_label", i), bodyParts[i].Label);
-				yield return new Rule_String(string.Format(prefix + "{0}_definite", i), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label));
-				yield return new Rule_String(string.Format(prefix + "{0}_indefinite", i), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label));
-				constants[string.Format(prefix + "{0}_destroyed", i)] = bodyPartsDestroyed[i].ToString();
-				constants[string.Format(prefix + "{0}_gender", i)] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label).ToString();
-				if (bodyPartsDestroyed[i])
+				foreach (Rule rule in GrammarUtility.RulesForDef(prefix, weaponDef))
 				{
-					yield return new Rule_String(string.Format(prefix + "_destroyed{0}_label", destroyedIndex), bodyParts[i].Label);
-					yield return new Rule_String(string.Format(prefix + "_destroyed{0}_definite", destroyedIndex), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label));
-					yield return new Rule_String(string.Format(prefix + "_destroyed{0}_indefinite", destroyedIndex), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label));
-					constants[$"{prefix}_destroyed{destroyedIndex}_outside"] = (bodyParts[i].depth == BodyPartDepth.Outside).ToString();
-					constants[$"{prefix}_destroyed{destroyedIndex}_gender"] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label).ToString();
-					destroyedIndex++;
+					yield return rule;
 				}
-				else
+				IEnumerator<Rule> enumerator = null;
+				ThingDef thingDef = projectileDef;
+				if (thingDef == null && !weaponDef.Verbs.NullOrEmpty<VerbProperties>())
 				{
-					yield return new Rule_String(string.Format(prefix + "_damaged{0}_label", damagedIndex), bodyParts[i].Label);
-					yield return new Rule_String(string.Format(prefix + "_damaged{0}_definite", damagedIndex), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label));
-					yield return new Rule_String(string.Format(prefix + "_damaged{0}_indefinite", damagedIndex), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label));
-					constants[$"{prefix}_damaged{damagedIndex}_outside"] = (bodyParts[i].depth == BodyPartDepth.Outside).ToString();
-					constants[$"{prefix}_damaged{damagedIndex}_gender"] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label).ToString();
-					damagedIndex++;
+					thingDef = weaponDef.Verbs[0].defaultProjectile;
 				}
-				int num = i + 1;
-				i = num;
+				if (thingDef != null)
+				{
+					foreach (Rule rule2 in GrammarUtility.RulesForDef(prefix + "_projectile", thingDef))
+					{
+						yield return rule2;
+					}
+					enumerator = null;
+				}
 			}
-			constants[prefix + "_count"] = bodyParts.Count.ToString();
-			constants[prefix + "_destroyed_count"] = destroyedIndex.ToString();
-			constants[prefix + "_damaged_count"] = damagedIndex.ToString();
+			yield break;
+			yield break;
 		}
-		else
+
+		// Token: 0x0600153E RID: 5438 RVA: 0x0006448F File Offset: 0x0006268F
+		public static IEnumerable<Rule> RulesForDamagedParts(string prefix, BodyDef body, List<BodyPartRecord> bodyParts, List<bool> bodyPartsDestroyed, Dictionary<string, string> constants)
 		{
-			constants[prefix + "_count"] = "0";
-			constants[prefix + "_destroyed_count"] = "0";
-			constants[prefix + "_damaged_count"] = "0";
+			if (bodyParts != null)
+			{
+				int destroyedIndex = 0;
+				int damagedIndex = 0;
+				int num;
+				for (int i = 0; i < bodyParts.Count; i = num)
+				{
+					yield return new Rule_String(string.Format(prefix + "{0}_label", i), bodyParts[i].Label);
+					yield return new Rule_String(string.Format(prefix + "{0}_definite", i), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label, false, false));
+					yield return new Rule_String(string.Format(prefix + "{0}_indefinite", i), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label, false, false));
+					constants[string.Format(prefix + "{0}_destroyed", i)] = bodyPartsDestroyed[i].ToString();
+					constants[string.Format(prefix + "{0}_gender", i)] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label, null, Gender.Male).ToString();
+					if (bodyPartsDestroyed[i])
+					{
+						yield return new Rule_String(string.Format(prefix + "_destroyed{0}_label", destroyedIndex), bodyParts[i].Label);
+						yield return new Rule_String(string.Format(prefix + "_destroyed{0}_definite", destroyedIndex), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label, false, false));
+						yield return new Rule_String(string.Format(prefix + "_destroyed{0}_indefinite", destroyedIndex), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label, false, false));
+						constants[string.Format("{0}_destroyed{1}_outside", prefix, destroyedIndex)] = (bodyParts[i].depth == BodyPartDepth.Outside).ToString();
+						constants[string.Format("{0}_destroyed{1}_gender", prefix, destroyedIndex)] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label, null, Gender.Male).ToString();
+						num = destroyedIndex;
+						destroyedIndex = num + 1;
+					}
+					else
+					{
+						yield return new Rule_String(string.Format(prefix + "_damaged{0}_label", damagedIndex), bodyParts[i].Label);
+						yield return new Rule_String(string.Format(prefix + "_damaged{0}_definite", damagedIndex), Find.ActiveLanguageWorker.WithDefiniteArticle(bodyParts[i].Label, false, false));
+						yield return new Rule_String(string.Format(prefix + "_damaged{0}_indefinite", damagedIndex), Find.ActiveLanguageWorker.WithIndefiniteArticle(bodyParts[i].Label, false, false));
+						constants[string.Format("{0}_damaged{1}_outside", prefix, damagedIndex)] = (bodyParts[i].depth == BodyPartDepth.Outside).ToString();
+						constants[string.Format("{0}_damaged{1}_gender", prefix, damagedIndex)] = LanguageDatabase.activeLanguage.ResolveGender(bodyParts[i].Label, null, Gender.Male).ToString();
+						num = damagedIndex;
+						damagedIndex = num + 1;
+					}
+					num = i + 1;
+				}
+				constants[prefix + "_count"] = bodyParts.Count.ToString();
+				constants[prefix + "_destroyed_count"] = destroyedIndex.ToString();
+				constants[prefix + "_damaged_count"] = damagedIndex.ToString();
+			}
+			else
+			{
+				constants[prefix + "_count"] = "0";
+				constants[prefix + "_destroyed_count"] = "0";
+				constants[prefix + "_damaged_count"] = "0";
+			}
+			yield break;
 		}
 	}
 }

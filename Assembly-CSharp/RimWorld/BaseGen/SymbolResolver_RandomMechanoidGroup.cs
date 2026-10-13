@@ -1,37 +1,51 @@
+﻿using System;
 using System.Linq;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_RandomMechanoidGroup : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static readonly IntRange DefaultMechanoidCountRange = new IntRange(1, 5);
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003970 RID: 14704
+	public class SymbolResolver_RandomMechanoidGroup : SymbolResolver
 	{
-		int num = rp.mechanoidsCount ?? DefaultMechanoidCountRange.RandomInRange;
-		Lord lord = rp.singlePawnLord;
-		if (lord == null && num > 0)
+		// Token: 0x0601436A RID: 82794 RVA: 0x00607BC8 File Offset: 0x00605DC8
+		public override void Resolve(ResolveParams rp)
 		{
-			Map map = BaseGen.globalSettings.map;
-			lord = LordMaker.MakeNewLord(lordJob: (rp.disableSinglePawn == true) ? new LordJob_SleepThenAssaultColony(Faction.OfMechanoids, rp.sendWokenUpMessage ?? true)
+			int num = rp.mechanoidsCount ?? SymbolResolver_RandomMechanoidGroup.DefaultMechanoidCountRange.RandomInRange;
+			Lord lord = rp.singlePawnLord;
+			if (lord == null && num > 0)
 			{
-				wakeOnPawnUnfogged = (rp.wakeSleepingMechanoidsOnUnfogged == true)
-			} : ((!Rand.Bool || !rp.rect.Cells.Where((IntVec3 x) => !x.Impassable(map)).TryRandomElement(out var result)) ? ((LordJob)new LordJob_AssaultColony(Faction.OfMechanoids, canKidnap: false, canTimeoutOrFlee: false, sappers: false, useAvoidGridSmart: false, canSteal: false)) : ((LordJob)new LordJob_DefendPoint(result))), faction: Faction.OfMechanoids, map: map);
-		}
-		for (int num2 = 0; num2 < num; num2++)
-		{
-			PawnKindDef pawnKindDef = rp.singlePawnKindDef;
-			if (pawnKindDef == null)
-			{
-				pawnKindDef = DefDatabase<PawnKindDef>.AllDefsListForReading.Where(MechClusterGenerator.MechKindSuitableForCluster).RandomElementByWeight((PawnKindDef kind) => 1f / kind.combatPower);
+				Map map = BaseGen.globalSettings.map;
+				IntVec3 point;
+				LordJob lordJob;
+				if (Rand.Bool && (from x in rp.rect.Cells
+				where !x.Impassable(map)
+				select x).TryRandomElement(out point))
+				{
+					lordJob = new LordJob_DefendPoint(point, null, null, false, true);
+				}
+				else
+				{
+					lordJob = new LordJob_AssaultColony(Faction.OfMechanoids, false, false, false, false, false, false, false);
+				}
+				lord = LordMaker.MakeNewLord(Faction.OfMechanoids, lordJob, map, null);
 			}
-			ResolveParams resolveParams = rp;
-			resolveParams.singlePawnKindDef = pawnKindDef;
-			resolveParams.singlePawnLord = lord;
-			resolveParams.faction = Faction.OfMechanoids;
-			BaseGen.symbolStack.Push("pawn", resolveParams);
+			for (int i = 0; i < num; i++)
+			{
+				PawnKindDef pawnKindDef = rp.singlePawnKindDef;
+				if (pawnKindDef == null)
+				{
+					pawnKindDef = DefDatabase<PawnKindDef>.AllDefsListForReading.Where(new Func<PawnKindDef, bool>(MechClusterGenerator.MechKindSuitableForCluster)).RandomElementByWeight((PawnKindDef kind) => 1f / kind.combatPower);
+				}
+				ResolveParams resolveParams = rp;
+				resolveParams.singlePawnKindDef = pawnKindDef;
+				resolveParams.singlePawnLord = lord;
+				resolveParams.faction = Faction.OfMechanoids;
+				BaseGen.symbolStack.Push("pawn", resolveParams, null);
+			}
 		}
+
+		// Token: 0x0400DF5F RID: 57183
+		private static readonly IntRange DefaultMechanoidCountRange = new IntRange(1, 5);
 	}
 }

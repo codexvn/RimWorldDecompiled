@@ -1,54 +1,69 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProducesBioferrite : ThingComp
+namespace RimWorld
 {
-	public CompProperties_ProducesBioferrite Props => (CompProperties_ProducesBioferrite)props;
-
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+	// Token: 0x02002DB9 RID: 11705
+	public class CompProducesBioferrite : ThingComp
 	{
-		StatDrawEntry statDrawEntry = BioferriteStatDrawEntry(parent as Pawn);
-		statDrawEntry.overridesHideStats = true;
-		yield return statDrawEntry;
-	}
+		// Token: 0x170029F4 RID: 10740
+		// (get) Token: 0x06010741 RID: 67393 RVA: 0x004BEEF4 File Offset: 0x004BD0F4
+		public CompProperties_ProducesBioferrite Props
+		{
+			get
+			{
+				return (CompProperties_ProducesBioferrite)this.props;
+			}
+		}
 
-	public static float BioferritePerDay(Pawn pawn)
-	{
-		CompProducesBioferrite compProducesBioferrite = pawn.TryGetComp<CompProducesBioferrite>();
-		if (compProducesBioferrite == null && (!pawn.IsMutant || !pawn.mutant.Def.producesBioferrite))
+		// Token: 0x06010742 RID: 67394 RVA: 0x004BEF01 File Offset: 0x004BD101
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
 		{
-			return 0f;
+			StatDrawEntry statDrawEntry = CompProducesBioferrite.BioferriteStatDrawEntry(this.parent as Pawn);
+			statDrawEntry.overridesHideStats = true;
+			yield return statDrawEntry;
+			yield break;
 		}
-		if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioferriteExtracted))
-		{
-			return 0f;
-		}
-		float num = compProducesBioferrite?.Props.bioferriteDensity ?? 1f;
-		return pawn.BodySize * num;
-	}
 
-	public static StatDrawEntry BioferriteStatDrawEntry(Pawn pawn)
-	{
-		CompProducesBioferrite compProducesBioferrite = pawn.TryGetComp<CompProducesBioferrite>();
-		StringBuilder stringBuilder = new StringBuilder("StatsReport_BioferriteGeneration_Desc".Translate());
-		stringBuilder.AppendLine();
-		stringBuilder.AppendLine();
-		stringBuilder.AppendLine("StatsReport_BaseValue".Translate() + ": 1");
-		stringBuilder.AppendLine();
-		stringBuilder.AppendLine("StatsReport_BodySize".Translate(pawn.BodySize.ToString("F2")) + ": x" + pawn.BodySize.ToStringPercent());
-		if (compProducesBioferrite != null)
+		// Token: 0x06010743 RID: 67395 RVA: 0x004BEF14 File Offset: 0x004BD114
+		public static float BioferritePerDay(Pawn pawn)
 		{
-			stringBuilder.AppendLine("StatsReport_BioferriteDensityMultiplier".Translate() + ": x" + compProducesBioferrite.Props.bioferriteDensity.ToStringPercent());
+			CompProducesBioferrite compProducesBioferrite = pawn.TryGetComp<CompProducesBioferrite>();
+			if (compProducesBioferrite == null && (!pawn.IsMutant || !pawn.mutant.Def.producesBioferrite))
+			{
+				return 0f;
+			}
+			if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioferriteExtracted, false))
+			{
+				return 0f;
+			}
+			float num = (compProducesBioferrite != null) ? compProducesBioferrite.Props.bioferriteDensity : 1f;
+			return pawn.BodySize * num;
 		}
-		if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioferriteExtracted))
+
+		// Token: 0x06010744 RID: 67396 RVA: 0x004BEF88 File Offset: 0x004BD188
+		public static StatDrawEntry BioferriteStatDrawEntry(Pawn pawn)
 		{
-			stringBuilder.AppendLine("StatsReport_BioferriteExtractedMultiplier".Translate() + ": x" + 0f.ToStringPercent());
+			CompProducesBioferrite compProducesBioferrite = pawn.TryGetComp<CompProducesBioferrite>();
+			StringBuilder stringBuilder = new StringBuilder("StatsReport_BioferriteGeneration_Desc".Translate());
+			stringBuilder.AppendLine();
+			stringBuilder.AppendLine();
+			stringBuilder.AppendLine("StatsReport_BaseValue".Translate() + ": 1");
+			stringBuilder.AppendLine();
+			stringBuilder.AppendLine("StatsReport_BodySize".Translate(pawn.BodySize.ToString("F2")) + ": x" + pawn.BodySize.ToStringPercent());
+			if (compProducesBioferrite != null)
+			{
+				stringBuilder.AppendLine("StatsReport_BioferriteDensityMultiplier".Translate() + ": x" + compProducesBioferrite.Props.bioferriteDensity.ToStringPercent());
+			}
+			if (pawn.health.hediffSet.HasHediff(HediffDefOf.BioferriteExtracted, false))
+			{
+				stringBuilder.AppendLine("StatsReport_BioferriteExtractedMultiplier".Translate() + ": x" + 0f.ToStringPercent());
+			}
+			stringBuilder.AppendLine();
+			stringBuilder.Append("StatsReport_FinalValue".Translate() + ": " + CompProducesBioferrite.BioferritePerDay(pawn).ToString("F1"));
+			return new StatDrawEntry(StatCategoryDefOf.Containment, "StatsReport_BioferriteGeneration".Translate(), CompProducesBioferrite.BioferritePerDay(pawn).ToString(), stringBuilder.ToString(), 100, null, null, false, false);
 		}
-		stringBuilder.AppendLine();
-		stringBuilder.Append("StatsReport_FinalValue".Translate() + ": " + BioferritePerDay(pawn).ToString("F1"));
-		return new StatDrawEntry(StatCategoryDefOf.Containment, "StatsReport_BioferriteGeneration".Translate(), BioferritePerDay(pawn).ToString(), stringBuilder.ToString(), 100);
 	}
 }

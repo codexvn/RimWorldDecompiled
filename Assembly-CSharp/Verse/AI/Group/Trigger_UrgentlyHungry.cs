@@ -1,22 +1,38 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_UrgentlyHungry : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010DA RID: 4314
+	public class Trigger_UrgentlyHungry : Trigger
 	{
-		if (signal.type == TriggerSignalType.Tick)
+		// Token: 0x06006936 RID: 26934 RVA: 0x00212ACC File Offset: 0x00210CCC
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.Tick)
 			{
-				Pawn_NeedsTracker needs = lord.ownedPawns[i].needs;
-				if (needs != null && (int?)needs.food?.CurCategory >= (int?)2)
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					return true;
+					Pawn_NeedsTracker needs = lord.ownedPawns[i].needs;
+					bool flag;
+					if (needs == null)
+					{
+						flag = false;
+					}
+					else
+					{
+						Need_Food food = needs.food;
+						HungerCategory? hungerCategory = (food != null) ? new HungerCategory?(food.CurCategory) : null;
+						HungerCategory hungerCategory2 = HungerCategory.UrgentlyHungry;
+						flag = (hungerCategory.GetValueOrDefault() >= hungerCategory2 & hungerCategory != null);
+					}
+					if (flag)
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

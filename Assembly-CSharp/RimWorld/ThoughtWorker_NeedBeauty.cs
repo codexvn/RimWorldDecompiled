@@ -1,26 +1,37 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_NeedBeauty : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001847 RID: 6215
+	public class ThoughtWorker_NeedBeauty : ThoughtWorker
 	{
-		if (p.needs.beauty == null)
+		// Token: 0x06008F6F RID: 36719 RVA: 0x002A5D0C File Offset: 0x002A3F0C
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (p.needs.beauty == null)
+			{
+				return ThoughtState.Inactive;
+			}
+			switch (p.needs.beauty.CurCategory)
+			{
+			case BeautyCategory.Hideous:
+				return ThoughtState.ActiveAtStage(0);
+			case BeautyCategory.VeryUgly:
+				return ThoughtState.ActiveAtStage(1);
+			case BeautyCategory.Ugly:
+				return ThoughtState.ActiveAtStage(2);
+			case BeautyCategory.Neutral:
+				return ThoughtState.Inactive;
+			case BeautyCategory.Pretty:
+				return ThoughtState.ActiveAtStage(3);
+			case BeautyCategory.VeryPretty:
+				return ThoughtState.ActiveAtStage(4);
+			case BeautyCategory.Beautiful:
+				return ThoughtState.ActiveAtStage(5);
+			default:
+				throw new InvalidOperationException("Unknown BeautyCategory");
+			}
 		}
-		return p.needs.beauty.CurCategory switch
-		{
-			BeautyCategory.Hideous => ThoughtState.ActiveAtStage(0), 
-			BeautyCategory.VeryUgly => ThoughtState.ActiveAtStage(1), 
-			BeautyCategory.Ugly => ThoughtState.ActiveAtStage(2), 
-			BeautyCategory.Neutral => ThoughtState.Inactive, 
-			BeautyCategory.Pretty => ThoughtState.ActiveAtStage(3), 
-			BeautyCategory.VeryPretty => ThoughtState.ActiveAtStage(4), 
-			BeautyCategory.Beautiful => ThoughtState.ActiveAtStage(5), 
-			_ => throw new InvalidOperationException("Unknown BeautyCategory"), 
-		};
 	}
 }

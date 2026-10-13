@@ -1,210 +1,243 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public static class SettlementProximityGoodwillUtility
+namespace RimWorld.Planet
 {
-	private static readonly List<Pair<Settlement, int>> tmpGoodwillOffsets = new List<Pair<Settlement, int>>();
-
-	public static int MaxDist => Mathf.RoundToInt(DiplomacyTuning.Goodwill_PerQuadrumFromSettlementProximity.Last().x);
-
-	public static void CheckSettlementProximityGoodwillChange()
+	// Token: 0x02003C20 RID: 15392
+	public static class SettlementProximityGoodwillUtility
 	{
-		if (Find.TickManager.TicksGame == 0 || Find.TickManager.TicksGame % 900000 != 0)
+		// Token: 0x170033A3 RID: 13219
+		// (get) Token: 0x06014E07 RID: 85511 RVA: 0x00640BF8 File Offset: 0x0063EDF8
+		public static int MaxDist
 		{
-			return;
-		}
-		List<Settlement> settlements = Find.WorldObjects.Settlements;
-		tmpGoodwillOffsets.Clear();
-		for (int i = 0; i < settlements.Count; i++)
-		{
-			Settlement settlement = settlements[i];
-			if (settlement.Faction == Faction.OfPlayer)
+			get
 			{
-				AppendProximityGoodwillOffsets(settlement.Tile, tmpGoodwillOffsets, ignoreIfAlreadyMinGoodwill: true, ignorePermanentlyHostile: false);
+				return Mathf.RoundToInt(DiplomacyTuning.Goodwill_PerQuadrumFromSettlementProximity.Last<CurvePoint>().x);
 			}
 		}
-		if (!tmpGoodwillOffsets.Any())
+
+		// Token: 0x06014E08 RID: 85512 RVA: 0x00640C1C File Offset: 0x0063EE1C
+		public static void CheckSettlementProximityGoodwillChange()
 		{
-			return;
-		}
-		SortProximityGoodwillOffsets(tmpGoodwillOffsets);
-		List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
-		bool flag = false;
-		TaggedString text = "LetterFactionBaseProximity".Translate() + "\n\n" + ProximityGoodwillOffsetsToString(tmpGoodwillOffsets).ToLineList(" - ");
-		for (int j = 0; j < allFactionsListForReading.Count; j++)
-		{
-			Faction faction = allFactionsListForReading[j];
-			if (faction == Faction.OfPlayer)
+			if (Find.TickManager.TicksGame == 0 || Find.TickManager.TicksGame % 900000 != 0)
 			{
-				continue;
+				return;
 			}
-			int num = 0;
-			for (int k = 0; k < tmpGoodwillOffsets.Count; k++)
+			List<Settlement> settlements = Find.WorldObjects.Settlements;
+			SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Clear();
+			for (int i = 0; i < settlements.Count; i++)
 			{
-				if (tmpGoodwillOffsets[k].First.Faction == faction)
+				Settlement settlement = settlements[i];
+				if (settlement.Faction == Faction.OfPlayer)
 				{
-					num += tmpGoodwillOffsets[k].Second;
+					SettlementProximityGoodwillUtility.AppendProximityGoodwillOffsets(settlement.Tile, SettlementProximityGoodwillUtility.tmpGoodwillOffsets, true, false);
 				}
 			}
-			if (num != 0)
+			if (!SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Any<Pair<Settlement, int>>())
 			{
-				FactionRelationKind playerRelationKind = faction.PlayerRelationKind;
-				Faction.OfPlayer.TryAffectGoodwillWith(faction, num, canSendMessage: false, canSendHostilityLetter: false, HistoryEventDefOf.SettlementProximity);
-				flag = true;
-				faction.TryAppendRelationKindChangedInfo(ref text, playerRelationKind, faction.PlayerRelationKind);
+				return;
 			}
-		}
-		if (flag)
-		{
-			Find.LetterStack.ReceiveLetter("LetterLabelFactionBaseProximity".Translate(), text, LetterDefOf.NegativeEvent);
-		}
-	}
-
-	public static void AppendProximityGoodwillOffsets(PlanetTile tile, List<Pair<Settlement, int>> outOffsets, bool ignoreIfAlreadyMinGoodwill, bool ignorePermanentlyHostile)
-	{
-		int maxDist = MaxDist;
-		List<Settlement> settlements = Find.WorldObjects.Settlements;
-		for (int i = 0; i < settlements.Count; i++)
-		{
-			Settlement settlement = settlements[i];
-			if (settlement.Faction == null || settlement.Faction == Faction.OfPlayer || (ignorePermanentlyHostile && settlement.Faction.def.permanentEnemy) || (ignoreIfAlreadyMinGoodwill && settlement.Faction.PlayerGoodwill == -100) || tile == settlement.Tile)
+			SettlementProximityGoodwillUtility.SortProximityGoodwillOffsets(SettlementProximityGoodwillUtility.tmpGoodwillOffsets);
+			List<Faction> allFactionsListForReading = Find.FactionManager.AllFactionsListForReading;
+			bool flag = false;
+			TaggedString text = "LetterFactionBaseProximity".Translate() + "\n\n" + SettlementProximityGoodwillUtility.ProximityGoodwillOffsetsToString(SettlementProximityGoodwillUtility.tmpGoodwillOffsets).ToLineList(" - ", false);
+			for (int j = 0; j < allFactionsListForReading.Count; j++)
 			{
-				continue;
-			}
-			int num = Find.WorldGrid.TraversalDistanceBetween(tile, settlement.Tile, passImpassable: false, maxDist);
-			if (num != int.MaxValue)
-			{
-				float x = (float)num * settlement.Tile.LayerDef.rangeDistanceFactor;
-				int num2 = Mathf.RoundToInt(DiplomacyTuning.Goodwill_PerQuadrumFromSettlementProximity.Evaluate(x));
-				if (num2 != 0)
+				Faction faction = allFactionsListForReading[j];
+				if (faction != Faction.OfPlayer)
 				{
-					outOffsets.Add(new Pair<Settlement, int>(settlement, num2));
+					int num = 0;
+					for (int k = 0; k < SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Count; k++)
+					{
+						if (SettlementProximityGoodwillUtility.tmpGoodwillOffsets[k].First.Faction == faction)
+						{
+							num += SettlementProximityGoodwillUtility.tmpGoodwillOffsets[k].Second;
+						}
+					}
+					if (num != 0)
+					{
+						FactionRelationKind playerRelationKind = faction.PlayerRelationKind;
+						Faction.OfPlayer.TryAffectGoodwillWith(faction, num, false, false, HistoryEventDefOf.SettlementProximity, null);
+						flag = true;
+						faction.TryAppendRelationKindChangedInfo(ref text, playerRelationKind, faction.PlayerRelationKind, null);
+					}
+				}
+			}
+			if (flag)
+			{
+				Find.LetterStack.ReceiveLetter("LetterLabelFactionBaseProximity".Translate(), text, LetterDefOf.NegativeEvent, null, 0, true);
+			}
+		}
+
+		// Token: 0x06014E09 RID: 85513 RVA: 0x00640DD8 File Offset: 0x0063EFD8
+		public static void AppendProximityGoodwillOffsets(PlanetTile tile, List<Pair<Settlement, int>> outOffsets, bool ignoreIfAlreadyMinGoodwill, bool ignorePermanentlyHostile)
+		{
+			int maxDist = SettlementProximityGoodwillUtility.MaxDist;
+			List<Settlement> settlements = Find.WorldObjects.Settlements;
+			for (int i = 0; i < settlements.Count; i++)
+			{
+				Settlement settlement = settlements[i];
+				if (settlement.Faction != null && settlement.Faction != Faction.OfPlayer && (!ignorePermanentlyHostile || !settlement.Faction.def.permanentEnemy) && (!ignoreIfAlreadyMinGoodwill || settlement.Faction.PlayerGoodwill != -100) && !(tile == settlement.Tile))
+				{
+					int num = Find.WorldGrid.TraversalDistanceBetween(tile, settlement.Tile, false, maxDist, false);
+					if (num != 2147483647)
+					{
+						float x = (float)num * settlement.Tile.LayerDef.rangeDistanceFactor;
+						int num2 = Mathf.RoundToInt(DiplomacyTuning.Goodwill_PerQuadrumFromSettlementProximity.Evaluate(x));
+						if (num2 != 0)
+						{
+							outOffsets.Add(new Pair<Settlement, int>(settlement, num2));
+						}
+					}
 				}
 			}
 		}
-	}
 
-	private static void AppendGravshipAttackOffsets(PlanetTile tile, List<Pair<Settlement, int>> outOffsets, bool ignoreIfAlreadyMinGoodwill, bool ignorePermanentlyHostile)
-	{
-		Settlement settlement = Find.WorldObjects.SettlementAt(tile);
-		if (settlement != null && !settlement.Faction.IsPlayer && (!ignorePermanentlyHostile || !settlement.Faction.def.permanentEnemy) && (!ignoreIfAlreadyMinGoodwill || settlement.Faction.PlayerGoodwill != -100))
+		// Token: 0x06014E0A RID: 85514 RVA: 0x00640EC4 File Offset: 0x0063F0C4
+		private static void AppendGravshipAttackOffsets(PlanetTile tile, List<Pair<Settlement, int>> outOffsets, bool ignoreIfAlreadyMinGoodwill, bool ignorePermanentlyHostile)
 		{
+			Settlement settlement = Find.WorldObjects.SettlementAt(tile);
+			if (settlement == null || settlement.Faction.IsPlayer)
+			{
+				return;
+			}
+			if (ignorePermanentlyHostile && settlement.Faction.def.permanentEnemy)
+			{
+				return;
+			}
+			if (ignoreIfAlreadyMinGoodwill && settlement.Faction.PlayerGoodwill == -100)
+			{
+				return;
+			}
 			outOffsets.Add(new Pair<Settlement, int>(settlement, Faction.OfPlayer.GoodwillToMakeHostile(settlement.Faction)));
 		}
-	}
 
-	public static void SortProximityGoodwillOffsets(List<Pair<Settlement, int>> offsets)
-	{
-		offsets.SortBy((Pair<Settlement, int> x) => x.First.Faction.loadID, (Pair<Settlement, int> x) => -Mathf.Abs(x.Second));
-	}
+		// Token: 0x06014E0B RID: 85515 RVA: 0x00640F34 File Offset: 0x0063F134
+		public static void SortProximityGoodwillOffsets(List<Pair<Settlement, int>> offsets)
+		{
+			offsets.SortBy((Pair<Settlement, int> x) => x.First.Faction.loadID, (Pair<Settlement, int> x) => -Mathf.Abs(x.Second));
+		}
 
-	public static IEnumerable<string> ProximityGoodwillOffsetsToString(List<Pair<Settlement, int>> offsets)
-	{
-		for (int i = 0; i < offsets.Count; i++)
+		// Token: 0x06014E0C RID: 85516 RVA: 0x00640F85 File Offset: 0x0063F185
+		public static IEnumerable<string> ProximityGoodwillOffsetsToString(List<Pair<Settlement, int>> offsets)
 		{
-			yield return offsets[i].First.LabelCap + ": " + "ProximitySingleGoodwillChange".Translate(offsets[i].Second.ToStringWithSign(), offsets[i].First.Faction.Name);
-		}
-	}
-
-	private static IEnumerable<TaggedString> GetConfirmationDescriptions(PlanetTile tile, Building_GravEngine gravEngine = null)
-	{
-		Settlement settlement = Find.WorldObjects.SettlementAt(tile);
-		if (ModsConfig.OdysseyActive && gravEngine != null && settlement != null && !settlement.Faction.IsPlayer)
-		{
-			if (settlement.Faction.HostileTo(Faction.OfPlayer))
+			int num;
+			for (int i = 0; i < offsets.Count; i = num + 1)
 			{
-				yield return "ConfirmLandOnHostileFactionBase".Translate(settlement.Faction);
+				yield return offsets[i].First.LabelCap + ": " + "ProximitySingleGoodwillChange".Translate(offsets[i].Second.ToStringWithSign(), offsets[i].First.Faction.Name);
+				num = i;
 			}
-			else
-			{
-				yield return "ConfirmLandOnNeutralFactionBase".Translate(settlement.Faction);
-			}
-		}
-		tmpGoodwillOffsets.Clear();
-		AppendProximityGoodwillOffsets(tile, tmpGoodwillOffsets, ignoreIfAlreadyMinGoodwill: false, ignorePermanentlyHostile: true);
-		if (tmpGoodwillOffsets.Any())
-		{
-			yield return "ConfirmSettleNearFactionBase".Translate(MaxDist - 1, 15);
-		}
-		if (ModsConfig.BiotechActive && NoxiousHazeUtility.TryGetNoxiousHazeMTB(tile, out var mtb))
-		{
-			yield return "ConfirmSettleNearPollution".Translate(mtb);
-		}
-		foreach (BiomeDef biome in tile.Tile.Biomes)
-		{
-			if (!biome.settleWarning.NullOrEmpty())
-			{
-				yield return biome.settleWarning;
-			}
-		}
-		if (!ModsConfig.OdysseyActive || tile.LayerDef != PlanetLayerDefOf.Orbit)
-		{
 			yield break;
 		}
-		yield return "OrbitalWarning".Translate();
-		if (gravEngine == null)
-		{
-			yield break;
-		}
-		yield return "OrbitalWarning_Gravship".Translate();
-		foreach (TaggedString orbitalWarning in gravEngine.GetOrbitalWarnings())
-		{
-			yield return orbitalWarning;
-		}
-	}
 
-	private static IEnumerable<string> GetConfirmationEffects(PlanetTile tile, bool gravship)
-	{
-		tmpGoodwillOffsets.Clear();
-		if (gravship && ModsConfig.OdysseyActive)
+		// Token: 0x06014E0D RID: 85517 RVA: 0x00640F95 File Offset: 0x0063F195
+		private static IEnumerable<TaggedString> GetConfirmationDescriptions(PlanetTile tile, Building_GravEngine gravEngine = null)
 		{
-			AppendGravshipAttackOffsets(tile, tmpGoodwillOffsets, ignoreIfAlreadyMinGoodwill: false, ignorePermanentlyHostile: true);
-		}
-		AppendProximityGoodwillOffsets(tile, tmpGoodwillOffsets, ignoreIfAlreadyMinGoodwill: false, ignorePermanentlyHostile: true);
-		SortProximityGoodwillOffsets(tmpGoodwillOffsets);
-		foreach (string item in ProximityGoodwillOffsetsToString(tmpGoodwillOffsets))
-		{
-			yield return item;
-		}
-	}
-
-	public static void CheckConfirmSettle(PlanetTile tile, Action settleAction, Action cancelAction = null, Building_GravEngine gravEngine = null)
-	{
-		IEnumerable<TaggedString> confirmationDescriptions = GetConfirmationDescriptions(tile, gravEngine);
-		if (confirmationDescriptions.Any())
-		{
-			TaggedString text = new TaggedString("");
-			foreach (TaggedString item in confirmationDescriptions)
+			Settlement settlement = Find.WorldObjects.SettlementAt(tile);
+			if (ModsConfig.OdysseyActive && gravEngine != null && settlement != null && !settlement.Faction.IsPlayer)
 			{
-				if (!text.NullOrEmpty())
+				if (settlement.Faction.HostileTo(Faction.OfPlayer))
 				{
-					text += "\n\n";
+					yield return "ConfirmLandOnHostileFactionBase".Translate(settlement.Faction);
 				}
-				text += item;
+				else
+				{
+					yield return "ConfirmLandOnNeutralFactionBase".Translate(settlement.Faction);
+				}
 			}
-			if (gravEngine != null)
+			SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Clear();
+			SettlementProximityGoodwillUtility.AppendProximityGoodwillOffsets(tile, SettlementProximityGoodwillUtility.tmpGoodwillOffsets, false, true);
+			if (SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Any<Pair<Settlement, int>>())
 			{
-				text += "\n\n" + "ConfirmLand".Translate();
+				yield return "ConfirmSettleNearFactionBase".Translate(SettlementProximityGoodwillUtility.MaxDist - 1, 15);
 			}
-			else
+			float value;
+			if (ModsConfig.BiotechActive && NoxiousHazeUtility.TryGetNoxiousHazeMTB(tile, out value))
 			{
-				text += "\n\n" + "ConfirmSettle".Translate();
+				yield return "ConfirmSettleNearPollution".Translate(value);
 			}
-			IEnumerable<string> confirmationEffects = GetConfirmationEffects(tile, gravEngine != null);
-			if (confirmationEffects.Any())
+			foreach (BiomeDef biomeDef in tile.Tile.Biomes)
 			{
-				text += "\n\n" + confirmationEffects.ToLineList(" - ");
+				if (!biomeDef.settleWarning.NullOrEmpty())
+				{
+					yield return biomeDef.settleWarning;
+				}
 			}
-			Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(text, settleAction, cancelAction));
+			IEnumerator<BiomeDef> enumerator = null;
+			if (ModsConfig.OdysseyActive && tile.LayerDef == PlanetLayerDefOf.Orbit)
+			{
+				yield return "OrbitalWarning".Translate();
+				if (gravEngine != null)
+				{
+					yield return "OrbitalWarning_Gravship".Translate();
+					foreach (TaggedString taggedString in gravEngine.GetOrbitalWarnings())
+					{
+						yield return taggedString;
+					}
+					IEnumerator<TaggedString> enumerator2 = null;
+				}
+			}
+			yield break;
+			yield break;
 		}
-		else
+
+		// Token: 0x06014E0E RID: 85518 RVA: 0x00640FAC File Offset: 0x0063F1AC
+		private static IEnumerable<string> GetConfirmationEffects(PlanetTile tile, bool gravship)
 		{
+			SettlementProximityGoodwillUtility.tmpGoodwillOffsets.Clear();
+			if (gravship && ModsConfig.OdysseyActive)
+			{
+				SettlementProximityGoodwillUtility.AppendGravshipAttackOffsets(tile, SettlementProximityGoodwillUtility.tmpGoodwillOffsets, false, true);
+			}
+			SettlementProximityGoodwillUtility.AppendProximityGoodwillOffsets(tile, SettlementProximityGoodwillUtility.tmpGoodwillOffsets, false, true);
+			SettlementProximityGoodwillUtility.SortProximityGoodwillOffsets(SettlementProximityGoodwillUtility.tmpGoodwillOffsets);
+			foreach (string text in SettlementProximityGoodwillUtility.ProximityGoodwillOffsetsToString(SettlementProximityGoodwillUtility.tmpGoodwillOffsets))
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06014E0F RID: 85519 RVA: 0x00640FC4 File Offset: 0x0063F1C4
+		public static void CheckConfirmSettle(PlanetTile tile, Action settleAction, Action cancelAction = null, Building_GravEngine gravEngine = null)
+		{
+			IEnumerable<TaggedString> confirmationDescriptions = SettlementProximityGoodwillUtility.GetConfirmationDescriptions(tile, gravEngine);
+			if (confirmationDescriptions.Any<TaggedString>())
+			{
+				TaggedString taggedString = new TaggedString("");
+				foreach (TaggedString t in confirmationDescriptions)
+				{
+					if (!taggedString.NullOrEmpty())
+					{
+						taggedString += "\n\n";
+					}
+					taggedString += t;
+				}
+				if (gravEngine != null)
+				{
+					taggedString += "\n\n" + "ConfirmLand".Translate();
+				}
+				else
+				{
+					taggedString += "\n\n" + "ConfirmSettle".Translate();
+				}
+				IEnumerable<string> confirmationEffects = SettlementProximityGoodwillUtility.GetConfirmationEffects(tile, gravEngine != null);
+				if (confirmationEffects.Any<string>())
+				{
+					taggedString += "\n\n" + confirmationEffects.ToLineList(" - ", false);
+				}
+				Find.WindowStack.Add(Dialog_MessageBox.CreateConfirmation(taggedString, settleAction, cancelAction, false, null, WindowLayer.Dialog));
+				return;
+			}
 			settleAction();
 		}
+
+		// Token: 0x0400E8A8 RID: 59560
+		private static readonly List<Pair<Settlement, int>> tmpGoodwillOffsets = new List<Pair<Settlement, int>>();
 	}
 }

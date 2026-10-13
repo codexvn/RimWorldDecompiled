@@ -1,41 +1,45 @@
+﻿using System;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public static class ScenSummaryList
+namespace RimWorld
 {
-	public static string SummaryWithList(Scenario scen, string tag, string intro)
+	// Token: 0x020028FF RID: 10495
+	public static class ScenSummaryList
 	{
-		string text = SummaryList(scen, tag);
-		if (!text.NullOrEmpty())
+		// Token: 0x0600E57F RID: 58751 RVA: 0x0042F510 File Offset: 0x0042D710
+		public static string SummaryWithList(Scenario scen, string tag, string intro)
 		{
-			return "\n" + intro + ":\n" + text;
+			string text = ScenSummaryList.SummaryList(scen, tag);
+			if (!text.NullOrEmpty())
+			{
+				return "\n" + intro + ":\n" + text;
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private static string SummaryList(Scenario scen, string tag)
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		bool flag = true;
-		foreach (ScenPart allPart in scen.AllParts)
+		// Token: 0x0600E580 RID: 58752 RVA: 0x0042F540 File Offset: 0x0042D740
+		private static string SummaryList(Scenario scen, string tag)
 		{
-			if (allPart.summarized)
+			StringBuilder stringBuilder = new StringBuilder();
+			bool flag = true;
+			foreach (ScenPart scenPart in scen.AllParts)
 			{
-				continue;
-			}
-			foreach (string summaryListEntry in allPart.GetSummaryListEntries(tag))
-			{
-				if (!flag)
+				if (!scenPart.summarized)
 				{
-					stringBuilder.Append("\n");
+					foreach (string str in scenPart.GetSummaryListEntries(tag))
+					{
+						if (!flag)
+						{
+							stringBuilder.Append("\n");
+						}
+						stringBuilder.Append("   -" + str);
+						scenPart.summarized = true;
+						flag = false;
+					}
 				}
-				stringBuilder.Append("   -" + summaryListEntry);
-				allPart.summarized = true;
-				flag = false;
 			}
+			return stringBuilder.ToString();
 		}
-		return stringBuilder.ToString();
 	}
 }

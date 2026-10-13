@@ -1,27 +1,32 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse.AI;
-
-public class ThinkNode_Random : ThinkNode
+namespace Verse.AI
 {
-	private static List<ThinkNode> tempList = new List<ThinkNode>();
-
-	public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
+	// Token: 0x02000FFC RID: 4092
+	public class ThinkNode_Random : ThinkNode
 	{
-		tempList.Clear();
-		for (int i = 0; i < subNodes.Count; i++)
+		// Token: 0x06006488 RID: 25736 RVA: 0x001FD9B4 File Offset: 0x001FBBB4
+		public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
 		{
-			tempList.Add(subNodes[i]);
-		}
-		tempList.Shuffle();
-		for (int j = 0; j < tempList.Count; j++)
-		{
-			ThinkResult result = tempList[j].TryIssueJobPackage(pawn, jobParams);
-			if (result.IsValid)
+			ThinkNode_Random.tempList.Clear();
+			for (int i = 0; i < this.subNodes.Count; i++)
 			{
-				return result;
+				ThinkNode_Random.tempList.Add(this.subNodes[i]);
 			}
+			ThinkNode_Random.tempList.Shuffle<ThinkNode>();
+			for (int j = 0; j < ThinkNode_Random.tempList.Count; j++)
+			{
+				ThinkResult result = ThinkNode_Random.tempList[j].TryIssueJobPackage(pawn, jobParams);
+				if (result.IsValid)
+				{
+					return result;
+				}
+			}
+			return ThinkResult.NoJob;
 		}
-		return ThinkResult.NoJob;
+
+		// Token: 0x040047EA RID: 18410
+		private static List<ThinkNode> tempList = new List<ThinkNode>();
 	}
 }

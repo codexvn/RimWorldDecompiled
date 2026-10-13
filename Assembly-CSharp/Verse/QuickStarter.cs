@@ -1,19 +1,24 @@
+﻿using System;
 using UnityEngine.SceneManagement;
 
-namespace Verse;
-
-public static class QuickStarter
+namespace Verse
 {
-	private static bool quickStarted;
-
-	public static bool CheckQuickStart()
+	// Token: 0x02000354 RID: 852
+	public static class QuickStarter
 	{
-		if (GenCommandLine.CommandLineArgPassed("quicktest") && !quickStarted && GenScene.InEntryScene)
+		// Token: 0x060015D6 RID: 5590 RVA: 0x00066BCD File Offset: 0x00064DCD
+		public static bool CheckQuickStart()
 		{
-			quickStarted = true;
-			SceneManager.LoadScene("Play");
-			return true;
+			if (GenCommandLine.CommandLineArgPassed("quicktest") && !QuickStarter.quickStarted && GenScene.InEntryScene)
+			{
+				QuickStarter.quickStarted = true;
+				SceneManager.LoadScene("Play");
+				return true;
+			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04001428 RID: 5160
+		private static bool quickStarted;
 	}
 }

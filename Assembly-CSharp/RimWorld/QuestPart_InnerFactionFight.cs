@@ -1,184 +1,199 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class QuestPart_InnerFactionFight : QuestPartActivable
+namespace RimWorld
 {
-	public Faction firstFaction;
-
-	public FactionDef secondFactionDef;
-
-	public Faction secondFaction;
-
-	public IntVec3 meetingPos;
-
-	public MapParent mapParent;
-
-	public List<Pawn> pawns = new List<Pawn>();
-
-	public List<string> inSignals = new List<string>();
-
-	public string outSignalEnabled;
-
-	public string outSignalComplete;
-
-	public string factionBecameHostileSignal;
-
-	private bool OneSideDefeated
+	// Token: 0x02001BCB RID: 7115
+	public class QuestPart_InnerFactionFight : QuestPartActivable
 	{
-		get
+		// Token: 0x17001852 RID: 6226
+		// (get) Token: 0x06009E65 RID: 40549 RVA: 0x002DD0A4 File Offset: 0x002DB2A4
+		private bool OneSideDefeated
 		{
-			if (secondFaction == null)
+			get
 			{
-				return false;
-			}
-			int num = 0;
-			int num2 = 0;
-			for (int i = 0; i < pawns.Count; i++)
-			{
-				if (!pawns[i].Destroyed && !pawns[i].Downed)
+				if (this.secondFaction == null)
 				{
-					if (pawns[i].Faction == firstFaction)
+					return false;
+				}
+				int num = 0;
+				int num2 = 0;
+				for (int i = 0; i < this.pawns.Count; i++)
+				{
+					if (!this.pawns[i].Destroyed && !this.pawns[i].Downed)
 					{
-						num++;
-					}
-					else if (pawns[i].Faction == secondFaction)
-					{
-						num2++;
+						if (this.pawns[i].Faction == this.firstFaction)
+						{
+							num++;
+						}
+						else if (this.pawns[i].Faction == this.secondFaction)
+						{
+							num2++;
+						}
 					}
 				}
+				return num == 0 || num2 == 0;
 			}
-			if (num != 0)
-			{
-				return num2 == 0;
-			}
-			return true;
 		}
-	}
 
-	protected override void Enable(SignalArgs receivedArgs)
-	{
-		base.Enable(receivedArgs);
-		if (!OneSideDefeated)
+		// Token: 0x06009E66 RID: 40550 RVA: 0x002DD140 File Offset: 0x002DB340
+		protected override void Enable(SignalArgs receivedArgs)
 		{
-			List<FactionRelation> list = new List<FactionRelation>();
-			foreach (Faction item in Find.FactionManager.AllFactionsListForReading)
+			base.Enable(receivedArgs);
+			if (!this.OneSideDefeated)
 			{
-				if (item == firstFaction)
+				List<FactionRelation> list = new List<FactionRelation>();
+				foreach (Faction faction in Find.FactionManager.AllFactionsListForReading)
 				{
-					list.Add(new FactionRelation(item, FactionRelationKind.Hostile));
-				}
-				else if (!item.def.PermanentlyHostileTo(firstFaction.def))
-				{
-					list.Add(new FactionRelation(item, FactionRelationKind.Neutral));
-				}
-			}
-			secondFaction = FactionGenerator.NewGeneratedFactionWithRelations(secondFactionDef, list, hidden: true);
-			secondFaction.temporary = true;
-			Find.FactionManager.Add(secondFaction);
-			List<Thing> list2 = new List<Thing>();
-			List<Thing> list3 = new List<Thing>();
-			for (int i = 0; i < pawns.Count; i++)
-			{
-				if (!pawns[i].Destroyed)
-				{
-					if (i % 2 == 0)
+					if (faction == this.firstFaction)
 					{
-						pawns[i].SetFaction(secondFaction);
-						list3.Add(pawns[i]);
+						list.Add(new FactionRelation(faction, FactionRelationKind.Hostile));
 					}
-					else
+					else if (!faction.def.PermanentlyHostileTo(this.firstFaction.def))
 					{
-						list2.Add(pawns[i]);
-						pawns[i].GetLord()?.RemovePawn(pawns[i]);
+						list.Add(new FactionRelation(faction, FactionRelationKind.Neutral));
 					}
 				}
+				this.secondFaction = FactionGenerator.NewGeneratedFactionWithRelations(this.secondFactionDef, list, true);
+				this.secondFaction.temporary = true;
+				Find.FactionManager.Add(this.secondFaction);
+				List<Thing> list2 = new List<Thing>();
+				List<Thing> list3 = new List<Thing>();
+				for (int i = 0; i < this.pawns.Count; i++)
+				{
+					if (!this.pawns[i].Destroyed)
+					{
+						if (i % 2 == 0)
+						{
+							this.pawns[i].SetFaction(this.secondFaction, null);
+							list3.Add(this.pawns[i]);
+						}
+						else
+						{
+							list2.Add(this.pawns[i]);
+							Lord lord = this.pawns[i].GetLord();
+							if (lord != null)
+							{
+								lord.RemovePawn(this.pawns[i]);
+							}
+						}
+					}
+				}
+				Lord lord2 = LordMaker.MakeNewLord(this.firstFaction, new LordJob_AssaultThings(this.firstFaction, list3, 1f, false), this.mapParent.Map, null);
+				foreach (Thing thing in list2)
+				{
+					lord2.AddPawn((Pawn)thing);
+				}
+				lord2.inSignalLeave = this.outSignalComplete;
+				Lord lord3 = LordMaker.MakeNewLord(this.secondFaction, new LordJob_AssaultThings(this.secondFaction, list2, 1f, false), this.mapParent.Map, null);
+				foreach (Thing thing2 in list3)
+				{
+					lord3.AddPawn((Pawn)thing2);
+				}
+				lord3.inSignalLeave = this.outSignalComplete;
+				if (!this.outSignalEnabled.NullOrEmpty())
+				{
+					Find.SignalManager.SendSignal(new Signal(this.outSignalEnabled, receivedArgs, false));
+					return;
+				}
 			}
-			Lord lord = LordMaker.MakeNewLord(firstFaction, new LordJob_AssaultThings(firstFaction, list3), mapParent.Map);
-			foreach (Thing item2 in list2)
+			else
 			{
-				lord.AddPawn((Pawn)item2);
+				base.Complete();
 			}
-			lord.inSignalLeave = outSignalComplete;
-			Lord lord2 = LordMaker.MakeNewLord(secondFaction, new LordJob_AssaultThings(secondFaction, list2), mapParent.Map);
-			foreach (Thing item3 in list3)
+		}
+
+		// Token: 0x06009E67 RID: 40551 RVA: 0x002DD3F0 File Offset: 0x002DB5F0
+		public override void QuestPartTick()
+		{
+			if (this.OneSideDefeated)
 			{
-				lord2.AddPawn((Pawn)item3);
+				Find.SignalManager.SendSignal(new Signal(this.outSignalComplete, false));
+				base.Complete();
 			}
-			lord2.inSignalLeave = outSignalComplete;
-			if (!outSignalEnabled.NullOrEmpty())
+		}
+
+		// Token: 0x06009E68 RID: 40552 RVA: 0x002DD416 File Offset: 0x002DB616
+		public override bool QuestPartReserves(Faction f)
+		{
+			return f == this.firstFaction || (this.secondFaction != null && f == this.secondFaction);
+		}
+
+		// Token: 0x06009E69 RID: 40553 RVA: 0x002DD436 File Offset: 0x002DB636
+		public override void Notify_FactionRemoved(Faction f)
+		{
+			if (this.firstFaction == f)
 			{
-				Find.SignalManager.SendSignal(new Signal(outSignalEnabled, receivedArgs));
+				this.firstFaction = null;
+				return;
 			}
-		}
-		else
-		{
-			Complete();
-		}
-	}
-
-	public override void QuestPartTick()
-	{
-		if (OneSideDefeated)
-		{
-			Find.SignalManager.SendSignal(new Signal(outSignalComplete));
-			Complete();
-		}
-	}
-
-	public override bool QuestPartReserves(Faction f)
-	{
-		if (f != firstFaction)
-		{
-			if (secondFaction != null)
+			if (this.secondFaction == f)
 			{
-				return f == secondFaction;
+				this.secondFaction = null;
 			}
-			return false;
 		}
-		return true;
-	}
 
-	public override void Notify_FactionRemoved(Faction f)
-	{
-		if (firstFaction == f)
+		// Token: 0x06009E6A RID: 40554 RVA: 0x002DD45C File Offset: 0x002DB65C
+		public override void Notify_QuestSignalReceived(Signal signal)
 		{
-			firstFaction = null;
+			base.Notify_QuestSignalReceived(signal);
+			if (signal.tag == this.factionBecameHostileSignal && this.secondFaction != null)
+			{
+				this.secondFaction.SetRelationDirect(Faction.OfPlayer, FactionRelationKind.Hostile, false, null, null);
+			}
 		}
-		else if (secondFaction == f)
-		{
-			secondFaction = null;
-		}
-	}
 
-	public override void Notify_QuestSignalReceived(Signal signal)
-	{
-		base.Notify_QuestSignalReceived(signal);
-		if (signal.tag == factionBecameHostileSignal && secondFaction != null)
+		// Token: 0x06009E6B RID: 40555 RVA: 0x002DD4A8 File Offset: 0x002DB6A8
+		public override void ExposeData()
 		{
-			secondFaction.SetRelationDirect(Faction.OfPlayer, FactionRelationKind.Hostile, canSendHostilityLetter: false);
+			base.ExposeData();
+			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
+			Scribe_References.Look<Faction>(ref this.firstFaction, "firstFaction", false);
+			Scribe_Defs.Look<FactionDef>(ref this.secondFactionDef, "secondFactionDef");
+			Scribe_References.Look<Faction>(ref this.secondFaction, "secondFaction", false);
+			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
+			Scribe_Collections.Look<string>(ref this.inSignals, "inSignals", LookMode.Value, Array.Empty<object>());
+			Scribe_Values.Look<string>(ref this.outSignalEnabled, "outSignalEnabled", null, false);
+			Scribe_Values.Look<string>(ref this.outSignalComplete, "outSignalComplete", null, false);
+			Scribe_Values.Look<IntVec3>(ref this.meetingPos, "meetingPos", default(IntVec3), false);
+			Scribe_Values.Look<string>(ref this.factionBecameHostileSignal, "factionBecameHostileSignal", null, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.pawns.RemoveAll((Pawn x) => x == null);
+			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
-		Scribe_References.Look(ref firstFaction, "firstFaction");
-		Scribe_Defs.Look(ref secondFactionDef, "secondFactionDef");
-		Scribe_References.Look(ref secondFaction, "secondFaction");
-		Scribe_References.Look(ref mapParent, "mapParent");
-		Scribe_Collections.Look(ref inSignals, "inSignals", LookMode.Value);
-		Scribe_Values.Look(ref outSignalEnabled, "outSignalEnabled");
-		Scribe_Values.Look(ref outSignalComplete, "outSignalComplete");
-		Scribe_Values.Look(ref meetingPos, "meetingPos");
-		Scribe_Values.Look(ref factionBecameHostileSignal, "factionBecameHostileSignal");
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			pawns.RemoveAll((Pawn x) => x == null);
-		}
+		// Token: 0x04006DA7 RID: 28071
+		public Faction firstFaction;
+
+		// Token: 0x04006DA8 RID: 28072
+		public FactionDef secondFactionDef;
+
+		// Token: 0x04006DA9 RID: 28073
+		public Faction secondFaction;
+
+		// Token: 0x04006DAA RID: 28074
+		public IntVec3 meetingPos;
+
+		// Token: 0x04006DAB RID: 28075
+		public MapParent mapParent;
+
+		// Token: 0x04006DAC RID: 28076
+		public List<Pawn> pawns = new List<Pawn>();
+
+		// Token: 0x04006DAD RID: 28077
+		public List<string> inSignals = new List<string>();
+
+		// Token: 0x04006DAE RID: 28078
+		public string outSignalEnabled;
+
+		// Token: 0x04006DAF RID: 28079
+		public string outSignalComplete;
+
+		// Token: 0x04006DB0 RID: 28080
+		public string factionBecameHostileSignal;
 	}
 }

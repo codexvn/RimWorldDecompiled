@@ -1,41 +1,48 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_ThroneroomInvalidConfiguration : Alert
+namespace RimWorld
 {
-	private string validationInfo;
-
-	public Alert_ThroneroomInvalidConfiguration()
+	// Token: 0x02003016 RID: 12310
+	public class Alert_ThroneroomInvalidConfiguration : Alert
 	{
-		defaultLabel = "ThroneroomInvalidConfiguration".Translate();
-		defaultExplanation = "ThroneroomInvalidConfigurationDesc".Translate();
-		requireRoyalty = true;
-	}
-
-	public override TaggedString GetExplanation()
-	{
-		return base.GetExplanation() + "\n\n" + validationInfo;
-	}
-
-	public override AlertReport GetReport()
-	{
-		List<Map> maps = Find.Maps;
-		for (int i = 0; i < maps.Count; i++)
+		// Token: 0x0601151F RID: 70943 RVA: 0x004F7845 File Offset: 0x004F5A45
+		public Alert_ThroneroomInvalidConfiguration()
 		{
-			foreach (Thing item in maps[i].listerThings.ThingsInGroup(ThingRequestGroup.Throne))
+			this.defaultLabel = "ThroneroomInvalidConfiguration".Translate();
+			this.defaultExplanation = "ThroneroomInvalidConfigurationDesc".Translate();
+			this.requireRoyalty = true;
+		}
+
+		// Token: 0x06011520 RID: 70944 RVA: 0x004F787E File Offset: 0x004F5A7E
+		public override TaggedString GetExplanation()
+		{
+			return base.GetExplanation() + "\n\n" + this.validationInfo;
+		}
+
+		// Token: 0x06011521 RID: 70945 RVA: 0x004F789C File Offset: 0x004F5A9C
+		public override AlertReport GetReport()
+		{
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
 			{
-				if (!item.Fogged() && item.Faction == Faction.OfPlayer)
+				foreach (Thing thing in maps[i].listerThings.ThingsInGroup(ThingRequestGroup.Throne))
 				{
-					validationInfo = RoomRoleWorker_ThroneRoom.Validate(item.GetRoom());
-					if (validationInfo != null)
+					if (!thing.Fogged() && thing.Faction == Faction.OfPlayer)
 					{
-						return AlertReport.CulpritIs(item);
+						this.validationInfo = RoomRoleWorker_ThroneRoom.Validate(thing.GetRoom(RegionType.Set_All));
+						if (this.validationInfo != null)
+						{
+							return AlertReport.CulpritIs(thing);
+						}
 					}
 				}
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x0400B37B RID: 45947
+		private string validationInfo;
 	}
 }

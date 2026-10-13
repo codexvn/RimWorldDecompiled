@@ -1,23 +1,30 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetRandomInRangeFloat : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<FloatRange> range;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A77 RID: 14967
+	public class QuestNode_GetRandomInRangeFloat : QuestNode
 	{
-		slate.Set(storeAs.GetValue(slate), range.GetValue(slate).RandomInRange);
-		return true;
-	}
+		// Token: 0x0601473B RID: 83771 RVA: 0x0061BDB0 File Offset: 0x00619FB0
+		protected override bool TestRunInt(Slate slate)
+		{
+			slate.Set<float>(this.storeAs.GetValue(slate), this.range.GetValue(slate).RandomInRange, false);
+			return true;
+		}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		QuestGen.slate.Set(storeAs.GetValue(slate), range.GetValue(slate).RandomInRange);
+		// Token: 0x0601473C RID: 83772 RVA: 0x0061BDE8 File Offset: 0x00619FE8
+		protected override void RunInt()
+		{
+			Slate slate = QuestGen.slate;
+			QuestGen.slate.Set<float>(this.storeAs.GetValue(slate), this.range.GetValue(slate).RandomInRange, false);
+		}
+
+		// Token: 0x0400E252 RID: 57938
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E253 RID: 57939
+		public SlateRef<FloatRange> range;
 	}
 }

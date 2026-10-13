@@ -1,34 +1,38 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_WildManOffset : StatPart
+namespace RimWorld
 {
-	public float offset;
-
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x0200372D RID: 14125
+	public class StatPart_WildManOffset : StatPart
 	{
-		if (IsWildMan(req))
+		// Token: 0x06013934 RID: 80180 RVA: 0x005CDBD5 File Offset: 0x005CBDD5
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val += offset;
+			if (this.IsWildMan(req))
+			{
+				val += this.offset;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (IsWildMan(req))
+		// Token: 0x06013935 RID: 80181 RVA: 0x005CDBEB File Offset: 0x005CBDEB
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReport_WildMan".Translate() + ": " + offset.ToStringWithSign();
+			if (this.IsWildMan(req))
+			{
+				return "StatsReport_WildMan".Translate() + ": " + this.offset.ToStringWithSign("0.##");
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool IsWildMan(StatRequest req)
-	{
-		if (req.Thing is Pawn p)
+		// Token: 0x06013936 RID: 80182 RVA: 0x005CDC28 File Offset: 0x005CBE28
+		private bool IsWildMan(StatRequest req)
 		{
-			return p.IsWildMan();
+			Pawn pawn = req.Thing as Pawn;
+			return pawn != null && pawn.IsWildMan();
 		}
-		return false;
+
+		// Token: 0x0400D911 RID: 55569
+		public float offset;
 	}
 }

@@ -1,19 +1,20 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompExplosivePowered : CompExplosive
+namespace RimWorld
 {
-	protected override bool CanEverExplodeFromDamage
+	// Token: 0x02002C7D RID: 11389
+	public class CompExplosivePowered : CompExplosive
 	{
-		get
+		// Token: 0x17002854 RID: 10324
+		// (get) Token: 0x0600FF9E RID: 65438 RVA: 0x004A1094 File Offset: 0x0049F294
+		protected override bool CanEverExplodeFromDamage
 		{
-			CompMechPowerCell compMechPowerCell = parent.TryGetComp<CompMechPowerCell>();
-			if (compMechPowerCell != null && compMechPowerCell.depleted)
+			get
 			{
-				return false;
+				CompMechPowerCell compMechPowerCell = this.parent.TryGetComp<CompMechPowerCell>();
+				return (compMechPowerCell == null || !compMechPowerCell.depleted) && base.CanEverExplodeFromDamage;
 			}
-			return base.CanEverExplodeFromDamage;
 		}
 	}
 }

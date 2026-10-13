@@ -1,6 +1,11 @@
-namespace Verse;
+﻿using System;
 
-public class StuffAppearanceDef : Def
+namespace Verse
 {
-	public string pathPrefix;
+	// Token: 0x02000262 RID: 610
+	public class StuffAppearanceDef : Def
+	{
+		// Token: 0x04000B64 RID: 2916
+		public string pathPrefix;
+	}
 }

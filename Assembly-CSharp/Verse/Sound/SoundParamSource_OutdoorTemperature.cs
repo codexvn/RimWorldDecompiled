@@ -1,19 +1,32 @@
-namespace Verse.Sound;
+﻿using System;
 
-public class SoundParamSource_OutdoorTemperature : SoundParamSource
+namespace Verse.Sound
 {
-	public override string Label => "Outdoor temperature";
-
-	public override float ValueFor(Sample samp)
+	// Token: 0x02000E12 RID: 3602
+	public class SoundParamSource_OutdoorTemperature : SoundParamSource
 	{
-		if (Current.ProgramState != ProgramState.Playing)
+		// Token: 0x17000E8C RID: 3724
+		// (get) Token: 0x06005B3F RID: 23359 RVA: 0x001D3B1A File Offset: 0x001D1D1A
+		public override string Label
 		{
-			return 0f;
+			get
+			{
+				return "Outdoor temperature";
+			}
 		}
-		if (Find.CurrentMap == null)
+
+		// Token: 0x06005B40 RID: 23360 RVA: 0x001D3B21 File Offset: 0x001D1D21
+		public override float ValueFor(Sample samp)
 		{
-			return 0f;
+			if (Current.ProgramState != ProgramState.Playing)
+			{
+				return 0f;
+			}
+			if (Find.CurrentMap == null)
+			{
+				return 0f;
+			}
+			return Find.CurrentMap.mapTemperature.OutdoorTemp;
 		}
-		return Find.CurrentMap.mapTemperature.OutdoorTemp;
 	}
 }

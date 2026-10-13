@@ -1,63 +1,72 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class GatheringWorker_Concert : GatheringWorker
+namespace RimWorld
 {
-	private static List<Building_MusicalInstrument> tmpInstruments = new List<Building_MusicalInstrument>();
-
-	protected override LordJob CreateLordJob(IntVec3 spot, Pawn organizer)
+	// Token: 0x02001A3F RID: 6719
+	public class GatheringWorker_Concert : GatheringWorker
 	{
-		return new LordJob_Joinable_Concert(spot, organizer, def);
-	}
-
-	protected override bool TryFindGatherSpot(Pawn organizer, out IntVec3 spot)
-	{
-		bool enjoyableOutside = JoyUtility.EnjoyableOutsideNow(organizer);
-		_ = organizer.Map;
-		IEnumerable<Building_MusicalInstrument> enumerable = organizer.Map.listerBuildings.AllBuildingsColonistOfClass<Building_MusicalInstrument>();
-		try
+		// Token: 0x06009754 RID: 38740 RVA: 0x002C3363 File Offset: 0x002C1563
+		protected override LordJob CreateLordJob(IntVec3 spot, Pawn organizer)
 		{
-			int num = -1;
-			foreach (Building_MusicalInstrument item in enumerable)
+			return new LordJob_Joinable_Concert(spot, organizer, this.def);
+		}
+
+		// Token: 0x06009755 RID: 38741 RVA: 0x002C3374 File Offset: 0x002C1574
+		protected override bool TryFindGatherSpot(Pawn organizer, out IntVec3 spot)
+		{
+			bool enjoyableOutside = JoyUtility.EnjoyableOutsideNow(organizer, null);
+			Map map = organizer.Map;
+			IEnumerable<Building_MusicalInstrument> enumerable = organizer.Map.listerBuildings.AllBuildingsColonistOfClass<Building_MusicalInstrument>();
+			bool result;
+			try
 			{
-				if (GatheringsUtility.ValidateGatheringSpot(item.InteractionCell, def, organizer, enjoyableOutside, ignoreRequiredColonistCount: false) && InstrumentAccessible(item, organizer))
+				int num = -1;
+				foreach (Building_MusicalInstrument building_MusicalInstrument in enumerable)
 				{
-					float instrumentRange = item.def.building.instrumentRange;
-					if ((float)num < instrumentRange)
+					if (GatheringsUtility.ValidateGatheringSpot(building_MusicalInstrument.InteractionCell, this.def, organizer, enjoyableOutside, false) && GatheringWorker_Concert.InstrumentAccessible(building_MusicalInstrument, organizer))
 					{
-						tmpInstruments.Clear();
+						float instrumentRange = building_MusicalInstrument.def.building.instrumentRange;
+						if ((float)num < instrumentRange)
+						{
+							GatheringWorker_Concert.tmpInstruments.Clear();
+						}
+						else if ((float)num > instrumentRange)
+						{
+							continue;
+						}
+						GatheringWorker_Concert.tmpInstruments.Add(building_MusicalInstrument);
 					}
-					else if ((float)num > instrumentRange)
-					{
-						continue;
-					}
-					tmpInstruments.Add(item);
+				}
+				Building_MusicalInstrument building_MusicalInstrument2;
+				if (!GatheringWorker_Concert.tmpInstruments.TryRandomElement(out building_MusicalInstrument2))
+				{
+					spot = IntVec3.Invalid;
+					result = false;
+				}
+				else
+				{
+					spot = building_MusicalInstrument2.InteractionCell;
+					result = true;
 				}
 			}
-			if (!tmpInstruments.TryRandomElement(out var result))
+			finally
 			{
-				spot = IntVec3.Invalid;
-				return false;
+				GatheringWorker_Concert.tmpInstruments.Clear();
 			}
-			spot = result.InteractionCell;
-			return true;
+			return result;
 		}
-		finally
-		{
-			tmpInstruments.Clear();
-		}
-	}
 
-	public static bool InstrumentAccessible(Building_MusicalInstrument i, Pawn p)
-	{
-		if (!i.IsBeingPlayed && p.CanReach(i.InteractionCell, PathEndMode.OnCell, p.NormalMaxDanger()))
+		// Token: 0x06009756 RID: 38742 RVA: 0x002C3480 File Offset: 0x002C1680
+		public static bool InstrumentAccessible(Building_MusicalInstrument i, Pawn p)
 		{
-			return p.CanReserveSittableOrSpot(i.InteractionCell);
+			return !i.IsBeingPlayed && p.CanReach(i.InteractionCell, PathEndMode.OnCell, p.NormalMaxDanger(), false, false, TraverseMode.ByPawn) && p.CanReserveSittableOrSpot(i.InteractionCell, false);
 		}
-		return false;
+
+		// Token: 0x04006454 RID: 25684
+		private static List<Building_MusicalInstrument> tmpInstruments = new List<Building_MusicalInstrument>();
 	}
 }

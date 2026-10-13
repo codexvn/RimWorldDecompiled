@@ -1,13 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ConditionalHasFallbackLocation : ThinkNode_Conditional
+namespace Verse.AI
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02000FE6 RID: 4070
+	public class ThinkNode_ConditionalHasFallbackLocation : ThinkNode_Conditional
 	{
-		if (pawn.mindState.duty != null)
+		// Token: 0x06006456 RID: 25686 RVA: 0x001FD3C0 File Offset: 0x001FB5C0
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return pawn.mindState.duty.focusSecond.IsValid;
+			return pawn.mindState.duty != null && pawn.mindState.duty.focusSecond.IsValid;
 		}
-		return false;
 	}
 }

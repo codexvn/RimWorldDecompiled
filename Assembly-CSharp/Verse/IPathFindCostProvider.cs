@@ -1,8 +1,14 @@
-namespace Verse;
+﻿using System;
 
-public interface IPathFindCostProvider
+namespace Verse
 {
-	ushort PathFindCostFor(Pawn pawn);
+	// Token: 0x020005C7 RID: 1479
+	public interface IPathFindCostProvider
+	{
+		// Token: 0x06002602 RID: 9730
+		ushort PathFindCostFor(Pawn pawn);
 
-	CellRect GetOccupiedRect();
+		// Token: 0x06002603 RID: 9731
+		CellRect GetOccupiedRect();
+	}
 }

@@ -1,14 +1,18 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-internal class BlackScreenFixer : MonoBehaviour
+namespace Verse
 {
-	private void Start()
+	// Token: 0x02000C60 RID: 3168
+	internal class BlackScreenFixer : MonoBehaviour
 	{
-		if (Screen.width != 0 && Screen.height != 0)
+		// Token: 0x06005114 RID: 20756 RVA: 0x001A569B File Offset: 0x001A389B
+		private void Start()
 		{
-			Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreen);
+			if (Screen.width != 0 && Screen.height != 0)
+			{
+				Screen.SetResolution(Screen.width, Screen.height, Screen.fullScreen);
+			}
 		}
 	}
 }

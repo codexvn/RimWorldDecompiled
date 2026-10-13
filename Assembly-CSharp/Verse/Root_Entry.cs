@@ -1,55 +1,64 @@
-using System;
+﻿using System;
 using System.IO;
 using RimWorld;
 
-namespace Verse;
-
-public class Root_Entry : Root
+namespace Verse
 {
-	public MusicManagerEntry musicManagerEntry;
-
-	public override void Start()
+	// Token: 0x02000359 RID: 857
+	public class Root_Entry : Root
 	{
-		base.Start();
-		try
+		// Token: 0x060015F1 RID: 5617 RVA: 0x000671F0 File Offset: 0x000653F0
+		public override void Start()
 		{
-			Current.Game = null;
-			musicManagerEntry = new MusicManagerEntry();
-			FileInfo fileInfo = (Root.checkedAutostartSaveFile ? null : SaveGameFilesUtility.GetAutostartSaveFile());
-			Root.checkedAutostartSaveFile = true;
-			if (fileInfo != null)
+			base.Start();
+			try
 			{
-				GameDataSaveLoader.LoadGame(fileInfo);
+				Current.Game = null;
+				this.musicManagerEntry = new MusicManagerEntry();
+				FileInfo fileInfo = Root.checkedAutostartSaveFile ? null : SaveGameFilesUtility.GetAutostartSaveFile();
+				Root.checkedAutostartSaveFile = true;
+				if (fileInfo != null)
+				{
+					GameDataSaveLoader.LoadGame(fileInfo);
+				}
+			}
+			catch (Exception ex)
+			{
+				string str = "Critical error in root Start(): ";
+				Exception ex2 = ex;
+				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
 			}
 		}
-		catch (Exception ex)
-		{
-			Log.Error("Critical error in root Start(): " + ex);
-		}
-	}
 
-	public override void Update()
-	{
-		base.Update();
-		if (LongEventHandler.ShouldWaitForEvent || destroyed)
+		// Token: 0x060015F2 RID: 5618 RVA: 0x00067264 File Offset: 0x00065464
+		public override void Update()
 		{
-			return;
-		}
-		try
-		{
-			musicManagerEntry.MusicManagerEntryUpdate();
-			if (Find.World != null)
+			base.Update();
+			if (LongEventHandler.ShouldWaitForEvent || this.destroyed)
 			{
-				Find.World.WorldUpdate();
+				return;
 			}
-			if (Current.Game != null)
+			try
 			{
-				Current.Game.UpdateEntry();
+				this.musicManagerEntry.MusicManagerEntryUpdate();
+				if (Find.World != null)
+				{
+					Find.World.WorldUpdate();
+				}
+				if (Current.Game != null)
+				{
+					Current.Game.UpdateEntry();
+				}
+			}
+			catch (Exception ex)
+			{
+				string str = "Root level exception in Update(): ";
+				Exception ex2 = ex;
+				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
 			}
 		}
-		catch (Exception ex)
-		{
-			Log.Error("Root level exception in Update(): " + ex);
-		}
+
+		// Token: 0x04001441 RID: 5185
+		public MusicManagerEntry musicManagerEntry;
 	}
 }

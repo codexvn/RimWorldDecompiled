@@ -1,81 +1,111 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using RimWorld.Planet;
 using Verse.AI.Group;
 
-namespace Verse.AI;
-
-public class JobDriver_Goto : JobDriver
+namespace Verse.AI
 {
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02000E82 RID: 3714
+	public class JobDriver_Goto : JobDriver
 	{
-		pawn.Map.pawnDestinationReservationManager.Reserve(pawn, job, job.targetA.Cell);
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		LocalTargetInfo lookAtTarget = job.GetTarget(TargetIndex.B);
-		Toil toil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-		toil.AddPreTickAction(delegate
+		// Token: 0x06005D9F RID: 23967 RVA: 0x001DDCB7 File Offset: 0x001DBEB7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			if (job.exitMapOnArrival && pawn.Map.exitMapGrid.IsExitCell(pawn.Position))
-			{
-				TryExitMap();
-			}
-		});
-		toil.FailOn(() => job.failIfCantJoinOrCreateCaravan && !CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(pawn));
-		toil.FailOn(() => job.GetTarget(TargetIndex.A).Thing is Pawn pawn && pawn.ParentHolder is Corpse);
-		toil.FailOn(() => job.GetTarget(TargetIndex.A).Thing?.Destroyed ?? false);
-		if (lookAtTarget.IsValid)
-		{
-			toil.tickIntervalAction = (Action<int>)Delegate.Combine(toil.tickIntervalAction, (Action<int>)delegate
-			{
-				pawn.rotationTracker.FaceCell(lookAtTarget.Cell);
-			});
-			toil.handlingFacing = true;
+			this.pawn.Map.pawnDestinationReservationManager.Reserve(this.pawn, this.job, this.job.targetA.Cell);
+			return true;
 		}
-		toil.AddFinishAction(delegate
-		{
-			if (job.controlGroupTag != null && job.controlGroupTag != null)
-			{
-				pawn.GetOverseer()?.mechanitor.GetControlGroup(pawn).SetTag(pawn, job.controlGroupTag);
-			}
-		});
-		yield return toil;
-		Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-		toil2.initAction = delegate
-		{
-			if (pawn.mindState != null && pawn.mindState.forcedGotoPosition == base.TargetA.Cell)
-			{
-				pawn.mindState.forcedGotoPosition = IntVec3.Invalid;
-			}
-			if (!job.ritualTag.NullOrEmpty() && pawn.GetLord()?.LordJob is LordJob_Ritual lordJob_Ritual)
-			{
-				lordJob_Ritual.AddTagForPawn(pawn, job.ritualTag);
-			}
-			if (job.exitMapOnArrival && (pawn.Position.OnEdge(pawn.Map) || pawn.Map.exitMapGrid.IsExitCell(pawn.Position)))
-			{
-				TryExitMap();
-			}
-		};
-		toil2.defaultCompleteMode = ToilCompleteMode.Instant;
-		yield return toil2;
-	}
 
-	private void TryExitMap()
-	{
-		if (!job.failIfCantJoinOrCreateCaravan || CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(pawn))
+		// Token: 0x06005DA0 RID: 23968 RVA: 0x001DDCEB File Offset: 0x001DBEEB
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
+			LocalTargetInfo lookAtTarget = this.job.GetTarget(TargetIndex.B);
+			Toil toil = Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+			toil.AddPreTickAction(delegate
+			{
+				if (this.job.exitMapOnArrival && this.pawn.Map.exitMapGrid.IsExitCell(this.pawn.Position))
+				{
+					this.TryExitMap();
+				}
+			});
+			toil.FailOn(() => this.job.failIfCantJoinOrCreateCaravan && !CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(this.pawn));
+			toil.FailOn(delegate()
+			{
+				Pawn pawn = this.job.GetTarget(TargetIndex.A).Thing as Pawn;
+				return pawn != null && pawn.ParentHolder is Corpse;
+			});
+			toil.FailOn(delegate()
+			{
+				Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
+				return thing != null && thing.Destroyed;
+			});
+			if (lookAtTarget.IsValid)
+			{
+				Toil toil2 = toil;
+				toil2.tickIntervalAction = (Action<int>)Delegate.Combine(toil2.tickIntervalAction, new Action<int>(delegate(int delta)
+				{
+					this.pawn.rotationTracker.FaceCell(lookAtTarget.Cell);
+				}));
+				toil.handlingFacing = true;
+			}
+			toil.AddFinishAction(delegate
+			{
+				if (this.job.controlGroupTag == null)
+				{
+					return;
+				}
+				if (this.job.controlGroupTag != null)
+				{
+					Pawn overseer = this.pawn.GetOverseer();
+					if (overseer != null)
+					{
+						overseer.mechanitor.GetControlGroup(this.pawn).SetTag(this.pawn, this.job.controlGroupTag);
+					}
+				}
+			});
+			yield return toil;
+			Toil toil3 = ToilMaker.MakeToil("MakeNewToils");
+			toil3.initAction = delegate()
+			{
+				if (this.pawn.mindState != null && this.pawn.mindState.forcedGotoPosition == this.TargetA.Cell)
+				{
+					this.pawn.mindState.forcedGotoPosition = IntVec3.Invalid;
+				}
+				if (!this.job.ritualTag.NullOrEmpty())
+				{
+					Lord lord = this.pawn.GetLord();
+					LordJob_Ritual lordJob_Ritual = ((lord != null) ? lord.LordJob : null) as LordJob_Ritual;
+					if (lordJob_Ritual != null)
+					{
+						lordJob_Ritual.AddTagForPawn(this.pawn, this.job.ritualTag);
+					}
+				}
+				if (this.job.exitMapOnArrival && (this.pawn.Position.OnEdge(this.pawn.Map) || this.pawn.Map.exitMapGrid.IsExitCell(this.pawn.Position)))
+				{
+					this.TryExitMap();
+				}
+			};
+			toil3.defaultCompleteMode = ToilCompleteMode.Instant;
+			yield return toil3;
+			yield break;
+		}
+
+		// Token: 0x06005DA1 RID: 23969 RVA: 0x001DDCFC File Offset: 0x001DBEFC
+		private void TryExitMap()
+		{
+			if (this.job.failIfCantJoinOrCreateCaravan && !CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(this.pawn))
+			{
+				return;
+			}
 			if (ModsConfig.BiotechActive)
 			{
-				MechanitorUtility.Notify_PawnGotoLeftMap(pawn, pawn.Map);
+				MechanitorUtility.Notify_PawnGotoLeftMap(this.pawn, this.pawn.Map);
 			}
-			if (!ModsConfig.AnomalyActive || MetalhorrorUtility.TryPawnExitMap(pawn))
+			if (ModsConfig.AnomalyActive && !MetalhorrorUtility.TryPawnExitMap(this.pawn))
 			{
-				pawn.ExitMap(allowedToJoinOrCreateCaravan: true, CellRect.WholeMap(base.Map).GetClosestEdge(pawn.Position));
+				return;
 			}
+			this.pawn.ExitMap(true, CellRect.WholeMap(base.Map).GetClosestEdge(this.pawn.Position));
 		}
 	}
 }

@@ -1,32 +1,37 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_PawnExperiencingAnomalousWeather : Trigger
+namespace Verse.AI.Group
 {
-	private float weatherHediffThreshold = 0.15f;
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010E5 RID: 4325
+	public class Trigger_PawnExperiencingAnomalousWeather : Trigger
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x0600694C RID: 26956 RVA: 0x00213048 File Offset: 0x00211248
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			return false;
-		}
-		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
-		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (!ModsConfig.AnomalyActive)
 			{
-				Pawn pawn = lord.ownedPawns[i];
-				if (pawn.Spawned && !pawn.Dead && !pawn.Downed)
+				return false;
+			}
+			if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
+			{
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BloodRage);
-					if (firstHediffOfDef != null && firstHediffOfDef.Severity > weatherHediffThreshold)
+					Pawn pawn = lord.ownedPawns[i];
+					if (pawn.Spawned && !pawn.Dead && !pawn.Downed)
 					{
-						return true;
+						Hediff firstHediffOfDef = pawn.health.hediffSet.GetFirstHediffOfDef(HediffDefOf.BloodRage, false);
+						if (firstHediffOfDef != null && firstHediffOfDef.Severity > this.weatherHediffThreshold)
+						{
+							return true;
+						}
 					}
 				}
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04004A7F RID: 19071
+		private float weatherHediffThreshold = 0.15f;
 	}
 }

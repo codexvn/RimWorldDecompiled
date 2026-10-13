@@ -1,24 +1,32 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 
-namespace RimWorld;
-
-public class WorldObjectCompProperties_DefeatAllEnemiesQuest : WorldObjectCompProperties
+namespace RimWorld
 {
-	public WorldObjectCompProperties_DefeatAllEnemiesQuest()
+	// Token: 0x020019CD RID: 6605
+	public class WorldObjectCompProperties_DefeatAllEnemiesQuest : WorldObjectCompProperties
 	{
-		compClass = typeof(DefeatAllEnemiesQuestComp);
-	}
-
-	public override IEnumerable<string> ConfigErrors(WorldObjectDef parentDef)
-	{
-		foreach (string item in base.ConfigErrors(parentDef))
+		// Token: 0x06009544 RID: 38212 RVA: 0x002BBDB3 File Offset: 0x002B9FB3
+		public WorldObjectCompProperties_DefeatAllEnemiesQuest()
 		{
-			yield return item;
+			this.compClass = typeof(DefeatAllEnemiesQuestComp);
 		}
-		if (!typeof(MapParent).IsAssignableFrom(parentDef.worldObjectClass))
+
+		// Token: 0x06009545 RID: 38213 RVA: 0x002BBDCB File Offset: 0x002B9FCB
+		public override IEnumerable<string> ConfigErrors(WorldObjectDef parentDef)
 		{
-			yield return parentDef.defName + " has WorldObjectCompProperties_DefeatAllEnemiesQuest but it's not MapParent.";
+			foreach (string text in base.ConfigErrors(parentDef))
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			if (!typeof(MapParent).IsAssignableFrom(parentDef.worldObjectClass))
+			{
+				yield return parentDef.defName + " has WorldObjectCompProperties_DefeatAllEnemiesQuest but it's not MapParent.";
+			}
+			yield break;
+			yield break;
 		}
 	}
 }

@@ -1,96 +1,100 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class FoodTypeFlagsExtension
+namespace RimWorld
 {
-	public static string ToHumanString(this FoodTypeFlags ft)
+	// Token: 0x0200199D RID: 6557
+	public static class FoodTypeFlagsExtension
 	{
-		string text = "";
-		if ((ft & FoodTypeFlags.VegetableOrFruit) != FoodTypeFlags.None)
+		// Token: 0x06009465 RID: 37989 RVA: 0x002B9494 File Offset: 0x002B7694
+		public static string ToHumanString(this FoodTypeFlags ft)
 		{
-			text += "FoodTypeFlags_VegetableOrFruit".Translate();
-		}
-		if ((ft & FoodTypeFlags.Meat) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			string text = "";
+			if ((ft & FoodTypeFlags.VegetableOrFruit) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				text += "FoodTypeFlags_VegetableOrFruit".Translate();
 			}
-			text += "FoodTypeFlags_Meat".Translate();
-		}
-		if ((ft & FoodTypeFlags.Corpse) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Meat) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Meat".Translate();
 			}
-			text += "FoodTypeFlags_Corpse".Translate();
-		}
-		if ((ft & FoodTypeFlags.Seed) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Corpse) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Corpse".Translate();
 			}
-			text += "FoodTypeFlags_Seed".Translate();
-		}
-		if ((ft & FoodTypeFlags.AnimalProduct) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Seed) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Seed".Translate();
 			}
-			text += "FoodTypeFlags_AnimalProduct".Translate();
-		}
-		if ((ft & FoodTypeFlags.Plant) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.AnimalProduct) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_AnimalProduct".Translate();
 			}
-			text += "FoodTypeFlags_Plant".Translate();
-		}
-		if ((ft & FoodTypeFlags.Tree) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Plant) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Plant".Translate();
 			}
-			text += "FoodTypeFlags_Tree".Translate();
-		}
-		if ((ft & FoodTypeFlags.Meal) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Tree) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Tree".Translate();
 			}
-			text += "FoodTypeFlags_Meal".Translate();
-		}
-		if ((ft & FoodTypeFlags.Processed) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Meal) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Meal".Translate();
 			}
-			text += "FoodTypeFlags_Processed".Translate();
-		}
-		if ((ft & FoodTypeFlags.Liquor) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Processed) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Processed".Translate();
 			}
-			text += "FoodTypeFlags_Liquor".Translate();
-		}
-		if ((ft & FoodTypeFlags.Kibble) != FoodTypeFlags.None)
-		{
-			if (text.Length > 0)
+			if ((ft & FoodTypeFlags.Liquor) != FoodTypeFlags.None)
 			{
-				text += ", ";
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Liquor".Translate();
 			}
-			text += "FoodTypeFlags_Kibble".Translate();
+			if ((ft & FoodTypeFlags.Kibble) != FoodTypeFlags.None)
+			{
+				if (text.Length > 0)
+				{
+					text += ", ";
+				}
+				text += "FoodTypeFlags_Kibble".Translate();
+			}
+			return text;
 		}
-		return text;
 	}
 }

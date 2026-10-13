@@ -1,146 +1,150 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using LudeonTK;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class ITab_Bills : ITab
+namespace RimWorld
 {
-	private float viewHeight = 1000f;
-
-	private Vector2 scrollPosition;
-
-	private Bill mouseoverBill;
-
-	private static readonly Vector2 WinSize = new Vector2(420f, 480f);
-
-	[TweakValue("Interface", 0f, 128f)]
-	private static float PasteX = 48f;
-
-	[TweakValue("Interface", 0f, 128f)]
-	private static float PasteY = 3f;
-
-	[TweakValue("Interface", 0f, 32f)]
-	private static float PasteSize = 24f;
-
-	protected Building_WorkTable SelTable => (Building_WorkTable)base.SelThing;
-
-	public ITab_Bills()
+	// Token: 0x02003389 RID: 13193
+	public class ITab_Bills : ITab
 	{
-		size = WinSize;
-		labelKey = "TabBills";
-		tutorTag = "Bills";
-	}
-
-	protected override void FillTab()
-	{
-		PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.BillsTab, KnowledgeAmount.FrameDisplayed);
-		Rect rect = new Rect(WinSize.x - PasteX, PasteY, PasteSize, PasteSize);
-		if (BillUtility.Clipboard != null)
+		// Token: 0x17003079 RID: 12409
+		// (get) Token: 0x060128C5 RID: 75973 RVA: 0x005791CA File Offset: 0x005773CA
+		protected Building_WorkTable SelTable
 		{
-			if (!SelTable.def.AllRecipes.Contains(BillUtility.Clipboard.recipe) || !BillUtility.Clipboard.recipe.AvailableNow || !BillUtility.Clipboard.recipe.AvailableOnNow(SelTable))
+			get
 			{
-				GUI.color = Color.gray;
-				Widgets.DrawTextureFitted(rect, TexButton.Paste, 1f);
-				GUI.color = Color.white;
-				if (Mouse.IsOver(rect))
-				{
-					TooltipHandler.TipRegion(rect, "ClipboardBillNotAvailableHere".Translate() + ": " + BillUtility.Clipboard.LabelCap);
-				}
-			}
-			else if (SelTable.billStack.Count >= 15)
-			{
-				GUI.color = Color.gray;
-				Widgets.DrawTextureFitted(rect, TexButton.Paste, 1f);
-				GUI.color = Color.white;
-				if (Mouse.IsOver(rect))
-				{
-					TooltipHandler.TipRegion(rect, "PasteBillTip".Translate() + " (" + "PasteBillTip_LimitReached".Translate() + "): " + BillUtility.Clipboard.LabelCap);
-				}
-			}
-			else
-			{
-				if (Widgets.ButtonImageFitted(rect, TexButton.Paste, Color.white))
-				{
-					Bill bill = BillUtility.Clipboard.Clone();
-					bill.InitializeAfterClone();
-					SelTable.billStack.AddBill(bill);
-					SoundDefOf.Tick_Low.PlayOneShotOnCamera();
-				}
-				if (Mouse.IsOver(rect))
-				{
-					TooltipHandler.TipRegion(rect, "PasteBillTip".Translate() + ": " + BillUtility.Clipboard.LabelCap);
-				}
+				return (Building_WorkTable)base.SelThing;
 			}
 		}
-		Rect rect2 = new Rect(0f, 0f, WinSize.x, WinSize.y).ContractedBy(10f);
-		mouseoverBill = SelTable.billStack.DoListing(rect2, OptionsMaker, ref scrollPosition, ref viewHeight);
-		List<FloatMenuOption> OptionsMaker()
+
+		// Token: 0x060128C6 RID: 75974 RVA: 0x005791D7 File Offset: 0x005773D7
+		public ITab_Bills()
 		{
-			List<FloatMenuOption> opts = new List<FloatMenuOption>();
-			for (int i = 0; i < SelTable.def.AllRecipes.Count; i++)
+			this.size = ITab_Bills.WinSize;
+			this.labelKey = "TabBills";
+			this.tutorTag = "Bills";
+		}
+
+		// Token: 0x060128C7 RID: 75975 RVA: 0x0057920C File Offset: 0x0057740C
+		protected override void FillTab()
+		{
+			PlayerKnowledgeDatabase.KnowledgeDemonstrated(ConceptDefOf.BillsTab, KnowledgeAmount.FrameDisplayed);
+			Rect rect = new Rect(ITab_Bills.WinSize.x - ITab_Bills.PasteX, ITab_Bills.PasteY, ITab_Bills.PasteSize, ITab_Bills.PasteSize);
+			if (BillUtility.Clipboard != null)
 			{
-				RecipeDef recipe;
-				if (SelTable.def.AllRecipes[i].AvailableNow && SelTable.def.AllRecipes[i].AvailableOnNow(SelTable))
+				if (!this.SelTable.def.AllRecipes.Contains(BillUtility.Clipboard.recipe) || !BillUtility.Clipboard.recipe.AvailableNow || !BillUtility.Clipboard.recipe.AvailableOnNow(this.SelTable, null))
 				{
-					recipe = SelTable.def.AllRecipes[i];
-					Add();
-					foreach (Ideo allIdeo in Faction.OfPlayer.ideos.AllIdeos)
+					GUI.color = Color.gray;
+					Widgets.DrawTextureFitted(rect, TexButton.Paste, 1f, 1f);
+					GUI.color = Color.white;
+					if (Mouse.IsOver(rect))
 					{
-						foreach (Precept_Building cachedPossibleBuilding in allIdeo.cachedPossibleBuildings)
+						TooltipHandler.TipRegion(rect, "ClipboardBillNotAvailableHere".Translate() + ": " + BillUtility.Clipboard.LabelCap);
+					}
+				}
+				else if (this.SelTable.billStack.Count >= 15)
+				{
+					GUI.color = Color.gray;
+					Widgets.DrawTextureFitted(rect, TexButton.Paste, 1f, 1f);
+					GUI.color = Color.white;
+					if (Mouse.IsOver(rect))
+					{
+						TooltipHandler.TipRegion(rect, "PasteBillTip".Translate() + " (" + "PasteBillTip_LimitReached".Translate() + "): " + BillUtility.Clipboard.LabelCap);
+					}
+				}
+				else
+				{
+					if (Widgets.ButtonImageFitted(rect, TexButton.Paste, Color.white))
+					{
+						Bill bill = BillUtility.Clipboard.Clone();
+						bill.InitializeAfterClone();
+						this.SelTable.billStack.AddBill(bill);
+						SoundDefOf.Tick_Low.PlayOneShotOnCamera(null);
+					}
+					if (Mouse.IsOver(rect))
+					{
+						TooltipHandler.TipRegion(rect, "PasteBillTip".Translate() + ": " + BillUtility.Clipboard.LabelCap);
+					}
+				}
+			}
+			Rect rect2 = new Rect(0f, 0f, ITab_Bills.WinSize.x, ITab_Bills.WinSize.y).ContractedBy(10f);
+			this.mouseoverBill = this.SelTable.billStack.DoListing(rect2, new Func<List<FloatMenuOption>>(this.<FillTab>g__OptionsMaker|10_0), ref this.scrollPosition, ref this.viewHeight);
+		}
+
+		// Token: 0x060128C8 RID: 75976 RVA: 0x00579468 File Offset: 0x00577668
+		public override void TabUpdate()
+		{
+			if (this.mouseoverBill != null)
+			{
+				this.mouseoverBill.TryDrawIngredientSearchRadiusOnMap(this.SelTable.Position);
+				this.mouseoverBill = null;
+			}
+		}
+
+		// Token: 0x060128CA RID: 75978 RVA: 0x005794C4 File Offset: 0x005776C4
+		[CompilerGenerated]
+		private List<FloatMenuOption> <FillTab>g__OptionsMaker|10_0()
+		{
+			ITab_Bills.<>c__DisplayClass10_0 CS$<>8__locals1;
+			CS$<>8__locals1.opts = new List<FloatMenuOption>();
+			ITab_Bills.<>c__DisplayClass10_1 CS$<>8__locals2 = new ITab_Bills.<>c__DisplayClass10_1();
+			CS$<>8__locals2.<>4__this = this;
+			CS$<>8__locals2.i = 0;
+			while (CS$<>8__locals2.i < this.SelTable.def.AllRecipes.Count)
+			{
+				ITab_Bills.<>c__DisplayClass10_2 CS$<>8__locals3 = new ITab_Bills.<>c__DisplayClass10_2();
+				CS$<>8__locals3.CS$<>8__locals1 = CS$<>8__locals2;
+				if (this.SelTable.def.AllRecipes[CS$<>8__locals3.CS$<>8__locals1.i].AvailableNow && this.SelTable.def.AllRecipes[CS$<>8__locals3.CS$<>8__locals1.i].AvailableOnNow(this.SelTable, null))
+				{
+					CS$<>8__locals3.recipe = this.SelTable.def.AllRecipes[CS$<>8__locals3.CS$<>8__locals1.i];
+					CS$<>8__locals3.<FillTab>g__Add|1(null, ref CS$<>8__locals1);
+					foreach (Ideo ideo in Faction.OfPlayer.ideos.AllIdeos)
+					{
+						foreach (Precept_Building precept_Building in ideo.cachedPossibleBuildings)
 						{
-							if (cachedPossibleBuilding.ThingDef == recipe.ProducedThingDef)
+							if (precept_Building.ThingDef == CS$<>8__locals3.recipe.ProducedThingDef)
 							{
-								Add(cachedPossibleBuilding);
+								CS$<>8__locals3.<FillTab>g__Add|1(precept_Building, ref CS$<>8__locals1);
 							}
 						}
 					}
 				}
-				void Add(Precept_ThingStyle precept = null)
-				{
-					string label = ((precept != null) ? "RecipeMake".Translate(precept.LabelCap).CapitalizeFirst() : recipe.LabelCap);
-					opts.Add(new FloatMenuOption(label, delegate
-					{
-						if (ModsConfig.BiotechActive && recipe.mechanitorOnlyRecipe && !SelTable.Map.mapPawns.FreeColonists.Any(MechanitorUtility.IsMechanitor))
-						{
-							Find.WindowStack.Add(new Dialog_MessageBox("RecipeRequiresMechanitor".Translate(recipe.LabelCap)));
-						}
-						else if (!SelTable.Map.mapPawns.FreeColonists.Any((Pawn col) => recipe.PawnSatisfiesSkillRequirements(col)))
-						{
-							Bill.CreateNoPawnsWithSkillDialog(recipe);
-						}
-						Bill bill2 = recipe.MakeNewBill(precept);
-						SelTable.billStack.AddBill(bill2);
-						if (recipe.conceptLearned != null)
-						{
-							PlayerKnowledgeDatabase.KnowledgeDemonstrated(recipe.conceptLearned, KnowledgeAmount.Total);
-						}
-						if (TutorSystem.TutorialMode)
-						{
-							TutorSystem.Notify_Event("AddBill-" + recipe.LabelCap.Resolve());
-						}
-					}, iconTex: recipe.UIIcon, shownItemForIcon: recipe.UIIconThing, thingStyle: null, forceBasicStyle: false, priority: MenuOptionPriority.Default, mouseoverGuiAction: delegate(Rect rect3)
-					{
-						BillUtility.DoBillInfoWindow(i, label, rect3, recipe);
-					}, revalidateClickTarget: null, extraPartWidth: 29f, extraPartOnGUI: (Rect rect3) => Widgets.InfoCardButton(rect3.x + 5f, rect3.y + (rect3.height - 24f) / 2f, recipe, precept), revalidateWorldClickTarget: null, playSelectionSound: true, orderInPriority: -recipe.displayPriority));
-				}
+				int i = CS$<>8__locals2.i;
+				CS$<>8__locals2.i = i + 1;
 			}
-			if (!opts.Any())
+			if (!CS$<>8__locals1.opts.Any<FloatMenuOption>())
 			{
-				opts.Add(new FloatMenuOption("NoneBrackets".Translate(), null));
+				CS$<>8__locals1.opts.Add(new FloatMenuOption("NoneBrackets".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
 			}
-			return opts;
+			return CS$<>8__locals1.opts;
 		}
-	}
 
-	public override void TabUpdate()
-	{
-		if (mouseoverBill != null)
-		{
-			mouseoverBill.TryDrawIngredientSearchRadiusOnMap(SelTable.Position);
-			mouseoverBill = null;
-		}
+		// Token: 0x0400C0A8 RID: 49320
+		private float viewHeight = 1000f;
+
+		// Token: 0x0400C0A9 RID: 49321
+		private Vector2 scrollPosition;
+
+		// Token: 0x0400C0AA RID: 49322
+		private Bill mouseoverBill;
+
+		// Token: 0x0400C0AB RID: 49323
+		private static readonly Vector2 WinSize = new Vector2(420f, 480f);
+
+		// Token: 0x0400C0AC RID: 49324
+		[TweakValue("Interface", 0f, 128f)]
+		private static float PasteX = 48f;
+
+		// Token: 0x0400C0AD RID: 49325
+		[TweakValue("Interface", 0f, 128f)]
+		private static float PasteY = 3f;
+
+		// Token: 0x0400C0AE RID: 49326
+		[TweakValue("Interface", 0f, 32f)]
+		private static float PasteSize = 24f;
 	}
 }

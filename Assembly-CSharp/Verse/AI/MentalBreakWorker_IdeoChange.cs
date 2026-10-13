@@ -1,13 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class MentalBreakWorker_IdeoChange : MentalBreakWorker
+namespace Verse.AI
 {
-	public override bool BreakCanOccur(Pawn pawn)
+	// Token: 0x02000F66 RID: 3942
+	public class MentalBreakWorker_IdeoChange : MentalBreakWorker
 	{
-		if (!ModsConfig.IdeologyActive || Find.IdeoManager.classicMode)
+		// Token: 0x0600617D RID: 24957 RVA: 0x001EDC2A File Offset: 0x001EBE2A
+		public override bool BreakCanOccur(Pawn pawn)
 		{
-			return false;
+			return ModsConfig.IdeologyActive && !Find.IdeoManager.classicMode && base.BreakCanOccur(pawn);
 		}
-		return base.BreakCanOccur(pawn);
 	}
 }

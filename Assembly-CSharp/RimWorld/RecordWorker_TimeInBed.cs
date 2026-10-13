@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RecordWorker_TimeInBed : RecordWorker
+namespace RimWorld
 {
-	public override bool ShouldMeasureTimeNow(Pawn pawn)
+	// Token: 0x020023C3 RID: 9155
+	public class RecordWorker_TimeInBed : RecordWorker
 	{
-		return pawn.InBed();
+		// Token: 0x0600C6A5 RID: 50853 RVA: 0x002A1743 File Offset: 0x0029F943
+		public override bool ShouldMeasureTimeNow(Pawn pawn)
+		{
+			return pawn.InBed();
+		}
 	}
 }

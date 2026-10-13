@@ -1,13 +1,16 @@
-namespace Verse.AI;
+﻿using System;
+using RimWorld;
 
-public class ThinkNode_ConditionalLowEnergy : ThinkNode_Conditional
+namespace Verse.AI
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02000FEC RID: 4076
+	public class ThinkNode_ConditionalLowEnergy : ThinkNode_Conditional
 	{
-		if (pawn.needs?.energy != null)
+		// Token: 0x06006464 RID: 25700 RVA: 0x001FD539 File Offset: 0x001FB739
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return pawn.needs.energy.IsLowEnergySelfShutdown;
+			Pawn_NeedsTracker needs = pawn.needs;
+			return ((needs != null) ? needs.energy : null) != null && pawn.needs.energy.IsLowEnergySelfShutdown;
 		}
-		return false;
 	}
 }

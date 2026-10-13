@@ -1,50 +1,58 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse;
-
-public static class GUIEventFilterForOSX
+namespace Verse
 {
-	private static List<Event> eventsThisFrame = new List<Event>();
-
-	private static int lastRecordedFrame = -1;
-
-	public static void CheckRejectGUIEvent()
+	// Token: 0x02000B99 RID: 2969
+	public static class GUIEventFilterForOSX
 	{
-		if (UnityData.platform != RuntimePlatform.OSXPlayer || (Event.current.type != EventType.MouseDown && Event.current.type != EventType.MouseUp))
+		// Token: 0x06004BF2 RID: 19442 RVA: 0x00182D54 File Offset: 0x00180F54
+		public static void CheckRejectGUIEvent()
 		{
-			return;
-		}
-		if (Time.frameCount != lastRecordedFrame)
-		{
-			eventsThisFrame.Clear();
-			lastRecordedFrame = Time.frameCount;
-		}
-		for (int i = 0; i < eventsThisFrame.Count; i++)
-		{
-			if (EventsAreEquivalent(eventsThisFrame[i], Event.current))
+			if (UnityData.platform != RuntimePlatform.OSXPlayer)
 			{
-				RejectEvent();
+				return;
 			}
+			if (Event.current.type != EventType.MouseDown && Event.current.type != EventType.MouseUp)
+			{
+				return;
+			}
+			if (Time.frameCount != GUIEventFilterForOSX.lastRecordedFrame)
+			{
+				GUIEventFilterForOSX.eventsThisFrame.Clear();
+				GUIEventFilterForOSX.lastRecordedFrame = Time.frameCount;
+			}
+			for (int i = 0; i < GUIEventFilterForOSX.eventsThisFrame.Count; i++)
+			{
+				if (GUIEventFilterForOSX.EventsAreEquivalent(GUIEventFilterForOSX.eventsThisFrame[i], Event.current))
+				{
+					GUIEventFilterForOSX.RejectEvent();
+				}
+			}
+			GUIEventFilterForOSX.eventsThisFrame.Add(Event.current);
 		}
-		eventsThisFrame.Add(Event.current);
-	}
 
-	private static bool EventsAreEquivalent(Event A, Event B)
-	{
-		if (A.button == B.button && A.keyCode == B.keyCode)
+		// Token: 0x06004BF3 RID: 19443 RVA: 0x00182DE4 File Offset: 0x00180FE4
+		private static bool EventsAreEquivalent(Event A, Event B)
 		{
-			return A.type == B.type;
+			return A.button == B.button && A.keyCode == B.keyCode && A.type == B.type;
 		}
-		return false;
-	}
 
-	private static void RejectEvent()
-	{
-		if (DebugViewSettings.logInput)
+		// Token: 0x06004BF4 RID: 19444 RVA: 0x00182E14 File Offset: 0x00181014
+		private static void RejectEvent()
 		{
-			Log.Message("Frame " + Time.frameCount + ": REJECTED " + Event.current.ToStringFull());
+			if (DebugViewSettings.logInput)
+			{
+				Log.Message("Frame " + Time.frameCount.ToString() + ": REJECTED " + Event.current.ToStringFull());
+			}
+			Event.current.Use();
 		}
-		Event.current.Use();
+
+		// Token: 0x04003640 RID: 13888
+		private static List<Event> eventsThisFrame = new List<Event>();
+
+		// Token: 0x04003641 RID: 13889
+		private static int lastRecordedFrame = -1;
 	}
 }

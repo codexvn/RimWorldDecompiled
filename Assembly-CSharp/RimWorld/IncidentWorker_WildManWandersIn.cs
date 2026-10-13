@@ -1,72 +1,69 @@
-using RimWorld.Planet;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class IncidentWorker_WildManWandersIn : IncidentWorker
+namespace RimWorld
 {
-	protected override bool CanFireNowSub(IncidentParms parms)
+	// Token: 0x02001DF2 RID: 7666
+	public class IncidentWorker_WildManWandersIn : IncidentWorker
 	{
-		if (!base.CanFireNowSub(parms))
+		// Token: 0x0600AAC6 RID: 43718 RVA: 0x0030D050 File Offset: 0x0030B250
+		protected override bool CanFireNowSub(IncidentParms parms)
 		{
-			return false;
+			if (!base.CanFireNowSub(parms))
+			{
+				return false;
+			}
+			Faction faction;
+			if (!this.TryFindFormerFaction(out faction))
+			{
+				return false;
+			}
+			Map map = (Map)parms.target;
+			IntVec3 intVec;
+			return !map.GameConditionManager.ConditionIsActive(GameConditionDefOf.ToxicFallout) && (!ModsConfig.BiotechActive || !map.GameConditionManager.ConditionIsActive(GameConditionDefOf.NoxiousHaze)) && map.mapTemperature.SeasonAcceptableFor(ThingDefOf.Human, 0f) && this.TryFindEntryCell(map, out intVec);
 		}
-		if (!TryFindFormerFaction(out var _))
-		{
-			return false;
-		}
-		Map map = (Map)parms.target;
-		if (map.GameConditionManager.ConditionIsActive(GameConditionDefOf.ToxicFallout))
-		{
-			return false;
-		}
-		if (ModsConfig.BiotechActive && map.GameConditionManager.ConditionIsActive(GameConditionDefOf.NoxiousHaze))
-		{
-			return false;
-		}
-		if (!map.mapTemperature.SeasonAcceptableFor(ThingDefOf.Human))
-		{
-			return false;
-		}
-		IntVec3 cell;
-		return TryFindEntryCell(map, out cell);
-	}
 
-	protected override bool TryExecuteWorker(IncidentParms parms)
-	{
-		Map map = (Map)parms.target;
-		if (!TryFindEntryCell(map, out var cell))
+		// Token: 0x0600AAC7 RID: 43719 RVA: 0x0030D0D4 File Offset: 0x0030B2D4
+		protected override bool TryExecuteWorker(IncidentParms parms)
 		{
-			return false;
+			Map map = (Map)parms.target;
+			IntVec3 loc;
+			if (!this.TryFindEntryCell(map, out loc))
+			{
+				return false;
+			}
+			Faction faction;
+			if (!this.TryFindFormerFaction(out faction))
+			{
+				return false;
+			}
+			DevelopmentalStage developmentalStage = Find.Storyteller.difficulty.ChildrenAllowed ? (DevelopmentalStage.Child | DevelopmentalStage.Adult) : DevelopmentalStage.Adult;
+			PawnKindDef wildMan = PawnKindDefOf.WildMan;
+			Faction faction2 = faction;
+			PawnGenerationContext context = PawnGenerationContext.NonPlayer;
+			DevelopmentalStage developmentalStages = developmentalStage;
+			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(wildMan, faction2, context, null, false, false, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, developmentalStages, null, null, null, false, false, false, -1, 0, false));
+			pawn.SetFaction(null, null);
+			GenSpawn.Spawn(pawn, loc, map, WipeMode.Vanish);
+			string value = pawn.DevelopmentalStage.Child() ? "FeralChild".Translate().ToString() : pawn.KindLabel;
+			TaggedString value2 = pawn.DevelopmentalStage.Child() ? "Child".Translate() : "Person".Translate();
+			TaggedString baseLetterLabel = this.def.letterLabel.Formatted(value, pawn.Named("PAWN")).CapitalizeFirst();
+			TaggedString baseLetterText = this.def.letterText.Formatted(pawn.NameShortColored, value2, pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true).CapitalizeFirst();
+			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref baseLetterText, ref baseLetterLabel, pawn);
+			base.SendStandardLetter(baseLetterLabel, baseLetterText, this.def.letterDef, parms, pawn, Array.Empty<NamedArgument>());
+			return true;
 		}
-		if (!TryFindFormerFaction(out var formerFaction))
+
+		// Token: 0x0600AAC8 RID: 43720 RVA: 0x0030D2D0 File Offset: 0x0030B4D0
+		private bool TryFindEntryCell(Map map, out IntVec3 cell)
 		{
-			return false;
+			return CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => map.reachability.CanReachColony(c), map, CellFinder.EdgeRoadChance_Ignore, out cell);
 		}
-		DevelopmentalStage developmentalStage = (Find.Storyteller.difficulty.ChildrenAllowed ? (DevelopmentalStage.Child | DevelopmentalStage.Adult) : DevelopmentalStage.Adult);
-		PawnKindDef wildMan = PawnKindDefOf.WildMan;
-		Faction faction = formerFaction;
-		PlanetTile? tile = map.Tile;
-		DevelopmentalStage developmentalStages = developmentalStage;
-		Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(wildMan, faction, PawnGenerationContext.NonPlayer, tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, developmentalStages));
-		pawn.SetFaction(null);
-		GenSpawn.Spawn(pawn, cell, map);
-		string text = (pawn.DevelopmentalStage.Child() ? "FeralChild".Translate().ToString() : pawn.KindLabel);
-		TaggedString taggedString = (pawn.DevelopmentalStage.Child() ? "Child".Translate() : "Person".Translate());
-		TaggedString title = def.letterLabel.Formatted(text, pawn.Named("PAWN")).CapitalizeFirst();
-		TaggedString text2 = def.letterText.Formatted(pawn.NameShortColored, taggedString, pawn.Named("PAWN")).AdjustedFor(pawn).CapitalizeFirst();
-		PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref text2, ref title, pawn);
-		SendStandardLetter(title, text2, def.letterDef, parms, pawn);
-		return true;
-	}
 
-	private bool TryFindEntryCell(Map map, out IntVec3 cell)
-	{
-		return CellFinder.TryFindRandomEdgeCellWith((IntVec3 c) => map.reachability.CanReachColony(c), map, CellFinder.EdgeRoadChance_Ignore, out cell);
-	}
-
-	private bool TryFindFormerFaction(out Faction formerFaction)
-	{
-		return Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out formerFaction, tryMedievalOrBetter: false, allowDefeated: true);
+		// Token: 0x0600AAC9 RID: 43721 RVA: 0x0030D307 File Offset: 0x0030B507
+		private bool TryFindFormerFaction(out Faction formerFaction)
+		{
+			return Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out formerFaction, false, true, TechLevel.Undefined, TechLevel.Undefined, false, false);
+		}
 	}
 }

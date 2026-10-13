@@ -1,42 +1,57 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public static class HaulSourceUtility
+namespace RimWorld
 {
-	public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(IHaulSource source, Pawn pawn)
+	// Token: 0x020029AA RID: 10666
+	public static class HaulSourceUtility
 	{
-		foreach (Thing item in (IEnumerable<Thing>)source.GetDirectlyHeldThings())
+		// Token: 0x0600EB11 RID: 60177 RVA: 0x00445A5F File Offset: 0x00443C5F
+		public static IEnumerable<FloatMenuOption> GetFloatMenuOptions(IHaulSource source, Pawn pawn)
 		{
-			StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(item, forced: true);
-			if (!item.MapHeld.listerHaulables.ThingsPotentiallyNeedingHauling().Contains(item) || !StoreUtility.TryFindBestBetterStorageFor(item, pawn, pawn.MapHeld, currentPriority, pawn.Faction, out var _, out var _))
+			Action <>9__0;
+			foreach (Thing thing in ((IEnumerable<Thing>)source.GetDirectlyHeldThings()))
 			{
-				continue;
-			}
-			yield return new FloatMenuOption("HaulFromSource".Translate(), delegate
-			{
-				bool flag = false;
-				foreach (Thing item2 in (IEnumerable<Thing>)source.GetDirectlyHeldThings())
+				StoragePriority currentPriority = StoreUtility.CurrentStoragePriorityOf(thing, true);
+				IntVec3 intVec;
+				IHaulDestination haulDestination;
+				if (thing.MapHeld.listerHaulables.ThingsPotentiallyNeedingHauling().Contains(thing) && StoreUtility.TryFindBestBetterStorageFor(thing, pawn, pawn.MapHeld, currentPriority, pawn.Faction, out intVec, out haulDestination, true))
 				{
-					Job job = HaulAIUtility.HaulToStorageJob(pawn, item2, forced: true);
-					if (job != null)
+					string label = "HaulFromSource".Translate();
+					Action action;
+					if ((action = <>9__0) == null)
 					{
-						job.playerForced = true;
-						if (!flag)
+						action = (<>9__0 = delegate()
 						{
-							flag = true;
-							pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc);
-						}
-						else
-						{
-							pawn.jobs.TryTakeOrderedJob(job, JobTag.Misc, requestQueueing: true);
-						}
+							bool flag = false;
+							foreach (Thing t in ((IEnumerable<Thing>)source.GetDirectlyHeldThings()))
+							{
+								Job job = HaulAIUtility.HaulToStorageJob(pawn, t, true);
+								if (job != null)
+								{
+									job.playerForced = true;
+									if (!flag)
+									{
+										flag = true;
+										pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), false);
+									}
+									else
+									{
+										pawn.jobs.TryTakeOrderedJob(job, new JobTag?(JobTag.Misc), true);
+									}
+								}
+							}
+						});
 					}
+					yield return new FloatMenuOption(label, action, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+					break;
 				}
-			});
-			break;
+			}
+			IEnumerator<Thing> enumerator = null;
+			yield break;
+			yield break;
 		}
 	}
 }

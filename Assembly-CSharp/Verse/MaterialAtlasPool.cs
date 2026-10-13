@@ -1,52 +1,62 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse;
-
-public static class MaterialAtlasPool
+namespace Verse
 {
-	private class MaterialAtlas
+	// Token: 0x0200080C RID: 2060
+	public static class MaterialAtlasPool
 	{
-		protected Material[] subMats = new Material[16];
-
-		private const float TexPadding = 1f / 32f;
-
-		public MaterialAtlas(Material newRootMat)
+		// Token: 0x0600347B RID: 13435 RVA: 0x00113A6B File Offset: 0x00111C6B
+		public static Material SubMaterialFromAtlas(Material mat, LinkDirections LinkSet)
 		{
-			Vector2 mainTextureScale = new Vector2(0.1875f, 0.1875f);
-			for (int i = 0; i < 16; i++)
+			if (!MaterialAtlasPool.atlasDict.ContainsKey(mat))
 			{
-				float x = (float)(i % 4) * 0.25f + 1f / 32f;
-				float y = (float)(i / 4) * 0.25f + 1f / 32f;
-				Vector2 mainTextureOffset = new Vector2(x, y);
-				Material material = MaterialAllocator.Create(newRootMat);
-				material.name = newRootMat.name + "_ASM" + i;
-				material.mainTextureScale = mainTextureScale;
-				material.mainTextureOffset = mainTextureOffset;
-				subMats[i] = material;
+				MaterialAtlasPool.atlasDict.Add(mat, new MaterialAtlasPool.MaterialAtlas(mat));
 			}
+			return MaterialAtlasPool.atlasDict[mat].SubMat(LinkSet);
 		}
 
-		public Material SubMat(LinkDirections linkSet)
+		// Token: 0x04002793 RID: 10131
+		private static Dictionary<Material, MaterialAtlasPool.MaterialAtlas> atlasDict = new Dictionary<Material, MaterialAtlasPool.MaterialAtlas>();
+
+		// Token: 0x0200080D RID: 2061
+		private class MaterialAtlas
 		{
-			int num = (int)linkSet;
-			if (num >= subMats.Length)
+			// Token: 0x0600347D RID: 13437 RVA: 0x00113AA8 File Offset: 0x00111CA8
+			public MaterialAtlas(Material newRootMat)
 			{
-				Log.Warning("Cannot get submat of index " + num + ": out of range.");
-				return BaseContent.BadMat;
+				Vector2 mainTextureScale = new Vector2(0.1875f, 0.1875f);
+				for (int i = 0; i < 16; i++)
+				{
+					float x = (float)(i % 4) * 0.25f + 0.03125f;
+					float y = (float)(i / 4) * 0.25f + 0.03125f;
+					Vector2 mainTextureOffset = new Vector2(x, y);
+					Material material = MaterialAllocator.Create(newRootMat);
+					material.name = newRootMat.name + "_ASM" + i.ToString();
+					material.mainTextureScale = mainTextureScale;
+					material.mainTextureOffset = mainTextureOffset;
+					this.subMats[i] = material;
+				}
 			}
-			return subMats[num];
-		}
-	}
 
-	private static Dictionary<Material, MaterialAtlas> atlasDict = new Dictionary<Material, MaterialAtlas>();
+			// Token: 0x0600347E RID: 13438 RVA: 0x00113B54 File Offset: 0x00111D54
+			public Material SubMat(LinkDirections linkSet)
+			{
+				int num = (int)linkSet;
+				if (num >= this.subMats.Length)
+				{
+					Log.Warning("Cannot get submat of index " + num.ToString() + ": out of range.");
+					return BaseContent.BadMat;
+				}
+				return this.subMats[num];
+			}
 
-	public static Material SubMaterialFromAtlas(Material mat, LinkDirections LinkSet)
-	{
-		if (!atlasDict.ContainsKey(mat))
-		{
-			atlasDict.Add(mat, new MaterialAtlas(mat));
+			// Token: 0x04002794 RID: 10132
+			protected Material[] subMats = new Material[16];
+
+			// Token: 0x04002795 RID: 10133
+			private const float TexPadding = 0.03125f;
 		}
-		return atlasDict[mat].SubMat(LinkSet);
 	}
 }

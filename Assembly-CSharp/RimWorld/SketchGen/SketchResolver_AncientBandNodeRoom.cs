@@ -1,22 +1,24 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_AncientBandNodeRoom : SketchResolver
+namespace RimWorld.SketchGen
 {
-	protected override bool CanResolveInt(SketchResolveParams parms)
+	// Token: 0x020038A0 RID: 14496
+	public class SketchResolver_AncientBandNodeRoom : SketchResolver
 	{
-		if (parms.rect.HasValue)
+		// Token: 0x0601406E RID: 82030 RVA: 0x005F3083 File Offset: 0x005F1283
+		protected override bool CanResolveInt(SketchResolveParams parms)
 		{
-			return parms.sketch != null;
+			return parms.rect != null && parms.sketch != null;
 		}
-		return false;
-	}
 
-	protected override void ResolveInt(SketchResolveParams parms)
-	{
-		if (ModLister.CheckBiotech("Ancient band node room"))
+		// Token: 0x0601406F RID: 82031 RVA: 0x005F3110 File Offset: 0x005F1310
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
+			if (!ModLister.CheckBiotech("Ancient band node room"))
+			{
+				return;
+			}
 			SketchResolveParams parms2 = parms;
 			parms2.wallEdgeThing = ThingDefOf.AncientBandNode;
 			SketchResolverDefOf.AddWallEdgeThings.Resolve(parms2);

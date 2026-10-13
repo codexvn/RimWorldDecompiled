@@ -1,91 +1,94 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class DebugArena : WorldObjectComp
+namespace RimWorld.Planet
 {
-	public List<Pawn> lhs;
-
-	public List<Pawn> rhs;
-
-	public Action<ArenaUtility.ArenaResult> callback;
-
-	private int tickCreated;
-
-	private int tickFightStarted;
-
-	public DebugArena()
+	// Token: 0x02003E22 RID: 15906
+	public class DebugArena : WorldObjectComp
 	{
-		tickCreated = Find.TickManager.TicksGame;
-	}
+		// Token: 0x06015B97 RID: 88983 RVA: 0x0067F617 File Offset: 0x0067D817
+		public DebugArena()
+		{
+			this.tickCreated = Find.TickManager.TicksGame;
+		}
 
-	public override void CompTickInterval(int delta)
-	{
-		if (lhs == null || rhs == null)
+		// Token: 0x06015B98 RID: 88984 RVA: 0x0067F630 File Offset: 0x0067D830
+		public override void CompTickInterval(int delta)
 		{
-			Log.ErrorOnce("DebugArena improperly set up", 73785616);
-			return;
-		}
-		if ((tickFightStarted == 0 && Find.TickManager.TicksGame - tickCreated > 10000) || (tickFightStarted != 0 && Find.TickManager.TicksGame - tickFightStarted > 60000))
-		{
-			Log.Message("Fight timed out");
-			ArenaUtility.ArenaResult obj = new ArenaUtility.ArenaResult
+			if (this.lhs == null || this.rhs == null)
 			{
-				tickDuration = Find.TickManager.TicksGame - tickCreated,
-				winner = ArenaUtility.ArenaResult.Winner.Other
-			};
-			callback(obj);
-			parent.Destroy();
-			return;
-		}
-		if (tickFightStarted == 0)
-		{
-			foreach (Pawn item in lhs.Concat(rhs))
+				Log.ErrorOnce("DebugArena improperly set up", 73785616);
+				return;
+			}
+			if ((this.tickFightStarted == 0 && Find.TickManager.TicksGame - this.tickCreated > 10000) || (this.tickFightStarted != 0 && Find.TickManager.TicksGame - this.tickFightStarted > 60000))
 			{
-				if (item.records.GetValue(RecordDefOf.ShotsFired) > 0f || (item.CurJob != null && item.CurJob.def == JobDefOf.AttackMelee && item.Position.DistanceTo(item.CurJob.targetA.Thing.Position) <= 2f))
+				Log.Message("Fight timed out");
+				ArenaUtility.ArenaResult obj = default(ArenaUtility.ArenaResult);
+				obj.tickDuration = Find.TickManager.TicksGame - this.tickCreated;
+				obj.winner = ArenaUtility.ArenaResult.Winner.Other;
+				this.callback(obj);
+				this.parent.Destroy();
+				return;
+			}
+			if (this.tickFightStarted == 0)
+			{
+				foreach (Pawn pawn3 in this.lhs.Concat(this.rhs))
 				{
-					tickFightStarted = Find.TickManager.TicksGame;
-					break;
+					if (pawn3.records.GetValue(RecordDefOf.ShotsFired) > 0f || (pawn3.CurJob != null && pawn3.CurJob.def == JobDefOf.AttackMelee && pawn3.Position.DistanceTo(pawn3.CurJob.targetA.Thing.Position) <= 2f))
+					{
+						this.tickFightStarted = Find.TickManager.TicksGame;
+						break;
+					}
+				}
+			}
+			if (this.tickFightStarted != 0)
+			{
+				bool flag = !this.lhs.Any((Pawn pawn) => !pawn.Dead && !pawn.Downed && pawn.Spawned);
+				bool flag2 = !this.rhs.Any((Pawn pawn) => !pawn.Dead && !pawn.Downed && pawn.Spawned);
+				if (flag || flag2)
+				{
+					ArenaUtility.ArenaResult obj2 = default(ArenaUtility.ArenaResult);
+					obj2.tickDuration = Find.TickManager.TicksGame - this.tickFightStarted;
+					if (flag && !flag2)
+					{
+						obj2.winner = ArenaUtility.ArenaResult.Winner.Rhs;
+					}
+					else if (!flag && flag2)
+					{
+						obj2.winner = ArenaUtility.ArenaResult.Winner.Lhs;
+					}
+					else
+					{
+						obj2.winner = ArenaUtility.ArenaResult.Winner.Other;
+					}
+					this.callback(obj2);
+					foreach (Pawn pawn2 in this.lhs.Concat(this.rhs))
+					{
+						if (!pawn2.Destroyed)
+						{
+							pawn2.Destroy(DestroyMode.Vanish);
+						}
+					}
+					this.parent.Destroy();
 				}
 			}
 		}
-		if (tickFightStarted == 0)
-		{
-			return;
-		}
-		bool flag = !lhs.Any((Pawn pawn) => !pawn.Dead && !pawn.Downed && pawn.Spawned);
-		bool flag2 = !rhs.Any((Pawn pawn) => !pawn.Dead && !pawn.Downed && pawn.Spawned);
-		if (!(flag || flag2))
-		{
-			return;
-		}
-		ArenaUtility.ArenaResult obj2 = new ArenaUtility.ArenaResult
-		{
-			tickDuration = Find.TickManager.TicksGame - tickFightStarted
-		};
-		if (flag && !flag2)
-		{
-			obj2.winner = ArenaUtility.ArenaResult.Winner.Rhs;
-		}
-		else if (!flag && flag2)
-		{
-			obj2.winner = ArenaUtility.ArenaResult.Winner.Lhs;
-		}
-		else
-		{
-			obj2.winner = ArenaUtility.ArenaResult.Winner.Other;
-		}
-		callback(obj2);
-		foreach (Pawn item2 in lhs.Concat(rhs))
-		{
-			if (!item2.Destroyed)
-			{
-				item2.Destroy();
-			}
-		}
-		parent.Destroy();
+
+		// Token: 0x0400F12D RID: 61741
+		public List<Pawn> lhs;
+
+		// Token: 0x0400F12E RID: 61742
+		public List<Pawn> rhs;
+
+		// Token: 0x0400F12F RID: 61743
+		public Action<ArenaUtility.ArenaResult> callback;
+
+		// Token: 0x0400F130 RID: 61744
+		private int tickCreated;
+
+		// Token: 0x0400F131 RID: 61745
+		private int tickFightStarted;
 	}
 }

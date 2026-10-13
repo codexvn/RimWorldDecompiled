@@ -1,29 +1,36 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class DiaNodeList
+namespace Verse
 {
-	public string Name = "NeedsName";
-
-	public List<DiaNodeMold> Nodes = new List<DiaNodeMold>();
-
-	public List<string> NodeNames = new List<string>();
-
-	public DiaNodeMold RandomNodeFromList()
+	// Token: 0x02000C27 RID: 3111
+	public class DiaNodeList
 	{
-		List<DiaNodeMold> list = Nodes.ListFullCopy();
-		foreach (string nodeName in NodeNames)
+		// Token: 0x06004FDA RID: 20442 RVA: 0x0019ABF4 File Offset: 0x00198DF4
+		public DiaNodeMold RandomNodeFromList()
 		{
-			list.Add(DialogDatabase.GetNodeNamed(nodeName));
-		}
-		foreach (DiaNodeMold item in list)
-		{
-			if (item.unique && item.used)
+			List<DiaNodeMold> list = this.Nodes.ListFullCopy<DiaNodeMold>();
+			foreach (string nodeName in this.NodeNames)
 			{
-				list.Remove(item);
+				list.Add(DialogDatabase.GetNodeNamed(nodeName));
 			}
+			foreach (DiaNodeMold diaNodeMold in list)
+			{
+				if (diaNodeMold.unique && diaNodeMold.used)
+				{
+					list.Remove(diaNodeMold);
+				}
+			}
+			return list.RandomElement<DiaNodeMold>();
 		}
-		return list.RandomElement();
+
+		// Token: 0x04003967 RID: 14695
+		public string Name = "NeedsName";
+
+		// Token: 0x04003968 RID: 14696
+		public List<DiaNodeMold> Nodes = new List<DiaNodeMold>();
+
+		// Token: 0x04003969 RID: 14697
+		public List<string> NodeNames = new List<string>();
 	}
 }

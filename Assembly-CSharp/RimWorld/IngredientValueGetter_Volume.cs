@@ -1,34 +1,51 @@
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class IngredientValueGetter_Volume : IngredientValueGetter
+namespace RimWorld
 {
-	public override float ValuePerUnitOf(ThingDef t)
+	// Token: 0x020019B2 RID: 6578
+	public class IngredientValueGetter_Volume : IngredientValueGetter
 	{
-		if (t.IsStuff)
+		// Token: 0x060094CB RID: 38091 RVA: 0x002BA6AC File Offset: 0x002B88AC
+		public override float ValuePerUnitOf(ThingDef t)
 		{
-			return t.VolumePerUnit;
+			if (t.IsStuff)
+			{
+				return t.VolumePerUnit;
+			}
+			return 1f;
 		}
-		return 1f;
-	}
 
-	public override string BillRequirementsDescription(RecipeDef r, IngredientCount ing)
-	{
-		if (!ing.filter.AllowedThingDefs.Any((ThingDef td) => td.smallVolume) || ing.filter.AllowedThingDefs.Any((ThingDef td) => td.smallVolume && !r.GetPremultipliedSmallIngredients().Contains(td)))
+		// Token: 0x060094CC RID: 38092 RVA: 0x002BA6C4 File Offset: 0x002B88C4
+		public override string BillRequirementsDescription(RecipeDef r, IngredientCount ing)
 		{
-			return ing.GetBaseCount() + "x " + ing.filter.Summary;
+			if (!ing.filter.AllowedThingDefs.Any((ThingDef td) => td.smallVolume) || ing.filter.AllowedThingDefs.Any((ThingDef td) => td.smallVolume && !r.GetPremultipliedSmallIngredients().Contains(td)))
+			{
+				return ing.GetBaseCount().ToString() + "x " + ing.filter.Summary;
+			}
+			return (ing.GetBaseCount() * 10f).ToString() + "x " + ing.filter.Summary;
 		}
-		return ing.GetBaseCount() * 10f + "x " + ing.filter.Summary;
-	}
 
-	public override string ExtraDescriptionLine(RecipeDef r)
-	{
-		if (r.ingredients.Any((IngredientCount ing) => ing.filter.AllowedThingDefs.Any((ThingDef td) => td.smallVolume && !r.GetPremultipliedSmallIngredients().Contains(td))))
+		// Token: 0x060094CD RID: 38093 RVA: 0x002BA77C File Offset: 0x002B897C
+		public override string ExtraDescriptionLine(RecipeDef r)
 		{
-			return "BillRequiresMayVary".Translate(10.ToStringCached());
+			Func<ThingDef, bool> <>9__1;
+			if (r.ingredients.Any(delegate(IngredientCount ing)
+			{
+				IEnumerable<ThingDef> allowedThingDefs = ing.filter.AllowedThingDefs;
+				Func<ThingDef, bool> predicate;
+				if ((predicate = <>9__1) == null)
+				{
+					predicate = (<>9__1 = ((ThingDef td) => td.smallVolume && !r.GetPremultipliedSmallIngredients().Contains(td)));
+				}
+				return allowedThingDefs.Any(predicate);
+			}))
+			{
+				return "BillRequiresMayVary".Translate(10.ToStringCached());
+			}
+			return null;
 		}
-		return null;
 	}
 }

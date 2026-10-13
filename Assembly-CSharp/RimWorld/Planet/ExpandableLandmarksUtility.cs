@@ -1,160 +1,183 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-[StaticConstructorOnStartup]
-public static class ExpandableLandmarksUtility
+namespace RimWorld.Planet
 {
-	private static float transitionPct;
-
-	private static List<PlanetTile> cachedLandmarksToShow = new List<PlanetTile>();
-
-	private const float LandmarkIconSize = 30f;
-
-	private const float TransitionSpeed = 3f;
-
-	private static readonly Color HighlightedColor = ExpandableWorldObjectsUtility.HighlightedColor;
-
-	private static Texture2D landmarkTex;
-
-	private static Texture2D LandmarkTex => landmarkTex ?? (landmarkTex = ContentFinder<Texture2D>.Get("World/WorldObjects/Expanding/LandmarkExpanding"));
-
-	private static float TransitionPct
+	// Token: 0x02003D15 RID: 15637
+	[StaticConstructorOnStartup]
+	public static class ExpandableLandmarksUtility
 	{
-		get
+		// Token: 0x1700350C RID: 13580
+		// (get) Token: 0x06015486 RID: 87174 RVA: 0x0065DEC4 File Offset: 0x0065C0C4
+		private static Texture2D LandmarkTex
 		{
-			if (!Find.PlaySettings.showExpandingLandmarks)
+			get
 			{
-				return 0f;
-			}
-			return transitionPct;
-		}
-	}
-
-	private static List<PlanetTile> LandmarksToShow
-	{
-		get
-		{
-			if (!cachedLandmarksToShow.Empty())
-			{
-				return cachedLandmarksToShow;
-			}
-			foreach (PlanetTile key in Find.World.landmarks.landmarks.Keys)
-			{
-				if (!Find.WorldObjects.AnyWorldObjectAt(key))
+				Texture2D result;
+				if ((result = ExpandableLandmarksUtility.landmarkTex) == null)
 				{
-					cachedLandmarksToShow.Add(key);
+					result = (ExpandableLandmarksUtility.landmarkTex = ContentFinder<Texture2D>.Get("World/WorldObjects/Expanding/LandmarkExpanding", true));
 				}
+				return result;
 			}
-			return cachedLandmarksToShow;
 		}
-	}
 
-	public static void ResetStaticData()
-	{
-		landmarkTex = null;
-		cachedLandmarksToShow.Clear();
-	}
-
-	public static void ExpandableLandmarksUpdate()
-	{
-		float num = Time.deltaTime * 3f;
-		if ((int)Find.WorldCameraDriver.CurrentZoom <= 0)
+		// Token: 0x1700350D RID: 13581
+		// (get) Token: 0x06015487 RID: 87175 RVA: 0x0065DEE0 File Offset: 0x0065C0E0
+		private static float TransitionPct
 		{
-			transitionPct -= num;
-		}
-		else
-		{
-			transitionPct += num;
-		}
-		transitionPct = Mathf.Clamp01(transitionPct);
-	}
-
-	public static void ExpandableLandmarksOnGUI()
-	{
-		foreach (PlanetTile item in LandmarksToShow)
-		{
-			try
+			get
 			{
-				bool flag = IsHighlighted(item);
-				if ((TransitionPct != 0f || flag) && !HiddenBehindTerrainNow(item))
+				if (!Find.PlaySettings.showExpandingLandmarks)
 				{
-					Color white = Color.white;
-					white.a = (flag ? 1f : transitionPct);
-					GUI.color = white;
-					Rect rect = ExpandedIconScreenRect(item);
-					Material material = null;
-					if (flag)
+					return 0f;
+				}
+				return ExpandableLandmarksUtility.transitionPct;
+			}
+		}
+
+		// Token: 0x1700350E RID: 13582
+		// (get) Token: 0x06015488 RID: 87176 RVA: 0x0065DEFC File Offset: 0x0065C0FC
+		private static List<PlanetTile> LandmarksToShow
+		{
+			get
+			{
+				if (!ExpandableLandmarksUtility.cachedLandmarksToShow.Empty<PlanetTile>())
+				{
+					return ExpandableLandmarksUtility.cachedLandmarksToShow;
+				}
+				foreach (PlanetTile planetTile in Find.World.landmarks.landmarks.Keys)
+				{
+					if (!Find.WorldObjects.AnyWorldObjectAt(planetTile))
 					{
-						material = GetMaterial(white);
+						ExpandableLandmarksUtility.cachedLandmarksToShow.Add(planetTile);
 					}
-					Widgets.DrawTextureRotated(rect, LandmarkTex, 0f, material);
+				}
+				return ExpandableLandmarksUtility.cachedLandmarksToShow;
+			}
+		}
+
+		// Token: 0x06015489 RID: 87177 RVA: 0x0065DF88 File Offset: 0x0065C188
+		public static void ResetStaticData()
+		{
+			ExpandableLandmarksUtility.landmarkTex = null;
+			ExpandableLandmarksUtility.cachedLandmarksToShow.Clear();
+		}
+
+		// Token: 0x0601548A RID: 87178 RVA: 0x0065DF9C File Offset: 0x0065C19C
+		public static void ExpandableLandmarksUpdate()
+		{
+			float num = Time.deltaTime * 3f;
+			if (Find.WorldCameraDriver.CurrentZoom <= WorldCameraZoomRange.VeryClose)
+			{
+				ExpandableLandmarksUtility.transitionPct -= num;
+			}
+			else
+			{
+				ExpandableLandmarksUtility.transitionPct += num;
+			}
+			ExpandableLandmarksUtility.transitionPct = Mathf.Clamp01(ExpandableLandmarksUtility.transitionPct);
+		}
+
+		// Token: 0x0601548B RID: 87179 RVA: 0x0065DFEC File Offset: 0x0065C1EC
+		public static void ExpandableLandmarksOnGUI()
+		{
+			foreach (PlanetTile planetTile in ExpandableLandmarksUtility.LandmarksToShow)
+			{
+				try
+				{
+					bool flag = ExpandableLandmarksUtility.IsHighlighted(planetTile);
+					if (ExpandableLandmarksUtility.TransitionPct != 0f || flag)
+					{
+						if (!ExpandableLandmarksUtility.HiddenBehindTerrainNow(planetTile))
+						{
+							Color white = Color.white;
+							white.a = (flag ? 1f : ExpandableLandmarksUtility.transitionPct);
+							GUI.color = white;
+							Rect rect = ExpandableLandmarksUtility.ExpandedIconScreenRect(planetTile);
+							Material material = null;
+							if (flag)
+							{
+								material = ExpandableLandmarksUtility.GetMaterial(white);
+							}
+							Widgets.DrawTextureRotated(rect, ExpandableLandmarksUtility.LandmarkTex, 0f, material);
+						}
+					}
+				}
+				catch (Exception arg)
+				{
+					Log.Error(string.Format("Error while drawing landmark at {0}: {1}", planetTile.ToStringSafe<PlanetTile>(), arg));
 				}
 			}
-			catch (Exception arg)
+			GUI.color = Color.white;
+		}
+
+		// Token: 0x0601548C RID: 87180 RVA: 0x0065E0DC File Offset: 0x0065C2DC
+		private static bool IsHighlighted(PlanetTile tile)
+		{
+			Dialog_WorldSearch dialog_WorldSearch;
+			return Find.WindowStack.TryGetWindow<Dialog_WorldSearch>(out dialog_WorldSearch) && ((dialog_WorldSearch.Highlighted != null && dialog_WorldSearch.Highlighted.tile == tile) || (dialog_WorldSearch.CommonSearchWidget.filter.Text.Length >= 1 && dialog_WorldSearch.IsListed(tile)));
+		}
+
+		// Token: 0x0601548D RID: 87181 RVA: 0x0065E138 File Offset: 0x0065C338
+		private static Material GetMaterial(Color color)
+		{
+			return MaterialPool.MatFrom(new MaterialRequest(null, ShaderDatabase.ExpandingIconUI, color)
 			{
-				Log.Error($"Error while drawing landmark at {item.ToStringSafe()}: {arg}");
+				needsMainTex = false,
+				colorTwo = ExpandableLandmarksUtility.HighlightedColor
+			});
+		}
+
+		// Token: 0x0601548E RID: 87182 RVA: 0x0065E170 File Offset: 0x0065C370
+		private static Rect ExpandedIconScreenRect(PlanetTile tile)
+		{
+			Vector2 vector = GenWorldUI.WorldToUIPosition(ExpandableLandmarksUtility.DrawPos(tile));
+			bool flag = tile.Layer != Find.WorldSelector.SelectedLayer;
+			float num = 30f;
+			if (flag)
+			{
+				num /= 2f;
 			}
+			return new Rect(vector.x - num / 2f, vector.y - num / 2f, num, num);
 		}
-		GUI.color = Color.white;
-	}
 
-	private static bool IsHighlighted(PlanetTile tile)
-	{
-		if (!Find.WindowStack.TryGetWindow<Dialog_WorldSearch>(out var window))
+		// Token: 0x0601548F RID: 87183 RVA: 0x0065E1D2 File Offset: 0x0065C3D2
+		private static bool HiddenBehindTerrainNow(PlanetTile tile)
 		{
-			return false;
+			return WorldRendererUtility.HiddenBehindTerrainNow(ExpandableLandmarksUtility.DrawPos(tile)) || tile.Layer != PlanetLayer.Selected;
 		}
-		if (window.Highlighted != null && window.Highlighted.tile == tile)
+
+		// Token: 0x06015490 RID: 87184 RVA: 0x0065E1F4 File Offset: 0x0065C3F4
+		private static Vector3 DrawPos(PlanetTile tile)
 		{
-			return true;
+			return tile.Layer.Origin + Find.WorldGrid.GetTileCenter(tile);
 		}
-		if (window.CommonSearchWidget.filter.Text.Length >= 1)
+
+		// Token: 0x06015491 RID: 87185 RVA: 0x0065E212 File Offset: 0x0065C412
+		public static void Notify_WorldObjectsChanged()
 		{
-			return window.IsListed(tile);
+			ExpandableLandmarksUtility.cachedLandmarksToShow.Clear();
 		}
-		return false;
-	}
 
-	private static Material GetMaterial(Color color)
-	{
-		MaterialRequest req = new MaterialRequest(null, ShaderDatabase.ExpandingIconUI, color);
-		req.needsMainTex = false;
-		req.colorTwo = HighlightedColor;
-		return MaterialPool.MatFrom(req);
-	}
+		// Token: 0x0400ED50 RID: 60752
+		private static float transitionPct;
 
-	private static Rect ExpandedIconScreenRect(PlanetTile tile)
-	{
-		Vector2 vector = GenWorldUI.WorldToUIPosition(DrawPos(tile));
-		bool num = tile.Layer != Find.WorldSelector.SelectedLayer;
-		float num2 = 30f;
-		if (num)
-		{
-			num2 /= 2f;
-		}
-		return new Rect(vector.x - num2 / 2f, vector.y - num2 / 2f, num2, num2);
-	}
+		// Token: 0x0400ED51 RID: 60753
+		private static List<PlanetTile> cachedLandmarksToShow = new List<PlanetTile>();
 
-	private static bool HiddenBehindTerrainNow(PlanetTile tile)
-	{
-		if (!WorldRendererUtility.HiddenBehindTerrainNow(DrawPos(tile)))
-		{
-			return tile.Layer != PlanetLayer.Selected;
-		}
-		return true;
-	}
+		// Token: 0x0400ED52 RID: 60754
+		private const float LandmarkIconSize = 30f;
 
-	private static Vector3 DrawPos(PlanetTile tile)
-	{
-		return tile.Layer.Origin + Find.WorldGrid.GetTileCenter(tile);
-	}
+		// Token: 0x0400ED53 RID: 60755
+		private const float TransitionSpeed = 3f;
 
-	public static void Notify_WorldObjectsChanged()
-	{
-		cachedLandmarksToShow.Clear();
+		// Token: 0x0400ED54 RID: 60756
+		private static readonly Color HighlightedColor = ExpandableWorldObjectsUtility.HighlightedColor;
+
+		// Token: 0x0400ED55 RID: 60757
+		private static Texture2D landmarkTex;
 	}
 }

@@ -1,242 +1,278 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public static class ThingSelectionUtility
+namespace RimWorld
 {
-	private static HashSet<Thing> yieldedThings = new HashSet<Thing>();
-
-	private static readonly HashSet<Plan> yieldedPlans = new HashSet<Plan>();
-
-	private static readonly HashSet<Zone> yieldedZones = new HashSet<Zone>();
-
-	private static readonly List<Pawn> tmpColonists = new List<Pawn>();
-
-	public static bool SelectableByMapClick(Thing t)
+	// Token: 0x020033DE RID: 13278
+	public static class ThingSelectionUtility
 	{
-		if (!t.def.selectable)
+		// Token: 0x06012A88 RID: 76424 RVA: 0x005859FC File Offset: 0x00583BFC
+		public static bool SelectableByMapClick(Thing t)
 		{
-			return false;
-		}
-		if (t is Pawn pawn && pawn.IsHiddenFromPlayer())
-		{
-			return false;
-		}
-		Thing spawnedParentOrMe = t.SpawnedParentOrMe;
-		if (spawnedParentOrMe == null)
-		{
-			return false;
-		}
-		if (spawnedParentOrMe.def.size.x == 1 && spawnedParentOrMe.def.size.z == 1)
-		{
-			return !spawnedParentOrMe.Position.Fogged(spawnedParentOrMe.Map);
-		}
-		foreach (IntVec3 item in spawnedParentOrMe.OccupiedRect())
-		{
-			if (!item.Fogged(spawnedParentOrMe.Map))
+			if (!t.def.selectable)
 			{
-				return true;
+				return false;
 			}
-		}
-		return false;
-	}
-
-	public static bool SelectableByHotkey(Thing t)
-	{
-		if (t.def.selectable)
-		{
-			return t.Spawned;
-		}
-		return false;
-	}
-
-	public static IEnumerable<Thing> MultiSelectableThingsInScreenRectDistinct(Rect rect)
-	{
-		CellRect mapRect = GetMapRect(rect);
-		yieldedThings.Clear();
-		try
-		{
-			foreach (IntVec3 item in mapRect)
+			Pawn pawn = t as Pawn;
+			if (pawn != null && pawn.IsHiddenFromPlayer())
 			{
-				if (!item.InBounds(Find.CurrentMap))
+				return false;
+			}
+			Thing spawnedParentOrMe = t.SpawnedParentOrMe;
+			if (spawnedParentOrMe == null)
+			{
+				return false;
+			}
+			if (spawnedParentOrMe.def.size.x == 1 && spawnedParentOrMe.def.size.z == 1)
+			{
+				return !spawnedParentOrMe.Position.Fogged(spawnedParentOrMe.Map);
+			}
+			using (CellRect.Enumerator enumerator = spawnedParentOrMe.OccupiedRect().GetEnumerator())
+			{
+				while (enumerator.MoveNext())
 				{
-					continue;
-				}
-				List<Thing> cellThings = Find.CurrentMap.thingGrid.ThingsListAt(item);
-				if (cellThings == null)
-				{
-					continue;
-				}
-				for (int k = 0; k < cellThings.Count; k++)
-				{
-					Thing t = cellThings[k];
-					if (SelectableByMapClick(t) && !t.def.neverMultiSelect && !yieldedThings.Contains(t))
+					if (!enumerator.Current.Fogged(spawnedParentOrMe.Map))
 					{
-						yield return t;
-						yieldedThings.Add(t);
+						return true;
 					}
 				}
 			}
-			Rect rectInWorldSpace = GetRectInWorldSpace(rect);
-			foreach (IntVec3 edgeCell in mapRect.ExpandedBy(1).EdgeCells)
+			return false;
+		}
+
+		// Token: 0x06012A89 RID: 76425 RVA: 0x00585ACC File Offset: 0x00583CCC
+		public static bool SelectableByHotkey(Thing t)
+		{
+			return t.def.selectable && t.Spawned;
+		}
+
+		// Token: 0x06012A8A RID: 76426 RVA: 0x00585AE3 File Offset: 0x00583CE3
+		public static IEnumerable<Thing> MultiSelectableThingsInScreenRectDistinct(Rect rect)
+		{
+			CellRect mapRect = ThingSelectionUtility.GetMapRect(rect);
+			ThingSelectionUtility.yieldedThings.Clear();
+			try
 			{
-				if (!edgeCell.InBounds(Find.CurrentMap) || edgeCell.GetItemCount(Find.CurrentMap) <= 1)
+				foreach (IntVec3 c in mapRect)
 				{
-					continue;
-				}
-				foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(edgeCell))
-				{
-					if (t.def.category == ThingCategory.Item && SelectableByMapClick(t) && !t.def.neverMultiSelect && !yieldedThings.Contains(t))
+					if (c.InBounds(Find.CurrentMap))
 					{
-						Vector3 vector = t.TrueCenter();
-						if (new Rect(vector.x - 0.5f, vector.z - 0.5f, 1f, 1f).Overlaps(rectInWorldSpace))
+						List<Thing> cellThings = Find.CurrentMap.thingGrid.ThingsListAt(c);
+						if (cellThings != null)
 						{
-							yield return t;
-							yieldedThings.Add(t);
+							int num;
+							for (int i = 0; i < cellThings.Count; i = num + 1)
+							{
+								Thing t = cellThings[i];
+								if (ThingSelectionUtility.SelectableByMapClick(t) && !t.def.neverMultiSelect && !ThingSelectionUtility.yieldedThings.Contains(t))
+								{
+									yield return t;
+									ThingSelectionUtility.yieldedThings.Add(t);
+								}
+								t = null;
+								num = i;
+							}
+						}
+						cellThings = null;
+					}
+				}
+				Rect rectInWorldSpace = ThingSelectionUtility.GetRectInWorldSpace(rect);
+				foreach (IntVec3 c2 in mapRect.ExpandedBy(1).EdgeCells)
+				{
+					if (c2.InBounds(Find.CurrentMap) && c2.GetItemCount(Find.CurrentMap) > 1)
+					{
+						foreach (Thing t in Find.CurrentMap.thingGrid.ThingsAt(c2))
+						{
+							if (t.def.category == ThingCategory.Item && ThingSelectionUtility.SelectableByMapClick(t) && !t.def.neverMultiSelect && !ThingSelectionUtility.yieldedThings.Contains(t))
+							{
+								Vector3 vector = t.TrueCenter();
+								Rect rect2 = new Rect(vector.x - 0.5f, vector.z - 0.5f, 1f, 1f);
+								if (rect2.Overlaps(rectInWorldSpace))
+								{
+									yield return t;
+									ThingSelectionUtility.yieldedThings.Add(t);
+								}
+							}
+							t = null;
+						}
+						IEnumerator<Thing> enumerator3 = null;
+					}
+				}
+				IEnumerator<IntVec3> enumerator2 = null;
+				rectInWorldSpace = default(Rect);
+			}
+			finally
+			{
+				ThingSelectionUtility.yieldedThings.Clear();
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012A8B RID: 76427 RVA: 0x00585AF4 File Offset: 0x00583CF4
+		private static Rect GetRectInWorldSpace(Rect rect)
+		{
+			Vector2 screenLoc = new Vector2(rect.x, (float)UI.screenHeight - rect.y);
+			Vector2 screenLoc2 = new Vector2(rect.x + rect.width, (float)UI.screenHeight - (rect.y + rect.height));
+			Vector3 vector = UI.UIToMapPosition(screenLoc);
+			Vector3 vector2 = UI.UIToMapPosition(screenLoc2);
+			return new Rect(vector.x, vector2.z, vector2.x - vector.x, vector.z - vector2.z);
+		}
+
+		// Token: 0x06012A8C RID: 76428 RVA: 0x00585B7F File Offset: 0x00583D7F
+		public static IEnumerable<Plan> MultiSelectablePlansInScreenRectDistinct(Rect rect, ColorDef match = null)
+		{
+			CellRect mapRect = ThingSelectionUtility.GetMapRect(rect);
+			ThingSelectionUtility.yieldedPlans.Clear();
+			try
+			{
+				foreach (IntVec3 c in mapRect)
+				{
+					if (c.InBounds(Find.CurrentMap))
+					{
+						Plan plan = c.GetPlan(Find.CurrentMap);
+						if (plan != null && (match == null || plan.Color == match))
+						{
+							if (!ThingSelectionUtility.yieldedPlans.Contains(plan))
+							{
+								yield return plan;
+								ThingSelectionUtility.yieldedPlans.Add(plan);
+							}
+							plan = null;
 						}
 					}
 				}
 			}
-		}
-		finally
-		{
-			yieldedThings.Clear();
-		}
-	}
-
-	private static Rect GetRectInWorldSpace(Rect rect)
-	{
-		Vector2 screenLoc = new Vector2(rect.x, (float)UI.screenHeight - rect.y);
-		Vector2 screenLoc2 = new Vector2(rect.x + rect.width, (float)UI.screenHeight - (rect.y + rect.height));
-		Vector3 vector = UI.UIToMapPosition(screenLoc);
-		Vector3 vector2 = UI.UIToMapPosition(screenLoc2);
-		return new Rect(vector.x, vector2.z, vector2.x - vector.x, vector.z - vector2.z);
-	}
-
-	public static IEnumerable<Plan> MultiSelectablePlansInScreenRectDistinct(Rect rect, ColorDef match = null)
-	{
-		CellRect mapRect = GetMapRect(rect);
-		yieldedPlans.Clear();
-		try
-		{
-			foreach (IntVec3 item in mapRect)
+			finally
 			{
-				if (item.InBounds(Find.CurrentMap))
+				ThingSelectionUtility.yieldedPlans.Clear();
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012A8D RID: 76429 RVA: 0x00585B96 File Offset: 0x00583D96
+		public static IEnumerable<Zone> MultiSelectableZonesInScreenRectDistinct(Rect rect, Zone matchType = null)
+		{
+			CellRect mapRect = ThingSelectionUtility.GetMapRect(rect);
+			ThingSelectionUtility.yieldedZones.Clear();
+			try
+			{
+				foreach (IntVec3 c in mapRect)
 				{
-					Plan plan = item.GetPlan(Find.CurrentMap);
-					if (plan != null && (match == null || plan.Color == match) && !yieldedPlans.Contains(plan))
+					if (c.InBounds(Find.CurrentMap))
 					{
-						yield return plan;
-						yieldedPlans.Add(plan);
+						Zone zone = c.GetZone(Find.CurrentMap);
+						if (zone != null && zone.IsMultiselectable && (matchType == null || !(zone.GetType() != matchType.GetType())))
+						{
+							if (!ThingSelectionUtility.yieldedZones.Contains(zone))
+							{
+								yield return zone;
+								ThingSelectionUtility.yieldedZones.Add(zone);
+							}
+							zone = null;
+						}
 					}
 				}
 			}
-		}
-		finally
-		{
-			yieldedPlans.Clear();
-		}
-	}
-
-	public static IEnumerable<Zone> MultiSelectableZonesInScreenRectDistinct(Rect rect, Zone matchType = null)
-	{
-		CellRect mapRect = GetMapRect(rect);
-		yieldedZones.Clear();
-		try
-		{
-			foreach (IntVec3 item in mapRect)
+			finally
 			{
-				if (item.InBounds(Find.CurrentMap))
+				ThingSelectionUtility.yieldedZones.Clear();
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06012A8E RID: 76430 RVA: 0x00585BB0 File Offset: 0x00583DB0
+		private static CellRect GetMapRect(Rect rect)
+		{
+			Vector2 screenLoc = new Vector2(rect.x, (float)UI.screenHeight - rect.y);
+			Vector2 screenLoc2 = new Vector2(rect.x + rect.width, (float)UI.screenHeight - (rect.y + rect.height));
+			Vector3 vector = UI.UIToMapPosition(screenLoc);
+			Vector3 vector2 = UI.UIToMapPosition(screenLoc2);
+			return new CellRect
+			{
+				minX = Mathf.FloorToInt(vector.x),
+				minZ = Mathf.FloorToInt(vector2.z),
+				maxX = Mathf.FloorToInt(vector2.x),
+				maxZ = Mathf.FloorToInt(vector.z)
+			};
+		}
+
+		// Token: 0x06012A8F RID: 76431 RVA: 0x00585C64 File Offset: 0x00583E64
+		public static void SelectNextColonist()
+		{
+			ThingSelectionUtility.tmpColonists.Clear();
+			ThingSelectionUtility.tmpColonists.AddRange(Find.ColonistBar.GetColonistsInOrder().Where(new Func<Pawn, bool>(ThingSelectionUtility.SelectableByHotkey)));
+			if (ThingSelectionUtility.tmpColonists.Count == 0)
+			{
+				return;
+			}
+			bool worldSelected = WorldRendererUtility.WorldSelected;
+			int num = -1;
+			for (int i = ThingSelectionUtility.tmpColonists.Count - 1; i >= 0; i--)
+			{
+				if ((!worldSelected && Find.Selector.IsSelected(ThingSelectionUtility.tmpColonists[i])) || (worldSelected && ThingSelectionUtility.tmpColonists[i].IsCaravanMember() && Find.WorldSelector.IsSelected(ThingSelectionUtility.tmpColonists[i].GetCaravan())))
 				{
-					Zone zone = item.GetZone(Find.CurrentMap);
-					if (zone != null && zone.IsMultiselectable && (matchType == null || !(zone.GetType() != matchType.GetType())) && !yieldedZones.Contains(zone))
-					{
-						yield return zone;
-						yieldedZones.Add(zone);
-					}
+					num = i;
+					break;
 				}
 			}
-		}
-		finally
-		{
-			yieldedZones.Clear();
-		}
-	}
-
-	private static CellRect GetMapRect(Rect rect)
-	{
-		Vector2 screenLoc = new Vector2(rect.x, (float)UI.screenHeight - rect.y);
-		Vector2 screenLoc2 = new Vector2(rect.x + rect.width, (float)UI.screenHeight - (rect.y + rect.height));
-		Vector3 vector = UI.UIToMapPosition(screenLoc);
-		Vector3 vector2 = UI.UIToMapPosition(screenLoc2);
-		return new CellRect
-		{
-			minX = Mathf.FloorToInt(vector.x),
-			minZ = Mathf.FloorToInt(vector2.z),
-			maxX = Mathf.FloorToInt(vector2.x),
-			maxZ = Mathf.FloorToInt(vector.z)
-		};
-	}
-
-	public static void SelectNextColonist()
-	{
-		tmpColonists.Clear();
-		tmpColonists.AddRange(Find.ColonistBar.GetColonistsInOrder().Where(SelectableByHotkey));
-		if (tmpColonists.Count == 0)
-		{
-			return;
-		}
-		bool worldSelected = WorldRendererUtility.WorldSelected;
-		int num = -1;
-		for (int num2 = tmpColonists.Count - 1; num2 >= 0; num2--)
-		{
-			if ((!worldSelected && Find.Selector.IsSelected(tmpColonists[num2])) || (worldSelected && tmpColonists[num2].IsCaravanMember() && Find.WorldSelector.IsSelected(tmpColonists[num2].GetCaravan())))
+			if (num == -1)
 			{
-				num = num2;
-				break;
+				CameraJumper.TryJumpAndSelect(ThingSelectionUtility.tmpColonists[0], CameraJumper.MovementMode.Pan);
 			}
-		}
-		if (num == -1)
-		{
-			CameraJumper.TryJumpAndSelect(tmpColonists[0]);
-		}
-		else
-		{
-			CameraJumper.TryJumpAndSelect(tmpColonists[(num + 1) % tmpColonists.Count]);
-		}
-		tmpColonists.Clear();
-	}
-
-	public static void SelectPreviousColonist()
-	{
-		tmpColonists.Clear();
-		tmpColonists.AddRange(Find.ColonistBar.GetColonistsInOrder().Where(SelectableByHotkey));
-		if (tmpColonists.Count == 0)
-		{
-			return;
-		}
-		bool worldSelected = WorldRendererUtility.WorldSelected;
-		int num = -1;
-		for (int i = 0; i < tmpColonists.Count; i++)
-		{
-			if ((!worldSelected && Find.Selector.IsSelected(tmpColonists[i])) || (worldSelected && tmpColonists[i].IsCaravanMember() && Find.WorldSelector.IsSelected(tmpColonists[i].GetCaravan())))
+			else
 			{
-				num = i;
-				break;
+				CameraJumper.TryJumpAndSelect(ThingSelectionUtility.tmpColonists[(num + 1) % ThingSelectionUtility.tmpColonists.Count], CameraJumper.MovementMode.Pan);
 			}
+			ThingSelectionUtility.tmpColonists.Clear();
 		}
-		if (num == -1)
+
+		// Token: 0x06012A90 RID: 76432 RVA: 0x00585D64 File Offset: 0x00583F64
+		public static void SelectPreviousColonist()
 		{
-			CameraJumper.TryJumpAndSelect(tmpColonists[tmpColonists.Count - 1]);
+			ThingSelectionUtility.tmpColonists.Clear();
+			ThingSelectionUtility.tmpColonists.AddRange(Find.ColonistBar.GetColonistsInOrder().Where(new Func<Pawn, bool>(ThingSelectionUtility.SelectableByHotkey)));
+			if (ThingSelectionUtility.tmpColonists.Count == 0)
+			{
+				return;
+			}
+			bool worldSelected = WorldRendererUtility.WorldSelected;
+			int num = -1;
+			for (int i = 0; i < ThingSelectionUtility.tmpColonists.Count; i++)
+			{
+				if ((!worldSelected && Find.Selector.IsSelected(ThingSelectionUtility.tmpColonists[i])) || (worldSelected && ThingSelectionUtility.tmpColonists[i].IsCaravanMember() && Find.WorldSelector.IsSelected(ThingSelectionUtility.tmpColonists[i].GetCaravan())))
+				{
+					num = i;
+					break;
+				}
+			}
+			if (num == -1)
+			{
+				CameraJumper.TryJumpAndSelect(ThingSelectionUtility.tmpColonists[ThingSelectionUtility.tmpColonists.Count - 1], CameraJumper.MovementMode.Pan);
+			}
+			else
+			{
+				CameraJumper.TryJumpAndSelect(ThingSelectionUtility.tmpColonists[GenMath.PositiveMod(num - 1, ThingSelectionUtility.tmpColonists.Count)], CameraJumper.MovementMode.Pan);
+			}
+			ThingSelectionUtility.tmpColonists.Clear();
 		}
-		else
-		{
-			CameraJumper.TryJumpAndSelect(tmpColonists[GenMath.PositiveMod(num - 1, tmpColonists.Count)]);
-		}
-		tmpColonists.Clear();
+
+		// Token: 0x0400C1C6 RID: 49606
+		private static HashSet<Thing> yieldedThings = new HashSet<Thing>();
+
+		// Token: 0x0400C1C7 RID: 49607
+		private static readonly HashSet<Plan> yieldedPlans = new HashSet<Plan>();
+
+		// Token: 0x0400C1C8 RID: 49608
+		private static readonly HashSet<Zone> yieldedZones = new HashSet<Zone>();
+
+		// Token: 0x0400C1C9 RID: 49609
+		private static readonly List<Pawn> tmpColonists = new List<Pawn>();
 	}
 }

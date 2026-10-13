@@ -1,236 +1,338 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class CompTurretGun : ThingComp, IAttackTargetSearcher
+namespace RimWorld
 {
-	private const int StartShootIntervalTicks = 10;
-
-	private static readonly CachedTexture ToggleTurretIcon = new CachedTexture("UI/Gizmos/ToggleTurret");
-
-	public Thing gun;
-
-	protected int burstCooldownTicksLeft;
-
-	protected int burstWarmupTicksLeft;
-
-	protected LocalTargetInfo currentTarget = LocalTargetInfo.Invalid;
-
-	private bool fireAtWill = true;
-
-	private LocalTargetInfo lastAttackedTarget = LocalTargetInfo.Invalid;
-
-	private int lastAttackTargetTick;
-
-	public float curRotation;
-
-	public Thing Thing => parent;
-
-	public CompProperties_TurretGun Props => (CompProperties_TurretGun)props;
-
-	public Verb CurrentEffectiveVerb => AttackVerb;
-
-	public LocalTargetInfo LastAttackedTarget => lastAttackedTarget;
-
-	public int LastAttackTargetTick => lastAttackTargetTick;
-
-	public CompEquippable GunCompEq => gun.TryGetComp<CompEquippable>();
-
-	public Verb AttackVerb => GunCompEq.PrimaryVerb;
-
-	private bool WarmingUp => burstWarmupTicksLeft > 0;
-
-	private bool CanShoot
+	// Token: 0x02002EB5 RID: 11957
+	public class CompTurretGun : ThingComp, IAttackTargetSearcher
 	{
-		get
+		// Token: 0x17002B6F RID: 11119
+		// (get) Token: 0x06010DD6 RID: 69078 RVA: 0x0048FDB8 File Offset: 0x0048DFB8
+		public Thing Thing
 		{
-			if (parent is Pawn pawn)
+			get
 			{
-				if (!pawn.Spawned || pawn.Downed || pawn.Dead || !pawn.Awake())
+				return this.parent;
+			}
+		}
+
+		// Token: 0x17002B70 RID: 11120
+		// (get) Token: 0x06010DD7 RID: 69079 RVA: 0x004DB72F File Offset: 0x004D992F
+		public CompProperties_TurretGun Props
+		{
+			get
+			{
+				return (CompProperties_TurretGun)this.props;
+			}
+		}
+
+		// Token: 0x17002B71 RID: 11121
+		// (get) Token: 0x06010DD8 RID: 69080 RVA: 0x004DB73C File Offset: 0x004D993C
+		public Verb CurrentEffectiveVerb
+		{
+			get
+			{
+				return this.AttackVerb;
+			}
+		}
+
+		// Token: 0x17002B72 RID: 11122
+		// (get) Token: 0x06010DD9 RID: 69081 RVA: 0x004DB744 File Offset: 0x004D9944
+		public LocalTargetInfo LastAttackedTarget
+		{
+			get
+			{
+				return this.lastAttackedTarget;
+			}
+		}
+
+		// Token: 0x17002B73 RID: 11123
+		// (get) Token: 0x06010DDA RID: 69082 RVA: 0x004DB74C File Offset: 0x004D994C
+		public int LastAttackTargetTick
+		{
+			get
+			{
+				return this.lastAttackTargetTick;
+			}
+		}
+
+		// Token: 0x17002B74 RID: 11124
+		// (get) Token: 0x06010DDB RID: 69083 RVA: 0x004DB754 File Offset: 0x004D9954
+		public CompEquippable GunCompEq
+		{
+			get
+			{
+				return this.gun.TryGetComp<CompEquippable>();
+			}
+		}
+
+		// Token: 0x17002B75 RID: 11125
+		// (get) Token: 0x06010DDC RID: 69084 RVA: 0x004DB761 File Offset: 0x004D9961
+		public Verb AttackVerb
+		{
+			get
+			{
+				return this.GunCompEq.PrimaryVerb;
+			}
+		}
+
+		// Token: 0x17002B76 RID: 11126
+		// (get) Token: 0x06010DDD RID: 69085 RVA: 0x004DB76E File Offset: 0x004D996E
+		private bool WarmingUp
+		{
+			get
+			{
+				return this.burstWarmupTicksLeft > 0;
+			}
+		}
+
+		// Token: 0x17002B77 RID: 11127
+		// (get) Token: 0x06010DDE RID: 69086 RVA: 0x004DB77C File Offset: 0x004D997C
+		private bool CanShoot
+		{
+			get
+			{
+				Pawn pawn = this.parent as Pawn;
+				if (pawn != null)
 				{
-					return false;
+					if (!pawn.Spawned || pawn.Downed || pawn.Dead || !pawn.Awake())
+					{
+						return false;
+					}
+					if (pawn.stances.stunner.Stunned)
+					{
+						return false;
+					}
+					if (this.TurretDestroyed)
+					{
+						return false;
+					}
+					if (pawn.IsColonyMechPlayerControlled && !this.fireAtWill)
+					{
+						return false;
+					}
 				}
-				if (pawn.stances.stunner.Stunned)
+				CompCanBeDormant compCanBeDormant = this.parent.TryGetComp<CompCanBeDormant>();
+				return compCanBeDormant == null || compCanBeDormant.Awake;
+			}
+		}
+
+		// Token: 0x17002B78 RID: 11128
+		// (get) Token: 0x06010DDF RID: 69087 RVA: 0x004DB804 File Offset: 0x004D9A04
+		public bool TurretDestroyed
+		{
+			get
+			{
+				Pawn pawn = this.parent as Pawn;
+				return pawn != null && this.AttackVerb.verbProps.linkedBodyPartsGroup != null && this.AttackVerb.verbProps.ensureLinkedBodyPartsGroupAlwaysUsable && PawnCapacityUtility.CalculateNaturalPartsAverageEfficiency(pawn.health.hediffSet, this.AttackVerb.verbProps.linkedBodyPartsGroup) <= 0f;
+			}
+		}
+
+		// Token: 0x17002B79 RID: 11129
+		// (get) Token: 0x06010DE0 RID: 69088 RVA: 0x004DB86E File Offset: 0x004D9A6E
+		public bool AutoAttack
+		{
+			get
+			{
+				return this.Props.autoAttack;
+			}
+		}
+
+		// Token: 0x06010DE1 RID: 69089 RVA: 0x004DB87B File Offset: 0x004D9A7B
+		public override void PostPostMake()
+		{
+			base.PostPostMake();
+			this.MakeGun();
+		}
+
+		// Token: 0x06010DE2 RID: 69090 RVA: 0x004DB889 File Offset: 0x004D9A89
+		private void MakeGun()
+		{
+			this.gun = ThingMaker.MakeThing(this.Props.turretDef, null);
+			this.UpdateGunVerbs();
+		}
+
+		// Token: 0x06010DE3 RID: 69091 RVA: 0x004DB8A8 File Offset: 0x004D9AA8
+		private void UpdateGunVerbs()
+		{
+			List<Verb> allVerbs = this.gun.TryGetComp<CompEquippable>().AllVerbs;
+			for (int i = 0; i < allVerbs.Count; i++)
+			{
+				Verb verb = allVerbs[i];
+				verb.caster = this.parent;
+				verb.castCompleteCallback = delegate()
 				{
-					return false;
-				}
-				if (TurretDestroyed)
+					this.burstCooldownTicksLeft = this.AttackVerb.verbProps.defaultCooldownTime.SecondsToTicks();
+				};
+			}
+		}
+
+		// Token: 0x06010DE4 RID: 69092 RVA: 0x004DB8FC File Offset: 0x004D9AFC
+		public override void CompTick()
+		{
+			if (!this.CanShoot)
+			{
+				return;
+			}
+			if (this.currentTarget.IsValid)
+			{
+				this.curRotation = (this.currentTarget.Cell.ToVector3Shifted() - this.parent.DrawPos).AngleFlat() + this.Props.angleOffset;
+			}
+			this.AttackVerb.VerbTick();
+			if (this.AttackVerb.state != VerbState.Bursting)
+			{
+				if (this.WarmingUp)
 				{
-					return false;
+					this.burstWarmupTicksLeft--;
+					if (this.burstWarmupTicksLeft == 0)
+					{
+						this.AttackVerb.TryStartCastOn(this.currentTarget, false, true, false, true);
+						this.lastAttackTargetTick = Find.TickManager.TicksGame;
+						this.lastAttackedTarget = this.currentTarget;
+						return;
+					}
 				}
-				if (pawn.IsColonyMechPlayerControlled && !fireAtWill)
+				else
 				{
-					return false;
+					if (this.burstCooldownTicksLeft > 0)
+					{
+						this.burstCooldownTicksLeft--;
+					}
+					if (this.burstCooldownTicksLeft <= 0 && this.parent.IsHashIntervalTick(10))
+					{
+						this.currentTarget = (Thing)AttackTargetFinder.BestShootTargetFromCurrentPosition(this, TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable, null, 0f, 9999f);
+						if (this.currentTarget.IsValid)
+						{
+							this.burstWarmupTicksLeft = 1;
+							return;
+						}
+						this.ResetCurrentTarget();
+					}
 				}
 			}
-			CompCanBeDormant compCanBeDormant = parent.TryGetComp<CompCanBeDormant>();
-			if (compCanBeDormant != null && !compCanBeDormant.Awake)
+		}
+
+		// Token: 0x06010DE5 RID: 69093 RVA: 0x004DBA39 File Offset: 0x004D9C39
+		private void ResetCurrentTarget()
+		{
+			this.currentTarget = LocalTargetInfo.Invalid;
+			this.burstWarmupTicksLeft = 0;
+		}
+
+		// Token: 0x06010DE6 RID: 69094 RVA: 0x004DBA4D File Offset: 0x004D9C4D
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
+		{
+			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
 			{
-				return false;
+				yield return gizmo;
 			}
-			return true;
-		}
-	}
-
-	public bool TurretDestroyed
-	{
-		get
-		{
-			if (parent is Pawn pawn && AttackVerb.verbProps.linkedBodyPartsGroup != null && AttackVerb.verbProps.ensureLinkedBodyPartsGroupAlwaysUsable && PawnCapacityUtility.CalculateNaturalPartsAverageEfficiency(pawn.health.hediffSet, AttackVerb.verbProps.linkedBodyPartsGroup) <= 0f)
+			IEnumerator<Gizmo> enumerator = null;
+			Pawn pawn = this.parent as Pawn;
+			if (pawn != null && pawn.IsColonyMechPlayerControlled)
 			{
-				return true;
-			}
-			return false;
-		}
-	}
-
-	public bool AutoAttack => Props.autoAttack;
-
-	public override void PostPostMake()
-	{
-		base.PostPostMake();
-		MakeGun();
-	}
-
-	private void MakeGun()
-	{
-		gun = ThingMaker.MakeThing(Props.turretDef);
-		UpdateGunVerbs();
-	}
-
-	private void UpdateGunVerbs()
-	{
-		List<Verb> allVerbs = gun.TryGetComp<CompEquippable>().AllVerbs;
-		for (int i = 0; i < allVerbs.Count; i++)
-		{
-			Verb verb = allVerbs[i];
-			verb.caster = parent;
-			verb.castCompleteCallback = delegate
-			{
-				burstCooldownTicksLeft = AttackVerb.verbProps.defaultCooldownTime.SecondsToTicks();
-			};
-		}
-	}
-
-	public override void CompTick()
-	{
-		if (!CanShoot)
-		{
-			return;
-		}
-		if (currentTarget.IsValid)
-		{
-			curRotation = (currentTarget.Cell.ToVector3Shifted() - parent.DrawPos).AngleFlat() + Props.angleOffset;
-		}
-		AttackVerb.VerbTick();
-		if (AttackVerb.state == VerbState.Bursting)
-		{
-			return;
-		}
-		if (WarmingUp)
-		{
-			burstWarmupTicksLeft--;
-			if (burstWarmupTicksLeft == 0)
-			{
-				AttackVerb.TryStartCastOn(currentTarget, surpriseAttack: false, canHitNonTargetPawns: true, preventFriendlyFire: false, nonInterruptingSelfCast: true);
-				lastAttackTargetTick = Find.TickManager.TicksGame;
-				lastAttackedTarget = currentTarget;
-			}
-			return;
-		}
-		if (burstCooldownTicksLeft > 0)
-		{
-			burstCooldownTicksLeft--;
-		}
-		if (burstCooldownTicksLeft <= 0 && parent.IsHashIntervalTick(10))
-		{
-			currentTarget = (Thing)AttackTargetFinder.BestShootTargetFromCurrentPosition(this, TargetScanFlags.NeedThreat | TargetScanFlags.NeedAutoTargetable);
-			if (currentTarget.IsValid)
-			{
-				burstWarmupTicksLeft = 1;
-			}
-			else
-			{
-				ResetCurrentTarget();
-			}
-		}
-	}
-
-	private void ResetCurrentTarget()
-	{
-		currentTarget = LocalTargetInfo.Invalid;
-		burstWarmupTicksLeft = 0;
-	}
-
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		foreach (Gizmo item in base.CompGetGizmosExtra())
-		{
-			yield return item;
-		}
-		if (parent is Pawn { IsColonyMechPlayerControlled: not false })
-		{
-			Command_Toggle command_Toggle = new Command_Toggle();
-			command_Toggle.defaultLabel = "CommandToggleTurret".Translate();
-			command_Toggle.defaultDesc = "CommandToggleTurretDesc".Translate();
-			command_Toggle.isActive = () => fireAtWill;
-			command_Toggle.icon = ToggleTurretIcon.Texture;
-			command_Toggle.toggleAction = delegate
-			{
-				fireAtWill = !fireAtWill;
-			};
-			yield return command_Toggle;
-		}
-	}
-
-	public override List<PawnRenderNode> CompRenderNodes()
-	{
-		if (!Props.renderNodeProperties.NullOrEmpty() && parent is Pawn pawn)
-		{
-			List<PawnRenderNode> list = new List<PawnRenderNode>();
-			{
-				foreach (PawnRenderNodeProperties renderNodeProperty in Props.renderNodeProperties)
+				yield return new Command_Toggle
 				{
-					PawnRenderNode_TurretGun pawnRenderNode_TurretGun = (PawnRenderNode_TurretGun)Activator.CreateInstance(renderNodeProperty.nodeClass, pawn, renderNodeProperty, pawn.Drawer.renderer.renderTree);
-					pawnRenderNode_TurretGun.turretComp = this;
-					list.Add(pawnRenderNode_TurretGun);
+					defaultLabel = "CommandToggleTurret".Translate(),
+					defaultDesc = "CommandToggleTurretDesc".Translate(),
+					isActive = (() => this.fireAtWill),
+					icon = CompTurretGun.ToggleTurretIcon.Texture,
+					toggleAction = delegate()
+					{
+						this.fireAtWill = !this.fireAtWill;
+					}
+				};
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06010DE7 RID: 69095 RVA: 0x004DBA60 File Offset: 0x004D9C60
+		public override List<PawnRenderNode> CompRenderNodes()
+		{
+			if (!this.Props.renderNodeProperties.NullOrEmpty<PawnRenderNodeProperties>())
+			{
+				Pawn pawn = this.parent as Pawn;
+				if (pawn != null)
+				{
+					List<PawnRenderNode> list = new List<PawnRenderNode>();
+					foreach (PawnRenderNodeProperties pawnRenderNodeProperties in this.Props.renderNodeProperties)
+					{
+						PawnRenderNode_TurretGun pawnRenderNode_TurretGun = (PawnRenderNode_TurretGun)Activator.CreateInstance(pawnRenderNodeProperties.nodeClass, new object[]
+						{
+							pawn,
+							pawnRenderNodeProperties,
+							pawn.Drawer.renderer.renderTree
+						});
+						pawnRenderNode_TurretGun.turretComp = this;
+						list.Add(pawnRenderNode_TurretGun);
+					}
+					return list;
 				}
-				return list;
 			}
+			return base.CompRenderNodes();
 		}
-		return base.CompRenderNodes();
-	}
 
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-	{
-		if (Props.turretDef != null)
+		// Token: 0x06010DE8 RID: 69096 RVA: 0x004DBB28 File Offset: 0x004D9D28
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
 		{
-			yield return new StatDrawEntry(StatCategoryDefOf.PawnCombat, "Turret".Translate(), Props.turretDef.LabelCap, "Stat_Thing_TurretDesc".Translate(), 5600, null, Gen.YieldSingle(new Dialog_InfoCard.Hyperlink(Props.turretDef)));
+			if (this.Props.turretDef != null)
+			{
+				yield return new StatDrawEntry(StatCategoryDefOf.PawnCombat, "Turret".Translate(), this.Props.turretDef.LabelCap, "Stat_Thing_TurretDesc".Translate(), 5600, null, Gen.YieldSingle<Dialog_InfoCard.Hyperlink>(new Dialog_InfoCard.Hyperlink(this.Props.turretDef, -1)), false, false);
+			}
+			yield break;
 		}
-	}
 
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Values.Look(ref burstCooldownTicksLeft, "burstCooldownTicksLeft", 0);
-		Scribe_Values.Look(ref burstWarmupTicksLeft, "burstWarmupTicksLeft", 0);
-		Scribe_TargetInfo.Look(ref currentTarget, "currentTarget");
-		Scribe_Deep.Look(ref gun, "gun");
-		Scribe_Values.Look(ref fireAtWill, "fireAtWill", defaultValue: true);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x06010DE9 RID: 69097 RVA: 0x004DBB38 File Offset: 0x004D9D38
+		public override void PostExposeData()
 		{
-			if (gun == null)
+			base.PostExposeData();
+			Scribe_Values.Look<int>(ref this.burstCooldownTicksLeft, "burstCooldownTicksLeft", 0, false);
+			Scribe_Values.Look<int>(ref this.burstWarmupTicksLeft, "burstWarmupTicksLeft", 0, false);
+			Scribe_TargetInfo.Look(ref this.currentTarget, "currentTarget");
+			Scribe_Deep.Look<Thing>(ref this.gun, "gun", Array.Empty<object>());
+			Scribe_Values.Look<bool>(ref this.fireAtWill, "fireAtWill", true, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				Log.Error("CompTurrentGun had null gun after loading. Recreating.");
-				MakeGun();
-			}
-			else
-			{
-				UpdateGunVerbs();
+				if (this.gun == null)
+				{
+					Log.Error("CompTurrentGun had null gun after loading. Recreating.");
+					this.MakeGun();
+					return;
+				}
+				this.UpdateGunVerbs();
 			}
 		}
+
+		// Token: 0x0400AF94 RID: 44948
+		private const int StartShootIntervalTicks = 10;
+
+		// Token: 0x0400AF95 RID: 44949
+		private static readonly CachedTexture ToggleTurretIcon = new CachedTexture("UI/Gizmos/ToggleTurret");
+
+		// Token: 0x0400AF96 RID: 44950
+		public Thing gun;
+
+		// Token: 0x0400AF97 RID: 44951
+		protected int burstCooldownTicksLeft;
+
+		// Token: 0x0400AF98 RID: 44952
+		protected int burstWarmupTicksLeft;
+
+		// Token: 0x0400AF99 RID: 44953
+		protected LocalTargetInfo currentTarget = LocalTargetInfo.Invalid;
+
+		// Token: 0x0400AF9A RID: 44954
+		private bool fireAtWill = true;
+
+		// Token: 0x0400AF9B RID: 44955
+		private LocalTargetInfo lastAttackedTarget = LocalTargetInfo.Invalid;
+
+		// Token: 0x0400AF9C RID: 44956
+		private int lastAttackTargetTick;
+
+		// Token: 0x0400AF9D RID: 44957
+		public float curRotation;
 	}
 }

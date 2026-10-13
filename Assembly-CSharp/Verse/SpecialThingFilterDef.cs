@@ -1,49 +1,64 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class SpecialThingFilterDef : Def
+namespace Verse
 {
-	public ThingCategoryDef parentCategory;
-
-	public string saveKey;
-
-	public bool allowedByDefault;
-
-	public bool configurable = true;
-
-	public Type workerClass;
-
-	[Unsaved(false)]
-	private SpecialThingFilterWorker workerInt;
-
-	public SpecialThingFilterWorker Worker
+	// Token: 0x02000D63 RID: 3427
+	public class SpecialThingFilterDef : Def
 	{
-		get
+		// Token: 0x17000DAF RID: 3503
+		// (get) Token: 0x0600572A RID: 22314 RVA: 0x001C0FA2 File Offset: 0x001BF1A2
+		public SpecialThingFilterWorker Worker
 		{
-			if (workerInt == null)
+			get
 			{
-				workerInt = (SpecialThingFilterWorker)Activator.CreateInstance(workerClass);
+				if (this.workerInt == null)
+				{
+					this.workerInt = (SpecialThingFilterWorker)Activator.CreateInstance(this.workerClass);
+				}
+				return this.workerInt;
 			}
-			return workerInt;
 		}
-	}
 
-	public override IEnumerable<string> ConfigErrors()
-	{
-		foreach (string item in base.ConfigErrors())
+		// Token: 0x0600572B RID: 22315 RVA: 0x001C0FC8 File Offset: 0x001BF1C8
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return item;
+			foreach (string text in base.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			if (this.workerClass == null)
+			{
+				yield return "SpecialThingFilterDef " + this.defName + " has no worker class.";
+			}
+			yield break;
+			yield break;
 		}
-		if (workerClass == null)
-		{
-			yield return "SpecialThingFilterDef " + defName + " has no worker class.";
-		}
-	}
 
-	public static SpecialThingFilterDef Named(string defName)
-	{
-		return DefDatabase<SpecialThingFilterDef>.GetNamed(defName);
+		// Token: 0x0600572C RID: 22316 RVA: 0x001C0FD8 File Offset: 0x001BF1D8
+		public static SpecialThingFilterDef Named(string defName)
+		{
+			return DefDatabase<SpecialThingFilterDef>.GetNamed(defName, true);
+		}
+
+		// Token: 0x04003F86 RID: 16262
+		public ThingCategoryDef parentCategory;
+
+		// Token: 0x04003F87 RID: 16263
+		public string saveKey;
+
+		// Token: 0x04003F88 RID: 16264
+		public bool allowedByDefault;
+
+		// Token: 0x04003F89 RID: 16265
+		public bool configurable = true;
+
+		// Token: 0x04003F8A RID: 16266
+		public Type workerClass;
+
+		// Token: 0x04003F8B RID: 16267
+		[Unsaved(false)]
+		private SpecialThingFilterWorker workerInt;
 	}
 }

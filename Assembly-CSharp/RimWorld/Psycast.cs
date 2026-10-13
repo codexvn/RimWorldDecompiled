@@ -1,197 +1,223 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class Psycast : Ability
+namespace RimWorld
 {
-	private Mote moteCast;
-
-	private static float MoteCastFadeTime = 0.4f;
-
-	private static float MoteCastScale = 1f;
-
-	private static Vector3 MoteCastOffset = new Vector3(0f, 0f, 0.48f);
-
-	public override AcceptanceReport CanCast
+	// Token: 0x020022B7 RID: 8887
+	public class Psycast : Ability
 	{
-		get
+		// Token: 0x17001D98 RID: 7576
+		// (get) Token: 0x0600C146 RID: 49478 RVA: 0x0037F5D8 File Offset: 0x0037D7D8
+		public override AcceptanceReport CanCast
 		{
-			AcceptanceReport canCast = base.CanCast;
-			if (!canCast)
+			get
 			{
-				return canCast;
-			}
-			if (def.EntropyGain > float.Epsilon)
-			{
-				if (pawn.GetPsylinkLevel() < def.level && def.level > 0)
+				AcceptanceReport canCast = base.CanCast;
+				if (!canCast)
 				{
-					return false;
+					return canCast;
 				}
-				return !pawn.psychicEntropy.WouldOverflowEntropy(def.EntropyGain);
-			}
-			if (def.PsyfocusCost > pawn.psychicEntropy.CurrentPsyfocus + 0.0005f)
-			{
-				return false;
-			}
-			return true;
-		}
-	}
-
-	public Psycast(Pawn pawn)
-		: base(pawn)
-	{
-	}
-
-	public Psycast(Pawn pawn, AbilityDef def)
-		: base(pawn, def)
-	{
-	}
-
-	public override IEnumerable<Command> GetGizmos()
-	{
-		if (ModLister.RoyaltyInstalled)
-		{
-			if (gizmo == null)
-			{
-				gizmo = new Command_Psycast(this, pawn);
-			}
-			yield return gizmo;
-		}
-	}
-
-	public override bool Activate(LocalTargetInfo target, LocalTargetInfo dest)
-	{
-		if (!ModLister.CheckRoyalty("Psycast"))
-		{
-			return false;
-		}
-		if (def.EntropyGain > float.Epsilon && !pawn.psychicEntropy.TryAddEntropy(def.EntropyGain))
-		{
-			return false;
-		}
-		float num = FinalPsyfocusCost(target);
-		if (num > float.Epsilon)
-		{
-			pawn.psychicEntropy.OffsetPsyfocusDirectly(0f - num);
-		}
-		if (def.showPsycastEffects)
-		{
-			if (base.EffectComps.Any((CompAbilityEffect c) => c.Props.psychic))
-			{
-				if (def.HasAreaOfEffect)
+				if (this.def.EntropyGain > 1E-45f)
 				{
-					FleckMaker.Static(target.Cell, pawn.Map, FleckDefOf.PsycastAreaEffect, def.EffectRadius);
-					SoundDefOf.PsycastPsychicPulse.PlayOneShot(new TargetInfo(target.Cell, pawn.Map));
+					if (this.pawn.GetPsylinkLevel() < this.def.level && this.def.level > 0)
+					{
+						return false;
+					}
+					return !this.pawn.psychicEntropy.WouldOverflowEntropy(this.def.EntropyGain);
 				}
 				else
 				{
-					SoundDefOf.PsycastPsychicEffect.PlayOneShot(new TargetInfo(target.Cell, pawn.Map));
+					if (this.def.PsyfocusCost > this.pawn.psychicEntropy.CurrentPsyfocus + 0.0005f)
+					{
+						return false;
+					}
+					return true;
 				}
 			}
-			else if (def.HasAreaOfEffect && def.canUseAoeToGetTargets)
+		}
+
+		// Token: 0x0600C147 RID: 49479 RVA: 0x003723E8 File Offset: 0x003705E8
+		public Psycast(Pawn pawn) : base(pawn)
+		{
+		}
+
+		// Token: 0x0600C148 RID: 49480 RVA: 0x003723F1 File Offset: 0x003705F1
+		public Psycast(Pawn pawn, AbilityDef def) : base(pawn, def)
+		{
+		}
+
+		// Token: 0x0600C149 RID: 49481 RVA: 0x0037F689 File Offset: 0x0037D889
+		public override IEnumerable<Command> GetGizmos()
+		{
+			if (!ModLister.RoyaltyInstalled)
 			{
-				SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, pawn.Map));
+				yield break;
 			}
-		}
-		return base.Activate(target, dest);
-	}
-
-	public override bool Activate(GlobalTargetInfo target)
-	{
-		if (def.EntropyGain > float.Epsilon && !pawn.psychicEntropy.TryAddEntropy(def.EntropyGain))
-		{
-			return false;
-		}
-		float psyfocusCost = def.PsyfocusCost;
-		if (psyfocusCost > float.Epsilon)
-		{
-			pawn.psychicEntropy.OffsetPsyfocusDirectly(0f - psyfocusCost);
-		}
-		return base.Activate(target);
-	}
-
-	protected override void ApplyEffects(IEnumerable<CompAbilityEffect> effects, LocalTargetInfo target, LocalTargetInfo dest)
-	{
-		if (CanApplyPsycastTo(target))
-		{
-			foreach (CompAbilityEffect effect in effects)
+			if (this.gizmo == null)
 			{
-				effect.Apply(target, dest);
+				this.gizmo = new Command_Psycast(this, this.pawn);
 			}
-			return;
+			yield return this.gizmo;
+			yield break;
 		}
-		MoteMaker.ThrowText(target.CenterVector3, pawn.Map, "TextMote_Immune".Translate());
-	}
 
-	public bool CanApplyPsycastTo(LocalTargetInfo target)
-	{
-		if (!base.EffectComps.Any((CompAbilityEffect e) => e.Props.psychic))
+		// Token: 0x0600C14A RID: 49482 RVA: 0x0037F69C File Offset: 0x0037D89C
+		public override bool Activate(LocalTargetInfo target, LocalTargetInfo dest)
 		{
-			return true;
-		}
-		Pawn pawn = target.Pawn;
-		if (pawn != null)
-		{
-			if (pawn.GetStatValue(StatDefOf.PsychicSensitivity) < float.Epsilon)
+			if (!ModLister.CheckRoyalty("Psycast"))
 			{
 				return false;
 			}
-			if (pawn.Faction != null && pawn.Faction == Faction.OfMechanoids && base.EffectComps.Any((CompAbilityEffect e) => !e.Props.applicableToMechs))
+			if (this.def.EntropyGain > 1E-45f && !this.pawn.psychicEntropy.TryAddEntropy(this.def.EntropyGain, null, true, false))
 			{
 				return false;
 			}
-		}
-		return true;
-	}
-
-	public override bool GizmoDisabled(out string reason)
-	{
-		if (pawn.psychicEntropy.PsychicSensitivity < float.Epsilon)
-		{
-			reason = "CommandPsycastZeroPsychicSensitivity".Translate();
-			return true;
-		}
-		float num = PsycastUtility.TotalPsyfocusCostOfQueuedPsycasts(pawn);
-		if (def.level > 0 && pawn.GetPsylinkLevel() < def.level)
-		{
-			reason = "CommandPsycastHigherLevelPsylinkRequired".Translate(def.level);
-			return true;
-		}
-		if (def.PsyfocusCost + num > pawn.psychicEntropy.CurrentPsyfocus + 0.0005f)
-		{
-			reason = "CommandPsycastNotEnoughPsyfocus".Translate(def.PsyfocusCostPercent, (pawn.psychicEntropy.CurrentPsyfocus - num).ToStringPercent("0.#"), def.label.Named("PSYCASTNAME"), pawn.Named("CASTERNAME"));
-			return true;
-		}
-		if (def.level > pawn.psychicEntropy.MaxAbilityLevel)
-		{
-			reason = "CommandPsycastLowPsyfocus".Translate(Pawn_PsychicEntropyTracker.PsyfocusBandPercentages[def.RequiredPsyfocusBand].ToStringPercent());
-			return true;
-		}
-		if (def.EntropyGain > float.Epsilon && pawn.psychicEntropy.WouldOverflowEntropy(def.EntropyGain + PsycastUtility.TotalEntropyFromQueuedPsycasts(pawn)))
-		{
-			reason = "CommandPsycastWouldExceedEntropy".Translate(def.label);
-			return true;
-		}
-		return base.GizmoDisabled(out reason);
-	}
-
-	public override void AbilityTick()
-	{
-		base.AbilityTick();
-		if (pawn.Spawned && base.Casting)
-		{
-			if (moteCast == null || moteCast.Destroyed)
+			float num = base.FinalPsyfocusCost(target);
+			if (num > 1E-45f)
 			{
-				moteCast = MoteMaker.MakeAttachedOverlay(pawn, ThingDefOf.Mote_CastPsycast, MoteCastOffset, MoteCastScale, base.verb.verbProps.warmupTime - MoteCastFadeTime);
+				this.pawn.psychicEntropy.OffsetPsyfocusDirectly(-num);
 			}
-			else
+			if (this.def.showPsycastEffects)
 			{
-				moteCast.Maintain();
+				if (base.EffectComps.Any((CompAbilityEffect c) => c.Props.psychic))
+				{
+					if (this.def.HasAreaOfEffect)
+					{
+						FleckMaker.Static(target.Cell, this.pawn.Map, FleckDefOf.PsycastAreaEffect, this.def.EffectRadius);
+						SoundDefOf.PsycastPsychicPulse.PlayOneShot(new TargetInfo(target.Cell, this.pawn.Map, false));
+					}
+					else
+					{
+						SoundDefOf.PsycastPsychicEffect.PlayOneShot(new TargetInfo(target.Cell, this.pawn.Map, false));
+					}
+				}
+				else if (this.def.HasAreaOfEffect && this.def.canUseAoeToGetTargets)
+				{
+					SoundDefOf.Psycast_Skip_Pulse.PlayOneShot(new TargetInfo(target.Cell, this.pawn.Map, false));
+				}
+			}
+			return base.Activate(target, dest);
+		}
+
+		// Token: 0x0600C14B RID: 49483 RVA: 0x0037F81C File Offset: 0x0037DA1C
+		public override bool Activate(GlobalTargetInfo target)
+		{
+			if (this.def.EntropyGain > 1E-45f && !this.pawn.psychicEntropy.TryAddEntropy(this.def.EntropyGain, null, true, false))
+			{
+				return false;
+			}
+			float psyfocusCost = this.def.PsyfocusCost;
+			if (psyfocusCost > 1E-45f)
+			{
+				this.pawn.psychicEntropy.OffsetPsyfocusDirectly(-psyfocusCost);
+			}
+			return base.Activate(target);
+		}
+
+		// Token: 0x0600C14C RID: 49484 RVA: 0x0037F88C File Offset: 0x0037DA8C
+		protected override void ApplyEffects(IEnumerable<CompAbilityEffect> effects, LocalTargetInfo target, LocalTargetInfo dest)
+		{
+			if (this.CanApplyPsycastTo(target))
+			{
+				using (IEnumerator<CompAbilityEffect> enumerator = effects.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						CompAbilityEffect compAbilityEffect = enumerator.Current;
+						compAbilityEffect.Apply(target, dest);
+					}
+					return;
+				}
+			}
+			MoteMaker.ThrowText(target.CenterVector3, this.pawn.Map, "TextMote_Immune".Translate(), -1f);
+		}
+
+		// Token: 0x0600C14D RID: 49485 RVA: 0x0037F908 File Offset: 0x0037DB08
+		public bool CanApplyPsycastTo(LocalTargetInfo target)
+		{
+			if (!base.EffectComps.Any((CompAbilityEffect e) => e.Props.psychic))
+			{
+				return true;
+			}
+			Pawn pawn = target.Pawn;
+			if (pawn != null)
+			{
+				if (pawn.GetStatValue(StatDefOf.PsychicSensitivity, true, -1) < 1E-45f)
+				{
+					return false;
+				}
+				if (pawn.Faction != null && pawn.Faction == Faction.OfMechanoids)
+				{
+					if (base.EffectComps.Any((CompAbilityEffect e) => !e.Props.applicableToMechs))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x0600C14E RID: 49486 RVA: 0x0037F9A8 File Offset: 0x0037DBA8
+		public override bool GizmoDisabled(out string reason)
+		{
+			if (this.pawn.psychicEntropy.PsychicSensitivity < 1E-45f)
+			{
+				reason = "CommandPsycastZeroPsychicSensitivity".Translate();
+				return true;
+			}
+			float num = PsycastUtility.TotalPsyfocusCostOfQueuedPsycasts(this.pawn);
+			if (this.def.level > 0 && this.pawn.GetPsylinkLevel() < this.def.level)
+			{
+				reason = "CommandPsycastHigherLevelPsylinkRequired".Translate(this.def.level);
+				return true;
+			}
+			if (this.def.PsyfocusCost + num > this.pawn.psychicEntropy.CurrentPsyfocus + 0.0005f)
+			{
+				reason = "CommandPsycastNotEnoughPsyfocus".Translate(this.def.PsyfocusCostPercent, (this.pawn.psychicEntropy.CurrentPsyfocus - num).ToStringPercent("0.#"), this.def.label.Named("PSYCASTNAME"), this.pawn.Named("CASTERNAME"));
+				return true;
+			}
+			if (this.def.level > this.pawn.psychicEntropy.MaxAbilityLevel)
+			{
+				reason = "CommandPsycastLowPsyfocus".Translate(Pawn_PsychicEntropyTracker.PsyfocusBandPercentages[this.def.RequiredPsyfocusBand].ToStringPercent());
+				return true;
+			}
+			if (this.def.EntropyGain > 1E-45f && this.pawn.psychicEntropy.WouldOverflowEntropy(this.def.EntropyGain + PsycastUtility.TotalEntropyFromQueuedPsycasts(this.pawn)))
+			{
+				reason = "CommandPsycastWouldExceedEntropy".Translate(this.def.label);
+				return true;
+			}
+			return base.GizmoDisabled(out reason);
+		}
+
+		// Token: 0x0600C14F RID: 49487 RVA: 0x0037FB78 File Offset: 0x0037DD78
+		public override void AbilityTick()
+		{
+			base.AbilityTick();
+			if (this.pawn.Spawned && base.Casting)
+			{
+				if (this.moteCast == null || this.moteCast.Destroyed)
+				{
+					this.moteCast = MoteMaker.MakeAttachedOverlay(this.pawn, ThingDefOf.Mote_CastPsycast, Psycast.MoteCastOffset, Psycast.MoteCastScale, base.verb.verbProps.warmupTime - Psycast.MoteCastFadeTime);
+					return;
+				}
+				this.moteCast.Maintain();
 			}
 		}
+
+		// Token: 0x04008430 RID: 33840
+		private Mote moteCast;
+
+		// Token: 0x04008431 RID: 33841
+		private static float MoteCastFadeTime = 0.4f;
+
+		// Token: 0x04008432 RID: 33842
+		private static float MoteCastScale = 1f;
+
+		// Token: 0x04008433 RID: 33843
+		private static Vector3 MoteCastOffset = new Vector3(0f, 0f, 0.48f);
 	}
 }

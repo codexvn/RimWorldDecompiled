@@ -1,591 +1,735 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-[StaticConstructorOnStartup]
-public class VacuumComponent : MapComponent, ICellBoolGiver, IDisposable
+namespace Verse
 {
-	private class GroupData : IFullPoolable
+	// Token: 0x02000463 RID: 1123
+	[StaticConstructorOnStartup]
+	public class VacuumComponent : MapComponent, ICellBoolGiver, IDisposable
 	{
-		public readonly Dictionary<Room, HashSet<IntVec3>> adjacent = new Dictionary<Room, HashSet<IntVec3>>();
-
-		public HashSet<IntVec3> directWarnings;
-
-		public bool hasDirectPathToVacuum;
-
-		public void Reset()
+		// Token: 0x1700055A RID: 1370
+		// (get) Token: 0x06001D6D RID: 7533 RVA: 0x00094950 File Offset: 0x00092B50
+		private CellBoolDrawer Drawer
 		{
-			foreach (var (_, hashSet2) in adjacent)
+			get
 			{
-				hashSet2.Clear();
-				SimplePool<HashSet<IntVec3>>.Return(hashSet2);
+				CellBoolDrawer result;
+				if ((result = this.drawerInt) == null)
+				{
+					result = (this.drawerInt = new CellBoolDrawer(this, this.map.Size.x, this.map.Size.z, 3600, 0.33f));
+				}
+				return result;
 			}
-			adjacent.Clear();
-			directWarnings = null;
-			hasDirectPathToVacuum = false;
 		}
-	}
 
-	private CellBoolDrawer drawerInt;
-
-	private bool dirty = true;
-
-	private const int UpdateInterval = 250;
-
-	private const float VacuumDeltaPerSecondFactor = 1.0416666f;
-
-	private const float VacuumFactorPerHundredCells = 0.5f;
-
-	private const float DirectVacuumPenaltyPerHundredCells = 0.1f;
-
-	private const float WarningLevel = 0.5f;
-
-	private readonly Dictionary<Room, GroupData> roomGroups = new Dictionary<Room, GroupData>();
-
-	private static readonly Material IntWarningMat = MatLoader.LoadMat("Map/OxygenOverlay/Warning");
-
-	private static readonly Material IntVacuumOverlayMat0 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlay");
-
-	private static readonly Material IntVacuumOverlayTransitionMat0 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlayTransition");
-
-	private static readonly Material IntVacuumOverlayMat1 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlay2");
-
-	private static readonly Material IntVacuumOverlayTransitionMat1 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlayTransition2");
-
-	private static readonly int VacuumPercent = Shader.PropertyToID("_VacuumPercent");
-
-	private readonly List<Matrix4x4> vacuumBoxMatrices = new List<Matrix4x4>();
-
-	private readonly List<float> vacuumBoxIntensities = new List<float>();
-
-	private MaterialPropertyBlock vacuumBoxPropBlock;
-
-	private readonly Dictionary<IntVec3, float> vacuumedCells = new Dictionary<IntVec3, float>();
-
-	private readonly List<Matrix4x4> vacuumTransitionMatrices = new List<Matrix4x4>();
-
-	private readonly List<float> vacuumTransitionIntensities = new List<float>();
-
-	private readonly Dictionary<Room, float> roomVacuums = new Dictionary<Room, float>();
-
-	private readonly HashSet<IntVec3> warningCells = new HashSet<IntVec3>();
-
-	private readonly List<Matrix4x4> warningMatrices = new List<Matrix4x4>();
-
-	private MaterialPropertyBlock vacuumTransitionPropBlock;
-
-	private static readonly HashSet<Room> visited = new HashSet<Room>();
-
-	private static readonly Dictionary<Room, HashSet<IntVec3>> exteriorCells = new Dictionary<Room, HashSet<IntVec3>>();
-
-	private static readonly Queue<Room> frontier = new Queue<Room>();
-
-	private CellBoolDrawer Drawer => drawerInt ?? (drawerInt = new CellBoolDrawer(this, map.Size.x, map.Size.z, 3600));
-
-	private Material WarningMat => IntWarningMat;
-
-	private Material VacuumOverlayMat0 => IntVacuumOverlayMat0;
-
-	private Material VacuumOverlayTransitionMat0 => IntVacuumOverlayTransitionMat0;
-
-	private Material VacuumOverlayMat1 => IntVacuumOverlayMat1;
-
-	private Material VacuumOverlayTransitionMat1 => IntVacuumOverlayTransitionMat1;
-
-	private bool ActiveOnMap
-	{
-		get
+		// Token: 0x1700055B RID: 1371
+		// (get) Token: 0x06001D6E RID: 7534 RVA: 0x000949A0 File Offset: 0x00092BA0
+		private Material WarningMat
 		{
-			if (ModLister.OdysseyInstalled)
+			get
 			{
-				return map.Biome.inVacuum;
+				return VacuumComponent.IntWarningMat;
 			}
+		}
+
+		// Token: 0x1700055C RID: 1372
+		// (get) Token: 0x06001D6F RID: 7535 RVA: 0x000949A7 File Offset: 0x00092BA7
+		private Material VacuumOverlayMat0
+		{
+			get
+			{
+				return VacuumComponent.IntVacuumOverlayMat0;
+			}
+		}
+
+		// Token: 0x1700055D RID: 1373
+		// (get) Token: 0x06001D70 RID: 7536 RVA: 0x000949AE File Offset: 0x00092BAE
+		private Material VacuumOverlayTransitionMat0
+		{
+			get
+			{
+				return VacuumComponent.IntVacuumOverlayTransitionMat0;
+			}
+		}
+
+		// Token: 0x1700055E RID: 1374
+		// (get) Token: 0x06001D71 RID: 7537 RVA: 0x000949B5 File Offset: 0x00092BB5
+		private Material VacuumOverlayMat1
+		{
+			get
+			{
+				return VacuumComponent.IntVacuumOverlayMat1;
+			}
+		}
+
+		// Token: 0x1700055F RID: 1375
+		// (get) Token: 0x06001D72 RID: 7538 RVA: 0x000949BC File Offset: 0x00092BBC
+		private Material VacuumOverlayTransitionMat1
+		{
+			get
+			{
+				return VacuumComponent.IntVacuumOverlayTransitionMat1;
+			}
+		}
+
+		// Token: 0x17000560 RID: 1376
+		// (get) Token: 0x06001D73 RID: 7539 RVA: 0x000949C3 File Offset: 0x00092BC3
+		private bool ActiveOnMap
+		{
+			get
+			{
+				return ModLister.OdysseyInstalled && this.map.Biome.inVacuum;
+			}
+		}
+
+		// Token: 0x06001D74 RID: 7540 RVA: 0x000949E0 File Offset: 0x00092BE0
+		public VacuumComponent(Map map) : base(map)
+		{
+			if (Scribe.mode != LoadSaveMode.Inactive)
+			{
+				return;
+			}
+			this.InitializeIfRequired();
+		}
+
+		// Token: 0x06001D75 RID: 7541 RVA: 0x00094A6C File Offset: 0x00092C6C
+		private void InitializeIfRequired()
+		{
+			if (!this.ActiveOnMap)
+			{
+				return;
+			}
+			this.map.events.RegionsRoomsChanged += this.Dirty;
+			this.map.events.DoorOpened += delegate(Building_Door _)
+			{
+				this.Dirty();
+			};
+			this.map.events.DoorClosed += delegate(Building_Door _)
+			{
+				this.Dirty();
+			};
+			this.map.events.TerrainChanged += delegate(IntVec3 _)
+			{
+				this.Dirty();
+			};
+			this.map.events.RoofChanged += delegate(IntVec3 _)
+			{
+				this.Dirty();
+			};
+		}
+
+		// Token: 0x06001D76 RID: 7542 RVA: 0x00094B0E File Offset: 0x00092D0E
+		public override void FinalizeInit()
+		{
+			if (this.ActiveOnMap)
+			{
+				this.RebuildData();
+			}
+		}
+
+		// Token: 0x06001D77 RID: 7543 RVA: 0x00094B1E File Offset: 0x00092D1E
+		public override void MapComponentTick()
+		{
+			if (!this.ActiveOnMap)
+			{
+				return;
+			}
+			if (!this.map.IsHashIntervalTick(250))
+			{
+				return;
+			}
+			if (this.dirty)
+			{
+				this.RebuildData();
+			}
+			this.ExchangeRoomVacuum();
+			this.UpdateVacuumOverlay();
+		}
+
+		// Token: 0x06001D78 RID: 7544 RVA: 0x00094B58 File Offset: 0x00092D58
+		private bool HasDirectPathToVacuum(Room room, out HashSet<IntVec3> warning)
+		{
+			VacuumComponent.frontier.Enqueue(room);
+			Room room2;
+			while (VacuumComponent.frontier.TryDequeue(out room2))
+			{
+				VacuumComponent.visited.Add(room2);
+				if (room2.ExposedToSpace)
+				{
+					warning = VacuumComponent.exteriorCells[room2];
+					VacuumComponent.visited.Clear();
+					VacuumComponent.exteriorCells.Clear();
+					VacuumComponent.frontier.Clear();
+					return true;
+				}
+				VacuumComponent.GroupData groupData;
+				if (this.roomGroups.TryGetValue(room2, out groupData))
+				{
+					using (Dictionary<Room, HashSet<IntVec3>>.Enumerator enumerator = groupData.adjacent.GetEnumerator())
+					{
+						while (enumerator.MoveNext())
+						{
+							KeyValuePair<Room, HashSet<IntVec3>> keyValuePair = enumerator.Current;
+							Room room3;
+							HashSet<IntVec3> hashSet;
+							keyValuePair.Deconstruct(out room3, out hashSet);
+							Room room4 = room3;
+							HashSet<IntVec3> hashSet2 = hashSet;
+							if (!VacuumComponent.visited.Contains(room4) && !VacuumComponent.frontier.Contains(room4))
+							{
+								foreach (IntVec3 c in hashSet2)
+								{
+									Building edifice = c.GetEdifice(this.map);
+									if (edifice != null)
+									{
+										Building_Door building_Door = edifice as Building_Door;
+										if (building_Door == null || !building_Door.Open)
+										{
+											continue;
+										}
+									}
+									VacuumComponent.exteriorCells[room4] = hashSet2;
+									VacuumComponent.frontier.Enqueue(room4);
+									break;
+								}
+							}
+						}
+						continue;
+					}
+					break;
+				}
+			}
+			VacuumComponent.visited.Clear();
+			VacuumComponent.exteriorCells.Clear();
+			VacuumComponent.frontier.Clear();
+			warning = null;
 			return false;
 		}
-	}
 
-	public Color Color => Color.white;
-
-	public VacuumComponent(Map map)
-		: base(map)
-	{
-		if (Scribe.mode == LoadSaveMode.Inactive)
+		// Token: 0x06001D79 RID: 7545 RVA: 0x00094CE4 File Offset: 0x00092EE4
+		private void ExchangeRoomVacuum()
 		{
-			InitializeIfRequired();
-		}
-	}
-
-	private void InitializeIfRequired()
-	{
-		if (ActiveOnMap)
-		{
-			map.events.RegionsRoomsChanged += Dirty;
-			map.events.DoorOpened += delegate
+			this.warningCells.Clear();
+			this.warningMatrices.Clear();
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
 			{
-				Dirty();
-			};
-			map.events.DoorClosed += delegate
-			{
-				Dirty();
-			};
-			map.events.TerrainChanged += delegate
-			{
-				Dirty();
-			};
-			map.events.RoofChanged += delegate
-			{
-				Dirty();
-			};
-		}
-	}
-
-	public override void FinalizeInit()
-	{
-		if (ActiveOnMap)
-		{
-			RebuildData();
-		}
-	}
-
-	public override void MapComponentTick()
-	{
-		if (ActiveOnMap && map.IsHashIntervalTick(250))
-		{
-			if (dirty)
-			{
-				RebuildData();
-			}
-			ExchangeRoomVacuum();
-			UpdateVacuumOverlay();
-		}
-	}
-
-	private bool HasDirectPathToVacuum(Room room, out HashSet<IntVec3> warning)
-	{
-		frontier.Enqueue(room);
-		Room result;
-		while (frontier.TryDequeue(out result))
-		{
-			visited.Add(result);
-			if (result.ExposedToSpace)
-			{
-				warning = exteriorCells[result];
-				visited.Clear();
-				exteriorCells.Clear();
-				frontier.Clear();
-				return true;
-			}
-			if (!roomGroups.TryGetValue(result, out var value))
-			{
-				continue;
-			}
-			foreach (var (room3, hashSet2) in value.adjacent)
-			{
-				if (visited.Contains(room3) || frontier.Contains(room3))
+				Room room;
+				VacuumComponent.GroupData groupData;
+				keyValuePair.Deconstruct(out room, out groupData);
+				Room room2 = room;
+				VacuumComponent.GroupData groupData2 = groupData;
+				this.roomVacuums[room2] = room2.UnsanitizedVacuum;
+				foreach (KeyValuePair<Room, HashSet<IntVec3>> keyValuePair2 in groupData2.adjacent)
 				{
-					continue;
+					HashSet<IntVec3> hashSet;
+					keyValuePair2.Deconstruct(out room, out hashSet);
+					Room room3 = room;
+					this.roomVacuums[room3] = room3.UnsanitizedVacuum;
 				}
-				foreach (IntVec3 item in hashSet2)
+			}
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
+			{
+				Room room;
+				VacuumComponent.GroupData groupData;
+				keyValuePair.Deconstruct(out room, out groupData);
+				Room room4 = room;
+				VacuumComponent.GroupData groupData3 = groupData;
+				if (groupData3.adjacent.Count != 0 && !room4.IsDoorway)
 				{
-					Building edifice = item.GetEdifice(map);
-					if (edifice == null || edifice is Building_Door { Open: not false })
+					float num = this.roomVacuums[room4];
+					int num2 = room4.CellCount;
+					float num3 = (float)room4.CellCount * num;
+					int num4 = room4.CellCount;
+					if (!room4.ExposedToSpace)
 					{
-						exteriorCells[room3] = hashSet2;
-						frontier.Enqueue(room3);
-						break;
+						foreach (KeyValuePair<Room, HashSet<IntVec3>> keyValuePair2 in groupData3.adjacent)
+						{
+							HashSet<IntVec3> hashSet;
+							keyValuePair2.Deconstruct(out room, out hashSet);
+							Room room5 = room;
+							HashSet<IntVec3> hashSet2 = hashSet;
+							num2 += room5.CellCount;
+							num3 += (float)room5.CellCount * this.roomVacuums[room5];
+							if (!room5.ExposedToSpace)
+							{
+								num4 += room5.CellCount;
+							}
+							else
+							{
+								foreach (IntVec3 item in hashSet2)
+								{
+									if (this.warningCells.Add(item))
+									{
+										this.warningMatrices.Add(Matrix4x4.Translate(item.ToVector3ShiftedWithAltitude(AltitudeLayer.MapDataOverlay)));
+									}
+								}
+							}
+						}
+						float num5 = Mathf.Clamp(num3 / (float)num2, -0.1f, 1f);
+						if (groupData3.hasDirectPathToVacuum)
+						{
+							if (room4.Vacuum < 1f)
+							{
+								foreach (IntVec3 item2 in groupData3.directWarnings)
+								{
+									if (this.warningCells.Add(item2))
+									{
+										this.warningMatrices.Add(Matrix4x4.Translate(item2.ToVector3ShiftedWithAltitude(AltitudeLayer.MapDataOverlay)));
+									}
+								}
+								float num6 = Mathf.Min(0.1f / ((float)num4 / 100f), 1f);
+								num5 = Mathf.Clamp(num5 + num6, -0.1f, 1f);
+								float num7 = Mathf.Min(0.5f / ((float)num4 / 100f), 1f);
+								float num8 = (num5 - num) * 1.0416666f * num7;
+								room4.Vacuum = num + num8;
+							}
+						}
+						else if (!Mathf.Approximately(num, num5))
+						{
+							float num9 = Mathf.Min(0.5f / ((float)num4 / 100f), 1f);
+							float num10 = (num5 - num) * 1.0416666f * num9;
+							room4.Vacuum = num + num10;
+						}
 					}
 				}
 			}
+			this.roomVacuums.Clear();
+			this.Drawer.SetDirty();
 		}
-		visited.Clear();
-		exteriorCells.Clear();
-		frontier.Clear();
-		warning = null;
-		return false;
-	}
 
-	private void ExchangeRoomVacuum()
-	{
-		warningCells.Clear();
-		warningMatrices.Clear();
-		Room key;
-		GroupData value;
-		HashSet<IntVec3> value2;
-		foreach (KeyValuePair<Room, GroupData> roomGroup in roomGroups)
+		// Token: 0x06001D7A RID: 7546 RVA: 0x0009510C File Offset: 0x0009330C
+		private void RebuildData()
 		{
-			roomGroup.Deconstruct(out key, out value);
-			Room room = key;
-			GroupData groupData = value;
-			roomVacuums[room] = room.UnsanitizedVacuum;
-			foreach (KeyValuePair<Room, HashSet<IntVec3>> item in groupData.adjacent)
+			using (ProfilerBlock.Scope("VacuumComponent.RebuildData"))
 			{
-				item.Deconstruct(out key, out value2);
-				Room room2 = key;
-				roomVacuums[room2] = room2.UnsanitizedVacuum;
+				this.dirty = false;
+				this.ClearBuffer();
+				this.MergeRoomsIntoGroups();
+				this.RegenerateVacuumOverlay();
 			}
 		}
-		foreach (KeyValuePair<Room, GroupData> roomGroup2 in roomGroups)
+
+		// Token: 0x06001D7B RID: 7547 RVA: 0x00095160 File Offset: 0x00093360
+		public void Dirty()
 		{
-			roomGroup2.Deconstruct(out key, out value);
-			Room room3 = key;
-			GroupData groupData2 = value;
-			if (groupData2.adjacent.Count == 0 || room3.IsDoorway)
+			this.dirty = true;
+			this.SetDrawerDirty();
+		}
+
+		// Token: 0x06001D7C RID: 7548 RVA: 0x00095170 File Offset: 0x00093370
+		private void ClearBuffer()
+		{
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
 			{
-				continue;
+				Room room;
+				VacuumComponent.GroupData item;
+				keyValuePair.Deconstruct(out room, out item);
+				FullPool<VacuumComponent.GroupData>.Return(item);
 			}
-			float num = roomVacuums[room3];
-			int num2 = room3.CellCount;
-			float num3 = (float)room3.CellCount * num;
-			int num4 = room3.CellCount;
-			if (room3.ExposedToSpace)
+			this.roomGroups.Clear();
+		}
+
+		// Token: 0x06001D7D RID: 7549 RVA: 0x000951D8 File Offset: 0x000933D8
+		private void MergeRoomsIntoGroups()
+		{
+			foreach (Room room in this.map.regionGrid.AllRooms)
 			{
-				continue;
-			}
-			foreach (KeyValuePair<Room, HashSet<IntVec3>> item2 in groupData2.adjacent)
-			{
-				item2.Deconstruct(out key, out value2);
-				Room room4 = key;
-				HashSet<IntVec3> hashSet = value2;
-				num2 += room4.CellCount;
-				num3 += (float)room4.CellCount * roomVacuums[room4];
-				if (!room4.ExposedToSpace)
+				if (!room.ExposedToSpace)
 				{
-					num4 += room4.CellCount;
-					continue;
-				}
-				foreach (IntVec3 item3 in hashSet)
-				{
-					if (warningCells.Add(item3))
+					VacuumComponent.GroupData orAddGroup = this.GetOrAddGroup(room);
+					if (room.IsDoorway)
 					{
-						warningMatrices.Add(Matrix4x4.Translate(item3.ToVector3ShiftedWithAltitude(AltitudeLayer.MapDataOverlay)));
-					}
-				}
-			}
-			float num5 = Mathf.Clamp(num3 / (float)num2, -0.1f, 1f);
-			if (groupData2.hasDirectPathToVacuum)
-			{
-				if (room3.Vacuum >= 1f)
-				{
-					continue;
-				}
-				foreach (IntVec3 directWarning in groupData2.directWarnings)
-				{
-					if (warningCells.Add(directWarning))
-					{
-						warningMatrices.Add(Matrix4x4.Translate(directWarning.ToVector3ShiftedWithAltitude(AltitudeLayer.MapDataOverlay)));
-					}
-				}
-				float num6 = Mathf.Min(0.1f / ((float)num4 / 100f), 1f);
-				num5 = Mathf.Clamp(num5 + num6, -0.1f, 1f);
-				float num7 = Mathf.Min(0.5f / ((float)num4 / 100f), 1f);
-				float num8 = (num5 - num) * 1.0416666f * num7;
-				room3.Vacuum = num + num8;
-			}
-			else if (!Mathf.Approximately(num, num5))
-			{
-				float num9 = Mathf.Min(0.5f / ((float)num4 / 100f), 1f);
-				float num10 = (num5 - num) * 1.0416666f * num9;
-				room3.Vacuum = num + num10;
-			}
-		}
-		roomVacuums.Clear();
-		Drawer.SetDirty();
-	}
-
-	public void RebuildData()
-	{
-		using (ProfilerBlock.Scope("VacuumComponent.RebuildData"))
-		{
-			dirty = false;
-			ClearBuffer();
-			MergeRoomsIntoGroups();
-			RegenerateVacuumOverlay();
-		}
-	}
-
-	public void Dirty()
-	{
-		dirty = true;
-		SetDrawerDirty();
-	}
-
-	private void ClearBuffer()
-	{
-		foreach (KeyValuePair<Room, GroupData> roomGroup in roomGroups)
-		{
-			roomGroup.Deconstruct(out var _, out var value);
-			FullPool<GroupData>.Return(value);
-		}
-		roomGroups.Clear();
-	}
-
-	private void MergeRoomsIntoGroups()
-	{
-		foreach (Room allRoom in map.regionGrid.AllRooms)
-		{
-			if (allRoom.ExposedToSpace)
-			{
-				continue;
-			}
-			GroupData orAddGroup = GetOrAddGroup(allRoom);
-			if (allRoom.IsDoorway)
-			{
-				Building_Door door = allRoom.Cells.First().GetDoor(map);
-				if (door == null || !door.ExchangeVacuum)
-				{
-					continue;
-				}
-				CellRect cellRect = door.OccupiedRect();
-				foreach (IntVec3 item in cellRect)
-				{
-					for (int i = 0; i < 4; i++)
-					{
-						IntVec3 intVec = item + GenAdj.CardinalDirections[i];
-						if (cellRect.Contains(intVec))
+						Building_Door door = room.Cells.First<IntVec3>().GetDoor(this.map);
+						if (door == null || !door.ExchangeVacuum)
 						{
 							continue;
 						}
-						Room room = intVec.GetRoom(map);
-						if (room != null && room != allRoom)
+						CellRect cellRect = door.OccupiedRect();
+						using (CellRect.Enumerator enumerator2 = cellRect.GetEnumerator())
 						{
-							if (!orAddGroup.adjacent.TryGetValue(room, out var value))
+							while (enumerator2.MoveNext())
 							{
-								HashSet<IntVec3> hashSet = (orAddGroup.adjacent[room] = SimplePool<HashSet<IntVec3>>.Get());
-								value = hashSet;
+								IntVec3 intVec = enumerator2.Current;
+								for (int i = 0; i < 4; i++)
+								{
+									IntVec3 intVec2 = intVec + GenAdj.CardinalDirections[i];
+									if (!cellRect.Contains(intVec2))
+									{
+										Room room2 = intVec2.GetRoom(this.map);
+										if (room2 != null && room2 != room)
+										{
+											HashSet<IntVec3> hashSet;
+											if (!orAddGroup.adjacent.TryGetValue(room2, out hashSet))
+											{
+												hashSet = (orAddGroup.adjacent[room2] = SimplePool<HashSet<IntVec3>>.Get());
+											}
+											hashSet.Add(intVec);
+										}
+									}
+								}
 							}
-							value.Add(item);
-						}
-					}
-				}
-				continue;
-			}
-			foreach (IntVec3 item2 in allRoom.BorderCellsCardinal)
-			{
-				Building edifice = item2.GetEdifice(map);
-				if (edifice == null || !edifice.ExchangeVacuum)
-				{
-					continue;
-				}
-				CellRect cellRect2 = edifice.OccupiedRect();
-				foreach (IntVec3 item3 in cellRect2)
-				{
-					for (int j = 0; j < 4; j++)
-					{
-						IntVec3 intVec2 = item3 + GenAdj.CardinalDirections[j];
-						if (cellRect2.Contains(intVec2))
-						{
 							continue;
 						}
-						Room room2 = intVec2.GetRoom(map);
-						if (room2 != null && room2 != allRoom)
+					}
+					foreach (IntVec3 intVec3 in room.BorderCellsCardinal)
+					{
+						Building edifice = intVec3.GetEdifice(this.map);
+						if (edifice != null && edifice.ExchangeVacuum)
 						{
-							if (!orAddGroup.adjacent.TryGetValue(room2, out var value2))
+							CellRect cellRect2 = edifice.OccupiedRect();
+							foreach (IntVec3 a in cellRect2)
 							{
-								HashSet<IntVec3> hashSet = (orAddGroup.adjacent[room2] = SimplePool<HashSet<IntVec3>>.Get());
-								value2 = hashSet;
+								for (int j = 0; j < 4; j++)
+								{
+									IntVec3 intVec4 = a + GenAdj.CardinalDirections[j];
+									if (!cellRect2.Contains(intVec4))
+									{
+										Room room3 = intVec4.GetRoom(this.map);
+										if (room3 != null && room3 != room)
+										{
+											HashSet<IntVec3> hashSet2;
+											if (!orAddGroup.adjacent.TryGetValue(room3, out hashSet2))
+											{
+												hashSet2 = (orAddGroup.adjacent[room3] = SimplePool<HashSet<IntVec3>>.Get());
+											}
+											hashSet2.Add(intVec3);
+										}
+									}
+								}
 							}
-							value2.Add(item2);
 						}
 					}
 				}
 			}
-		}
-		foreach (var (room4, groupData2) in roomGroups)
-		{
-			if (HasDirectPathToVacuum(room4, out var warning))
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
 			{
-				groupData2.hasDirectPathToVacuum = true;
-				groupData2.directWarnings = warning;
-			}
-		}
-	}
-
-	private GroupData GetOrAddGroup(Room room)
-	{
-		if (roomGroups.TryGetValue(room, out var value))
-		{
-			return value;
-		}
-		GroupData groupData = FullPool<GroupData>.Get();
-		roomGroups[room] = groupData;
-		return groupData;
-	}
-
-	public void SetDrawerDirty()
-	{
-		Drawer.SetDirty();
-	}
-
-	private void RegenerateVacuumOverlay()
-	{
-		vacuumBoxMatrices.Clear();
-		vacuumBoxIntensities.Clear();
-		vacuumedCells.Clear();
-		foreach (KeyValuePair<Room, GroupData> roomGroup in roomGroups)
-		{
-			roomGroup.Deconstruct(out var key, out var _);
-			Room room = key;
-			room.vacuumOverlayDrawn = RoomVacuumVisible(room);
-			room.vacuumOverlayRects = 0;
-			if (!room.vacuumOverlayDrawn)
-			{
-				continue;
-			}
-			float vacuum = room.Vacuum;
-			foreach (IntVec3 cell in room.Cells)
-			{
-				vacuumedCells.Add(cell, vacuum);
-			}
-			foreach (Region region in room.Regions)
-			{
-				foreach (CellRect item4 in region.EnumerateRectangleCover())
+				Room room4;
+				VacuumComponent.GroupData groupData;
+				keyValuePair.Deconstruct(out room4, out groupData);
+				Room room5 = room4;
+				VacuumComponent.GroupData groupData2 = groupData;
+				HashSet<IntVec3> directWarnings;
+				if (this.HasDirectPathToVacuum(room5, out directWarnings))
 				{
-					Vector3 centerVector = item4.CenterVector3;
-					centerVector.y = AltitudeLayer.Gas.AltitudeFor();
-					Matrix4x4 item = Matrix4x4.TRS(centerVector, Quaternion.identity, new Vector3(item4.Width, 1f, item4.Height));
-					room.vacuumOverlayRects++;
-					vacuumBoxMatrices.Add(item);
-					vacuumBoxIntensities.Add(vacuum);
+					groupData2.hasDirectPathToVacuum = true;
+					groupData2.directWarnings = directWarnings;
 				}
 			}
 		}
-		vacuumTransitionMatrices.Clear();
-		vacuumTransitionIntensities.Clear();
-		foreach (KeyValuePair<IntVec3, float> vacuumedCell in vacuumedCells)
+
+		// Token: 0x06001D7E RID: 7550 RVA: 0x0009550C File Offset: 0x0009370C
+		private VacuumComponent.GroupData GetOrAddGroup(Room room)
 		{
-			vacuumedCell.Deconstruct(out var key2, out var value2);
-			IntVec3 intVec = key2;
-			float item2 = value2;
-			for (int i = 0; i < 4; i++)
+			VacuumComponent.GroupData result;
+			if (this.roomGroups.TryGetValue(room, out result))
 			{
-				IntVec3 key3 = intVec + GenAdj.CardinalDirections[i];
-				if (!vacuumedCells.ContainsKey(key3))
+				return result;
+			}
+			VacuumComponent.GroupData groupData = FullPool<VacuumComponent.GroupData>.Get();
+			this.roomGroups[room] = groupData;
+			return groupData;
+		}
+
+		// Token: 0x06001D7F RID: 7551 RVA: 0x0009553F File Offset: 0x0009373F
+		public void SetDrawerDirty()
+		{
+			this.Drawer.SetDirty();
+		}
+
+		// Token: 0x06001D80 RID: 7552 RVA: 0x0009554C File Offset: 0x0009374C
+		private void RegenerateVacuumOverlay()
+		{
+			this.vacuumBoxMatrices.Clear();
+			this.vacuumBoxIntensities.Clear();
+			this.vacuumedCells.Clear();
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
+			{
+				Room room;
+				VacuumComponent.GroupData groupData;
+				keyValuePair.Deconstruct(out room, out groupData);
+				Room room2 = room;
+				room2.vacuumOverlayDrawn = VacuumComponent.RoomVacuumVisible(room2);
+				room2.vacuumOverlayRects = 0;
+				if (room2.vacuumOverlayDrawn)
 				{
-					Matrix4x4 item3 = Matrix4x4.TRS(key3.ToVector3ShiftedWithAltitude(AltitudeLayer.Gas), new Rot4(i).AsQuat, Vector3.one);
-					vacuumTransitionMatrices.Add(item3);
-					vacuumTransitionIntensities.Add(item2);
+					float vacuum = room2.Vacuum;
+					foreach (IntVec3 key in room2.Cells)
+					{
+						this.vacuumedCells.Add(key, vacuum);
+					}
+					foreach (Region region in room2.Regions)
+					{
+						foreach (CellRect cellRect in region.EnumerateRectangleCover())
+						{
+							Vector3 centerVector = cellRect.CenterVector3;
+							centerVector.y = AltitudeLayer.Gas.AltitudeFor();
+							Matrix4x4 item = Matrix4x4.TRS(centerVector, Quaternion.identity, new Vector3((float)cellRect.Width, 1f, (float)cellRect.Height));
+							room2.vacuumOverlayRects++;
+							this.vacuumBoxMatrices.Add(item);
+							this.vacuumBoxIntensities.Add(vacuum);
+						}
+					}
+				}
+			}
+			this.vacuumTransitionMatrices.Clear();
+			this.vacuumTransitionIntensities.Clear();
+			foreach (KeyValuePair<IntVec3, float> keyValuePair2 in this.vacuumedCells)
+			{
+				IntVec3 intVec;
+				float num;
+				keyValuePair2.Deconstruct(out intVec, out num);
+				IntVec3 a = intVec;
+				float item2 = num;
+				for (int i = 0; i < 4; i++)
+				{
+					IntVec3 key2 = a + GenAdj.CardinalDirections[i];
+					if (!this.vacuumedCells.ContainsKey(key2))
+					{
+						Matrix4x4 item3 = Matrix4x4.TRS(key2.ToVector3ShiftedWithAltitude(AltitudeLayer.Gas), new Rot4(i).AsQuat, Vector3.one);
+						this.vacuumTransitionMatrices.Add(item3);
+						this.vacuumTransitionIntensities.Add(item2);
+					}
 				}
 			}
 		}
-	}
 
-	private void UpdateVacuumOverlay()
-	{
-		int num = 0;
-		foreach (var (room2, _) in roomGroups)
+		// Token: 0x06001D81 RID: 7553 RVA: 0x0009583C File Offset: 0x00093A3C
+		private void UpdateVacuumOverlay()
 		{
-			if (RoomVacuumVisible(room2) != room2.vacuumOverlayDrawn)
+			int num = 0;
+			foreach (KeyValuePair<Room, VacuumComponent.GroupData> keyValuePair in this.roomGroups)
 			{
-				RegenerateVacuumOverlay();
-				break;
-			}
-			for (int i = 0; i < room2.vacuumOverlayRects; i++)
-			{
-				vacuumBoxIntensities[num++] = room2.Vacuum;
+				Room room;
+				VacuumComponent.GroupData groupData;
+				keyValuePair.Deconstruct(out room, out groupData);
+				Room room2 = room;
+				if (VacuumComponent.RoomVacuumVisible(room2) != room2.vacuumOverlayDrawn)
+				{
+					this.RegenerateVacuumOverlay();
+					break;
+				}
+				for (int i = 0; i < room2.vacuumOverlayRects; i++)
+				{
+					this.vacuumBoxIntensities[num++] = room2.Vacuum;
+				}
 			}
 		}
-	}
 
-	private static bool RoomVacuumVisible(Room room)
-	{
-		if (!room.ExposedToSpace && room.UnsanitizedVacuum > 0.5f)
+		// Token: 0x06001D82 RID: 7554 RVA: 0x000958DC File Offset: 0x00093ADC
+		private static bool RoomVacuumVisible(Room room)
 		{
-			if (room.IsDoorway)
-			{
-				return room.Door.Open;
-			}
-			return true;
+			return !room.ExposedToSpace && room.UnsanitizedVacuum > 0.5f && (!room.IsDoorway || room.Door.Open);
 		}
-		return false;
-	}
 
-	public override void MapComponentDraw()
-	{
-		if (!map.Biome.inVacuum)
+		// Token: 0x06001D83 RID: 7555 RVA: 0x0009590C File Offset: 0x00093B0C
+		public override void MapComponentDraw()
 		{
-			return;
-		}
-		if (Find.PlaySettings.showVacuumOverlay && !WorldComponent_GravshipController.GravshipRenderInProgess)
-		{
-			Drawer.MarkForDraw();
-			if (warningMatrices.Count > 0)
+			if (!this.map.Biome.inVacuum)
 			{
-				Graphics.DrawMeshInstanced(MeshPool.plane08, 0, WarningMat, warningMatrices);
+				return;
+			}
+			if (Find.PlaySettings.showVacuumOverlay && !WorldComponent_GravshipController.GravshipRenderInProgess)
+			{
+				this.Drawer.MarkForDraw();
+				if (this.warningMatrices.Count > 0)
+				{
+					Graphics.DrawMeshInstanced(MeshPool.plane08, 0, this.WarningMat, this.warningMatrices);
+				}
+			}
+			using (ProfilerBlock.Scope("VacuumComponent.Drawer.CellBoolDrawerUpdate()"))
+			{
+				this.Drawer.CellBoolDrawerUpdate();
+			}
+			if (WorldComponent_GravshipController.CutsceneInProgress)
+			{
+				return;
+			}
+			if (this.vacuumBoxMatrices.Count > 0)
+			{
+				if (this.vacuumBoxPropBlock == null)
+				{
+					this.vacuumBoxPropBlock = new MaterialPropertyBlock();
+				}
+				this.vacuumBoxPropBlock.Clear();
+				if (this.vacuumBoxIntensities.Count > 0)
+				{
+					this.vacuumBoxPropBlock.SetFloatArray(VacuumComponent.VacuumPercent, this.vacuumBoxIntensities);
+				}
+				Graphics.DrawMeshInstanced(MeshPool.plane10, 0, this.VacuumOverlayMat0, this.vacuumBoxMatrices, this.vacuumBoxPropBlock);
+				Graphics.DrawMeshInstanced(MeshPool.plane10, 0, this.VacuumOverlayMat1, this.vacuumBoxMatrices, this.vacuumBoxPropBlock);
+			}
+			if (this.vacuumTransitionMatrices.Count > 0)
+			{
+				if (this.vacuumTransitionPropBlock == null)
+				{
+					this.vacuumTransitionPropBlock = new MaterialPropertyBlock();
+				}
+				this.vacuumTransitionPropBlock.Clear();
+				if (this.vacuumTransitionIntensities.Count > 0)
+				{
+					this.vacuumTransitionPropBlock.SetFloatArray(VacuumComponent.VacuumPercent, this.vacuumTransitionIntensities);
+				}
+				Graphics.DrawMeshInstanced(MeshPool.plane10, 0, this.VacuumOverlayTransitionMat0, this.vacuumTransitionMatrices, this.vacuumTransitionPropBlock);
+				Graphics.DrawMeshInstanced(MeshPool.plane10, 0, this.VacuumOverlayTransitionMat1, this.vacuumTransitionMatrices, this.vacuumTransitionPropBlock);
 			}
 		}
-		using (ProfilerBlock.Scope("VacuumComponent.Drawer.CellBoolDrawerUpdate()"))
-		{
-			Drawer.CellBoolDrawerUpdate();
-		}
-		if (WorldComponent_GravshipController.CutsceneInProgress)
-		{
-			return;
-		}
-		if (vacuumBoxMatrices.Count > 0)
-		{
-			if (vacuumBoxPropBlock == null)
-			{
-				vacuumBoxPropBlock = new MaterialPropertyBlock();
-			}
-			vacuumBoxPropBlock.Clear();
-			if (vacuumBoxIntensities.Count > 0)
-			{
-				vacuumBoxPropBlock.SetFloatArray(VacuumPercent, vacuumBoxIntensities);
-			}
-			Graphics.DrawMeshInstanced(MeshPool.plane10, 0, VacuumOverlayMat0, vacuumBoxMatrices, vacuumBoxPropBlock);
-			Graphics.DrawMeshInstanced(MeshPool.plane10, 0, VacuumOverlayMat1, vacuumBoxMatrices, vacuumBoxPropBlock);
-		}
-		if (vacuumTransitionMatrices.Count > 0)
-		{
-			if (vacuumTransitionPropBlock == null)
-			{
-				vacuumTransitionPropBlock = new MaterialPropertyBlock();
-			}
-			vacuumTransitionPropBlock.Clear();
-			if (vacuumTransitionIntensities.Count > 0)
-			{
-				vacuumTransitionPropBlock.SetFloatArray(VacuumPercent, vacuumTransitionIntensities);
-			}
-			Graphics.DrawMeshInstanced(MeshPool.plane10, 0, VacuumOverlayTransitionMat0, vacuumTransitionMatrices, vacuumTransitionPropBlock);
-			Graphics.DrawMeshInstanced(MeshPool.plane10, 0, VacuumOverlayTransitionMat1, vacuumTransitionMatrices, vacuumTransitionPropBlock);
-		}
-	}
 
-	public bool GetCellBool(int index)
-	{
-		IntVec3 c = map.cellIndices.IndexToCell(index);
-		Building edifice = c.GetEdifice(map);
-		if (!c.Fogged(map))
+		// Token: 0x17000561 RID: 1377
+		// (get) Token: 0x06001D84 RID: 7556 RVA: 0x000440FD File Offset: 0x000422FD
+		public Color Color
 		{
-			return edifice?.ExchangeVacuum ?? true;
+			get
+			{
+				return Color.white;
+			}
 		}
-		return false;
-	}
 
-	public Color GetCellExtraColor(int index)
-	{
-		float vacuum = map.cellIndices.IndexToCell(index).GetVacuum(map);
-		if (vacuum < 0.5f)
+		// Token: 0x06001D85 RID: 7557 RVA: 0x00095AC4 File Offset: 0x00093CC4
+		public bool GetCellBool(int index)
 		{
-			return Color.Lerp(Color.green, Color.yellow, Mathf.InverseLerp(0f, 0.5f, vacuum));
+			IntVec3 c = this.map.cellIndices.IndexToCell(index);
+			Building edifice = c.GetEdifice(this.map);
+			return !c.Fogged(this.map) && (edifice == null || edifice.ExchangeVacuum);
 		}
-		return Color.Lerp(Color.yellow, Color.red, Mathf.InverseLerp(0.5f, 1f, vacuum));
-	}
 
-	public override void ExposeData()
-	{
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x06001D86 RID: 7558 RVA: 0x00095B0C File Offset: 0x00093D0C
+		public Color GetCellExtraColor(int index)
 		{
-			InitializeIfRequired();
+			float vacuum = this.map.cellIndices.IndexToCell(index).GetVacuum(this.map);
+			if (vacuum < 0.5f)
+			{
+				return Color.Lerp(Color.green, Color.yellow, Mathf.InverseLerp(0f, 0.5f, vacuum));
+			}
+			return Color.Lerp(Color.yellow, Color.red, Mathf.InverseLerp(0.5f, 1f, vacuum));
 		}
-	}
 
-	public void Dispose()
-	{
-		ClearBuffer();
+		// Token: 0x06001D87 RID: 7559 RVA: 0x00095B7D File Offset: 0x00093D7D
+		public override void ExposeData()
+		{
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.InitializeIfRequired();
+			}
+		}
+
+		// Token: 0x06001D88 RID: 7560 RVA: 0x00095B8D File Offset: 0x00093D8D
+		public void Dispose()
+		{
+			this.ClearBuffer();
+		}
+
+		// Token: 0x0400198B RID: 6539
+		private CellBoolDrawer drawerInt;
+
+		// Token: 0x0400198C RID: 6540
+		private bool dirty = true;
+
+		// Token: 0x0400198D RID: 6541
+		private const int UpdateInterval = 250;
+
+		// Token: 0x0400198E RID: 6542
+		private const float VacuumDeltaPerSecondFactor = 1.0416666f;
+
+		// Token: 0x0400198F RID: 6543
+		private const float VacuumFactorPerHundredCells = 0.5f;
+
+		// Token: 0x04001990 RID: 6544
+		private const float DirectVacuumPenaltyPerHundredCells = 0.1f;
+
+		// Token: 0x04001991 RID: 6545
+		private const float WarningLevel = 0.5f;
+
+		// Token: 0x04001992 RID: 6546
+		private readonly Dictionary<Room, VacuumComponent.GroupData> roomGroups = new Dictionary<Room, VacuumComponent.GroupData>();
+
+		// Token: 0x04001993 RID: 6547
+		private static readonly Material IntWarningMat = MatLoader.LoadMat("Map/OxygenOverlay/Warning", -1);
+
+		// Token: 0x04001994 RID: 6548
+		private static readonly Material IntVacuumOverlayMat0 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlay", -1);
+
+		// Token: 0x04001995 RID: 6549
+		private static readonly Material IntVacuumOverlayTransitionMat0 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlayTransition", -1);
+
+		// Token: 0x04001996 RID: 6550
+		private static readonly Material IntVacuumOverlayMat1 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlay2", -1);
+
+		// Token: 0x04001997 RID: 6551
+		private static readonly Material IntVacuumOverlayTransitionMat1 = MatLoader.LoadMat("Map/OxygenOverlay/VacuumOverlayTransition2", -1);
+
+		// Token: 0x04001998 RID: 6552
+		private static readonly int VacuumPercent = Shader.PropertyToID("_VacuumPercent");
+
+		// Token: 0x04001999 RID: 6553
+		private readonly List<Matrix4x4> vacuumBoxMatrices = new List<Matrix4x4>();
+
+		// Token: 0x0400199A RID: 6554
+		private readonly List<float> vacuumBoxIntensities = new List<float>();
+
+		// Token: 0x0400199B RID: 6555
+		private MaterialPropertyBlock vacuumBoxPropBlock;
+
+		// Token: 0x0400199C RID: 6556
+		private readonly Dictionary<IntVec3, float> vacuumedCells = new Dictionary<IntVec3, float>();
+
+		// Token: 0x0400199D RID: 6557
+		private readonly List<Matrix4x4> vacuumTransitionMatrices = new List<Matrix4x4>();
+
+		// Token: 0x0400199E RID: 6558
+		private readonly List<float> vacuumTransitionIntensities = new List<float>();
+
+		// Token: 0x0400199F RID: 6559
+		private readonly Dictionary<Room, float> roomVacuums = new Dictionary<Room, float>();
+
+		// Token: 0x040019A0 RID: 6560
+		private readonly HashSet<IntVec3> warningCells = new HashSet<IntVec3>();
+
+		// Token: 0x040019A1 RID: 6561
+		private readonly List<Matrix4x4> warningMatrices = new List<Matrix4x4>();
+
+		// Token: 0x040019A2 RID: 6562
+		private MaterialPropertyBlock vacuumTransitionPropBlock;
+
+		// Token: 0x040019A3 RID: 6563
+		private static readonly HashSet<Room> visited = new HashSet<Room>();
+
+		// Token: 0x040019A4 RID: 6564
+		private static readonly Dictionary<Room, HashSet<IntVec3>> exteriorCells = new Dictionary<Room, HashSet<IntVec3>>();
+
+		// Token: 0x040019A5 RID: 6565
+		private static readonly Queue<Room> frontier = new Queue<Room>();
+
+		// Token: 0x02000464 RID: 1124
+		private class GroupData : IFullPoolable
+		{
+			// Token: 0x06001D8E RID: 7566 RVA: 0x00095C2C File Offset: 0x00093E2C
+			public void Reset()
+			{
+				foreach (KeyValuePair<Room, HashSet<IntVec3>> keyValuePair in this.adjacent)
+				{
+					Room room;
+					HashSet<IntVec3> hashSet;
+					keyValuePair.Deconstruct(out room, out hashSet);
+					HashSet<IntVec3> hashSet2 = hashSet;
+					hashSet2.Clear();
+					SimplePool<HashSet<IntVec3>>.Return(hashSet2);
+				}
+				this.adjacent.Clear();
+				this.directWarnings = null;
+				this.hasDirectPathToVacuum = false;
+			}
+
+			// Token: 0x040019A6 RID: 6566
+			public readonly Dictionary<Room, HashSet<IntVec3>> adjacent = new Dictionary<Room, HashSet<IntVec3>>();
+
+			// Token: 0x040019A7 RID: 6567
+			public HashSet<IntVec3> directWarnings;
+
+			// Token: 0x040019A8 RID: 6568
+			public bool hasDirectPathToVacuum;
+		}
 	}
 }

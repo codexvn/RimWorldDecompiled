@@ -1,10 +1,15 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class StatModifierBySeverity
+namespace Verse
 {
-	public StatDef stat;
+	// Token: 0x0200028D RID: 653
+	public class StatModifierBySeverity
+	{
+		// Token: 0x04000D44 RID: 3396
+		public StatDef stat;
 
-	public SimpleCurve valueBySeverity;
+		// Token: 0x04000D45 RID: 3397
+		public SimpleCurve valueBySeverity;
+	}
 }

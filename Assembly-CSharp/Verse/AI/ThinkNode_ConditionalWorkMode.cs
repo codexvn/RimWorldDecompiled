@@ -1,29 +1,31 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class ThinkNode_ConditionalWorkMode : ThinkNode_Conditional
+namespace Verse.AI
 {
-	public MechWorkModeDef workMode;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x02000FEA RID: 4074
+	public class ThinkNode_ConditionalWorkMode : ThinkNode_Conditional
 	{
-		ThinkNode_ConditionalWorkMode obj = (ThinkNode_ConditionalWorkMode)base.DeepCopy(resolve);
-		obj.workMode = workMode;
-		return obj;
-	}
+		// Token: 0x0600645F RID: 25695 RVA: 0x001FD467 File Offset: 0x001FB667
+		public override ThinkNode DeepCopy(bool resolve = true)
+		{
+			ThinkNode_ConditionalWorkMode thinkNode_ConditionalWorkMode = (ThinkNode_ConditionalWorkMode)base.DeepCopy(resolve);
+			thinkNode_ConditionalWorkMode.workMode = this.workMode;
+			return thinkNode_ConditionalWorkMode;
+		}
 
-	protected override bool Satisfied(Pawn pawn)
-	{
-		if (!pawn.RaceProps.IsMechanoid || pawn.Faction != Faction.OfPlayer)
+		// Token: 0x06006460 RID: 25696 RVA: 0x001FD484 File Offset: 0x001FB684
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return false;
+			if (!pawn.RaceProps.IsMechanoid || pawn.Faction != Faction.OfPlayer)
+			{
+				return false;
+			}
+			Pawn overseer = pawn.GetOverseer();
+			return overseer != null && overseer.mechanitor.GetControlGroup(pawn).WorkMode == this.workMode;
 		}
-		Pawn overseer = pawn.GetOverseer();
-		if (overseer == null)
-		{
-			return false;
-		}
-		return overseer.mechanitor.GetControlGroup(pawn).WorkMode == workMode;
+
+		// Token: 0x040047D3 RID: 18387
+		public MechWorkModeDef workMode;
 	}
 }

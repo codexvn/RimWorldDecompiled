@@ -1,8 +1,14 @@
-namespace Verse;
+﻿using System;
 
-public class DamageMultiplier
+namespace Verse
 {
-	public DamageDef damageDef;
+	// Token: 0x02000300 RID: 768
+	public class DamageMultiplier
+	{
+		// Token: 0x04001160 RID: 4448
+		public DamageDef damageDef;
 
-	public float multiplier = 1f;
+		// Token: 0x04001161 RID: 4449
+		public float multiplier = 1f;
+	}
 }

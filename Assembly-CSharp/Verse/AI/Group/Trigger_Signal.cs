@@ -1,20 +1,23 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public class Trigger_Signal : Trigger
+namespace Verse.AI.Group
 {
-	private string signal;
-
-	public Trigger_Signal(string signal)
+	// Token: 0x020010C9 RID: 4297
+	public class Trigger_Signal : Trigger
 	{
-		this.signal = signal;
-	}
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
-	{
-		if (signal.type == TriggerSignalType.Signal)
+		// Token: 0x0600690F RID: 26895 RVA: 0x00212356 File Offset: 0x00210556
+		public Trigger_Signal(string signal)
 		{
-			return signal.signal.tag == this.signal;
+			this.signal = signal;
 		}
-		return false;
+
+		// Token: 0x06006910 RID: 26896 RVA: 0x00212365 File Offset: 0x00210565
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
+		{
+			return signal.type == TriggerSignalType.Signal && signal.signal.tag == this.signal;
+		}
+
+		// Token: 0x04004A64 RID: 19044
+		private string signal;
 	}
 }

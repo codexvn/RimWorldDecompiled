@@ -1,18 +1,23 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Spark : Projectile
+namespace RimWorld
 {
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
+	// Token: 0x02002B42 RID: 11074
+	public class Spark : Projectile
 	{
-		Map map = base.Map;
-		base.Impact(hitThing, blockedByShield);
-		Thing instigator = launcher;
-		if (launcher is Fire fire)
+		// Token: 0x0600F79D RID: 63389 RVA: 0x0047FDB4 File Offset: 0x0047DFB4
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			instigator = fire.instigator;
+			Map map = base.Map;
+			base.Impact(hitThing, blockedByShield);
+			Thing instigator = this.launcher;
+			Fire fire = this.launcher as Fire;
+			if (fire != null)
+			{
+				instigator = fire.instigator;
+			}
+			FireUtility.TryStartFireIn(base.Position, map, 0.1f, instigator, null);
 		}
-		FireUtility.TryStartFireIn(base.Position, map, 0.1f, instigator);
 	}
 }

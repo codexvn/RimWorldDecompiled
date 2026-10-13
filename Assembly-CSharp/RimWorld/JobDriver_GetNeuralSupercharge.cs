@@ -1,31 +1,43 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_GetNeuralSupercharge : JobDriver
+namespace RimWorld
 {
-	private const TargetIndex ChargerInd = TargetIndex.A;
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02001390 RID: 5008
+	public class JobDriver_GetNeuralSupercharge : JobDriver
 	{
-		return pawn.Reserve(job.GetTarget(TargetIndex.A).Thing, job, 1, -1, null, errorOnFailed);
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-		yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
-		yield return Toils_General.Wait(0.55f.SecondsToTicks());
-		Toil toil = Toils_General.Wait(1.5f.SecondsToTicks());
-		toil.WithEffect(() => EffecterDefOf.NeuralSuperchargerUse, job.GetTarget(TargetIndex.A).Thing);
-		yield return toil;
-		yield return Toils_General.Do(delegate
+		// Token: 0x06007AB0 RID: 31408 RVA: 0x0024F558 File Offset: 0x0024D758
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			(job.GetTarget(TargetIndex.A).Thing?.TryGetComp<CompRechargeable>())?.Discharge();
-			pawn.health.AddHediff(HediffDefOf.NeuralSupercharge, pawn.health.hediffSet.GetBrain());
-		});
-		yield return Toils_General.Wait(0.35f.SecondsToTicks());
+			return this.pawn.Reserve(this.job.GetTarget(TargetIndex.A).Thing, this.job, 1, -1, null, errorOnFailed, false);
+		}
+
+		// Token: 0x06007AB1 RID: 31409 RVA: 0x0024F594 File Offset: 0x0024D794
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
+			yield return Toils_General.Wait(0.55f.SecondsToTicks(), TargetIndex.None);
+			Toil toil = Toils_General.Wait(1.5f.SecondsToTicks(), TargetIndex.None);
+			toil.WithEffect(() => EffecterDefOf.NeuralSuperchargerUse, this.job.GetTarget(TargetIndex.A).Thing, null);
+			yield return toil;
+			yield return Toils_General.Do(delegate
+			{
+				Thing thing = this.job.GetTarget(TargetIndex.A).Thing;
+				CompRechargeable compRechargeable = (thing != null) ? thing.TryGetComp<CompRechargeable>() : null;
+				if (compRechargeable != null)
+				{
+					compRechargeable.Discharge();
+				}
+				this.pawn.health.AddHediff(HediffDefOf.NeuralSupercharge, this.pawn.health.hediffSet.GetBrain(), null, null);
+			});
+			yield return Toils_General.Wait(0.35f.SecondsToTicks(), TargetIndex.None);
+			yield break;
+		}
+
+		// Token: 0x04005305 RID: 21253
+		private const TargetIndex ChargerInd = TargetIndex.A;
 	}
 }

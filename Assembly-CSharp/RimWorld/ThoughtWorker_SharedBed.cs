@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_SharedBed : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001889 RID: 6281
+	public class ThoughtWorker_SharedBed : ThoughtWorker
 	{
-		if (!p.RaceProps.Humanlike)
+		// Token: 0x06009001 RID: 36865 RVA: 0x002A7DA4 File Offset: 0x002A5FA4
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return false;
+			if (!p.RaceProps.Humanlike)
+			{
+				return false;
+			}
+			return LovePartnerRelationUtility.GetMostDislikedNonPartnerBedOwner(p) != null;
 		}
-		return LovePartnerRelationUtility.GetMostDislikedNonPartnerBedOwner(p) != null;
 	}
 }

@@ -1,68 +1,82 @@
+﻿using System;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public static class TaleRecorder
+namespace RimWorld
 {
-	public static Tale RecordTale(TaleDef def, params object[] args)
+	// Token: 0x02002927 RID: 10535
+	public static class TaleRecorder
 	{
-		bool flag = Rand.Value < def.ignoreChance;
-		if (Rand.Value < def.ignoreChance && !DebugViewSettings.logTaleRecording)
+		// Token: 0x0600E67F RID: 59007 RVA: 0x00433B48 File Offset: 0x00431D48
+		public static Tale RecordTale(TaleDef def, params object[] args)
 		{
-			return null;
-		}
-		if (def.colonistOnly)
-		{
-			bool flag2 = false;
-			bool flag3 = false;
-			for (int i = 0; i < args.Length; i++)
-			{
-				if (args[i] is Pawn pawn)
-				{
-					flag2 = true;
-					if (pawn.Faction == Faction.OfPlayer)
-					{
-						flag3 = true;
-					}
-				}
-			}
-			if (flag2 && !flag3)
+			bool flag = Rand.Value < def.ignoreChance;
+			if (Rand.Value < def.ignoreChance && !DebugViewSettings.logTaleRecording)
 			{
 				return null;
 			}
-		}
-		if (!def.usableWithChildren)
-		{
-			for (int j = 0; j < args.Length; j++)
+			if (def.colonistOnly)
 			{
-				if (args[j] is Pawn pawn2 && !pawn2.ageTracker.Adult)
+				bool flag2 = false;
+				bool flag3 = false;
+				for (int i = 0; i < args.Length; i++)
+				{
+					Pawn pawn = args[i] as Pawn;
+					if (pawn != null)
+					{
+						flag2 = true;
+						if (pawn.Faction == Faction.OfPlayer)
+						{
+							flag3 = true;
+						}
+					}
+				}
+				if (flag2 && !flag3)
 				{
 					return null;
 				}
 			}
-		}
-		Tale tale = TaleFactory.MakeRawTale(def, args);
-		if (tale == null)
-		{
-			return null;
-		}
-		if (DebugViewSettings.logTaleRecording)
-		{
-			Log.Message(string.Format("Tale {0} from {1}, targets {2}:\n{3}", flag ? "ignored" : "recorded", def, args.Select((object arg) => arg.ToStringSafe()).ToCommaList(), TaleTextGenerator.GenerateTextFromTale(TextGenerationPurpose.ArtDescription, tale, Rand.Int, RulePackDefOf.ArtDescription_Sculpture)));
-		}
-		if (flag)
-		{
-			return null;
-		}
-		Find.TaleManager.Add(tale);
-		for (int num = 0; num < args.Length; num++)
-		{
-			if (args[num] is Pawn { Dead: false } pawn3 && pawn3.needs.mood != null)
+			if (!def.usableWithChildren)
 			{
-				pawn3.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+				for (int j = 0; j < args.Length; j++)
+				{
+					Pawn pawn2 = args[j] as Pawn;
+					if (pawn2 != null && !pawn2.ageTracker.Adult)
+					{
+						return null;
+					}
+				}
 			}
+			Tale tale = TaleFactory.MakeRawTale(def, args);
+			if (tale == null)
+			{
+				return null;
+			}
+			if (DebugViewSettings.logTaleRecording)
+			{
+				string format = "Tale {0} from {1}, targets {2}:\n{3}";
+				object[] array = new object[4];
+				array[0] = (flag ? "ignored" : "recorded");
+				array[1] = def;
+				array[2] = (from arg in args
+				select arg.ToStringSafe<object>()).ToCommaList(false, false);
+				array[3] = TaleTextGenerator.GenerateTextFromTale(TextGenerationPurpose.ArtDescription, tale, Rand.Int, RulePackDefOf.ArtDescription_Sculpture, null, null);
+				Log.Message(string.Format(format, array));
+			}
+			if (flag)
+			{
+				return null;
+			}
+			Find.TaleManager.Add(tale);
+			for (int k = 0; k < args.Length; k++)
+			{
+				Pawn pawn3 = args[k] as Pawn;
+				if (pawn3 != null && !pawn3.Dead && pawn3.needs.mood != null)
+				{
+					pawn3.needs.mood.thoughts.situational.Notify_SituationalThoughtsDirty();
+				}
+			}
+			return tale;
 		}
-		return tale;
 	}
 }

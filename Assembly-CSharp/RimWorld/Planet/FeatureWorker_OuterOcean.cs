@@ -1,57 +1,59 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class FeatureWorker_OuterOcean : FeatureWorker
+namespace RimWorld.Planet
 {
-	private readonly List<PlanetTile> group = new List<PlanetTile>();
-
-	private readonly List<PlanetTile> edgeTiles = new List<PlanetTile>();
-
-	public override void GenerateWhereAppropriate(PlanetLayer layer)
+	// Token: 0x02003C31 RID: 15409
+	public class FeatureWorker_OuterOcean : FeatureWorker
 	{
-		edgeTiles.Clear();
-		for (int i = 0; i < layer.TilesCount; i++)
+		// Token: 0x06014E7D RID: 85629 RVA: 0x00642E10 File Offset: 0x00641010
+		public override void GenerateWhereAppropriate(PlanetLayer layer)
 		{
-			PlanetTile planetTile = new PlanetTile(i, layer);
-			if (IsRoot(planetTile))
+			this.edgeTiles.Clear();
+			for (int i = 0; i < layer.TilesCount; i++)
 			{
-				edgeTiles.Add(planetTile);
+				PlanetTile planetTile = new PlanetTile(i, layer);
+				if (this.IsRoot(planetTile))
+				{
+					this.edgeTiles.Add(planetTile);
+				}
 			}
-		}
-		if (edgeTiles.Any())
-		{
-			group.Clear();
-			layer.Filler.FloodFill(PlanetTile.Invalid, CanTraverse, delegate(PlanetTile tile, int traversalDist)
+			if (!this.edgeTiles.Any<PlanetTile>())
 			{
-				group.Add(tile);
+				return;
+			}
+			this.group.Clear();
+			layer.Filler.FloodFill(PlanetTile.Invalid, new Predicate<PlanetTile>(this.CanTraverse), delegate(PlanetTile tile, int traversalDist)
+			{
+				this.group.Add(tile);
 				return false;
-			}, int.MaxValue, edgeTiles);
-			group.RemoveAll((PlanetTile x) => layer[x].feature != null);
-			if (group.Count >= def.minSize && group.Count <= def.maxSize)
+			}, int.MaxValue, this.edgeTiles);
+			this.group.RemoveAll((PlanetTile x) => layer[x].feature != null);
+			if (this.group.Count < this.def.minSize || this.group.Count > this.def.maxSize)
 			{
-				AddFeature(layer, group, group);
+				return;
 			}
+			base.AddFeature(layer, this.group, this.group);
 		}
-	}
 
-	private bool IsRoot(PlanetTile tile)
-	{
-		if (Find.WorldGrid.IsOnEdge(tile) && CanTraverse(tile))
+		// Token: 0x06014E7E RID: 85630 RVA: 0x00642F27 File Offset: 0x00641127
+		private bool IsRoot(PlanetTile tile)
 		{
-			return Find.WorldGrid[tile].feature == null;
+			return Find.WorldGrid.IsOnEdge(tile) && this.CanTraverse(tile) && Find.WorldGrid[tile].feature == null;
 		}
-		return false;
-	}
 
-	private bool CanTraverse(PlanetTile tile)
-	{
-		BiomeDef primaryBiome = Find.WorldGrid[tile].PrimaryBiome;
-		if (primaryBiome != BiomeDefOf.Ocean)
+		// Token: 0x06014E7F RID: 85631 RVA: 0x00642F54 File Offset: 0x00641154
+		private bool CanTraverse(PlanetTile tile)
 		{
-			return primaryBiome == BiomeDefOf.Lake;
+			BiomeDef primaryBiome = Find.WorldGrid[tile].PrimaryBiome;
+			return primaryBiome == BiomeDefOf.Ocean || primaryBiome == BiomeDefOf.Lake;
 		}
-		return true;
+
+		// Token: 0x0400E912 RID: 59666
+		private readonly List<PlanetTile> group = new List<PlanetTile>();
+
+		// Token: 0x0400E913 RID: 59667
+		private readonly List<PlanetTile> edgeTiles = new List<PlanetTile>();
 	}
 }

@@ -1,39 +1,55 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class StockGenerator_MultiDef : StockGenerator
+namespace RimWorld
 {
-	private List<ThingDef> thingDefs = new List<ThingDef>();
-
-	public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
+	// Token: 0x02002F93 RID: 12179
+	public class StockGenerator_MultiDef : StockGenerator
 	{
-		ThingDef thingDef = thingDefs.RandomElement();
-		foreach (Thing item in StockGeneratorUtility.TryMakeForStock(thingDef, RandomCountOf(thingDef), faction))
+		// Token: 0x0601126A RID: 70250 RVA: 0x004EB047 File Offset: 0x004E9247
+		public override IEnumerable<Thing> GenerateThings(PlanetTile forTile, Faction faction = null)
 		{
-			yield return item;
-		}
-	}
-
-	public override bool HandlesThingDef(ThingDef thingDef)
-	{
-		return thingDefs.Contains(thingDef);
-	}
-
-	public override IEnumerable<string> ConfigErrors(TraderKindDef parentDef)
-	{
-		foreach (string item in base.ConfigErrors(parentDef))
-		{
-			yield return item;
-		}
-		for (int i = 0; i < thingDefs.Count; i++)
-		{
-			if (!thingDefs[i].tradeability.TraderCanSell())
+			ThingDef thingDef = this.thingDefs.RandomElement<ThingDef>();
+			foreach (Thing thing in StockGeneratorUtility.TryMakeForStock(thingDef, base.RandomCountOf(thingDef), faction))
 			{
-				yield return thingDefs[i]?.ToString() + " tradeability doesn't allow traders to sell this thing";
+				yield return thing;
 			}
+			IEnumerator<Thing> enumerator = null;
+			yield break;
+			yield break;
 		}
+
+		// Token: 0x0601126B RID: 70251 RVA: 0x004EB05E File Offset: 0x004E925E
+		public override bool HandlesThingDef(ThingDef thingDef)
+		{
+			return this.thingDefs.Contains(thingDef);
+		}
+
+		// Token: 0x0601126C RID: 70252 RVA: 0x004EB06C File Offset: 0x004E926C
+		public override IEnumerable<string> ConfigErrors(TraderKindDef parentDef)
+		{
+			foreach (string text in base.ConfigErrors(parentDef))
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			int num;
+			for (int i = 0; i < this.thingDefs.Count; i = num + 1)
+			{
+				if (!this.thingDefs[i].tradeability.TraderCanSell())
+				{
+					ThingDef thingDef = this.thingDefs[i];
+					yield return ((thingDef != null) ? thingDef.ToString() : null) + " tradeability doesn't allow traders to sell this thing";
+				}
+				num = i;
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0400B1FC RID: 45564
+		private List<ThingDef> thingDefs = new List<ThingDef>();
 	}
 }

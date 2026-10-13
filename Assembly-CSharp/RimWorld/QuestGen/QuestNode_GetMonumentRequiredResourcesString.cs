@@ -1,204 +1,230 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetMonumentRequiredResourcesString : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	[NoTranslate]
-	public SlateRef<string> storeMarketValueAs;
-
-	public SlateRef<MonumentMarker> monumentMarker;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A53 RID: 14931
+	public class QuestNode_GetMonumentRequiredResourcesString : QuestNode
 	{
-		DoWork(slate);
-		return true;
-	}
-
-	protected override void RunInt()
-	{
-		DoWork(QuestGen.slate);
-	}
-
-	private void DoWork(Slate slate)
-	{
-		MonumentMarker value = monumentMarker.GetValue(slate);
-		if (value == null)
+		// Token: 0x060146BC RID: 83644 RVA: 0x0061941C File Offset: 0x0061761C
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (!storeMarketValueAs.GetValue(slate).NullOrEmpty())
-			{
-				slate.Set(storeMarketValueAs.GetValue(slate), 0f);
-			}
-			return;
+			this.DoWork(slate);
+			return true;
 		}
-		Dictionary<ThingDef, int> dictionary = new Dictionary<ThingDef, int>();
-		List<Pair<List<StuffCategoryDef>, int>> list = new List<Pair<List<StuffCategoryDef>, int>>();
-		List<List<Pair<ThingDef, int>>> list2 = new List<List<Pair<ThingDef, int>>>();
-		int num = value.sketch.Entities.Where((SketchEntity x) => x is SketchTerrain sketchTerrain && sketchTerrain.treatSimilarAsSame).Count();
-		foreach (SketchEntity entity in value.sketch.Entities)
+
+		// Token: 0x060146BD RID: 83645 RVA: 0x00619426 File Offset: 0x00617626
+		protected override void RunInt()
 		{
-			if (!(entity is SketchBuildable sketchBuildable))
+			this.DoWork(QuestGen.slate);
+		}
+
+		// Token: 0x060146BE RID: 83646 RVA: 0x00619434 File Offset: 0x00617634
+		private void DoWork(Slate slate)
+		{
+			MonumentMarker value = this.monumentMarker.GetValue(slate);
+			if (value == null)
 			{
-				continue;
+				if (!this.storeMarketValueAs.GetValue(slate).NullOrEmpty())
+				{
+					slate.Set<float>(this.storeMarketValueAs.GetValue(slate), 0f, false);
+				}
+				return;
 			}
-			if (sketchBuildable.Buildable.MadeFromStuff && sketchBuildable.Stuff == null)
+			Dictionary<ThingDef, int> dictionary = new Dictionary<ThingDef, int>();
+			List<Pair<List<StuffCategoryDef>, int>> list4 = new List<Pair<List<StuffCategoryDef>, int>>();
+			List<List<Pair<ThingDef, int>>> list2 = new List<List<Pair<ThingDef, int>>>();
+			int num = value.sketch.Entities.Where(delegate(SketchEntity x)
 			{
-				int num2 = FindStuffsIndexFor(sketchBuildable.Buildable, list);
-				if (num2 < 0)
+				SketchTerrain sketchTerrain = x as SketchTerrain;
+				return sketchTerrain != null && sketchTerrain.treatSimilarAsSame;
+			}).Count<SketchEntity>();
+			foreach (SketchEntity sketchEntity in value.sketch.Entities)
+			{
+				SketchBuildable sketchBuildable = sketchEntity as SketchBuildable;
+				if (sketchBuildable != null)
 				{
-					list.Add(new Pair<List<StuffCategoryDef>, int>(sketchBuildable.Buildable.stuffCategories, sketchBuildable.Buildable.CostStuffCount));
-				}
-				else
-				{
-					list[num2] = new Pair<List<StuffCategoryDef>, int>(list[num2].First, list[num2].Second + sketchBuildable.Buildable.CostStuffCount);
-				}
-				if (sketchBuildable.Buildable.CostList == null)
-				{
-					continue;
-				}
-				for (int num3 = 0; num3 < sketchBuildable.Buildable.CostList.Count; num3++)
-				{
-					ThingDefCountClass thingDefCountClass = sketchBuildable.Buildable.CostList[num3];
-					if (!dictionary.TryGetValue(thingDefCountClass.thingDef, out var value2))
+					if (sketchBuildable.Buildable.MadeFromStuff && sketchBuildable.Stuff == null)
 					{
-						value2 = 0;
+						int num2 = this.FindStuffsIndexFor(sketchBuildable.Buildable, list4);
+						if (num2 < 0)
+						{
+							list4.Add(new Pair<List<StuffCategoryDef>, int>(sketchBuildable.Buildable.stuffCategories, sketchBuildable.Buildable.CostStuffCount));
+						}
+						else
+						{
+							list4[num2] = new Pair<List<StuffCategoryDef>, int>(list4[num2].First, list4[num2].Second + sketchBuildable.Buildable.CostStuffCount);
+						}
+						if (sketchBuildable.Buildable.CostList != null)
+						{
+							for (int i = 0; i < sketchBuildable.Buildable.CostList.Count; i++)
+							{
+								ThingDefCountClass thingDefCountClass = sketchBuildable.Buildable.CostList[i];
+								int num3;
+								if (!dictionary.TryGetValue(thingDefCountClass.thingDef, out num3))
+								{
+									num3 = 0;
+								}
+								dictionary[thingDefCountClass.thingDef] = num3 + thingDefCountClass.count;
+							}
+						}
 					}
-					dictionary[thingDefCountClass.thingDef] = value2 + thingDefCountClass.count;
-				}
-				continue;
-			}
-			SketchTerrain st = sketchBuildable as SketchTerrain;
-			if (st != null && st.treatSimilarAsSame)
-			{
-				foreach (TerrainDef item in DefDatabase<TerrainDef>.AllDefs.Where((TerrainDef x) => st.IsSameOrSimilar(x)))
-				{
-					if (item.CostList.NullOrEmpty())
+					else
 					{
-						continue;
-					}
-					List<Pair<ThingDef, int>> list3 = new List<Pair<ThingDef, int>>();
-					foreach (ThingDefCountClass cost in item.CostList)
-					{
-						list3.Add(new Pair<ThingDef, int>(cost.thingDef, cost.count * num));
-					}
-					if (!list2.Any((List<Pair<ThingDef, int>> x) => x.SetsEqual(list3)))
-					{
-						list2.Add(list3);
+						SketchTerrain st = sketchBuildable as SketchTerrain;
+						if (st != null && st.treatSimilarAsSame)
+						{
+							using (IEnumerator<TerrainDef> enumerator2 = (from x in DefDatabase<TerrainDef>.AllDefs
+							where st.IsSameOrSimilar(x)
+							select x).GetEnumerator())
+							{
+								while (enumerator2.MoveNext())
+								{
+									TerrainDef terrainDef = enumerator2.Current;
+									if (!terrainDef.CostList.NullOrEmpty<ThingDefCountClass>())
+									{
+										List<Pair<ThingDef, int>> list = new List<Pair<ThingDef, int>>();
+										foreach (ThingDefCountClass thingDefCountClass2 in terrainDef.CostList)
+										{
+											list.Add(new Pair<ThingDef, int>(thingDefCountClass2.thingDef, thingDefCountClass2.count * num));
+										}
+										if (!list2.Any((List<Pair<ThingDef, int>> x) => x.SetsEqual(list)))
+										{
+											list2.Add(list);
+										}
+									}
+								}
+								continue;
+							}
+						}
+						List<ThingDefCountClass> list3 = sketchBuildable.Buildable.CostListAdjusted(sketchBuildable.Stuff, true);
+						for (int j = 0; j < list3.Count; j++)
+						{
+							int num4;
+							if (!dictionary.TryGetValue(list3[j].thingDef, out num4))
+							{
+								num4 = 0;
+							}
+							dictionary[list3[j].thingDef] = num4 + list3[j].count;
+						}
 					}
 				}
-				continue;
 			}
-			List<ThingDefCountClass> list4 = sketchBuildable.Buildable.CostListAdjusted(sketchBuildable.Stuff);
-			for (int num4 = 0; num4 < list4.Count; num4++)
+			float num5 = 0f;
+			StringBuilder stringBuilder = new StringBuilder();
+			foreach (Pair<List<StuffCategoryDef>, int> pair in list4)
 			{
-				if (!dictionary.TryGetValue(list4[num4].thingDef, out var value3))
+				if (stringBuilder.Length != 0)
 				{
-					value3 = 0;
+					stringBuilder.AppendLine();
 				}
-				dictionary[list4[num4].thingDef] = value3 + list4[num4].count;
+				stringBuilder.Append("  - " + "AnyOf".Translate() + ": " + (from x in pair.First
+				select x.label).ToCommaList(false, false) + " x" + pair.Second.ToString());
+				num5 += this.GetCheapestStuffMarketValue(pair.First, pair.Second);
 			}
-		}
-		float num5 = 0f;
-		StringBuilder stringBuilder = new StringBuilder();
-		foreach (Pair<List<StuffCategoryDef>, int> item2 in list)
-		{
-			if (stringBuilder.Length != 0)
+			foreach (KeyValuePair<ThingDef, int> keyValuePair in dictionary)
 			{
-				stringBuilder.AppendLine();
-			}
-			stringBuilder.Append(string.Concat("  - " + "AnyOf".Translate() + ": " + item2.First.Select((StuffCategoryDef x) => x.label).ToCommaList() + " x", item2.Second.ToString()));
-			num5 += GetCheapestStuffMarketValue(item2.First, item2.Second);
-		}
-		foreach (KeyValuePair<ThingDef, int> item3 in dictionary)
-		{
-			if (stringBuilder.Length != 0)
-			{
-				stringBuilder.AppendLine();
-			}
-			stringBuilder.Append("  - " + GenLabel.ThingLabel(item3.Key, null, item3.Value).CapitalizeFirst());
-			num5 += item3.Key.BaseMarketValue * (float)item3.Value;
-		}
-		if (list2.Any())
-		{
-			if (stringBuilder.Length != 0)
-			{
-				stringBuilder.AppendLine();
-			}
-			stringBuilder.Append("  - " + "AnyOf".Translate() + ":");
-			foreach (List<Pair<ThingDef, int>> item4 in list2)
-			{
-				stringBuilder.AppendLine();
-				stringBuilder.Append("    - " + item4.Select((Pair<ThingDef, int> x) => x.First.label + " x" + x.Second).ToCommaList());
-			}
-			num5 += GetCheapestThingMarketValue(list2);
-		}
-		slate.Set(storeAs.GetValue(slate), stringBuilder.ToString());
-		if (!storeMarketValueAs.GetValue(slate).NullOrEmpty())
-		{
-			slate.Set(storeMarketValueAs.GetValue(slate), num5);
-		}
-	}
-
-	private int FindStuffsIndexFor(BuildableDef buildable, List<Pair<List<StuffCategoryDef>, int>> anyOf)
-	{
-		for (int i = 0; i < anyOf.Count; i++)
-		{
-			if (anyOf[i].First.SetsEqual(buildable.stuffCategories))
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
-
-	private float GetCheapestStuffMarketValue(List<StuffCategoryDef> categories, int count)
-	{
-		if (!categories.Any())
-		{
-			return 0f;
-		}
-		float num = float.MaxValue;
-		for (int i = 0; i < categories.Count; i++)
-		{
-			foreach (ThingDef item in GenStuff.AllowedStuffs(categories))
-			{
-				int num2 = Mathf.Max(Mathf.RoundToInt((float)count / item.VolumePerUnit), 1);
-				float num3 = item.BaseMarketValue * (float)num2;
-				if (num3 < num)
+				if (stringBuilder.Length != 0)
 				{
-					num = num3;
+					stringBuilder.AppendLine();
+				}
+				stringBuilder.Append("  - " + GenLabel.ThingLabel(keyValuePair.Key, null, keyValuePair.Value).CapitalizeFirst());
+				num5 += keyValuePair.Key.BaseMarketValue * (float)keyValuePair.Value;
+			}
+			if (list2.Any<List<Pair<ThingDef, int>>>())
+			{
+				if (stringBuilder.Length != 0)
+				{
+					stringBuilder.AppendLine();
+				}
+				stringBuilder.Append("  - " + "AnyOf".Translate() + ":");
+				foreach (List<Pair<ThingDef, int>> source in list2)
+				{
+					stringBuilder.AppendLine();
+					stringBuilder.Append("    - " + (from x in source
+					select x.First.label + " x" + x.Second.ToString()).ToCommaList(false, false));
+				}
+				num5 += this.GetCheapestThingMarketValue(list2);
+			}
+			slate.Set<string>(this.storeAs.GetValue(slate), stringBuilder.ToString(), false);
+			if (!this.storeMarketValueAs.GetValue(slate).NullOrEmpty())
+			{
+				slate.Set<float>(this.storeMarketValueAs.GetValue(slate), num5, false);
+			}
+		}
+
+		// Token: 0x060146BF RID: 83647 RVA: 0x00619AA0 File Offset: 0x00617CA0
+		private int FindStuffsIndexFor(BuildableDef buildable, List<Pair<List<StuffCategoryDef>, int>> anyOf)
+		{
+			for (int i = 0; i < anyOf.Count; i++)
+			{
+				if (anyOf[i].First.SetsEqual(buildable.stuffCategories))
+				{
+					return i;
 				}
 			}
+			return -1;
 		}
-		return num;
-	}
 
-	private float GetCheapestThingMarketValue(List<List<Pair<ThingDef, int>>> costs)
-	{
-		if (!costs.Any())
+		// Token: 0x060146C0 RID: 83648 RVA: 0x00619AE0 File Offset: 0x00617CE0
+		private float GetCheapestStuffMarketValue(List<StuffCategoryDef> categories, int count)
 		{
-			return 0f;
+			if (!categories.Any<StuffCategoryDef>())
+			{
+				return 0f;
+			}
+			float num = float.MaxValue;
+			for (int i = 0; i < categories.Count; i++)
+			{
+				foreach (ThingDef thingDef in GenStuff.AllowedStuffs(categories, TechLevel.Undefined))
+				{
+					int num2 = Mathf.Max(Mathf.RoundToInt((float)count / thingDef.VolumePerUnit), 1);
+					float num3 = thingDef.BaseMarketValue * (float)num2;
+					if (num3 < num)
+					{
+						num = num3;
+					}
+				}
+			}
+			return num;
 		}
-		float num = float.MaxValue;
-		for (int i = 0; i < costs.Count; i++)
+
+		// Token: 0x060146C1 RID: 83649 RVA: 0x00619B78 File Offset: 0x00617D78
+		private float GetCheapestThingMarketValue(List<List<Pair<ThingDef, int>>> costs)
 		{
-			float num2 = 0f;
-			for (int j = 0; j < costs[i].Count; j++)
+			if (!costs.Any<List<Pair<ThingDef, int>>>())
 			{
-				num2 += costs[i][j].First.BaseMarketValue * (float)costs[i][j].Second;
+				return 0f;
 			}
-			if (num2 < num)
+			float num = float.MaxValue;
+			for (int i = 0; i < costs.Count; i++)
 			{
-				num = num2;
+				float num2 = 0f;
+				for (int j = 0; j < costs[i].Count; j++)
+				{
+					num2 += costs[i][j].First.BaseMarketValue * (float)costs[i][j].Second;
+				}
+				if (num2 < num)
+				{
+					num = num2;
+				}
 			}
+			return num;
 		}
-		return num;
+
+		// Token: 0x0400E1C9 RID: 57801
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E1CA RID: 57802
+		[NoTranslate]
+		public SlateRef<string> storeMarketValueAs;
+
+		// Token: 0x0400E1CB RID: 57803
+		public SlateRef<MonumentMarker> monumentMarker;
 	}
 }

@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_MechRepairable : CompProperties
+namespace RimWorld
 {
-	public CompProperties_MechRepairable()
+	// Token: 0x02002D45 RID: 11589
+	public class CompProperties_MechRepairable : CompProperties
 	{
-		compClass = typeof(CompMechRepairable);
+		// Token: 0x06010480 RID: 66688 RVA: 0x004B4ABF File Offset: 0x004B2CBF
+		public CompProperties_MechRepairable()
+		{
+			this.compClass = typeof(CompMechRepairable);
+		}
 	}
 }

@@ -1,181 +1,192 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public static class FloatMenuMakerMap
+namespace RimWorld
 {
-	private static List<FloatMenuOptionProvider> providers;
-
-	public static FloatMenuOptionProvider currentProvider;
-
-	public static Pawn makingFor;
-
-	public static void Init()
+	// Token: 0x020032B5 RID: 12981
+	public static class FloatMenuMakerMap
 	{
-		providers = new List<FloatMenuOptionProvider>();
-		foreach (Type item in typeof(FloatMenuOptionProvider).AllSubclassesNonAbstract())
+		// Token: 0x06012455 RID: 74837 RVA: 0x005623E4 File Offset: 0x005605E4
+		public static void Init()
 		{
-			providers.Add((FloatMenuOptionProvider)Activator.CreateInstance(item));
-		}
-	}
-
-	public static List<FloatMenuOption> GetOptions(List<Pawn> selectedPawns, Vector3 clickPos, out FloatMenuContext context)
-	{
-		List<FloatMenuOption> list = new List<FloatMenuOption>();
-		context = null;
-		if (!clickPos.InBounds(Find.CurrentMap))
-		{
-			return list;
-		}
-		context = new FloatMenuContext(selectedPawns, clickPos, Find.CurrentMap);
-		if (!context.allSelectedPawns.Any())
-		{
-			return list;
-		}
-		if (!context.ClickedCell.IsValid || !context.ClickedCell.InBounds(Find.CurrentMap))
-		{
-			return list;
-		}
-		if (!context.IsMultiselect)
-		{
-			AcceptanceReport acceptanceReport = ShouldGenerateFloatMenuForPawn(context.FirstSelectedPawn);
-			if (!acceptanceReport.Accepted)
+			FloatMenuMakerMap.providers = new List<FloatMenuOptionProvider>();
+			foreach (Type type in typeof(FloatMenuOptionProvider).AllSubclassesNonAbstract())
 			{
-				if (!acceptanceReport.Reason.NullOrEmpty())
-				{
-					Messages.Message(acceptanceReport.Reason, context.FirstSelectedPawn, MessageTypeDefOf.RejectInput, historical: false);
-				}
-				return list;
+				FloatMenuMakerMap.providers.Add((FloatMenuOptionProvider)Activator.CreateInstance(type));
 			}
 		}
-		else
+
+		// Token: 0x06012456 RID: 74838 RVA: 0x00562458 File Offset: 0x00560658
+		public static List<FloatMenuOption> GetOptions(List<Pawn> selectedPawns, Vector3 clickPos, out FloatMenuContext context)
 		{
-			context.allSelectedPawns.RemoveAll((Pawn selectedPawn) => !ShouldGenerateFloatMenuForPawn(selectedPawn));
-			if (!context.allSelectedPawns.Any())
+			List<FloatMenuOption> list = new List<FloatMenuOption>();
+			context = null;
+			if (!clickPos.InBounds(Find.CurrentMap))
 			{
 				return list;
 			}
-		}
-		if (!context.IsMultiselect)
-		{
-			makingFor = context.FirstSelectedPawn;
-		}
-		GetProviderOptions(context, list);
-		makingFor = null;
-		return list;
-	}
-
-	private static void GetProviderOptions(FloatMenuContext context, List<FloatMenuOption> options)
-	{
-		foreach (FloatMenuOptionProvider provider in providers)
-		{
-			try
+			context = new FloatMenuContext(selectedPawns, clickPos, Find.CurrentMap);
+			if (!context.allSelectedPawns.Any<Pawn>())
 			{
-				currentProvider = provider;
-				if (!context.ValidSelectedPawns.Any() || !provider.Applies(context))
+				return list;
+			}
+			if (!context.ClickedCell.IsValid || !context.ClickedCell.InBounds(Find.CurrentMap))
+			{
+				return list;
+			}
+			if (!context.IsMultiselect)
+			{
+				AcceptanceReport acceptanceReport = FloatMenuMakerMap.ShouldGenerateFloatMenuForPawn(context.FirstSelectedPawn);
+				if (!acceptanceReport.Accepted)
 				{
-					continue;
+					if (!acceptanceReport.Reason.NullOrEmpty())
+					{
+						Messages.Message(acceptanceReport.Reason, context.FirstSelectedPawn, MessageTypeDefOf.RejectInput, false);
+					}
+					return list;
 				}
-				options.AddRange(provider.GetOptions(context));
-				foreach (Thing clickedThing in context.ClickedThings)
+			}
+			else
+			{
+				context.allSelectedPawns.RemoveAll((Pawn selectedPawn) => !FloatMenuMakerMap.ShouldGenerateFloatMenuForPawn(selectedPawn));
+				if (!context.allSelectedPawns.Any<Pawn>())
 				{
-					if (!provider.TargetThingValid(clickedThing, context))
+					return list;
+				}
+			}
+			if (!context.IsMultiselect)
+			{
+				FloatMenuMakerMap.makingFor = context.FirstSelectedPawn;
+			}
+			FloatMenuMakerMap.GetProviderOptions(context, list);
+			FloatMenuMakerMap.makingFor = null;
+			return list;
+		}
+
+		// Token: 0x06012457 RID: 74839 RVA: 0x00562570 File Offset: 0x00560770
+		private static void GetProviderOptions(FloatMenuContext context, List<FloatMenuOption> options)
+		{
+			foreach (FloatMenuOptionProvider floatMenuOptionProvider in FloatMenuMakerMap.providers)
+			{
+				try
+				{
+					FloatMenuMakerMap.currentProvider = floatMenuOptionProvider;
+					if (context.ValidSelectedPawns.Any<Pawn>())
 					{
-						continue;
-					}
-					Thing thing = clickedThing;
-					if (thing.TryGetComp(out CompSelectProxy comp) && comp.thingToSelect != null)
-					{
-						thing = comp.thingToSelect;
-					}
-					foreach (FloatMenuOption item in provider.GetOptionsFor(thing, context))
-					{
-						FloatMenuOption floatMenuOption = item;
-						if (floatMenuOption.iconThing == null)
+						if (floatMenuOptionProvider.Applies(context))
 						{
-							floatMenuOption.iconThing = thing;
+							options.AddRange(floatMenuOptionProvider.GetOptions(context));
+							foreach (Thing thing in context.ClickedThings)
+							{
+								if (floatMenuOptionProvider.TargetThingValid(thing, context))
+								{
+									Thing thing2 = thing;
+									CompSelectProxy compSelectProxy;
+									if (thing2.TryGetComp(out compSelectProxy) && compSelectProxy.thingToSelect != null)
+									{
+										thing2 = compSelectProxy.thingToSelect;
+									}
+									foreach (FloatMenuOption floatMenuOption in floatMenuOptionProvider.GetOptionsFor(thing2, context))
+									{
+										FloatMenuOption floatMenuOption2 = floatMenuOption;
+										if (floatMenuOption2.iconThing == null)
+										{
+											floatMenuOption2.iconThing = thing2;
+										}
+										floatMenuOption.targetsDespawned = !thing2.Spawned;
+										options.Add(floatMenuOption);
+									}
+								}
+							}
+							foreach (Pawn pawn in context.ClickedPawns)
+							{
+								if (floatMenuOptionProvider.TargetPawnValid(pawn, context))
+								{
+									foreach (FloatMenuOption floatMenuOption3 in floatMenuOptionProvider.GetOptionsFor(pawn, context))
+									{
+										FloatMenuOption floatMenuOption2 = floatMenuOption3;
+										if (floatMenuOption2.iconThing == null)
+										{
+											floatMenuOption2.iconThing = pawn;
+										}
+										floatMenuOption3.targetsDespawned = !pawn.Spawned;
+										options.Add(floatMenuOption3);
+									}
+								}
+							}
 						}
-						item.targetsDespawned = !thing.Spawned;
-						options.Add(item);
 					}
 				}
-				foreach (Pawn clickedPawn in context.ClickedPawns)
+				catch (Exception arg)
 				{
-					if (!provider.TargetPawnValid(clickedPawn, context))
-					{
-						continue;
-					}
-					foreach (FloatMenuOption item2 in provider.GetOptionsFor(clickedPawn, context))
-					{
-						FloatMenuOption floatMenuOption = item2;
-						if (floatMenuOption.iconThing == null)
-						{
-							floatMenuOption.iconThing = clickedPawn;
-						}
-						item2.targetsDespawned = !clickedPawn.Spawned;
-						options.Add(item2);
-					}
+					Log.Error(string.Format("Error in FloatMenuWorker {0}: {1}", floatMenuOptionProvider.GetType().Name, arg));
 				}
 			}
-			catch (Exception arg)
-			{
-				Log.Error($"Error in FloatMenuWorker {provider.GetType().Name}: {arg}");
-			}
+			FloatMenuMakerMap.currentProvider = null;
 		}
-		currentProvider = null;
-	}
 
-	public static AcceptanceReport ShouldGenerateFloatMenuForPawn(Pawn pawn)
-	{
-		if (pawn.Map != Find.CurrentMap)
+		// Token: 0x06012458 RID: 74840 RVA: 0x00562800 File Offset: 0x00560A00
+		public static AcceptanceReport ShouldGenerateFloatMenuForPawn(Pawn pawn)
 		{
-			return false;
-		}
-		if (pawn.Downed)
-		{
-			return "IsIncapped".Translate(pawn.LabelCap, pawn);
-		}
-		if (ModsConfig.BiotechActive && pawn.Deathresting)
-		{
-			return "IsDeathresting".Translate(pawn.Named("PAWN"));
-		}
-		Lord lord = pawn.GetLord();
-		if (lord != null)
-		{
-			AcceptanceReport result = lord.AllowsFloatMenu(pawn);
-			if (!result.Accepted)
+			if (pawn.Map != Find.CurrentMap)
 			{
-				return result;
+				return false;
 			}
+			if (pawn.Downed)
+			{
+				return "IsIncapped".Translate(pawn.LabelCap, pawn);
+			}
+			if (ModsConfig.BiotechActive && pawn.Deathresting)
+			{
+				return "IsDeathresting".Translate(pawn.Named("PAWN"));
+			}
+			Lord lord = pawn.GetLord();
+			if (lord != null)
+			{
+				AcceptanceReport result = lord.AllowsFloatMenu(pawn);
+				if (!result.Accepted)
+				{
+					return result;
+				}
+			}
+			return true;
 		}
-		return true;
-	}
 
-	public static FloatMenuOption GetAutoTakeOption(List<FloatMenuOption> options)
-	{
-		bool flag = true;
-		FloatMenuOption floatMenuOption = null;
-		foreach (FloatMenuOption option in options)
+		// Token: 0x06012459 RID: 74841 RVA: 0x00562898 File Offset: 0x00560A98
+		public static FloatMenuOption GetAutoTakeOption(List<FloatMenuOption> options)
 		{
-			if (option.Disabled || !option.autoTakeable)
+			bool flag = true;
+			FloatMenuOption floatMenuOption = null;
+			foreach (FloatMenuOption floatMenuOption2 in options)
 			{
-				flag = false;
-				break;
+				if (floatMenuOption2.Disabled || !floatMenuOption2.autoTakeable)
+				{
+					flag = false;
+					break;
+				}
+				if (floatMenuOption == null || floatMenuOption2.autoTakeablePriority > floatMenuOption.autoTakeablePriority)
+				{
+					floatMenuOption = floatMenuOption2;
+				}
 			}
-			if (floatMenuOption == null || option.autoTakeablePriority > floatMenuOption.autoTakeablePriority)
+			if (!flag || floatMenuOption == null)
 			{
-				floatMenuOption = option;
+				return null;
 			}
+			return floatMenuOption;
 		}
-		if (!flag || floatMenuOption == null)
-		{
-			return null;
-		}
-		return floatMenuOption;
+
+		// Token: 0x0400BE2F RID: 48687
+		private static List<FloatMenuOptionProvider> providers;
+
+		// Token: 0x0400BE30 RID: 48688
+		public static FloatMenuOptionProvider currentProvider;
+
+		// Token: 0x0400BE31 RID: 48689
+		public static Pawn makingFor;
 	}
 }

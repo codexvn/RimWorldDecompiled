@@ -1,103 +1,105 @@
+﻿using System;
 using System.Linq;
+using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_SinglePawn : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x02003935 RID: 14645
+	public class SymbolResolver_SinglePawn : SymbolResolver
 	{
-		if (!base.CanResolve(rp))
+		// Token: 0x060142B1 RID: 82609 RVA: 0x00602474 File Offset: 0x00600674
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return false;
+			IntVec3 intVec;
+			return base.CanResolve(rp) && ((rp.singlePawnToSpawn != null && rp.singlePawnToSpawn.Spawned) || SymbolResolver_SinglePawn.TryFindSpawnCell(rp, out intVec));
 		}
-		if (rp.singlePawnToSpawn != null && rp.singlePawnToSpawn.Spawned)
-		{
-			return true;
-		}
-		if (!TryFindSpawnCell(rp, out var _))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		if (rp.singlePawnToSpawn != null && rp.singlePawnToSpawn.Spawned)
+		// Token: 0x060142B2 RID: 82610 RVA: 0x006024B0 File Offset: 0x006006B0
+		public override void Resolve(ResolveParams rp)
 		{
-			return;
-		}
-		Map map = BaseGen.globalSettings.map;
-		if (!TryFindSpawnCell(rp, out var cell))
-		{
-			if (rp.singlePawnToSpawn != null)
+			if (rp.singlePawnToSpawn != null && rp.singlePawnToSpawn.Spawned)
 			{
-				Find.WorldPawns.PassToWorld(rp.singlePawnToSpawn);
+				return;
 			}
-			return;
-		}
-		Pawn pawn;
-		if (rp.singlePawnToSpawn == null)
-		{
-			PawnGenerationRequest request;
-			if (rp.singlePawnGenerationRequest.HasValue)
+			Map map = BaseGen.globalSettings.map;
+			IntVec3 loc;
+			if (!SymbolResolver_SinglePawn.TryFindSpawnCell(rp, out loc))
 			{
-				request = rp.singlePawnGenerationRequest.Value;
-			}
-			else
-			{
-				PawnKindDef pawnKindDef = rp.singlePawnKindDef ?? DefDatabase<PawnKindDef>.AllDefsListForReading.Where((PawnKindDef x) => x.defaultFactionDef == null || !x.defaultFactionDef.isPlayer).RandomElement();
-				Faction result = rp.faction;
-				if (result == null && pawnKindDef.RaceProps.Humanlike)
+				if (rp.singlePawnToSpawn != null)
 				{
-					if (pawnKindDef.defaultFactionDef != null)
+					Find.WorldPawns.PassToWorld(rp.singlePawnToSpawn, PawnDiscardDecideMode.Decide);
+				}
+				return;
+			}
+			Pawn pawn;
+			if (rp.singlePawnToSpawn == null)
+			{
+				PawnGenerationRequest value;
+				if (rp.singlePawnGenerationRequest != null)
+				{
+					value = rp.singlePawnGenerationRequest.Value;
+				}
+				else
+				{
+					PawnKindDef pawnKindDef;
+					if ((pawnKindDef = rp.singlePawnKindDef) == null)
 					{
-						result = FactionUtility.DefaultFactionFrom(pawnKindDef.defaultFactionDef);
-						if (result == null)
+						pawnKindDef = (from x in DefDatabase<PawnKindDef>.AllDefsListForReading
+						where x.defaultFactionDef == null || !x.defaultFactionDef.isPlayer
+						select x).RandomElement<PawnKindDef>();
+					}
+					PawnKindDef pawnKindDef2 = pawnKindDef;
+					Faction faction = rp.faction;
+					if (faction == null && pawnKindDef2.RaceProps.Humanlike)
+					{
+						if (pawnKindDef2.defaultFactionDef != null)
+						{
+							faction = FactionUtility.DefaultFactionFrom(pawnKindDef2.defaultFactionDef);
+							if (faction == null)
+							{
+								return;
+							}
+						}
+						else if (!(from x in Find.FactionManager.AllFactions
+						where !x.IsPlayer
+						select x).TryRandomElement(out faction))
 						{
 							return;
 						}
 					}
-					else if (!Find.FactionManager.AllFactions.Where((Faction x) => !x.IsPlayer).TryRandomElement(out result))
-					{
-						return;
-					}
+					value = new PawnGenerationRequest(pawnKindDef2, faction, PawnGenerationContext.NonPlayer, new PlanetTile?(map.Tile), false, false, faction.deactivated, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false);
 				}
-				request = new PawnGenerationRequest(pawnKindDef, result, PawnGenerationContext.NonPlayer, map.Tile, forceGenerateNewPawn: false, allowDead: false, result.deactivated);
+				pawn = PawnGenerator.GeneratePawn(value);
+				if (rp.postThingGenerate != null)
+				{
+					rp.postThingGenerate(pawn);
+				}
 			}
-			pawn = PawnGenerator.GeneratePawn(request);
-			if (rp.postThingGenerate != null)
+			else
 			{
-				rp.postThingGenerate(pawn);
+				pawn = rp.singlePawnToSpawn;
 			}
-		}
-		else
-		{
-			pawn = rp.singlePawnToSpawn;
-		}
-		if (!pawn.Dead && rp.disableSinglePawn.HasValue && rp.disableSinglePawn.Value)
-		{
-			if (pawn.TryGetComp<CompCanBeDormant>(out var comp))
+			if (!pawn.Dead && rp.disableSinglePawn != null && rp.disableSinglePawn.Value)
 			{
-				comp.ToSleep();
+				pawn.mindState.Active = false;
 			}
-			pawn.mindState.Active = false;
+			GenSpawn.Spawn(pawn, loc, map, WipeMode.Vanish);
+			if (rp.singlePawnLord != null)
+			{
+				rp.singlePawnLord.AddPawn(pawn);
+			}
+			if (rp.postThingSpawn != null)
+			{
+				rp.postThingSpawn(pawn);
+			}
 		}
-		GenSpawn.Spawn(pawn, cell, map);
-		if (rp.singlePawnLord != null)
-		{
-			rp.singlePawnLord.AddPawn(pawn);
-		}
-		if (rp.postThingSpawn != null)
-		{
-			rp.postThingSpawn(pawn);
-		}
-	}
 
-	public static bool TryFindSpawnCell(ResolveParams rp, out IntVec3 cell)
-	{
-		Map map = BaseGen.globalSettings.map;
-		return CellFinder.TryFindRandomCellInsideWith(rp.rect, (IntVec3 x) => x.Standable(map) && (rp.singlePawnSpawnCellExtraPredicate == null || rp.singlePawnSpawnCellExtraPredicate(x)), out cell);
+		// Token: 0x060142B3 RID: 82611 RVA: 0x006026F8 File Offset: 0x006008F8
+		public static bool TryFindSpawnCell(ResolveParams rp, out IntVec3 cell)
+		{
+			Map map = BaseGen.globalSettings.map;
+			return CellFinder.TryFindRandomCellInsideWith(rp.rect, (IntVec3 x) => x.Standable(map) && (rp.singlePawnSpawnCellExtraPredicate == null || rp.singlePawnSpawnCellExtraPredicate(x)), out cell);
+		}
 	}
 }

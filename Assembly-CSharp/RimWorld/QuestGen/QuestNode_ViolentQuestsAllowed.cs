@@ -1,43 +1,50 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_ViolentQuestsAllowed : QuestNode
+namespace RimWorld.QuestGen
 {
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AA1 RID: 15009
+	public class QuestNode_ViolentQuestsAllowed : QuestNode
 	{
-		return DoWork(slate, (QuestNode n) => n.TestRun(slate));
-	}
-
-	protected override void RunInt()
-	{
-		DoWork(QuestGen.slate, delegate(QuestNode n)
+		// Token: 0x060147CF RID: 83919 RVA: 0x0061E06C File Offset: 0x0061C26C
+		protected override bool TestRunInt(Slate slate)
 		{
-			n.Run();
-			return true;
-		});
-	}
+			return this.DoWork(slate, (QuestNode n) => n.TestRun(slate));
+		}
 
-	private bool DoWork(Slate slate, Func<QuestNode, bool> func)
-	{
-		bool allowViolentQuests = Find.Storyteller.difficulty.allowViolentQuests;
-		slate.Set("allowViolentQuests", allowViolentQuests);
-		if (allowViolentQuests)
+		// Token: 0x060147D0 RID: 83920 RVA: 0x0061E09E File Offset: 0x0061C29E
+		protected override void RunInt()
 		{
-			if (node != null)
+			this.DoWork(QuestGen.slate, delegate(QuestNode n)
 			{
-				return func(node);
-			}
+				n.Run();
+				return true;
+			});
 		}
-		else if (elseNode != null)
+
+		// Token: 0x060147D1 RID: 83921 RVA: 0x0061E0CC File Offset: 0x0061C2CC
+		private bool DoWork(Slate slate, Func<QuestNode, bool> func)
 		{
-			return func(elseNode);
+			bool allowViolentQuests = Find.Storyteller.difficulty.allowViolentQuests;
+			slate.Set<bool>("allowViolentQuests", allowViolentQuests, false);
+			if (allowViolentQuests)
+			{
+				if (this.node != null)
+				{
+					return func(this.node);
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				return func(this.elseNode);
+			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x0400E2E7 RID: 58087
+		public QuestNode node;
+
+		// Token: 0x0400E2E8 RID: 58088
+		public QuestNode elseNode;
 	}
 }

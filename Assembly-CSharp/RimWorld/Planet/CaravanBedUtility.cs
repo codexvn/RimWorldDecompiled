@@ -1,31 +1,39 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public static class CaravanBedUtility
+namespace RimWorld.Planet
 {
-	public static bool InCaravanBed(this Pawn p)
+	// Token: 0x02003D41 RID: 15681
+	public static class CaravanBedUtility
 	{
-		return p.CurrentCaravanBed() != null;
-	}
-
-	public static Building_Bed CurrentCaravanBed(this Pawn p)
-	{
-		return p.GetCaravan()?.beds.GetBedUsedBy(p);
-	}
-
-	public static bool WouldBenefitFromRestingInBed(Pawn p)
-	{
-		if (!p.Dead)
+		// Token: 0x060155D6 RID: 87510 RVA: 0x00663708 File Offset: 0x00661908
+		public static bool InCaravanBed(this Pawn p)
 		{
-			return p.health.hediffSet.HasImmunizableNotImmuneHediff();
+			return p.CurrentCaravanBed() != null;
 		}
-		return false;
-	}
 
-	public static string AppendUsingBedsLabel(string str, int bedCount)
-	{
-		string text = ((bedCount == 1) ? ((string)"UsingBedroll".Translate()) : ((string)"UsingBedrolls".Translate(bedCount)));
-		return str + " (" + text + ")";
+		// Token: 0x060155D7 RID: 87511 RVA: 0x00663714 File Offset: 0x00661914
+		public static Building_Bed CurrentCaravanBed(this Pawn p)
+		{
+			Caravan caravan = p.GetCaravan();
+			if (caravan == null)
+			{
+				return null;
+			}
+			return caravan.beds.GetBedUsedBy(p);
+		}
+
+		// Token: 0x060155D8 RID: 87512 RVA: 0x00663739 File Offset: 0x00661939
+		public static bool WouldBenefitFromRestingInBed(Pawn p)
+		{
+			return !p.Dead && p.health.hediffSet.HasImmunizableNotImmuneHediff();
+		}
+
+		// Token: 0x060155D9 RID: 87513 RVA: 0x00663758 File Offset: 0x00661958
+		public static string AppendUsingBedsLabel(string str, int bedCount)
+		{
+			string str2 = (bedCount == 1) ? "UsingBedroll".Translate() : "UsingBedrolls".Translate(bedCount);
+			return str + " (" + str2 + ")";
+		}
 	}
 }

@@ -1,95 +1,117 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ChoiceLetter_ChoosePawn : ChoiceLetter
+namespace RimWorld
 {
-	public List<Pawn> pawns = new List<Pawn>();
-
-	public string chosenPawnSignal;
-
-	public override bool CanDismissWithRightClick => false;
-
-	public override bool CanShowInLetterStack
+	// Token: 0x02003368 RID: 13160
+	public class ChoiceLetter_ChoosePawn : ChoiceLetter
 	{
-		get
+		// Token: 0x17003045 RID: 12357
+		// (get) Token: 0x06012805 RID: 75781 RVA: 0x00002501 File Offset: 0x00000701
+		public override bool CanDismissWithRightClick
 		{
-			if (!base.CanShowInLetterStack)
+			get
 			{
 				return false;
 			}
-			if (chosenPawnSignal.NullOrEmpty())
-			{
-				return false;
-			}
-			bool result = false;
-			for (int i = 0; i < pawns.Count; i++)
-			{
-				if (!pawns[i].DestroyedOrNull())
-				{
-					result = true;
-					break;
-				}
-			}
-			return result;
 		}
-	}
 
-	public override IEnumerable<DiaOption> Choices
-	{
-		get
+		// Token: 0x17003046 RID: 12358
+		// (get) Token: 0x06012806 RID: 75782 RVA: 0x00575508 File Offset: 0x00573708
+		public override bool CanShowInLetterStack
 		{
-			if (!base.ArchivedOnly)
+			get
 			{
-				for (int i = 0; i < pawns.Count; i++)
+				if (!base.CanShowInLetterStack)
 				{
-					if (!pawns[i].DestroyedOrNull())
+					return false;
+				}
+				if (this.chosenPawnSignal.NullOrEmpty())
+				{
+					return false;
+				}
+				bool result = false;
+				for (int i = 0; i < this.pawns.Count; i++)
+				{
+					if (!this.pawns[i].DestroyedOrNull())
 					{
-						yield return Option_ChoosePawn(pawns[i]);
+						result = true;
+						break;
 					}
 				}
-				yield return base.Option_Postpone;
-			}
-			else
-			{
-				yield return base.Option_Close;
-			}
-			if (lookTargets.IsValid())
-			{
-				yield return base.Option_JumpToLocationAndPostpone;
-			}
-			if (quest != null && !quest.hidden)
-			{
-				yield return Option_ViewInQuestsTab("ViewRelatedQuest", postpone: true);
+				return result;
 			}
 		}
-	}
 
-	private DiaOption Option_ChoosePawn(Pawn p)
-	{
-		return new DiaOption(p.LabelCap)
+		// Token: 0x17003047 RID: 12359
+		// (get) Token: 0x06012807 RID: 75783 RVA: 0x0057555E File Offset: 0x0057375E
+		public override IEnumerable<DiaOption> Choices
 		{
-			action = delegate
+			get
 			{
-				if (!chosenPawnSignal.NullOrEmpty())
+				if (!base.ArchivedOnly)
 				{
-					Find.SignalManager.SendSignal(new Signal(chosenPawnSignal, p.Named("CHOSEN")));
+					int num;
+					for (int i = 0; i < this.pawns.Count; i = num + 1)
+					{
+						if (!this.pawns[i].DestroyedOrNull())
+						{
+							yield return this.Option_ChoosePawn(this.pawns[i]);
+						}
+						num = i;
+					}
+					yield return base.Option_Postpone;
 				}
-				Find.LetterStack.RemoveLetter(this);
-			},
-			resolveTree = true
-		};
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
-		Scribe_Values.Look(ref chosenPawnSignal, "chosenPawnSignal");
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			pawns.RemoveAll((Pawn x) => x == null);
+				else
+				{
+					yield return base.Option_Close;
+				}
+				if (this.lookTargets.IsValid())
+				{
+					yield return base.Option_JumpToLocationAndPostpone;
+				}
+				if (this.quest != null && !this.quest.hidden)
+				{
+					yield return base.Option_ViewInQuestsTab("ViewRelatedQuest", true);
+				}
+				yield break;
+			}
 		}
+
+		// Token: 0x06012808 RID: 75784 RVA: 0x00575570 File Offset: 0x00573770
+		private DiaOption Option_ChoosePawn(Pawn p)
+		{
+			return new DiaOption(p.LabelCap)
+			{
+				action = delegate()
+				{
+					if (!this.chosenPawnSignal.NullOrEmpty())
+					{
+						Find.SignalManager.SendSignal(new Signal(this.chosenPawnSignal, p.Named("CHOSEN")));
+					}
+					Find.LetterStack.RemoveLetter(this);
+				},
+				resolveTree = true
+			};
+		}
+
+		// Token: 0x06012809 RID: 75785 RVA: 0x005755BC File Offset: 0x005737BC
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
+			Scribe_Values.Look<string>(ref this.chosenPawnSignal, "chosenPawnSignal", null, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.pawns.RemoveAll((Pawn x) => x == null);
+			}
+		}
+
+		// Token: 0x0400C032 RID: 49202
+		public List<Pawn> pawns = new List<Pawn>();
+
+		// Token: 0x0400C033 RID: 49203
+		public string chosenPawnSignal;
 	}
 }

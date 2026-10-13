@@ -1,28 +1,29 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_MeditateInBed : JobGiver_Meditate
+namespace RimWorld
 {
-	protected override bool ValidatePawnState(Pawn pawn)
+	// Token: 0x020014A9 RID: 5289
+	public class JobGiver_MeditateInBed : JobGiver_Meditate
 	{
-		if (pawn.CurrentBed() != null && pawn.Awake())
+		// Token: 0x06007EE5 RID: 32485 RVA: 0x00262CC7 File Offset: 0x00260EC7
+		protected override bool ValidatePawnState(Pawn pawn)
 		{
-			return MeditationUtility.ShouldMeditateInBed(pawn);
+			return pawn.CurrentBed() != null && pawn.Awake() && MeditationUtility.ShouldMeditateInBed(pawn);
 		}
-		return false;
-	}
 
-	protected override Job TryGiveJob(Pawn pawn)
-	{
-		if (!MeditationUtility.CanMeditateNow(pawn))
+		// Token: 0x06007EE6 RID: 32486 RVA: 0x00262CE4 File Offset: 0x00260EE4
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
+			if (!MeditationUtility.CanMeditateNow(pawn))
+			{
+				return null;
+			}
+			LocalTargetInfo targetC = ModsConfig.RoyaltyActive ? MeditationUtility.BestFocusAt(pawn.Position, pawn) : LocalTargetInfo.Invalid;
+			Job job = JobMaker.MakeJob(JobDefOf.Meditate, pawn.Position, pawn.InBed() ? pawn.CurrentBed() : new LocalTargetInfo(pawn.Position), targetC);
+			job.ignoreJoyTimeAssignment = true;
+			return job;
 		}
-		LocalTargetInfo targetC = (ModsConfig.RoyaltyActive ? MeditationUtility.BestFocusAt(pawn.Position, pawn) : LocalTargetInfo.Invalid);
-		Job job = JobMaker.MakeJob(JobDefOf.Meditate, pawn.Position, pawn.InBed() ? ((LocalTargetInfo)pawn.CurrentBed()) : new LocalTargetInfo(pawn.Position), targetC);
-		job.ignoreJoyTimeAssignment = true;
-		return job;
 	}
 }

@@ -1,36 +1,46 @@
+﻿using System;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public class ActivityWorker
+namespace RimWorld
 {
-	public virtual float GetChangeRatePerDay(ThingWithComps thing)
+	// Token: 0x02002B9F RID: 11167
+	public class ActivityWorker
 	{
-		CompActivity comp = thing.GetComp<CompActivity>();
-		if (!comp.IsDormant)
+		// Token: 0x0600F998 RID: 63896 RVA: 0x0048991C File Offset: 0x00487B1C
+		public virtual float GetChangeRatePerDay(ThingWithComps thing)
 		{
-			return 0f;
+			CompActivity comp = thing.GetComp<CompActivity>();
+			if (!comp.IsDormant)
+			{
+				return 0f;
+			}
+			return comp.Props.changePerDayBase;
 		}
-		return comp.Props.changePerDayBase;
-	}
 
-	public void GetInspectString(ThingWithComps thing, StringBuilder sb)
-	{
-		CompActivity comp = thing.GetComp<CompActivity>();
-		sb.Append(string.Format("{0}: {1} ({2} / {3})", "ActivityLevel".Translate(), comp.ActivityLevel.ToStringPercent("0"), GetChangeRatePerDay(thing).ToStringPercentSigned("0"), "day".Translate()));
-	}
-
-	public virtual void GetSummary(ThingWithComps thing, StringBuilder sb)
-	{
-		CompActivity comp = thing.GetComp<CompActivity>();
-		sb.AppendLine("\n\n" + string.Format("{0}: {1} / {2}", "ActivityIncrease".Translate(), GetChangeRatePerDay(thing).ToStringPercent("0"), "day".Translate()));
-		if (comp.State == ActivityState.Active)
+		// Token: 0x0600F999 RID: 63897 RVA: 0x0048994C File Offset: 0x00487B4C
+		public void GetInspectString(ThingWithComps thing, StringBuilder sb)
 		{
-			sb.Append(string.Format(" - {0}: x0", "IsActive".Translate()));
+			CompActivity comp = thing.GetComp<CompActivity>();
+			sb.Append(string.Format("{0}: {1} ({2} / {3})", new object[]
+			{
+				"ActivityLevel".Translate(),
+				comp.ActivityLevel.ToStringPercent("0"),
+				this.GetChangeRatePerDay(thing).ToStringPercentSigned("0"),
+				"day".Translate()
+			}));
 		}
-		else
+
+		// Token: 0x0600F99A RID: 63898 RVA: 0x004899C4 File Offset: 0x00487BC4
+		public virtual void GetSummary(ThingWithComps thing, StringBuilder sb)
 		{
+			CompActivity comp = thing.GetComp<CompActivity>();
+			sb.AppendLine("\n\n" + string.Format("{0}: {1} / {2}", "ActivityIncrease".Translate(), this.GetChangeRatePerDay(thing).ToStringPercent("0"), "day".Translate()));
+			if (comp.State == ActivityState.Active)
+			{
+				sb.Append(string.Format(" - {0}: x0", "IsActive".Translate()));
+				return;
+			}
 			sb.Append(string.Format(" - {0}: {1}", "BaseLevel".Translate(), comp.Props.changePerDayBase.ToStringPercent("0")));
 		}
 	}

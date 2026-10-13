@@ -1,30 +1,28 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class LearningGiver_Reading : LearningGiver
+namespace RimWorld
 {
-	public override bool CanDo(Pawn pawn)
+	// Token: 0x0200151F RID: 5407
+	public class LearningGiver_Reading : LearningGiver
 	{
-		if (!base.CanDo(pawn) || !BookUtility.CanReadNow(pawn))
+		// Token: 0x060080C1 RID: 32961 RVA: 0x0026C8AC File Offset: 0x0026AAAC
+		public override bool CanDo(Pawn pawn)
 		{
-			return false;
+			Book book;
+			return base.CanDo(pawn) && BookUtility.CanReadNow(pawn) && !PawnUtility.WillSoonHaveBasicNeed(pawn, 0.05f) && BookUtility.TryGetRandomBookToRead(pawn, out book);
 		}
-		if (PawnUtility.WillSoonHaveBasicNeed(pawn))
-		{
-			return false;
-		}
-		Book book;
-		return BookUtility.TryGetRandomBookToRead(pawn, out book);
-	}
 
-	public override Job TryGiveJob(Pawn pawn)
-	{
-		if (BookUtility.TryGetRandomBookToRead(pawn, out var book))
+		// Token: 0x060080C2 RID: 32962 RVA: 0x0026C8E4 File Offset: 0x0026AAE4
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return JobMaker.MakeJob(def.jobDef, book);
+			Book t;
+			if (BookUtility.TryGetRandomBookToRead(pawn, out t))
+			{
+				return JobMaker.MakeJob(this.def.jobDef, t);
+			}
+			return null;
 		}
-		return null;
 	}
 }

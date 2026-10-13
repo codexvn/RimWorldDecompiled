@@ -1,79 +1,103 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_DestroyThingsOrPassToWorld : QuestPart
+namespace RimWorld
 {
-	public string inSignal;
-
-	public List<Thing> things = new List<Thing>();
-
-	public bool questLookTargets = true;
-
-	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+	// Token: 0x02001C24 RID: 7204
+	public class QuestPart_DestroyThingsOrPassToWorld : QuestPart
 	{
-		get
+		// Token: 0x170018A9 RID: 6313
+		// (get) Token: 0x0600A070 RID: 41072 RVA: 0x002E3ADF File Offset: 0x002E1CDF
+		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
 		{
-			if (questLookTargets)
+			get
 			{
-				for (int i = 0; i < things.Count; i++)
+				if (this.questLookTargets)
 				{
-					yield return things[i];
+					int num;
+					for (int i = 0; i < this.things.Count; i = num + 1)
+					{
+						yield return this.things[i];
+						num = i;
+					}
 				}
+				yield break;
 			}
 		}
-	}
 
-	public override void Notify_QuestSignalReceived(Signal signal)
-	{
-		base.Notify_QuestSignalReceived(signal);
-		if (signal.tag == inSignal)
+		// Token: 0x0600A071 RID: 41073 RVA: 0x002E3AEF File Offset: 0x002E1CEF
+		public override void Notify_QuestSignalReceived(Signal signal)
 		{
-			Destroy(things);
+			base.Notify_QuestSignalReceived(signal);
+			if (signal.tag == this.inSignal)
+			{
+				QuestPart_DestroyThingsOrPassToWorld.Destroy(this.things);
+			}
 		}
-	}
 
-	public static void Destroy(List<Thing> things)
-	{
-		for (int num = things.Count - 1; num >= 0; num--)
+		// Token: 0x0600A072 RID: 41074 RVA: 0x002E3B18 File Offset: 0x002E1D18
+		public static void Destroy(List<Thing> things)
 		{
-			Destroy(things[num]);
+			for (int i = things.Count - 1; i >= 0; i--)
+			{
+				QuestPart_DestroyThingsOrPassToWorld.Destroy(things[i]);
+			}
 		}
-	}
 
-	public static void Destroy(Thing thing)
-	{
-		Thing thing2 = ((!(thing.ParentHolder is MinifiedThing)) ? thing : ((Thing)thing.ParentHolder));
-		if (!thing2.Destroyed)
+		// Token: 0x0600A073 RID: 41075 RVA: 0x002E3B44 File Offset: 0x002E1D44
+		public static void Destroy(Thing thing)
 		{
-			thing2.DestroyOrPassToWorld(DestroyMode.QuestLogic);
+			Thing thing2;
+			if (thing.ParentHolder is MinifiedThing)
+			{
+				thing2 = (Thing)thing.ParentHolder;
+			}
+			else
+			{
+				thing2 = thing;
+			}
+			if (!thing2.Destroyed)
+			{
+				thing2.DestroyOrPassToWorld(DestroyMode.QuestLogic);
+			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref inSignal, "inSignal");
-		Scribe_Collections.Look(ref things, "things", LookMode.Reference);
-		Scribe_Values.Look(ref questLookTargets, "questLookTargets", defaultValue: true);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x0600A074 RID: 41076 RVA: 0x002E3B80 File Offset: 0x002E1D80
+		public override void ExposeData()
 		{
-			things.RemoveAll((Thing x) => x == null);
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
+			Scribe_Collections.Look<Thing>(ref this.things, "things", LookMode.Reference, Array.Empty<object>());
+			Scribe_Values.Look<bool>(ref this.questLookTargets, "questLookTargets", true, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.things.RemoveAll((Thing x) => x == null);
+			}
 		}
-	}
 
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		inSignal = "DebugSignal" + Rand.Int;
-		if (Find.AnyPlayerHomeMap != null)
+		// Token: 0x0600A075 RID: 41077 RVA: 0x002E3C00 File Offset: 0x002E1E00
+		public override void AssignDebugData()
 		{
-			List<Thing> source = Find.RandomPlayerHomeMap.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
-			things.Clear();
-			things.Add(source.FirstOrDefault());
+			base.AssignDebugData();
+			this.inSignal = "DebugSignal" + Rand.Int.ToString();
+			if (Find.AnyPlayerHomeMap != null)
+			{
+				List<Thing> source = Find.RandomPlayerHomeMap.listerThings.ThingsInGroup(ThingRequestGroup.Plant);
+				this.things.Clear();
+				this.things.Add(source.FirstOrDefault<Thing>());
+			}
 		}
+
+		// Token: 0x04006EEF RID: 28399
+		public string inSignal;
+
+		// Token: 0x04006EF0 RID: 28400
+		public List<Thing> things = new List<Thing>();
+
+		// Token: 0x04006EF1 RID: 28401
+		public bool questLookTargets = true;
 	}
 }

@@ -1,54 +1,52 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_HasRoyalTitleInCurrentFaction : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<Pawn> pawn;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A98 RID: 15000
+	public class QuestNode_HasRoyalTitleInCurrentFaction : QuestNode
 	{
-		if (HasRoyalTitleInCurrentFaction(slate))
+		// Token: 0x060147AD RID: 83885 RVA: 0x0061DAFA File Offset: 0x0061BCFA
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.HasRoyalTitleInCurrentFaction(slate))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		if (HasRoyalTitleInCurrentFaction(QuestGen.slate))
+		// Token: 0x060147AE RID: 83886 RVA: 0x0061DB32 File Offset: 0x0061BD32
+		protected override void RunInt()
 		{
-			if (node != null)
+			if (this.HasRoyalTitleInCurrentFaction(QuestGen.slate))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
-	}
 
-	private bool HasRoyalTitleInCurrentFaction(Slate slate)
-	{
-		Pawn value = pawn.GetValue(slate);
-		if (value != null && value.Faction != null && value.royalty != null)
+		// Token: 0x060147AF RID: 83887 RVA: 0x0061DB68 File Offset: 0x0061BD68
+		private bool HasRoyalTitleInCurrentFaction(Slate slate)
 		{
-			return value.royalty.HasAnyTitleIn(value.Faction);
+			Pawn value = this.pawn.GetValue(slate);
+			return value != null && value.Faction != null && value.royalty != null && value.royalty.HasAnyTitleIn(value.Faction);
 		}
-		return false;
+
+		// Token: 0x0400E2CC RID: 58060
+		public SlateRef<Pawn> pawn;
+
+		// Token: 0x0400E2CD RID: 58061
+		public QuestNode node;
+
+		// Token: 0x0400E2CE RID: 58062
+		public QuestNode elseNode;
 	}
 }

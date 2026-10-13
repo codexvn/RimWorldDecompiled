@@ -1,106 +1,112 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.BaseGen;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_AncientUtilityBuilding : SketchResolver
+namespace RimWorld.SketchGen
 {
-	protected override bool CanResolveInt(SketchResolveParams parms)
+	// Token: 0x020038B4 RID: 14516
+	public class SketchResolver_AncientUtilityBuilding : SketchResolver
 	{
-		return parms.sketch != null;
-	}
+		// Token: 0x060140CB RID: 82123 RVA: 0x005F386F File Offset: 0x005F1A6F
+		protected override bool CanResolveInt(SketchResolveParams parms)
+		{
+			return parms.sketch != null;
+		}
 
-	protected override void ResolveInt(SketchResolveParams parms)
-	{
-		if (!ModLister.CheckIdeology("Ancient utility building"))
+		// Token: 0x060140CC RID: 82124 RVA: 0x005F4644 File Offset: 0x005F2844
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
-			return;
-		}
-		ThingDef thingDef = BaseGenUtility.RandomCheapWallStuff(Faction.OfAncients, notVeryFlammable: true);
-		LayoutSketch layoutSketch = new LayoutSketch
-		{
-			wallStuff = thingDef,
-			doorStuff = thingDef
-		};
-		IntVec2 intVec = parms.utilityBuildingSize ?? new IntVec2(10, 10);
-		StructureLayout structureLayout = (layoutSketch.structureLayout = RoomLayoutGenerator.GenerateRandomLayout(new CellRect(0, 0, intVec.x, intVec.z), 4, 4, 0f, canRemoveRooms: false, generateDoors: true, null, 2, IntRange.Zero));
-		layoutSketch.FlushLayoutToSketch();
-		List<LayoutRoom> rooms = structureLayout.Rooms;
-		rooms.SortByDescending((LayoutRoom a) => a.Area);
-		LayoutRoom layoutRoom = null;
-		for (int num = 0; num < rooms.Count; num++)
-		{
-			if (!structureLayout.IsAdjacentToLayoutEdge(rooms[num]))
+			if (!ModLister.CheckIdeology("Ancient utility building"))
 			{
-				continue;
+				return;
 			}
-			foreach (IntVec3 cell in rooms[num].Cells)
+			ThingDef thingDef = BaseGenUtility.RandomCheapWallStuff(Faction.OfAncients, true);
+			LayoutSketch layoutSketch = new LayoutSketch
 			{
-				if (structureLayout.container.IsOnEdge(cell) && structureLayout.IsWallAt(cell))
+				wallStuff = thingDef,
+				doorStuff = thingDef
+			};
+			IntVec2 intVec = parms.utilityBuildingSize ?? new IntVec2(10, 10);
+			StructureLayout structureLayout = RoomLayoutGenerator.GenerateRandomLayout(new CellRect(0, 0, intVec.x, intVec.z), 4, 4, 0f, false, true, null, 2, new IntRange?(IntRange.Zero), CorridorShape.All, true, false);
+			layoutSketch.structureLayout = structureLayout;
+			layoutSketch.FlushLayoutToSketch();
+			List<LayoutRoom> rooms = structureLayout.Rooms;
+			rooms.SortByDescending((LayoutRoom a) => a.Area);
+			LayoutRoom layoutRoom = null;
+			for (int i = 0; i < rooms.Count; i++)
+			{
+				if (structureLayout.IsAdjacentToLayoutEdge(rooms[i]))
 				{
-					layoutSketch.AddThing(ThingDefOf.AncientFence, cell, Rot4.North);
-				}
-			}
-			IEnumerable<IntVec3> cellsToCheck = rooms[num].rects.SelectMany((CellRect r) => r.Cells).InRandomOrder();
-			if (TryFindThingPositionWithGap(ThingDefOf.AncientGenerator, cellsToCheck, layoutSketch, out var position))
-			{
-				layoutSketch.AddThing(ThingDefOf.AncientGenerator, position, ThingDefOf.AncientGenerator.defaultPlacingRot);
-			}
-			foreach (CellRect rect in rooms[num].rects)
-			{
-				foreach (IntVec3 item in rect)
-				{
-					layoutSketch.AddTerrain(TerrainDefOf.AncientConcrete, item);
-				}
-			}
-			layoutRoom = rooms[num];
-			break;
-		}
-		for (int num2 = 0; num2 < rooms.Count; num2++)
-		{
-			if (rooms[num2] == layoutRoom)
-			{
-				continue;
-			}
-			foreach (IntVec3 item2 in rooms[num2].rects.SelectMany((CellRect r) => r.Cells))
-			{
-				layoutSketch.AddTerrain(TerrainDefOf.AncientConcrete, item2);
-			}
-		}
-		parms.sketch.Merge(layoutSketch);
-		SketchResolveParams parms2 = parms;
-		parms2.wallEdgeThing = ThingDefOf.Table1x2c;
-		parms2.requireFloor = true;
-		parms2.allowWood = false;
-		SketchResolverDefOf.AddWallEdgeThings.Resolve(parms2);
-		SketchResolveParams parms3 = parms;
-		parms3.destroyChanceExp = 1.5f;
-		SketchResolverDefOf.DamageBuildings.Resolve(parms3);
-	}
-
-	private bool TryFindThingPositionWithGap(ThingDef thingDef, IEnumerable<IntVec3> cellsToCheck, Sketch sketch, out IntVec3 position, int gap = 1)
-	{
-		foreach (IntVec3 item in cellsToCheck)
-		{
-			CellRect cellRect = GenAdj.OccupiedRect(item, thingDef.defaultPlacingRot, thingDef.size).ExpandedBy(gap);
-			bool flag = true;
-			foreach (IntVec3 cell in cellRect.Cells)
-			{
-				if (sketch.EdificeAt(cell) != null)
-				{
-					flag = false;
+					foreach (IntVec3 intVec2 in rooms[i].Cells)
+					{
+						if (structureLayout.container.IsOnEdge(intVec2) && structureLayout.IsWallAt(intVec2))
+						{
+							layoutSketch.AddThing(ThingDefOf.AncientFence, intVec2, Rot4.North, null, 1, null, null, true, 2f);
+						}
+					}
+					IEnumerable<IntVec3> cellsToCheck = rooms[i].rects.SelectMany((CellRect r) => r.Cells).InRandomOrder(null);
+					IntVec3 pos;
+					if (this.TryFindThingPositionWithGap(ThingDefOf.AncientGenerator, cellsToCheck, layoutSketch, out pos, 1))
+					{
+						layoutSketch.AddThing(ThingDefOf.AncientGenerator, pos, ThingDefOf.AncientGenerator.defaultPlacingRot, null, 1, null, null, true, 2f);
+					}
+					foreach (CellRect cellRect in rooms[i].rects)
+					{
+						foreach (IntVec3 pos2 in cellRect)
+						{
+							layoutSketch.AddTerrain(TerrainDefOf.AncientConcrete, pos2, true);
+						}
+					}
+					layoutRoom = rooms[i];
 					break;
 				}
 			}
-			if (flag)
+			for (int j = 0; j < rooms.Count; j++)
 			{
-				position = item;
-				return true;
+				if (rooms[j] != layoutRoom)
+				{
+					foreach (IntVec3 pos3 in rooms[j].rects.SelectMany((CellRect r) => r.Cells))
+					{
+						layoutSketch.AddTerrain(TerrainDefOf.AncientConcrete, pos3, true);
+					}
+				}
 			}
+			parms.sketch.Merge(layoutSketch, true);
+			SketchResolveParams parms2 = parms;
+			parms2.wallEdgeThing = ThingDefOf.Table1x2c;
+			parms2.requireFloor = new bool?(true);
+			parms2.allowWood = new bool?(false);
+			SketchResolverDefOf.AddWallEdgeThings.Resolve(parms2);
+			SketchResolveParams parms3 = parms;
+			parms3.destroyChanceExp = new float?(1.5f);
+			SketchResolverDefOf.DamageBuildings.Resolve(parms3);
 		}
-		position = IntVec3.Invalid;
-		return false;
+
+		// Token: 0x060140CD RID: 82125 RVA: 0x005F49EC File Offset: 0x005F2BEC
+		private bool TryFindThingPositionWithGap(ThingDef thingDef, IEnumerable<IntVec3> cellsToCheck, Sketch sketch, out IntVec3 position, int gap = 1)
+		{
+			foreach (IntVec3 intVec in cellsToCheck)
+			{
+				CellRect cellRect = GenAdj.OccupiedRect(intVec, thingDef.defaultPlacingRot, thingDef.size).ExpandedBy(gap);
+				bool flag = true;
+				foreach (IntVec3 pos in cellRect.Cells)
+				{
+					if (sketch.EdificeAt(pos) != null)
+					{
+						flag = false;
+						break;
+					}
+				}
+				if (flag)
+				{
+					position = intVec;
+					return true;
+				}
+			}
+			position = IntVec3.Invalid;
+			return false;
+		}
 	}
 }

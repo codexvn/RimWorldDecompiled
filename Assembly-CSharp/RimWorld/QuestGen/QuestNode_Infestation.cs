@@ -1,76 +1,86 @@
+﻿using System;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Infestation : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> inSignal;
-
-	public SlateRef<int> hivesCount;
-
-	public SlateRef<string> tag;
-
-	public SlateRef<string> customLetterLabel;
-
-	public SlateRef<string> customLetterText;
-
-	public SlateRef<RulePack> customLetterLabelRules;
-
-	public SlateRef<RulePack> customLetterTextRules;
-
-	private const string RootSymbol = "root";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003BF3 RID: 15347
+	public class QuestNode_Infestation : QuestNode
 	{
-		if (!Find.Storyteller.difficulty.allowViolentQuests)
+		// Token: 0x06014D1F RID: 85279 RVA: 0x0063C7D4 File Offset: 0x0063A9D4
+		protected override bool TestRunInt(Slate slate)
 		{
-			return false;
+			if (!Find.Storyteller.difficulty.allowViolentQuests)
+			{
+				return false;
+			}
+			if (!slate.Exists("map", false))
+			{
+				return false;
+			}
+			if (Faction.OfInsects == null)
+			{
+				return false;
+			}
+			Map map = slate.Get<Map>("map", null, false);
+			IntVec3 intVec;
+			return InfestationCellFinder.TryFindCell(out intVec, map);
 		}
-		if (!slate.Exists("map"))
-		{
-			return false;
-		}
-		if (Faction.OfInsects == null)
-		{
-			return false;
-		}
-		Map map = slate.Get<Map>("map");
-		if (!InfestationCellFinder.TryFindCell(out var _, map))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		Map map = QuestGen.slate.Get<Map>("map");
-		if (map == null)
+		// Token: 0x06014D20 RID: 85280 RVA: 0x0063C828 File Offset: 0x0063AA28
+		protected override void RunInt()
 		{
-			return;
-		}
-		QuestPart_Infestation questPart = new QuestPart_Infestation();
-		questPart.mapParent = map.Parent;
-		questPart.hivesCount = hivesCount.GetValue(slate);
-		questPart.tag = QuestGenUtility.HardcodedTargetQuestTagWithQuestID(tag.GetValue(slate));
-		if (!customLetterLabel.GetValue(slate).NullOrEmpty() || customLetterLabelRules.GetValue(slate) != null)
-		{
-			QuestGen.AddTextRequest("root", delegate(string x)
+			Slate slate = QuestGen.slate;
+			Map map = QuestGen.slate.Get<Map>("map", null, false);
+			if (map == null)
 			{
-				questPart.customLetterLabel = x;
-			}, QuestGenUtility.MergeRules(customLetterLabelRules.GetValue(slate), customLetterLabel.GetValue(slate), "root"));
-		}
-		if (!customLetterText.GetValue(slate).NullOrEmpty() || customLetterTextRules.GetValue(slate) != null)
-		{
-			QuestGen.AddTextRequest("root", delegate(string x)
+				return;
+			}
+			QuestPart_Infestation questPart = new QuestPart_Infestation();
+			questPart.mapParent = map.Parent;
+			questPart.hivesCount = this.hivesCount.GetValue(slate);
+			questPart.tag = QuestGenUtility.HardcodedTargetQuestTagWithQuestID(this.tag.GetValue(slate));
+			if (!this.customLetterLabel.GetValue(slate).NullOrEmpty() || this.customLetterLabelRules.GetValue(slate) != null)
 			{
-				questPart.customLetterText = x;
-			}, QuestGenUtility.MergeRules(customLetterTextRules.GetValue(slate), customLetterText.GetValue(slate), "root"));
+				QuestGen.AddTextRequest("root", delegate(string x)
+				{
+					questPart.customLetterLabel = x;
+				}, QuestGenUtility.MergeRules(this.customLetterLabelRules.GetValue(slate), this.customLetterLabel.GetValue(slate), "root"));
+			}
+			if (!this.customLetterText.GetValue(slate).NullOrEmpty() || this.customLetterTextRules.GetValue(slate) != null)
+			{
+				QuestGen.AddTextRequest("root", delegate(string x)
+				{
+					questPart.customLetterText = x;
+				}, QuestGenUtility.MergeRules(this.customLetterTextRules.GetValue(slate), this.customLetterText.GetValue(slate), "root"));
+			}
+			questPart.inSignal = (QuestGenUtility.HardcodedSignalWithQuestID(this.inSignal.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal", null, false));
+			QuestGen.quest.AddPart(questPart);
 		}
-		questPart.inSignal = QuestGenUtility.HardcodedSignalWithQuestID(inSignal.GetValue(slate)) ?? QuestGen.slate.Get<string>("inSignal");
-		QuestGen.quest.AddPart(questPart);
+
+		// Token: 0x0400E7D9 RID: 59353
+		[NoTranslate]
+		public SlateRef<string> inSignal;
+
+		// Token: 0x0400E7DA RID: 59354
+		public SlateRef<int> hivesCount;
+
+		// Token: 0x0400E7DB RID: 59355
+		public SlateRef<string> tag;
+
+		// Token: 0x0400E7DC RID: 59356
+		public SlateRef<string> customLetterLabel;
+
+		// Token: 0x0400E7DD RID: 59357
+		public SlateRef<string> customLetterText;
+
+		// Token: 0x0400E7DE RID: 59358
+		public SlateRef<RulePack> customLetterLabelRules;
+
+		// Token: 0x0400E7DF RID: 59359
+		public SlateRef<RulePack> customLetterTextRules;
+
+		// Token: 0x0400E7E0 RID: 59360
+		private const string RootSymbol = "root";
 	}
 }

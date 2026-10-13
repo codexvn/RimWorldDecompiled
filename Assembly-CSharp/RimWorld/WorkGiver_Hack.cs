@@ -1,47 +1,52 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_Hack : WorkGiver_Scanner
+namespace RimWorld
 {
-	public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup(ThingRequestGroup.Hackable);
-
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	// Token: 0x020015D1 RID: 5585
+	public class WorkGiver_Hack : WorkGiver_Scanner
 	{
-		CompHackable compHackable = t.TryGetComp<CompHackable>();
-		if (compHackable == null)
+		// Token: 0x17001437 RID: 5175
+		// (get) Token: 0x060083F7 RID: 33783 RVA: 0x002797F8 File Offset: 0x002779F8
+		public override ThingRequest PotentialWorkThingRequest
 		{
-			return false;
+			get
+			{
+				return ThingRequest.ForGroup(ThingRequestGroup.Hackable);
+			}
 		}
-		if (!compHackable.Autohack && !forced)
-		{
-			return false;
-		}
-		AcceptanceReport acceptanceReport = compHackable.CanHackNow(pawn);
-		if (!acceptanceReport.Accepted && !acceptanceReport.Reason.NullOrEmpty())
-		{
-			JobFailReason.Is(acceptanceReport.Reason);
-		}
-		if (!forced && !pawn.CanReserve(t))
-		{
-			return false;
-		}
-		if (forced && ModsConfig.IdeologyActive && t.def == ThingDefOf.AncientEnemyTerminal)
-		{
-			return false;
-		}
-		return acceptanceReport.Accepted;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		if (t.TryGetComp<CompHackable>() == null)
+		// Token: 0x060083F8 RID: 33784 RVA: 0x00279804 File Offset: 0x00277A04
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return null;
+			CompHackable compHackable = t.TryGetComp<CompHackable>();
+			if (compHackable == null)
+			{
+				return false;
+			}
+			if (!compHackable.Autohack && !forced)
+			{
+				return false;
+			}
+			AcceptanceReport acceptanceReport = compHackable.CanHackNow(pawn);
+			if (!acceptanceReport.Accepted && !acceptanceReport.Reason.NullOrEmpty())
+			{
+				JobFailReason.Is(acceptanceReport.Reason, null);
+			}
+			return (forced || pawn.CanReserve(t, 1, -1, null, false)) && (!forced || !ModsConfig.IdeologyActive || t.def != ThingDefOf.AncientEnemyTerminal) && acceptanceReport.Accepted;
 		}
-		Job job = JobMaker.MakeJob(JobDefOf.Hack, t);
-		job.playerForced = forced;
-		return job;
+
+		// Token: 0x060083F9 RID: 33785 RVA: 0x0027988D File Offset: 0x00277A8D
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			if (t.TryGetComp<CompHackable>() == null)
+			{
+				return null;
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.Hack, t);
+			job.playerForced = forced;
+			return job;
+		}
 	}
 }

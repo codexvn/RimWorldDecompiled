@@ -1,20 +1,24 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public static class TradeRequestUtility
+namespace RimWorld.Planet
 {
-	public static string RequestedThingLabel(ThingDef def, int count)
+	// Token: 0x02003E3C RID: 15932
+	public static class TradeRequestUtility
 	{
-		string text = GenLabel.ThingLabel(def, null, count);
-		if (def.HasComp(typeof(CompQuality)))
+		// Token: 0x06015C55 RID: 89173 RVA: 0x00681994 File Offset: 0x0067FB94
+		public static string RequestedThingLabel(ThingDef def, int count)
 		{
-			text += " (" + "NormalQualityOrBetter".Translate() + ")";
+			string text = GenLabel.ThingLabel(def, null, count);
+			if (def.HasComp(typeof(CompQuality)))
+			{
+				text += " (" + "NormalQualityOrBetter".Translate() + ")";
+			}
+			if (def.IsApparel)
+			{
+				text += " (" + "NotTainted".Translate() + ")";
+			}
+			return text;
 		}
-		if (def.IsApparel)
-		{
-			text += " (" + "NotTainted".Translate() + ")";
-		}
-		return text;
 	}
 }

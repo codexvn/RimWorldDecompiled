@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
@@ -5,160 +6,194 @@ using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public static class ShipUtility
+namespace RimWorld
 {
-	private static Dictionary<ThingDef, int> requiredParts;
-
-	private static List<Building> closedSet = new List<Building>();
-
-	private static List<Building> openSet = new List<Building>();
-
-	public static Dictionary<ThingDef, int> RequiredParts()
+	// Token: 0x02002F17 RID: 12055
+	public static class ShipUtility
 	{
-		if (requiredParts == null)
+		// Token: 0x0601104B RID: 69707 RVA: 0x004E5244 File Offset: 0x004E3444
+		public static Dictionary<ThingDef, int> RequiredParts()
 		{
-			requiredParts = new Dictionary<ThingDef, int>();
-			requiredParts[ThingDefOf.Ship_CryptosleepCasket] = 1;
-			requiredParts[ThingDefOf.Ship_ComputerCore] = 1;
-			requiredParts[ThingDefOf.Ship_Reactor] = 1;
-			requiredParts[ThingDefOf.Ship_Engine] = 3;
-			requiredParts[ThingDefOf.Ship_Beam] = 1;
-			requiredParts[ThingDefOf.Ship_SensorCluster] = 1;
+			if (ShipUtility.requiredParts == null)
+			{
+				ShipUtility.requiredParts = new Dictionary<ThingDef, int>();
+				ShipUtility.requiredParts[ThingDefOf.Ship_CryptosleepCasket] = 1;
+				ShipUtility.requiredParts[ThingDefOf.Ship_ComputerCore] = 1;
+				ShipUtility.requiredParts[ThingDefOf.Ship_Reactor] = 1;
+				ShipUtility.requiredParts[ThingDefOf.Ship_Engine] = 3;
+				ShipUtility.requiredParts[ThingDefOf.Ship_Beam] = 1;
+				ShipUtility.requiredParts[ThingDefOf.Ship_SensorCluster] = 1;
+			}
+			return ShipUtility.requiredParts;
 		}
-		return requiredParts;
-	}
 
-	public static IEnumerable<string> LaunchFailReasons(Building rootBuilding)
-	{
-		List<Building> shipParts = ShipBuildingsAttachedTo(rootBuilding).ToList();
-		foreach (KeyValuePair<ThingDef, int> partDef in RequiredParts())
+		// Token: 0x0601104C RID: 69708 RVA: 0x004E52C7 File Offset: 0x004E34C7
+		public static IEnumerable<string> LaunchFailReasons(Building rootBuilding)
 		{
-			int num = shipParts.Count((Building pa) => pa.def == partDef.Key);
-			if (num < partDef.Value)
+			List<Building> shipParts = ShipUtility.ShipBuildingsAttachedTo(rootBuilding).ToList<Building>();
+			using (Dictionary<ThingDef, int>.Enumerator enumerator = ShipUtility.RequiredParts().GetEnumerator())
 			{
-				yield return string.Format("{0}: {1}x {2} ({3} {4})", "ShipReportMissingPart".Translate(), partDef.Value - num, partDef.Key.label, "ShipReportMissingPartRequires".Translate(), partDef.Value);
-			}
-		}
-		bool fullPodFound = false;
-		foreach (Building item in shipParts)
-		{
-			if (item.def == ThingDefOf.Ship_CryptosleepCasket && item is Building_CryptosleepCasket { HasAnyContents: not false })
-			{
-				fullPodFound = true;
-				break;
-			}
-		}
-		foreach (Building item2 in shipParts)
-		{
-			CompHibernatable compHibernatable = item2.TryGetComp<CompHibernatable>();
-			if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
-			{
-				yield return string.Format("{0}: {1}", "ShipReportHibernating".Translate(), item2.LabelCap);
-			}
-			else if (compHibernatable != null && !compHibernatable.Running)
-			{
-				yield return string.Format("{0}: {1}", "ShipReportNotReady".Translate(), item2.LabelCap);
-			}
-		}
-		if (!fullPodFound)
-		{
-			yield return "ShipReportNoFullPods".Translate();
-		}
-	}
-
-	public static bool HasHibernatingParts(Building rootBuilding)
-	{
-		foreach (Building item in ShipBuildingsAttachedTo(rootBuilding).ToList())
-		{
-			CompHibernatable compHibernatable = item.TryGetComp<CompHibernatable>();
-			if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
-			{
-				return true;
-			}
-		}
-		return false;
-	}
-
-	public static void StartupHibernatingParts(Building rootBuilding)
-	{
-		foreach (Building item in ShipBuildingsAttachedTo(rootBuilding).ToList())
-		{
-			CompHibernatable compHibernatable = item.TryGetComp<CompHibernatable>();
-			if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
-			{
-				compHibernatable.Startup();
-			}
-		}
-		SoundDefOf.ShipReactor_Startup.PlayOneShot(SoundInfo.InMap(rootBuilding));
-	}
-
-	public static List<Building> ShipBuildingsAttachedTo(Building root)
-	{
-		closedSet.Clear();
-		if (root == null || root.Destroyed)
-		{
-			return closedSet;
-		}
-		openSet.Clear();
-		openSet.Add(root);
-		while (openSet.Count > 0)
-		{
-			Building building = openSet[openSet.Count - 1];
-			openSet.Remove(building);
-			closedSet.Add(building);
-			foreach (IntVec3 item in GenAdj.CellsAdjacentCardinal(building))
-			{
-				Building edifice = item.GetEdifice(building.Map);
-				if (edifice != null && edifice.def.building.shipPart && !closedSet.Contains(edifice) && !openSet.Contains(edifice))
+				while (enumerator.MoveNext())
 				{
-					openSet.Add(edifice);
+					KeyValuePair<ThingDef, int> partDef = enumerator.Current;
+					int num = shipParts.Count((Building pa) => pa.def == partDef.Key);
+					if (num < partDef.Value)
+					{
+						yield return string.Format("{0}: {1}x {2} ({3} {4})", new object[]
+						{
+							"ShipReportMissingPart".Translate(),
+							partDef.Value - num,
+							partDef.Key.label,
+							"ShipReportMissingPartRequires".Translate(),
+							partDef.Value
+						});
+					}
 				}
 			}
-		}
-		return closedSet;
-	}
-
-	public static IEnumerable<Gizmo> ShipStartupGizmos(Building building)
-	{
-		if (!HasHibernatingParts(building))
-		{
+			Dictionary<ThingDef, int>.Enumerator enumerator = default(Dictionary<ThingDef, int>.Enumerator);
+			bool fullPodFound = false;
+			foreach (Building building in shipParts)
+			{
+				if (building.def == ThingDefOf.Ship_CryptosleepCasket)
+				{
+					Building_CryptosleepCasket building_CryptosleepCasket = building as Building_CryptosleepCasket;
+					if (building_CryptosleepCasket != null && building_CryptosleepCasket.HasAnyContents)
+					{
+						fullPodFound = true;
+						break;
+					}
+				}
+			}
+			foreach (Building building2 in shipParts)
+			{
+				CompHibernatable compHibernatable = building2.TryGetComp<CompHibernatable>();
+				if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
+				{
+					yield return string.Format("{0}: {1}", "ShipReportHibernating".Translate(), building2.LabelCap);
+				}
+				else if (compHibernatable != null && !compHibernatable.Running)
+				{
+					yield return string.Format("{0}: {1}", "ShipReportNotReady".Translate(), building2.LabelCap);
+				}
+			}
+			List<Building>.Enumerator enumerator3 = default(List<Building>.Enumerator);
+			if (!fullPodFound)
+			{
+				yield return "ShipReportNoFullPods".Translate();
+			}
+			yield break;
 			yield break;
 		}
-		Command_Action command_Action = new Command_Action();
-		command_Action.action = delegate
+
+		// Token: 0x0601104D RID: 69709 RVA: 0x004E52D8 File Offset: 0x004E34D8
+		public static bool HasHibernatingParts(Building rootBuilding)
 		{
-			string text = "HibernateWarning";
-			if (building.Map.info.parent.GetComponent<EscapeShipComp>() == null)
+			foreach (Building thing in ShipUtility.ShipBuildingsAttachedTo(rootBuilding).ToList<Building>())
 			{
-				text += "Standalone";
-			}
-			if (!Find.Storyteller.difficulty.allowBigThreats)
-			{
-				text += "Pacifist";
-			}
-			DiaNode diaNode = new DiaNode(text.Translate());
-			DiaOption item = new DiaOption("Confirm".Translate())
-			{
-				action = delegate
+				CompHibernatable compHibernatable = thing.TryGetComp<CompHibernatable>();
+				if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
 				{
-					StartupHibernatingParts(building);
-				},
-				resolveTree = true
-			};
-			diaNode.options.Add(item);
-			DiaOption item2 = new DiaOption("GoBack".Translate())
+					return true;
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x0601104E RID: 69710 RVA: 0x004E5348 File Offset: 0x004E3548
+		public static void StartupHibernatingParts(Building rootBuilding)
+		{
+			foreach (Building thing in ShipUtility.ShipBuildingsAttachedTo(rootBuilding).ToList<Building>())
 			{
-				resolveTree = true
-			};
-			diaNode.options.Add(item2);
-			Find.WindowStack.Add(new Dialog_NodeTree(diaNode, delayInteractivity: true));
-		};
-		command_Action.defaultLabel = "CommandShipStartup".Translate();
-		command_Action.defaultDesc = "CommandShipStartupDesc".Translate();
-		command_Action.hotKey = KeyBindingDefOf.Misc1;
-		command_Action.icon = ContentFinder<Texture2D>.Get("UI/Commands/DesirePower");
-		yield return command_Action;
+				CompHibernatable compHibernatable = thing.TryGetComp<CompHibernatable>();
+				if (compHibernatable != null && compHibernatable.State == HibernatableStateDefOf.Hibernating)
+				{
+					compHibernatable.Startup();
+				}
+			}
+			SoundDefOf.ShipReactor_Startup.PlayOneShot(SoundInfo.InMap(rootBuilding, MaintenanceType.None));
+		}
+
+		// Token: 0x0601104F RID: 69711 RVA: 0x004E53CC File Offset: 0x004E35CC
+		public static List<Building> ShipBuildingsAttachedTo(Building root)
+		{
+			ShipUtility.closedSet.Clear();
+			if (root == null || root.Destroyed)
+			{
+				return ShipUtility.closedSet;
+			}
+			ShipUtility.openSet.Clear();
+			ShipUtility.openSet.Add(root);
+			while (ShipUtility.openSet.Count > 0)
+			{
+				Building building = ShipUtility.openSet[ShipUtility.openSet.Count - 1];
+				ShipUtility.openSet.Remove(building);
+				ShipUtility.closedSet.Add(building);
+				foreach (IntVec3 c in GenAdj.CellsAdjacentCardinal(building))
+				{
+					Building edifice = c.GetEdifice(building.Map);
+					if (edifice != null && edifice.def.building.shipPart && !ShipUtility.closedSet.Contains(edifice) && !ShipUtility.openSet.Contains(edifice))
+					{
+						ShipUtility.openSet.Add(edifice);
+					}
+				}
+			}
+			return ShipUtility.closedSet;
+		}
+
+		// Token: 0x06011050 RID: 69712 RVA: 0x004E54D0 File Offset: 0x004E36D0
+		public static IEnumerable<Gizmo> ShipStartupGizmos(Building building)
+		{
+			if (ShipUtility.HasHibernatingParts(building))
+			{
+				Action <>9__1;
+				yield return new Command_Action
+				{
+					action = delegate()
+					{
+						string text = "HibernateWarning";
+						if (building.Map.info.parent.GetComponent<EscapeShipComp>() == null)
+						{
+							text += "Standalone";
+						}
+						if (!Find.Storyteller.difficulty.allowBigThreats)
+						{
+							text += "Pacifist";
+						}
+						DiaNode diaNode = new DiaNode(text.Translate());
+						DiaOption diaOption = new DiaOption("Confirm".Translate());
+						DiaOption diaOption2 = diaOption;
+						Action action;
+						if ((action = <>9__1) == null)
+						{
+							action = (<>9__1 = delegate()
+							{
+								ShipUtility.StartupHibernatingParts(building);
+							});
+						}
+						diaOption2.action = action;
+						diaOption.resolveTree = true;
+						diaNode.options.Add(diaOption);
+						DiaOption diaOption3 = new DiaOption("GoBack".Translate());
+						diaOption3.resolveTree = true;
+						diaNode.options.Add(diaOption3);
+						Find.WindowStack.Add(new Dialog_NodeTree(diaNode, true, false, null));
+					},
+					defaultLabel = "CommandShipStartup".Translate(),
+					defaultDesc = "CommandShipStartupDesc".Translate(),
+					hotKey = KeyBindingDefOf.Misc1,
+					icon = ContentFinder<Texture2D>.Get("UI/Commands/DesirePower", true)
+				};
+			}
+			yield break;
+		}
+
+		// Token: 0x0400B0DD RID: 45277
+		private static Dictionary<ThingDef, int> requiredParts;
+
+		// Token: 0x0400B0DE RID: 45278
+		private static List<Building> closedSet = new List<Building>();
+
+		// Token: 0x0400B0DF RID: 45279
+		private static List<Building> openSet = new List<Building>();
 	}
 }

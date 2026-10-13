@@ -1,19 +1,31 @@
+﻿using System;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class CompUseEffect_Artifact : CompUseEffect
+namespace RimWorld
 {
-	public CompProperties_UseEffectArtifact Props => (CompProperties_UseEffectArtifact)props;
-
-	public override void DoEffect(Pawn usedBy)
+	// Token: 0x02002F56 RID: 12118
+	public class CompUseEffect_Artifact : CompUseEffect
 	{
-		base.DoEffect(usedBy);
-		if (Props.sound != null)
+		// Token: 0x17002C2E RID: 11310
+		// (get) Token: 0x06011153 RID: 69971 RVA: 0x004E7DB1 File Offset: 0x004E5FB1
+		public CompProperties_UseEffectArtifact Props
 		{
-			Props.sound.PlayOneShot(new TargetInfo(parent.Position, usedBy.MapHeld));
+			get
+			{
+				return (CompProperties_UseEffectArtifact)this.props;
+			}
 		}
-		usedBy.records.Increment(RecordDefOf.ArtifactsActivated);
+
+		// Token: 0x06011154 RID: 69972 RVA: 0x004E7DC0 File Offset: 0x004E5FC0
+		public override void DoEffect(Pawn usedBy)
+		{
+			base.DoEffect(usedBy);
+			if (this.Props.sound != null)
+			{
+				this.Props.sound.PlayOneShot(new TargetInfo(this.parent.Position, usedBy.MapHeld, false));
+			}
+			usedBy.records.Increment(RecordDefOf.ArtifactsActivated);
+		}
 	}
 }

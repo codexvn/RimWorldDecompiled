@@ -1,66 +1,97 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldInfo : IExposable
+namespace RimWorld.Planet
 {
-	public string name = "DefaultWorldName";
-
-	public float planetCoverage;
-
-	public string seedString = "SeedError";
-
-	public int persistentRandomValue = Rand.Int;
-
-	public OverallRainfall overallRainfall = OverallRainfall.Normal;
-
-	public OverallTemperature overallTemperature = OverallTemperature.Normal;
-
-	public OverallPopulation overallPopulation = OverallPopulation.Normal;
-
-	public LandmarkDensity landmarkDensity = LandmarkDensity.Normal;
-
-	public IntVec3 initialMapSize = new IntVec3(250, 1, 250);
-
-	public List<FactionDef> factions;
-
-	public float pollution;
-
-	public string FileNameNoExtension => GenText.CapitalizedNoSpaces(name);
-
-	public int Seed => GenText.StableStringHash(seedString);
-
-	public void ExposeData()
+	// Token: 0x02003D11 RID: 15633
+	public class WorldInfo : IExposable
 	{
-		Scribe_Values.Look(ref name, "name");
-		Scribe_Values.Look(ref planetCoverage, "planetCoverage", 0f);
-		Scribe_Values.Look(ref seedString, "seedString");
-		Scribe_Values.Look(ref persistentRandomValue, "persistentRandomValue", 0);
-		Scribe_Values.Look(ref overallRainfall, "overallRainfall", OverallRainfall.AlmostNone);
-		Scribe_Values.Look(ref overallTemperature, "overallTemperature", OverallTemperature.VeryCold);
-		Scribe_Values.Look(ref initialMapSize, "initialMapSize");
-		Scribe_Values.Look(ref pollution, "pollution", 0f);
-		Scribe_Collections.Look(ref factions, "factions", LookMode.Def);
-		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		// Token: 0x17003508 RID: 13576
+		// (get) Token: 0x06015479 RID: 87161 RVA: 0x0065DA73 File Offset: 0x0065BC73
+		public string FileNameNoExtension
 		{
-			Dictionary<FactionDef, int> dict = null;
-			Scribe_Collections.Look(ref dict, "factionCounts", LookMode.Def, LookMode.Value);
-			if (dict != null)
+			get
 			{
-				factions = new List<FactionDef>();
-				foreach (KeyValuePair<FactionDef, int> item in dict)
+				return GenText.CapitalizedNoSpaces(this.name);
+			}
+		}
+
+		// Token: 0x17003509 RID: 13577
+		// (get) Token: 0x0601547A RID: 87162 RVA: 0x0065DA80 File Offset: 0x0065BC80
+		public int Seed
+		{
+			get
+			{
+				return GenText.StableStringHash(this.seedString);
+			}
+		}
+
+		// Token: 0x0601547B RID: 87163 RVA: 0x0065DA90 File Offset: 0x0065BC90
+		public void ExposeData()
+		{
+			Scribe_Values.Look<string>(ref this.name, "name", null, false);
+			Scribe_Values.Look<float>(ref this.planetCoverage, "planetCoverage", 0f, false);
+			Scribe_Values.Look<string>(ref this.seedString, "seedString", null, false);
+			Scribe_Values.Look<int>(ref this.persistentRandomValue, "persistentRandomValue", 0, false);
+			Scribe_Values.Look<OverallRainfall>(ref this.overallRainfall, "overallRainfall", OverallRainfall.AlmostNone, false);
+			Scribe_Values.Look<OverallTemperature>(ref this.overallTemperature, "overallTemperature", OverallTemperature.VeryCold, false);
+			Scribe_Values.Look<IntVec3>(ref this.initialMapSize, "initialMapSize", default(IntVec3), false);
+			Scribe_Values.Look<float>(ref this.pollution, "pollution", 0f, false);
+			Scribe_Collections.Look<FactionDef>(ref this.factions, "factions", LookMode.Def, Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
+			{
+				Dictionary<FactionDef, int> dictionary = null;
+				Scribe_Collections.Look<FactionDef, int>(ref dictionary, "factionCounts", LookMode.Def, LookMode.Value);
+				if (dictionary != null)
 				{
-					if (item.Value > 0)
+					this.factions = new List<FactionDef>();
+					foreach (KeyValuePair<FactionDef, int> keyValuePair in dictionary)
 					{
-						for (int i = 0; i < item.Value; i++)
+						if (keyValuePair.Value > 0)
 						{
-							factions.Add(item.Key);
+							for (int i = 0; i < keyValuePair.Value; i++)
+							{
+								this.factions.Add(keyValuePair.Key);
+							}
 						}
 					}
 				}
 			}
+			BackCompatibility.PostExposeData(this);
 		}
-		BackCompatibility.PostExposeData(this);
+
+		// Token: 0x0400ED34 RID: 60724
+		public string name = "DefaultWorldName";
+
+		// Token: 0x0400ED35 RID: 60725
+		public float planetCoverage;
+
+		// Token: 0x0400ED36 RID: 60726
+		public string seedString = "SeedError";
+
+		// Token: 0x0400ED37 RID: 60727
+		public int persistentRandomValue = Rand.Int;
+
+		// Token: 0x0400ED38 RID: 60728
+		public OverallRainfall overallRainfall = OverallRainfall.Normal;
+
+		// Token: 0x0400ED39 RID: 60729
+		public OverallTemperature overallTemperature = OverallTemperature.Normal;
+
+		// Token: 0x0400ED3A RID: 60730
+		public OverallPopulation overallPopulation = OverallPopulation.Normal;
+
+		// Token: 0x0400ED3B RID: 60731
+		public LandmarkDensity landmarkDensity = LandmarkDensity.Normal;
+
+		// Token: 0x0400ED3C RID: 60732
+		public IntVec3 initialMapSize = new IntVec3(250, 1, 250);
+
+		// Token: 0x0400ED3D RID: 60733
+		public List<FactionDef> factions;
+
+		// Token: 0x0400ED3E RID: 60734
+		public float pollution;
 	}
 }

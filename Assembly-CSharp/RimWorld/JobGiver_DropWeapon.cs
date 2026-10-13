@@ -1,22 +1,26 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_DropWeapon : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x02001436 RID: 5174
+	public class JobGiver_DropWeapon : ThinkNode_JobGiver
 	{
-		if (pawn.equipment != null)
+		// Token: 0x06007D93 RID: 32147 RVA: 0x0025D0E0 File Offset: 0x0025B2E0
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			foreach (ThingWithComps item in pawn.equipment.AllEquipmentListForReading)
+			if (pawn.equipment != null)
 			{
-				if (item.def.IsWeapon)
+				foreach (ThingWithComps thingWithComps in pawn.equipment.AllEquipmentListForReading)
 				{
-					return JobMaker.MakeJob(JobDefOf.DropEquipment, item);
+					if (thingWithComps.def.IsWeapon)
+					{
+						return JobMaker.MakeJob(JobDefOf.DropEquipment, thingWithComps);
+					}
 				}
 			}
+			return null;
 		}
-		return null;
 	}
 }

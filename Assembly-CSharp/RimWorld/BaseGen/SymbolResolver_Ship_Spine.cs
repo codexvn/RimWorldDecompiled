@@ -1,73 +1,83 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Ship_Spine : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x020039AE RID: 14766
+	public class SymbolResolver_Ship_Spine : SymbolResolver
 	{
-		ThingDef ship_Beam = ThingDefOf.Ship_Beam;
-		Map map = BaseGen.globalSettings.map;
-		if (!rp.thingRot.HasValue && !rp.thrustAxis.HasValue)
+		// Token: 0x0601441D RID: 82973 RVA: 0x0060C2D4 File Offset: 0x0060A4D4
+		public override void Resolve(ResolveParams rp)
 		{
-			rp.thrustAxis = Rot4.Random;
-			rp.thingRot = rp.thrustAxis;
-		}
-		IntVec2 intVec = IntVec2.Invalid;
-		IntVec2 intVec2 = IntVec2.Invalid;
-		IntVec2 toIntVec = rp.thingRot.Value.FacingCell.ToIntVec2;
-		int num = 0;
-		while (true)
-		{
-			if (rp.thingRot.Value.IsHorizontal)
+			ThingDef ship_Beam = ThingDefOf.Ship_Beam;
+			Map map = BaseGen.globalSettings.map;
+			if (rp.thingRot == null && rp.thrustAxis == null)
 			{
-				int newZ = Rand.Range(rp.rect.minZ + 1, rp.rect.maxZ - 2);
-				intVec = new IntVec2((rp.thingRot.Value == Rot4.East) ? rp.rect.minX : rp.rect.maxX, newZ);
-				intVec2 = new IntVec2((rp.thingRot.Value == Rot4.East) ? rp.rect.maxX : rp.rect.minX, newZ);
+				rp.thrustAxis = new Rot4?(Rot4.Random);
+				rp.thingRot = rp.thrustAxis;
 			}
-			else
+			IntVec2 invalid = IntVec2.Invalid;
+			IntVec2 invalid2 = IntVec2.Invalid;
+			IntVec2 toIntVec = rp.thingRot.Value.FacingCell.ToIntVec2;
+			int num = 0;
+			for (;;)
 			{
-				int newX = Rand.Range(rp.rect.minX + 1, rp.rect.maxX - 2);
-				intVec = new IntVec2(newX, (rp.thingRot.Value == Rot4.North) ? rp.rect.minZ : rp.rect.maxZ);
-				intVec2 = new IntVec2(newX, (rp.thingRot.Value == Rot4.North) ? rp.rect.maxZ : rp.rect.minZ);
+				if (rp.thingRot.Value.IsHorizontal)
+				{
+					int newZ = Rand.Range(rp.rect.minZ + 1, rp.rect.maxZ - 2);
+					invalid = new IntVec2((rp.thingRot.Value == Rot4.East) ? rp.rect.minX : rp.rect.maxX, newZ);
+					invalid2 = new IntVec2((rp.thingRot.Value == Rot4.East) ? rp.rect.maxX : rp.rect.minX, newZ);
+				}
+				else
+				{
+					int newX = Rand.Range(rp.rect.minX + 1, rp.rect.maxX - 2);
+					invalid = new IntVec2(newX, (rp.thingRot.Value == Rot4.North) ? rp.rect.minZ : rp.rect.maxZ);
+					invalid2 = new IntVec2(newX, (rp.thingRot.Value == Rot4.North) ? rp.rect.maxZ : rp.rect.minZ);
+				}
+				if (rp.allowPlacementOffEdge ?? true)
+				{
+					goto IL_22B;
+				}
+				if ((invalid - toIntVec).ToIntVec3.GetThingList(map).Any((Thing thing) => thing.def == ThingDefOf.Ship_Beam))
+				{
+					goto IL_22B;
+				}
+				if (num == 20)
+				{
+					break;
+				}
+				num++;
 			}
-			bool? allowPlacementOffEdge = rp.allowPlacementOffEdge;
-			if (!allowPlacementOffEdge.HasValue || allowPlacementOffEdge == true || (intVec - toIntVec).ToIntVec3.GetThingList(map).Any((Thing thing2) => thing2.def == ThingDefOf.Ship_Beam))
-			{
-				break;
-			}
-			if (num == 20)
+			return;
+			IL_22B:
+			int magnitudeManhattan = (invalid - invalid2).MagnitudeManhattan;
+			if ((invalid - invalid2).Magnitude < (float)ship_Beam.Size.z)
 			{
 				return;
 			}
-			num++;
-		}
-		int magnitudeManhattan = (intVec - intVec2).MagnitudeManhattan;
-		if (!((intVec - intVec2).Magnitude < (float)ship_Beam.Size.z))
-		{
-			int num2;
 			int num4;
+			int num5;
 			do
 			{
-				num2 = ((rp.allowPlacementOffEdge ?? true) ? Rand.Range(0, 7) : 0);
+				int num2 = (rp.allowPlacementOffEdge ?? true) ? Rand.Range(0, 7) : 0;
 				int num3 = Rand.Range(0, 7);
-				num2 = 0;
+				num4 = 0;
 				num3 = 0;
-				num4 = (magnitudeManhattan - num2 - num3) / ship_Beam.Size.z;
+				num5 = (magnitudeManhattan - num4 - num3) / ship_Beam.Size.z;
 			}
-			while (num4 <= 0);
-			IntVec2 intVec3 = intVec + toIntVec * (num2 + ship_Beam.Size.z / 2 - 1);
+			while (num5 <= 0);
+			IntVec2 a = invalid + toIntVec * (num4 + ship_Beam.Size.z / 2 - 1);
 			Thing t = null;
-			for (int num5 = 0; num5 < num4; num5++)
+			for (int i = 0; i < num5; i++)
 			{
-				Thing thing = ThingMaker.MakeThing(ship_Beam);
-				thing.SetFaction(rp.faction);
-				t = GenSpawn.Spawn(thing, intVec3.ToIntVec3, map, rp.thingRot.Value);
-				intVec3 += toIntVec * ship_Beam.Size.z;
+				Thing thing2 = ThingMaker.MakeThing(ship_Beam, null);
+				thing2.SetFaction(rp.faction, null);
+				t = GenSpawn.Spawn(thing2, a.ToIntVec3, map, rp.thingRot.Value, WipeMode.Vanish, false, false);
+				a += toIntVec * ship_Beam.Size.z;
 			}
 			if (rp.allowPlacementOffEdge ?? true)
 			{
-				BaseGen.symbolStack.Push("ship_populate", rp);
+				BaseGen.symbolStack.Push("ship_populate", rp, null);
 			}
 			CellRect rect;
 			Rot4 value;
@@ -91,27 +101,25 @@ public class SymbolResolver_Ship_Spine : SymbolResolver
 				rect2.minX = t.OccupiedRect().maxX + 1;
 				value2 = Rot4.East;
 			}
-			bool? allowPlacementOffEdge = rp.allowPlacementOffEdge;
-			if (!allowPlacementOffEdge.HasValue || allowPlacementOffEdge == true || Rand.Value < 0.3f)
+			if ((rp.allowPlacementOffEdge ?? true) || Rand.Value < 0.3f)
 			{
 				ResolveParams resolveParams = rp;
 				resolveParams.rect = rect;
-				resolveParams.thingRot = value;
-				resolveParams.allowPlacementOffEdge = false;
-				BaseGen.symbolStack.Push("ship_spine", resolveParams);
+				resolveParams.thingRot = new Rot4?(value);
+				resolveParams.allowPlacementOffEdge = new bool?(false);
+				BaseGen.symbolStack.Push("ship_spine", resolveParams, null);
 			}
-			allowPlacementOffEdge = rp.allowPlacementOffEdge;
-			if (!allowPlacementOffEdge.HasValue || allowPlacementOffEdge == true || Rand.Value < 0.3f)
+			if ((rp.allowPlacementOffEdge ?? true) || Rand.Value < 0.3f)
 			{
 				ResolveParams resolveParams2 = rp;
 				resolveParams2.rect = rect2;
-				resolveParams2.thingRot = value2;
-				resolveParams2.allowPlacementOffEdge = false;
-				BaseGen.symbolStack.Push("ship_spine", resolveParams2);
+				resolveParams2.thingRot = new Rot4?(value2);
+				resolveParams2.allowPlacementOffEdge = new bool?(false);
+				BaseGen.symbolStack.Push("ship_spine", resolveParams2, null);
 			}
 			ResolveParams resolveParams3 = rp;
 			resolveParams3.floorDef = TerrainDefOf.Concrete;
-			BaseGen.symbolStack.Push("floor", resolveParams3);
+			BaseGen.symbolStack.Push("floor", resolveParams3, null);
 		}
 	}
 }

@@ -1,145 +1,159 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public static class PawnPortraitIconsDrawer
+namespace RimWorld
 {
-	private struct PawnPortraitIcon
+	// Token: 0x020034A7 RID: 13479
+	[StaticConstructorOnStartup]
+	public static class PawnPortraitIconsDrawer
 	{
-		public Color color;
-
-		public Texture2D icon;
-
-		public string tooltip;
-	}
-
-	private static Texture2D prisonerIcon = ContentFinder<Texture2D>.Get("UI/Icons/Prisoner");
-
-	private static Texture2D sleepingIcon = ContentFinder<Texture2D>.Get("UI/Icons/ColonistBar/Sleeping");
-
-	private static Texture2D slaveryIcon;
-
-	private static List<PawnPortraitIcon> tmpPortraitIcons = new List<PawnPortraitIcon>();
-
-	private static Texture2D SlaveryIcon
-	{
-		get
+		// Token: 0x17003161 RID: 12641
+		// (get) Token: 0x06012F3E RID: 77630 RVA: 0x0059DACC File Offset: 0x0059BCCC
+		private static Texture2D SlaveryIcon
 		{
-			if (slaveryIcon == null)
+			get
 			{
-				slaveryIcon = ContentFinder<Texture2D>.Get("UI/Icons/Slavery");
+				if (PawnPortraitIconsDrawer.slaveryIcon == null)
+				{
+					PawnPortraitIconsDrawer.slaveryIcon = ContentFinder<Texture2D>.Get("UI/Icons/Slavery", true);
+				}
+				return PawnPortraitIconsDrawer.slaveryIcon;
 			}
-			return slaveryIcon;
 		}
-	}
 
-	private static void CalculatePawnPortraitIcons(Pawn pawn, bool required, bool showIdeoIcon)
-	{
-		using (new ProfilerBlock("CalculatePawnPortraitIcons"))
+		// Token: 0x06012F3F RID: 77631 RVA: 0x0059DAF0 File Offset: 0x0059BCF0
+		private static void CalculatePawnPortraitIcons(Pawn pawn, bool required, bool showIdeoIcon)
 		{
-			tmpPortraitIcons.Clear();
-			Ideo ideo = pawn.Ideo;
-			if (required)
+			using (new ProfilerBlock("CalculatePawnPortraitIcons"))
 			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
+				PawnPortraitIconsDrawer.tmpPortraitIcons.Clear();
+				Ideo ideo = pawn.Ideo;
+				if (required)
 				{
-					color = Color.white,
-					icon = IdeoUIUtility.LockedTex,
-					tooltip = "Required".Translate()
-				});
-			}
-			if (!ModsConfig.IdeologyActive || ideo == null)
-			{
-				return;
-			}
-			if (!Find.IdeoManager.classicMode && showIdeoIcon)
-			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
-				{
-					color = ideo.Color,
-					icon = ideo.Icon,
-					tooltip = ideo.memberName
-				});
-				Precept_Role role = ideo.GetRole(pawn);
-				if (role != null)
-				{
-					tmpPortraitIcons.Add(new PawnPortraitIcon
+					PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
 					{
-						color = ideo.Color,
-						icon = role.Icon,
-						tooltip = role.TipLabel
+						color = Color.white,
+						icon = IdeoUIUtility.LockedTex,
+						tooltip = "Required".Translate()
 					});
 				}
-				GUI.color = Color.white;
-			}
-			Faction homeFaction = pawn.HomeFaction;
-			if (homeFaction != null && !homeFaction.IsPlayer && !homeFaction.Hidden)
-			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
+				if (ModsConfig.IdeologyActive && ideo != null)
 				{
-					color = homeFaction.Color,
-					icon = homeFaction.def.FactionIcon,
-					tooltip = "Faction".Translate() + ": " + homeFaction.Name + "\n" + homeFaction.def.LabelCap
-				});
-			}
-			if (pawn.IsSlave)
-			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
-				{
-					color = Color.white,
-					icon = SlaveryIcon,
-					tooltip = "RitualBeginSlaveDesc".Translate()
-				});
-			}
-			if (pawn.IsPrisoner)
-			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
-				{
-					color = Color.white,
-					icon = prisonerIcon,
-					tooltip = null
-				});
-			}
-			if (!pawn.Awake())
-			{
-				tmpPortraitIcons.Add(new PawnPortraitIcon
-				{
-					color = Color.white,
-					icon = sleepingIcon,
-					tooltip = "RitualBeginSleepingDesc".Translate(pawn)
-				});
+					if (!Find.IdeoManager.classicMode && showIdeoIcon)
+					{
+						PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+						{
+							color = ideo.Color,
+							icon = ideo.Icon,
+							tooltip = ideo.memberName
+						});
+						Precept_Role role = ideo.GetRole(pawn);
+						if (role != null)
+						{
+							PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+							{
+								color = ideo.Color,
+								icon = role.Icon,
+								tooltip = role.TipLabel
+							});
+						}
+						GUI.color = Color.white;
+					}
+					Faction homeFaction = pawn.HomeFaction;
+					if (homeFaction != null && !homeFaction.IsPlayer && !homeFaction.Hidden)
+					{
+						PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+						{
+							color = homeFaction.Color,
+							icon = homeFaction.def.FactionIcon,
+							tooltip = "Faction".Translate() + ": " + homeFaction.Name + "\n" + homeFaction.def.LabelCap
+						});
+					}
+					if (pawn.IsSlave)
+					{
+						PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+						{
+							color = Color.white,
+							icon = PawnPortraitIconsDrawer.SlaveryIcon,
+							tooltip = "RitualBeginSlaveDesc".Translate()
+						});
+					}
+					if (pawn.IsPrisoner)
+					{
+						PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+						{
+							color = Color.white,
+							icon = PawnPortraitIconsDrawer.prisonerIcon,
+							tooltip = null
+						});
+					}
+					if (!pawn.Awake())
+					{
+						PawnPortraitIconsDrawer.tmpPortraitIcons.Add(new PawnPortraitIconsDrawer.PawnPortraitIcon
+						{
+							color = Color.white,
+							icon = PawnPortraitIconsDrawer.sleepingIcon,
+							tooltip = "RitualBeginSleepingDesc".Translate(pawn)
+						});
+					}
+				}
 			}
 		}
-	}
 
-	public static void DrawPawnPortraitIcons(Rect portraitRect, Pawn p, bool required, bool grayedOut, ref float curX, ref float curY, float iconSize, bool showIdeoIcon, out bool tooltipActive)
-	{
-		CalculatePawnPortraitIcons(p, required, showIdeoIcon);
-		tooltipActive = false;
-		foreach (PawnPortraitIcon tmpPortraitIcon in tmpPortraitIcons)
+		// Token: 0x06012F40 RID: 77632 RVA: 0x0059DDA4 File Offset: 0x0059BFA4
+		public static void DrawPawnPortraitIcons(Rect portraitRect, Pawn p, bool required, bool grayedOut, ref float curX, ref float curY, float iconSize, bool showIdeoIcon, out bool tooltipActive)
 		{
-			PawnPortraitIcon localIcon = tmpPortraitIcon;
-			Rect rect = new Rect(curX - iconSize, curY - iconSize, iconSize, iconSize);
-			curX -= iconSize;
-			if (curX - iconSize < portraitRect.x)
+			PawnPortraitIconsDrawer.CalculatePawnPortraitIcons(p, required, showIdeoIcon);
+			tooltipActive = false;
+			foreach (PawnPortraitIconsDrawer.PawnPortraitIcon pawnPortraitIcon in PawnPortraitIconsDrawer.tmpPortraitIcons)
 			{
-				curX = portraitRect.xMax;
-				curY -= iconSize + 2f;
-			}
-			GUI.color = (grayedOut ? tmpPortraitIcon.color.SaturationChanged(0f) : tmpPortraitIcon.color);
-			Widgets.DrawTextureFitted(rect, tmpPortraitIcon.icon, 1f);
-			GUI.color = Color.white;
-			if (tmpPortraitIcon.tooltip != null)
-			{
-				if (Mouse.IsOver(rect))
+				PawnPortraitIconsDrawer.PawnPortraitIcon localIcon = pawnPortraitIcon;
+				Rect rect = new Rect(curX - iconSize, curY - iconSize, iconSize, iconSize);
+				curX -= iconSize;
+				if (curX - iconSize < portraitRect.x)
 				{
-					tooltipActive = true;
+					curX = portraitRect.xMax;
+					curY -= iconSize + 2f;
 				}
-				TooltipHandler.TipRegion(rect, () => localIcon.tooltip, tmpPortraitIcon.icon.GetInstanceID() ^ p.thingIDNumber);
+				GUI.color = (grayedOut ? pawnPortraitIcon.color.SaturationChanged(0f) : pawnPortraitIcon.color);
+				Widgets.DrawTextureFitted(rect, pawnPortraitIcon.icon, 1f, 1f);
+				GUI.color = Color.white;
+				if (pawnPortraitIcon.tooltip != null)
+				{
+					if (Mouse.IsOver(rect))
+					{
+						tooltipActive = true;
+					}
+					TooltipHandler.TipRegion(rect, () => localIcon.tooltip, pawnPortraitIcon.icon.GetInstanceID() ^ p.thingIDNumber);
+				}
 			}
+		}
+
+		// Token: 0x0400C465 RID: 50277
+		private static Texture2D prisonerIcon = ContentFinder<Texture2D>.Get("UI/Icons/Prisoner", true);
+
+		// Token: 0x0400C466 RID: 50278
+		private static Texture2D sleepingIcon = ContentFinder<Texture2D>.Get("UI/Icons/ColonistBar/Sleeping", true);
+
+		// Token: 0x0400C467 RID: 50279
+		private static Texture2D slaveryIcon;
+
+		// Token: 0x0400C468 RID: 50280
+		private static List<PawnPortraitIconsDrawer.PawnPortraitIcon> tmpPortraitIcons = new List<PawnPortraitIconsDrawer.PawnPortraitIcon>();
+
+		// Token: 0x020034A8 RID: 13480
+		private struct PawnPortraitIcon
+		{
+			// Token: 0x0400C469 RID: 50281
+			public Color color;
+
+			// Token: 0x0400C46A RID: 50282
+			public Texture2D icon;
+
+			// Token: 0x0400C46B RID: 50283
+			public string tooltip;
 		}
 	}
 }

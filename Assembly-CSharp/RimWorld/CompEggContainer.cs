@@ -1,97 +1,90 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class CompEggContainer : CompThingContainer
+namespace RimWorld
 {
-	public bool CanEmpty
+	// Token: 0x02002E8E RID: 11918
+	public class CompEggContainer : CompThingContainer
 	{
-		get
+		// Token: 0x17002B21 RID: 11041
+		// (get) Token: 0x06010C90 RID: 68752 RVA: 0x004D5523 File Offset: 0x004D3723
+		public bool CanEmpty
 		{
-			if (base.Empty)
+			get
 			{
-				return false;
+				return !base.Empty && (this.EggsRuined || base.ContainedThing.stackCount >= base.Props.minCountToEmpty);
 			}
-			if (EggsRuined)
-			{
-				return true;
-			}
-			return base.ContainedThing.stackCount >= base.Props.minCountToEmpty;
 		}
-	}
 
-	private bool EggsRuined
-	{
-		get
+		// Token: 0x17002B22 RID: 11042
+		// (get) Token: 0x06010C91 RID: 68753 RVA: 0x004D5554 File Offset: 0x004D3754
+		private bool EggsRuined
 		{
-			if (base.Empty)
+			get
 			{
-				return false;
-			}
-			CompTemperatureRuinable compTemperatureRuinable = base.ContainedThing.TryGetComp<CompTemperatureRuinable>();
-			if (compTemperatureRuinable != null && compTemperatureRuinable.Ruined)
-			{
-				return true;
-			}
-			CompHatcher compHatcher = base.ContainedThing.TryGetComp<CompHatcher>();
-			if (compHatcher != null && compHatcher.TemperatureDamaged)
-			{
-				return true;
-			}
-			return false;
-		}
-	}
-
-	public override bool Accepts(ThingDef thingDef)
-	{
-		if (base.ContainedThing != null && EggsRuined)
-		{
-			return false;
-		}
-		if (thingDef.thingCategories != null && (thingDef.thingCategories.Contains(ThingCategoryDefOf.EggsFertilized) || thingDef.thingCategories.Contains(ThingCategoryDefOf.EggsUnfertilized)))
-		{
-			return base.Accepts(thingDef);
-		}
-		return false;
-	}
-
-	public override string CompInspectStringExtra()
-	{
-		string text = base.CompInspectStringExtra();
-		if (!base.Empty && !EggsRuined)
-		{
-			CompHatcher compHatcher = base.ContainedThing.TryGetComp<CompHatcher>();
-			if (compHatcher != null)
-			{
-				string text2 = compHatcher.CompInspectStringExtra();
-				if (!text2.NullOrEmpty())
+				if (base.Empty)
 				{
-					text = text + "\n" + text2;
+					return false;
+				}
+				CompTemperatureRuinable compTemperatureRuinable = base.ContainedThing.TryGetComp<CompTemperatureRuinable>();
+				if (compTemperatureRuinable != null && compTemperatureRuinable.Ruined)
+				{
+					return true;
+				}
+				CompHatcher compHatcher = base.ContainedThing.TryGetComp<CompHatcher>();
+				return compHatcher != null && compHatcher.TemperatureDamaged;
+			}
+		}
+
+		// Token: 0x06010C92 RID: 68754 RVA: 0x004D55A0 File Offset: 0x004D37A0
+		public override bool Accepts(ThingDef thingDef)
+		{
+			return (base.ContainedThing == null || !this.EggsRuined) && (thingDef.thingCategories != null && (thingDef.thingCategories.Contains(ThingCategoryDefOf.EggsFertilized) || thingDef.thingCategories.Contains(ThingCategoryDefOf.EggsUnfertilized))) && base.Accepts(thingDef);
+		}
+
+		// Token: 0x06010C93 RID: 68755 RVA: 0x004D55F4 File Offset: 0x004D37F4
+		public override string CompInspectStringExtra()
+		{
+			string text = base.CompInspectStringExtra();
+			if (!base.Empty && !this.EggsRuined)
+			{
+				CompHatcher compHatcher = base.ContainedThing.TryGetComp<CompHatcher>();
+				if (compHatcher != null)
+				{
+					string text2 = compHatcher.CompInspectStringExtra();
+					if (!text2.NullOrEmpty())
+					{
+						text = text + "\n" + text2;
+					}
 				}
 			}
+			return text;
 		}
-		return text;
-	}
 
-	public override IEnumerable<Gizmo> CompGetGizmosExtra()
-	{
-		foreach (Gizmo item in base.CompGetGizmosExtra())
+		// Token: 0x06010C94 RID: 68756 RVA: 0x004D5644 File Offset: 0x004D3844
+		public override IEnumerable<Gizmo> CompGetGizmosExtra()
 		{
-			yield return item;
-		}
-		if (DebugSettings.ShowDevGizmos && base.Empty)
-		{
-			yield return new Command_Action
+			foreach (Gizmo gizmo in base.CompGetGizmosExtra())
 			{
-				defaultLabel = "DEV: Fill with eggs",
-				action = delegate
+				yield return gizmo;
+			}
+			IEnumerator<Gizmo> enumerator = null;
+			if (DebugSettings.ShowDevGizmos && base.Empty)
+			{
+				yield return new Command_Action
 				{
-					Thing thing = ThingMaker.MakeThing(ThingDef.Named("EggChickenUnfertilized"));
-					thing.stackCount = base.Props.stackLimit;
-					innerContainer.TryAdd(thing);
-				}
-			};
+					defaultLabel = "DEV: Fill with eggs",
+					action = delegate()
+					{
+						Thing thing = ThingMaker.MakeThing(ThingDef.Named("EggChickenUnfertilized"), null);
+						thing.stackCount = base.Props.stackLimit;
+						this.innerContainer.TryAdd(thing, true);
+					}
+				};
+			}
+			yield break;
+			yield break;
 		}
 	}
 }

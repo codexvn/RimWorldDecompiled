@@ -1,33 +1,40 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class FeedbackFloaters
+namespace Verse
 {
-	protected List<FeedbackItem> feeders = new List<FeedbackItem>();
-
-	public void AddFeedback(FeedbackItem newFeedback)
+	// Token: 0x02000B7E RID: 2942
+	public class FeedbackFloaters
 	{
-		feeders.Add(newFeedback);
-	}
-
-	public void FeedbackUpdate()
-	{
-		for (int num = feeders.Count - 1; num >= 0; num--)
+		// Token: 0x06004B59 RID: 19289 RVA: 0x0017FDEC File Offset: 0x0017DFEC
+		public void AddFeedback(FeedbackItem newFeedback)
 		{
-			feeders[num].Update();
-			if (feeders[num].TimeLeft <= 0f)
+			this.feeders.Add(newFeedback);
+		}
+
+		// Token: 0x06004B5A RID: 19290 RVA: 0x0017FDFC File Offset: 0x0017DFFC
+		public void FeedbackUpdate()
+		{
+			for (int i = this.feeders.Count - 1; i >= 0; i--)
 			{
-				feeders.Remove(feeders[num]);
+				this.feeders[i].Update();
+				if (this.feeders[i].TimeLeft <= 0f)
+				{
+					this.feeders.Remove(this.feeders[i]);
+				}
 			}
 		}
-	}
 
-	public void FeedbackOnGUI()
-	{
-		foreach (FeedbackItem feeder in feeders)
+		// Token: 0x06004B5B RID: 19291 RVA: 0x0017FE64 File Offset: 0x0017E064
+		public void FeedbackOnGUI()
 		{
-			feeder.FeedbackOnGUI();
+			foreach (FeedbackItem feedbackItem in this.feeders)
+			{
+				feedbackItem.FeedbackOnGUI();
+			}
 		}
+
+		// Token: 0x040035AB RID: 13739
+		protected List<FeedbackItem> feeders = new List<FeedbackItem>();
 	}
 }

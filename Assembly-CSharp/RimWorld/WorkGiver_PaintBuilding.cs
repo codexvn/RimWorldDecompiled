@@ -1,145 +1,169 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_PaintBuilding : WorkGiver_Scanner
+namespace RimWorld
 {
-	private static List<Thing> tmpDye = new List<Thing>();
-
-	public override PathEndMode PathEndMode => PathEndMode.Touch;
-
-	public override bool ShouldSkip(Pawn pawn, bool forced = false)
+	// Token: 0x020015F0 RID: 5616
+	public class WorkGiver_PaintBuilding : WorkGiver_Scanner
 	{
-		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.PaintBuilding);
-	}
-
-	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
-	{
-		foreach (Designation item in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.PaintBuilding))
+		// Token: 0x17001451 RID: 5201
+		// (get) Token: 0x0600848D RID: 33933 RVA: 0x000E96BB File Offset: 0x000E78BB
+		public override PathEndMode PathEndMode
 		{
-			yield return item.target.Thing;
-		}
-	}
-
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		AcceptanceReport acceptanceReport = ShouldPaintThing(pawn, t, forced, checkDye: true);
-		if (!acceptanceReport)
-		{
-			if (!acceptanceReport.Reason.NullOrEmpty())
+			get
 			{
-				JobFailReason.Is(acceptanceReport.Reason);
+				return PathEndMode.Touch;
 			}
-			return false;
 		}
-		return true;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		tmpDye.Clear();
-		tmpDye = PaintUtility.FindNearbyDyes(pawn, forced);
-		int stackCountFromThingList = ThingUtility.GetStackCountFromThingList(tmpDye);
-		if (!tmpDye.Any())
+		// Token: 0x0600848E RID: 33934 RVA: 0x0027B6C1 File Offset: 0x002798C1
+		public override bool ShouldSkip(Pawn pawn, bool forced = false)
 		{
-			return null;
+			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.PaintBuilding);
 		}
-		tmpDye.SortBy((Thing x) => x.Position.DistanceToSquared(t.Position));
-		int num = 0;
-		Job job = JobMaker.MakeJob(JobDefOf.PaintBuilding);
-		job.AddQueuedTarget(TargetIndex.A, t);
-		job.AddQueuedTarget(TargetIndex.B, tmpDye[num]);
-		job.countQueue = new List<int> { 1 };
-		int num2 = Mathf.Min(10, stackCountFromThingList);
-		for (int num3 = 0; num3 < 100; num3++)
+
+		// Token: 0x0600848F RID: 33935 RVA: 0x0027B6DB File Offset: 0x002798DB
+		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			IntVec3 intVec = t.Position + GenRadial.RadialPattern[num3];
-			if (!intVec.InBounds(t.Map) || intVec.Fogged(t.Map) || !pawn.CanReach(intVec, PathEndMode.Touch, Danger.Deadly))
+			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.PaintBuilding))
 			{
-				continue;
+				yield return designation.target.Thing;
 			}
-			List<Thing> thingList = intVec.GetThingList(t.Map);
-			for (int num4 = 0; num4 < thingList.Count; num4++)
+			IEnumerator<Designation> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06008490 RID: 33936 RVA: 0x0027B6EC File Offset: 0x002798EC
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			AcceptanceReport report = this.ShouldPaintThing(pawn, t, forced, true);
+			if (!report)
 			{
-				Thing thing = thingList[num4];
-				if (thing == t || !ShouldPaintThing(pawn, thing, forced, checkDye: false) || job.targetQueueA.Contains(thing))
+				if (!report.Reason.NullOrEmpty())
 				{
-					continue;
+					JobFailReason.Is(report.Reason, null);
 				}
-				job.AddQueuedTarget(TargetIndex.A, thing);
-				job.countQueue[0]++;
-				if (job.countQueue[0] >= tmpDye[num].stackCount)
+				return false;
+			}
+			return true;
+		}
+
+		// Token: 0x06008491 RID: 33937 RVA: 0x0027B72C File Offset: 0x0027992C
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			WorkGiver_PaintBuilding.tmpDye.Clear();
+			WorkGiver_PaintBuilding.tmpDye = PaintUtility.FindNearbyDyes(pawn, forced);
+			int stackCountFromThingList = ThingUtility.GetStackCountFromThingList(WorkGiver_PaintBuilding.tmpDye);
+			if (!WorkGiver_PaintBuilding.tmpDye.Any<Thing>())
+			{
+				return null;
+			}
+			WorkGiver_PaintBuilding.tmpDye.SortBy((Thing x) => x.Position.DistanceToSquared(t.Position));
+			int num = 0;
+			Job job = JobMaker.MakeJob(JobDefOf.PaintBuilding);
+			job.AddQueuedTarget(TargetIndex.A, t);
+			job.AddQueuedTarget(TargetIndex.B, WorkGiver_PaintBuilding.tmpDye[num]);
+			job.countQueue = new List<int>
+			{
+				1
+			};
+			int num2 = Mathf.Min(10, stackCountFromThingList);
+			for (int i = 0; i < 100; i++)
+			{
+				IntVec3 c = t.Position + GenRadial.RadialPattern[i];
+				if (c.InBounds(t.Map) && !c.Fogged(t.Map) && pawn.CanReach(c, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
 				{
-					num++;
-					if (num >= tmpDye.Count)
+					List<Thing> thingList = c.GetThingList(t.Map);
+					for (int j = 0; j < thingList.Count; j++)
+					{
+						Thing thing = thingList[j];
+						if (thing != t && this.ShouldPaintThing(pawn, thing, forced, false) && !job.targetQueueA.Contains(thing))
+						{
+							job.AddQueuedTarget(TargetIndex.A, thing);
+							List<int> countQueue = job.countQueue;
+							int num3 = countQueue[0];
+							countQueue[0] = num3 + 1;
+							if (job.countQueue[0] >= WorkGiver_PaintBuilding.tmpDye[num].stackCount)
+							{
+								num++;
+								if (num >= WorkGiver_PaintBuilding.tmpDye.Count)
+								{
+									break;
+								}
+								job.AddQueuedTarget(TargetIndex.B, WorkGiver_PaintBuilding.tmpDye[num]);
+							}
+						}
+					}
+					if (job.GetTargetQueue(TargetIndex.A).Count >= num2 || num >= WorkGiver_PaintBuilding.tmpDye.Count)
 					{
 						break;
 					}
-					job.AddQueuedTarget(TargetIndex.B, tmpDye[num]);
 				}
 			}
-			if (job.GetTargetQueue(TargetIndex.A).Count >= num2 || num >= tmpDye.Count)
+			if (job.targetQueueA != null && job.targetQueueA.Count >= 5)
 			{
-				break;
+				job.targetQueueA.SortBy((LocalTargetInfo targ) => targ.Cell.DistanceToSquared(pawn.Position));
 			}
+			return job;
 		}
-		if (job.targetQueueA != null && job.targetQueueA.Count >= 5)
-		{
-			job.targetQueueA.SortBy((LocalTargetInfo targ) => targ.Cell.DistanceToSquared(pawn.Position));
-		}
-		return job;
-	}
 
-	private AcceptanceReport ShouldPaintThing(Pawn pawn, Thing t, bool forced, bool checkDye)
-	{
-		if (t.def.building == null || !t.def.building.paintable)
+		// Token: 0x06008492 RID: 33938 RVA: 0x0027B998 File Offset: 0x00279B98
+		private AcceptanceReport ShouldPaintThing(Pawn pawn, Thing t, bool forced, bool checkDye)
 		{
-			return false;
-		}
-		Designation designation = pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.PaintBuilding);
-		if (designation?.colorDef == null)
-		{
-			return false;
-		}
-		if (t is Building building && building.PaintColorDef == designation.colorDef)
-		{
-			return false;
-		}
-		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.PaintBuilding) == null)
-		{
-			return false;
-		}
-		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Deconstruct) != null)
-		{
-			return false;
-		}
-		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.RemovePaintBuilding) != null)
-		{
-			return false;
-		}
-		if (t.IsBurning())
-		{
-			return false;
-		}
-		if (!pawn.CanReserve(t, 1, -1, null, forced))
-		{
-			return false;
-		}
-		if (checkDye)
-		{
-			List<Thing> list = pawn.Map.listerThings.ThingsOfDef(ThingDefOf.Dye);
-			for (int i = 0; i < list.Count; i++)
+			if (t.def.building == null || !t.def.building.paintable)
 			{
-				if (!list[i].IsForbidden(pawn) && pawn.CanReserveAndReach(list[i], PathEndMode.ClosestTouch, Danger.Deadly, 1, 1, null, forced))
-				{
-					return true;
-				}
+				return false;
 			}
-			return "NoIngredient".Translate(ThingDefOf.Dye);
+			Designation designation = pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.PaintBuilding);
+			if (((designation != null) ? designation.colorDef : null) == null)
+			{
+				return false;
+			}
+			Building building = t as Building;
+			if (building != null && building.PaintColorDef == designation.colorDef)
+			{
+				return false;
+			}
+			if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.PaintBuilding) == null)
+			{
+				return false;
+			}
+			if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Deconstruct) != null)
+			{
+				return false;
+			}
+			if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.RemovePaintBuilding) != null)
+			{
+				return false;
+			}
+			if (t.IsBurning())
+			{
+				return false;
+			}
+			if (!pawn.CanReserve(t, 1, -1, null, forced))
+			{
+				return false;
+			}
+			if (checkDye)
+			{
+				List<Thing> list = pawn.Map.listerThings.ThingsOfDef(ThingDefOf.Dye);
+				for (int i = 0; i < list.Count; i++)
+				{
+					if (!list[i].IsForbidden(pawn) && pawn.CanReserveAndReach(list[i], PathEndMode.ClosestTouch, Danger.Deadly, 1, 1, null, forced))
+					{
+						return true;
+					}
+				}
+				return "NoIngredient".Translate(ThingDefOf.Dye);
+			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x04005728 RID: 22312
+		private static List<Thing> tmpDye = new List<Thing>();
 	}
 }

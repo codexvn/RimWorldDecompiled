@@ -1,317 +1,322 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class StunHandler : IExposable
+namespace RimWorld
 {
-	public Thing parent;
-
-	private Pawn parentPawn;
-
-	private int stunTicksLeft;
-
-	private Mote moteStun;
-
-	private bool showStunMote = true;
-
-	private Effecter empEffecter;
-
-	private bool stunFromEMP;
-
-	private Dictionary<DamageDef, int> adaptationTicksLeft;
-
-	private bool disableRotation;
-
-	private CompStunnable stunnableComp;
-
-	public const float StunDurationTicksPerDamage = 30f;
-
-	private static readonly List<KeyValuePair<DamageDef, int>> tmpAdaptationTicksLeft = new List<KeyValuePair<DamageDef, int>>();
-
-	public bool Stunned
+	// Token: 0x02002B17 RID: 11031
+	public class StunHandler : IExposable
 	{
-		get
+		// Token: 0x17002693 RID: 9875
+		// (get) Token: 0x0600F66C RID: 63084 RVA: 0x00478A31 File Offset: 0x00476C31
+		public bool Stunned
 		{
-			if (stunTicksLeft <= 0)
+			get
 			{
-				return Hypnotized;
+				return this.stunTicksLeft > 0 || this.Hypnotized;
 			}
-			return true;
 		}
-	}
 
-	public bool StunFromEMP => stunFromEMP;
-
-	public int StunTicksLeft => stunTicksLeft;
-
-	public bool DisableRotation
-	{
-		get
+		// Token: 0x17002694 RID: 9876
+		// (get) Token: 0x0600F66D RID: 63085 RVA: 0x00478A44 File Offset: 0x00476C44
+		public bool StunFromEMP
 		{
-			if (!disableRotation)
+			get
 			{
-				return Hypnotized;
+				return this.stunFromEMP;
 			}
-			return true;
 		}
-	}
 
-	public bool Hypnotized
-	{
-		get
+		// Token: 0x17002695 RID: 9877
+		// (get) Token: 0x0600F66E RID: 63086 RVA: 0x00478A4C File Offset: 0x00476C4C
+		public int StunTicksLeft
 		{
-			if (ModsConfig.AnomalyActive && parentPawn != null)
+			get
 			{
-				return Find.Anomaly.IsPawnHypnotized(parentPawn);
+				return this.stunTicksLeft;
 			}
-			return false;
 		}
-	}
 
-	public StunHandler(Thing parent)
-	{
-		this.parent = parent;
-		parentPawn = parent as Pawn;
-		stunnableComp = parent.TryGetComp<CompStunnable>();
-		adaptationTicksLeft = new Dictionary<DamageDef, int>();
-	}
-
-	public void StunHandlerTick()
-	{
-		if (adaptationTicksLeft.Count > 0)
+		// Token: 0x17002696 RID: 9878
+		// (get) Token: 0x0600F66F RID: 63087 RVA: 0x00478A54 File Offset: 0x00476C54
+		public bool DisableRotation
 		{
-			tmpAdaptationTicksLeft.Clear();
-			tmpAdaptationTicksLeft.AddRange(adaptationTicksLeft);
-			foreach (KeyValuePair<DamageDef, int> item in tmpAdaptationTicksLeft)
+			get
 			{
-				item.Deconstruct(out var key, out var value);
-				DamageDef damageDef = key;
-				if (value > 0)
+				return this.disableRotation || this.Hypnotized;
+			}
+		}
+
+		// Token: 0x17002697 RID: 9879
+		// (get) Token: 0x0600F670 RID: 63088 RVA: 0x00478A66 File Offset: 0x00476C66
+		public bool Hypnotized
+		{
+			get
+			{
+				return ModsConfig.AnomalyActive && this.parentPawn != null && Find.Anomaly.IsPawnHypnotized(this.parentPawn);
+			}
+		}
+
+		// Token: 0x0600F671 RID: 63089 RVA: 0x00478A89 File Offset: 0x00476C89
+		public StunHandler(Thing parent)
+		{
+			this.parent = parent;
+			this.parentPawn = (parent as Pawn);
+			this.stunnableComp = parent.TryGetComp<CompStunnable>();
+			this.adaptationTicksLeft = new Dictionary<DamageDef, int>();
+		}
+
+		// Token: 0x0600F672 RID: 63090 RVA: 0x00478AC4 File Offset: 0x00476CC4
+		public void StunHandlerTick()
+		{
+			if (this.adaptationTicksLeft.Count > 0)
+			{
+				StunHandler.tmpAdaptationTicksLeft.Clear();
+				StunHandler.tmpAdaptationTicksLeft.AddRange(this.adaptationTicksLeft);
+				foreach (KeyValuePair<DamageDef, int> keyValuePair in StunHandler.tmpAdaptationTicksLeft)
 				{
-					Dictionary<DamageDef, int> dictionary = adaptationTicksLeft;
-					key = damageDef;
-					value = dictionary[key]--;
+					DamageDef damageDef;
+					int num;
+					keyValuePair.Deconstruct(out damageDef, out num);
+					DamageDef damageDef2 = damageDef;
+					if (num > 0)
+					{
+						Dictionary<DamageDef, int> dictionary = this.adaptationTicksLeft;
+						damageDef = damageDef2;
+						num = dictionary[damageDef];
+						dictionary[damageDef] = num - 1;
+					}
 				}
 			}
-		}
-		if (stunTicksLeft > 0)
-		{
-			stunTicksLeft--;
-			if (showStunMote && (moteStun == null || moteStun.Destroyed) && !Hypnotized)
+			if (this.stunTicksLeft > 0)
 			{
-				moteStun = MoteMaker.MakeStunOverlay(parent);
-			}
-			if (parent is Pawn { Downed: not false })
-			{
-				stunTicksLeft = 0;
-			}
-			moteStun?.Maintain();
-			if (!stunFromEMP)
-			{
-				return;
-			}
-			if (empEffecter == null)
-			{
-				if (stunnableComp != null && stunnableComp.UseLargeEMPEffecter)
+				this.stunTicksLeft--;
+				if (this.showStunMote && (this.moteStun == null || this.moteStun.Destroyed) && !this.Hypnotized)
 				{
-					empEffecter = CreateLargeEffecter();
+					this.moteStun = MoteMaker.MakeStunOverlay(this.parent);
 				}
-				else
+				Pawn pawn = this.parent as Pawn;
+				if (pawn != null && pawn.Downed)
 				{
-					empEffecter = EffecterDefOf.DisabledByEMP.Spawn();
+					this.stunTicksLeft = 0;
 				}
-			}
-			empEffecter.EffectTick(parent, parent);
-		}
-		else
-		{
-			if (empEffecter != null)
-			{
-				empEffecter.Cleanup();
-				empEffecter = null;
-				stunFromEMP = false;
-			}
-			disableRotation = false;
-		}
-	}
-
-	public void Notify_DamageApplied(DamageInfo dinfo)
-	{
-		if (!CanBeStunnedByDamage(dinfo.Def))
-		{
-			return;
-		}
-		float num = ((float?)dinfo.Def.constantStunDurationTicks) ?? (dinfo.Amount * 30f);
-		if (CanAdaptToDamage(dinfo.Def))
-		{
-			if (((adaptationTicksLeft.TryGetValue(dinfo.Def, out var value) && value != 0) ? 1 : 0) <= (false ? 1 : 0))
-			{
-				adaptationTicksLeft.SetOrAdd(dinfo.Def, dinfo.Def.stunAdaptationTicks);
+				Mote mote = this.moteStun;
+				if (mote != null)
+				{
+					mote.Maintain();
+				}
+				if (this.stunFromEMP)
+				{
+					if (this.empEffecter == null)
+					{
+						if (this.stunnableComp != null && this.stunnableComp.UseLargeEMPEffecter)
+						{
+							this.empEffecter = this.CreateLargeEffecter();
+						}
+						else
+						{
+							this.empEffecter = EffecterDefOf.DisabledByEMP.Spawn();
+						}
+					}
+					this.empEffecter.EffectTick(this.parent, this.parent);
+					return;
+				}
 			}
 			else
 			{
-				if (dinfo.Def.displayAdaptedTextMote)
+				if (this.empEffecter != null)
 				{
-					MoteMaker.ThrowText(new Vector3((float)parent.Position.x + 1f, parent.Position.y, (float)parent.Position.z + 1f), text: dinfo.Def.adaptedText ?? ((string)"Adapted".Translate()), map: parent.Map, color: Color.white);
+					this.empEffecter.Cleanup();
+					this.empEffecter = null;
+					this.stunFromEMP = false;
 				}
-				num = 0f;
+				this.disableRotation = false;
 			}
 		}
-		if (num > 0f)
+
+		// Token: 0x0600F673 RID: 63091 RVA: 0x00478C78 File Offset: 0x00476E78
+		public void Notify_DamageApplied(DamageInfo dinfo)
 		{
-			if (dinfo.Def.stunResistStat != null && !dinfo.Def.stunResistStat.Worker.IsDisabledFor(parent))
+			if (!this.CanBeStunnedByDamage(dinfo.Def))
 			{
-				num *= Mathf.Clamp01(1f - parent.GetStatValue(dinfo.Def.stunResistStat));
+				return;
 			}
-			if (dinfo.Def == DamageDefOf.EMP)
+			int? constantStunDurationTicks = dinfo.Def.constantStunDurationTicks;
+			float num = (constantStunDurationTicks != null) ? ((float)constantStunDurationTicks.GetValueOrDefault()) : (dinfo.Amount * 30f);
+			if (this.CanAdaptToDamage(dinfo.Def))
 			{
-				stunFromEMP = true;
-			}
-			StunFor(Mathf.RoundToInt(num), dinfo.Instigator);
-		}
-	}
-
-	public void StunFor(int ticks, Thing instigator, bool addBattleLog = true, bool showMote = true, bool disableRotation = false)
-	{
-		stunTicksLeft = Mathf.Max(stunTicksLeft, ticks);
-		showStunMote = showMote;
-		this.disableRotation = disableRotation;
-		if (addBattleLog)
-		{
-			Find.BattleLog.Add(new BattleLogEntry_Event(parent, RulePackDefOf.Event_Stun, instigator));
-		}
-	}
-
-	public void StopStun()
-	{
-		stunTicksLeft = 0;
-	}
-
-	private Effecter CreateLargeEffecter()
-	{
-		Effecter effecter = EffecterDefOf.DisabledByEMPLarge.Spawn();
-		for (int i = 0; i < effecter.children.Count; i++)
-		{
-			if (effecter.children[i] is SubEffecter_SprayerChance subEffecter_SprayerChance)
-			{
-				if (stunnableComp.EMPEffecterDimensions.HasValue || stunnableComp.EMPEffecterOffset.HasValue)
+				int num2;
+				if ((this.adaptationTicksLeft.TryGetValue(dinfo.Def, out num2) ? num2 : 0) <= 0)
 				{
-					subEffecter_SprayerChance.spawnLocOverride = MoteSpawnLocType.OnSource;
+					this.adaptationTicksLeft.SetOrAdd(dinfo.Def, dinfo.Def.stunAdaptationTicks);
 				}
-				subEffecter_SprayerChance.dimensionsOverride = stunnableComp.EMPEffecterDimensions;
-				subEffecter_SprayerChance.offsetOverride = stunnableComp.EMPEffecterOffset;
-				subEffecter_SprayerChance.chanceOverride = stunnableComp.EMPChancePerTick;
+				else
+				{
+					if (dinfo.Def.displayAdaptedTextMote)
+					{
+						Vector3 loc = new Vector3((float)this.parent.Position.x + 1f, (float)this.parent.Position.y, (float)this.parent.Position.z + 1f);
+						string text = dinfo.Def.adaptedText ?? "Adapted".Translate();
+						MoteMaker.ThrowText(loc, this.parent.Map, text, Color.white, -1f);
+					}
+					num = 0f;
+				}
+			}
+			if (num > 0f)
+			{
+				if (dinfo.Def.stunResistStat != null && !dinfo.Def.stunResistStat.Worker.IsDisabledFor(this.parent))
+				{
+					num *= Mathf.Clamp01(1f - this.parent.GetStatValue(dinfo.Def.stunResistStat, true, -1));
+				}
+				if (dinfo.Def == DamageDefOf.EMP)
+				{
+					this.stunFromEMP = true;
+				}
+				this.StunFor(Mathf.RoundToInt(num), dinfo.Instigator, true, true, false);
 			}
 		}
-		return effecter;
-	}
 
-	private bool CanBeStunnedByDamage(DamageDef def)
-	{
-		if (!def.causeStun)
+		// Token: 0x0600F674 RID: 63092 RVA: 0x00478E30 File Offset: 0x00477030
+		public void StunFor(int ticks, Thing instigator, bool addBattleLog = true, bool showMote = true, bool disableRotation = false)
 		{
-			return false;
+			this.stunTicksLeft = Mathf.Max(this.stunTicksLeft, ticks);
+			this.showStunMote = showMote;
+			this.disableRotation = disableRotation;
+			if (addBattleLog)
+			{
+				Find.BattleLog.Add(new BattleLogEntry_Event(this.parent, RulePackDefOf.Event_Stun, instigator));
+			}
 		}
-		if (stunnableComp != null && !stunnableComp.CanBeStunnedByDamage(def))
+
+		// Token: 0x0600F675 RID: 63093 RVA: 0x00478E7D File Offset: 0x0047707D
+		public void StopStun()
 		{
-			return false;
+			this.stunTicksLeft = 0;
 		}
-		if (parent is Pawn pawn)
+
+		// Token: 0x0600F676 RID: 63094 RVA: 0x00478E88 File Offset: 0x00477088
+		private Effecter CreateLargeEffecter()
 		{
-			if (pawn.Downed || pawn.Dead)
+			Effecter effecter = EffecterDefOf.DisabledByEMPLarge.Spawn();
+			for (int i = 0; i < effecter.children.Count; i++)
+			{
+				SubEffecter_SprayerChance subEffecter_SprayerChance = effecter.children[i] as SubEffecter_SprayerChance;
+				if (subEffecter_SprayerChance != null)
+				{
+					if (this.stunnableComp.EMPEffecterDimensions != null || this.stunnableComp.EMPEffecterOffset != null)
+					{
+						subEffecter_SprayerChance.spawnLocOverride = new MoteSpawnLocType?(MoteSpawnLocType.OnSource);
+					}
+					subEffecter_SprayerChance.dimensionsOverride = this.stunnableComp.EMPEffecterDimensions;
+					subEffecter_SprayerChance.offsetOverride = this.stunnableComp.EMPEffecterOffset;
+					subEffecter_SprayerChance.chanceOverride = this.stunnableComp.EMPChancePerTick;
+				}
+			}
+			return effecter;
+		}
+
+		// Token: 0x0600F677 RID: 63095 RVA: 0x00478F3C File Offset: 0x0047713C
+		private bool CanBeStunnedByDamage(DamageDef def)
+		{
+			if (!def.causeStun)
 			{
 				return false;
 			}
-			if (ModsConfig.AnomalyActive && pawn.health.hediffSet.HasHediff(HediffDefOf.AwokenCorpse))
+			if (this.stunnableComp != null && !this.stunnableComp.CanBeStunnedByDamage(def))
 			{
 				return false;
 			}
-			if (def == DamageDefOf.Stun)
-			{
-				return true;
-			}
-			if (def == DamageDefOf.EMP && !pawn.RaceProps.IsFlesh)
-			{
-				return true;
-			}
-			if (ModsConfig.BiotechActive && def == DamageDefOf.MechBandShockwave && pawn.RaceProps.IsMechanoid)
-			{
-				return true;
-			}
-			if (def == DamageDefOf.NerveStun && !pawn.RaceProps.IsMechanoid)
-			{
-				return true;
-			}
-			return false;
+			Pawn pawn = this.parent as Pawn;
+			return pawn == null || (!pawn.Downed && !pawn.Dead && (!ModsConfig.AnomalyActive || !pawn.health.hediffSet.HasHediff(HediffDefOf.AwokenCorpse, false)) && (def == DamageDefOf.Stun || (def == DamageDefOf.EMP && !pawn.RaceProps.IsFlesh) || (ModsConfig.BiotechActive && def == DamageDefOf.MechBandShockwave && pawn.RaceProps.IsMechanoid) || (ModsConfig.AnomalyActive && def == DamageDefOf.NerveStun && !pawn.RaceProps.IsMechanoid)));
 		}
-		if (def == DamageDefOf.NerveStun)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	private bool CanAdaptToDamage(DamageDef def)
-	{
-		if (def.stunAdaptationTicks <= 0)
+		// Token: 0x0600F678 RID: 63096 RVA: 0x00479010 File Offset: 0x00477210
+		private bool CanAdaptToDamage(DamageDef def)
 		{
-			return false;
-		}
-		if (stunnableComp != null && stunnableComp.CanAdaptToDamage(def))
-		{
-			return true;
-		}
-		if (parent is Pawn pawn)
-		{
-			if (def == DamageDefOf.EMP)
+			if (def.stunAdaptationTicks <= 0)
 			{
-				if (ModsConfig.AnomalyActive && (pawn.kindDef == PawnKindDefOf.Revenant || pawn.kindDef == PawnKindDefOf.Nociosphere))
-				{
-					return true;
-				}
-				if (!pawn.RaceProps.IsMechanoid)
-				{
-					return pawn.RaceProps.IsDrone;
-				}
-				return true;
-			}
-			if (ModsConfig.AnomalyActive && def == DamageDefOf.NerveStun)
-			{
-				if (!pawn.RaceProps.IsMechanoid)
-				{
-					return !pawn.RaceProps.IsDrone;
-				}
 				return false;
 			}
+			if (this.stunnableComp != null && this.stunnableComp.CanAdaptToDamage(def))
+			{
+				return true;
+			}
+			Pawn pawn = this.parent as Pawn;
+			if (pawn != null)
+			{
+				if (def == DamageDefOf.EMP)
+				{
+					return (ModsConfig.AnomalyActive && (pawn.kindDef == PawnKindDefOf.Revenant || pawn.kindDef == PawnKindDefOf.Nociosphere)) || pawn.RaceProps.IsMechanoid || pawn.RaceProps.IsDrone;
+				}
+				if (ModsConfig.AnomalyActive && def == DamageDefOf.NerveStun)
+				{
+					return !pawn.RaceProps.IsMechanoid && !pawn.RaceProps.IsDrone;
+				}
+			}
+			return false;
 		}
-		return false;
-	}
 
-	public void ExposeData()
-	{
-		Scribe_Values.Look(ref stunTicksLeft, "stunTicksLeft", 0);
-		Scribe_Values.Look(ref showStunMote, "showStunMote", defaultValue: false);
-		Scribe_Values.Look(ref stunFromEMP, "stunFromEMP", defaultValue: false);
-		Scribe_Values.Look(ref disableRotation, "disableRotation", defaultValue: false);
-		Scribe_Collections.Look(ref adaptationTicksLeft, "adaptationTicksLeft", LookMode.Def, LookMode.Value);
-		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		// Token: 0x0600F679 RID: 63097 RVA: 0x004790C4 File Offset: 0x004772C4
+		public void ExposeData()
 		{
-			if (adaptationTicksLeft == null)
+			Scribe_Values.Look<int>(ref this.stunTicksLeft, "stunTicksLeft", 0, false);
+			Scribe_Values.Look<bool>(ref this.showStunMote, "showStunMote", false, false);
+			Scribe_Values.Look<bool>(ref this.stunFromEMP, "stunFromEMP", false, false);
+			Scribe_Values.Look<bool>(ref this.disableRotation, "disableRotation", false, false);
+			Scribe_Collections.Look<DamageDef, int>(ref this.adaptationTicksLeft, "adaptationTicksLeft", LookMode.Def, LookMode.Value);
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
-				adaptationTicksLeft = new Dictionary<DamageDef, int>();
+				if (this.adaptationTicksLeft == null)
+				{
+					this.adaptationTicksLeft = new Dictionary<DamageDef, int>();
+				}
+				int num = 0;
+				Scribe_Values.Look<int>(ref num, "EMPAdaptedTicksLeft", 0, false);
+				if (num != 0)
+				{
+					this.adaptationTicksLeft.SetOrAdd(DamageDefOf.EMP, num);
+				}
 			}
-			int value = 0;
-			Scribe_Values.Look(ref value, "EMPAdaptedTicksLeft", 0);
-			if (value != 0)
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				adaptationTicksLeft.SetOrAdd(DamageDefOf.EMP, value);
+				this.adaptationTicksLeft.RemoveAll((KeyValuePair<DamageDef, int> x) => x.Value <= 0);
 			}
 		}
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			adaptationTicksLeft.RemoveAll((KeyValuePair<DamageDef, int> x) => x.Value <= 0);
-		}
+
+		// Token: 0x0400A234 RID: 41524
+		public Thing parent;
+
+		// Token: 0x0400A235 RID: 41525
+		private Pawn parentPawn;
+
+		// Token: 0x0400A236 RID: 41526
+		private int stunTicksLeft;
+
+		// Token: 0x0400A237 RID: 41527
+		private Mote moteStun;
+
+		// Token: 0x0400A238 RID: 41528
+		private bool showStunMote = true;
+
+		// Token: 0x0400A239 RID: 41529
+		private Effecter empEffecter;
+
+		// Token: 0x0400A23A RID: 41530
+		private bool stunFromEMP;
+
+		// Token: 0x0400A23B RID: 41531
+		private Dictionary<DamageDef, int> adaptationTicksLeft;
+
+		// Token: 0x0400A23C RID: 41532
+		private bool disableRotation;
+
+		// Token: 0x0400A23D RID: 41533
+		private CompStunnable stunnableComp;
+
+		// Token: 0x0400A23E RID: 41534
+		public const float StunDurationTicksPerDamage = 30f;
+
+		// Token: 0x0400A23F RID: 41535
+		private static readonly List<KeyValuePair<DamageDef, int>> tmpAdaptationTicksLeft = new List<KeyValuePair<DamageDef, int>>();
 	}
 }

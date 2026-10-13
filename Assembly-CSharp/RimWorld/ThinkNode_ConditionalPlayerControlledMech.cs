@@ -1,12 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalPlayerControlledMech : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02001796 RID: 6038
+	public class ThinkNode_ConditionalPlayerControlledMech : ThinkNode_Conditional
 	{
-		return pawn.IsColonyMechPlayerControlled;
+		// Token: 0x06008D75 RID: 36213 RVA: 0x002A0B4C File Offset: 0x0029ED4C
+		protected override bool Satisfied(Pawn pawn)
+		{
+			return pawn.IsColonyMechPlayerControlled;
+		}
 	}
 }

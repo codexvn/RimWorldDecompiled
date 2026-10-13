@@ -1,24 +1,25 @@
+﻿using System;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordJob_WanderNest : LordJob
+namespace RimWorld
 {
-	public override StateGraph CreateGraph()
+	// Token: 0x02001688 RID: 5768
+	public class LordJob_WanderNest : LordJob
 	{
-		StateGraph stateGraph = new StateGraph();
-		LordToil_WanderNest toil = new LordToil_WanderNest();
-		stateGraph.AddToil(toil);
-		return stateGraph;
-	}
-
-	public override bool ShouldRemovePawn(Pawn p, PawnLostCondition reason)
-	{
-		if (reason == PawnLostCondition.Incapped)
+		// Token: 0x060087DA RID: 34778 RVA: 0x00289698 File Offset: 0x00287898
+		public override StateGraph CreateGraph()
 		{
-			return false;
+			StateGraph stateGraph = new StateGraph();
+			LordToil_WanderNest toil = new LordToil_WanderNest();
+			stateGraph.AddToil(toil);
+			return stateGraph;
 		}
-		return true;
+
+		// Token: 0x060087DB RID: 34779 RVA: 0x00283118 File Offset: 0x00281318
+		public override bool ShouldRemovePawn(Pawn p, PawnLostCondition reason)
+		{
+			return reason != PawnLostCondition.Incapped;
+		}
 	}
 }

@@ -1,19 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CorpseAttackTransition : MusicTransition
+namespace RimWorld
 {
-	public override bool IsTransitionSatisfied()
+	// Token: 0x02002908 RID: 10504
+	public class CorpseAttackTransition : MusicTransition
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x0600E5DD RID: 58845 RVA: 0x0043119F File Offset: 0x0042F39F
+		public override bool IsTransitionSatisfied()
 		{
-			return false;
+			return ModsConfig.AnomalyActive && base.IsTransitionSatisfied() && Find.Anomaly.HasActiveAwokenCorpse();
 		}
-		if (!base.IsTransitionSatisfied())
-		{
-			return false;
-		}
-		return Find.Anomaly.HasActiveAwokenCorpse();
 	}
 }

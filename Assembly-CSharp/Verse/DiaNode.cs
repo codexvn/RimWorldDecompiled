@@ -1,37 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class DiaNode
+namespace Verse
 {
-	public TaggedString text;
-
-	public List<DiaOption> options = new List<DiaOption>();
-
-	protected DiaNodeMold def;
-
-	public DiaNode(TaggedString text)
+	// Token: 0x02000C24 RID: 3108
+	public class DiaNode
 	{
-		this.text = text;
-	}
-
-	public DiaNode(DiaNodeMold newDef)
-	{
-		def = newDef;
-		def.used = true;
-		text = def.texts.RandomElement();
-		if (def.optionList.Count > 0)
+		// Token: 0x06004FD5 RID: 20437 RVA: 0x0019A9E8 File Offset: 0x00198BE8
+		public DiaNode(TaggedString text)
 		{
-			foreach (DiaOptionMold option in def.optionList)
-			{
-				options.Add(new DiaOption(option));
-			}
-			return;
+			this.text = text;
 		}
-		options.Add(new DiaOption("OK".Translate()));
-	}
 
-	public void PreClose()
-	{
+		// Token: 0x06004FD6 RID: 20438 RVA: 0x0019AA04 File Offset: 0x00198C04
+		public DiaNode(DiaNodeMold newDef)
+		{
+			this.def = newDef;
+			this.def.used = true;
+			this.text = this.def.texts.RandomElement<string>();
+			if (this.def.optionList.Count > 0)
+			{
+				using (List<DiaOptionMold>.Enumerator enumerator = this.def.optionList.GetEnumerator())
+				{
+					while (enumerator.MoveNext())
+					{
+						DiaOptionMold diaOptionMold = enumerator.Current;
+						this.options.Add(new DiaOption(diaOptionMold));
+					}
+					return;
+				}
+			}
+			this.options.Add(new DiaOption("OK".Translate()));
+		}
+
+		// Token: 0x06004FD7 RID: 20439 RVA: 0x000026EA File Offset: 0x000008EA
+		public void PreClose()
+		{
+		}
+
+		// Token: 0x04003958 RID: 14680
+		public TaggedString text;
+
+		// Token: 0x04003959 RID: 14681
+		public List<DiaOption> options = new List<DiaOption>();
+
+		// Token: 0x0400395A RID: 14682
+		protected DiaNodeMold def;
 	}
 }

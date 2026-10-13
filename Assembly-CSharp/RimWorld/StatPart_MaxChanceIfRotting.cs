@@ -1,32 +1,34 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_MaxChanceIfRotting : StatPart
+namespace RimWorld
 {
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x0200370C RID: 14092
+	public class StatPart_MaxChanceIfRotting : StatPart
 	{
-		if (IsRotting(req))
+		// Token: 0x060138A4 RID: 80036 RVA: 0x005CBDCE File Offset: 0x005C9FCE
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val = 1f;
+			if (this.IsRotting(req))
+			{
+				val = 1f;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (IsRotting(req))
+		// Token: 0x060138A5 RID: 80037 RVA: 0x005CBDE0 File Offset: 0x005C9FE0
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReport_NotFresh".Translate() + ": " + 1f.ToStringPercent();
+			if (this.IsRotting(req))
+			{
+				return "StatsReport_NotFresh".Translate() + ": " + 1f.ToStringPercent();
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool IsRotting(StatRequest req)
-	{
-		if (!req.HasThing)
+		// Token: 0x060138A6 RID: 80038 RVA: 0x005CBE15 File Offset: 0x005CA015
+		private bool IsRotting(StatRequest req)
 		{
-			return false;
+			return req.HasThing && req.Thing.GetRotStage() > RotStage.Fresh;
 		}
-		return req.Thing.GetRotStage() != RotStage.Fresh;
 	}
 }

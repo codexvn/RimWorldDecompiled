@@ -1,0 +1,51 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>UnityStubs</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Waylith.UnityCompat">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.UnityCompat.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith.AssetBake">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.AssetBake.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetsTools.NET">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\AssetsTools.NET.dll</HintPath>
+    </Reference>
+    <Reference Include="AssetsTools.NET.Texture">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\AssetsTools.NET.Texture.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Logging">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Fmod5Sharp">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Fmod5Sharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Waylith.VideoDecode">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Waylith.VideoDecode.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Vulkan">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Vulkan.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Glfw">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Glfw.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Numerics">
+      <HintPath>..\..\..\..\..\SteamLibrary\steamapps\common\RimWorld\Brutal.Core.Numerics.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

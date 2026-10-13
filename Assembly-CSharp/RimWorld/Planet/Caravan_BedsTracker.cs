@@ -1,172 +1,193 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class Caravan_BedsTracker : IExposable
+namespace RimWorld.Planet
 {
-	public Caravan caravan;
-
-	private Dictionary<Pawn, Building_Bed> usedBeds = new Dictionary<Pawn, Building_Bed>();
-
-	private static List<Building_Bed> tmpUsableBeds = new List<Building_Bed>();
-
-	private static List<string> tmpPawnLabels = new List<string>();
-
-	public Caravan_BedsTracker()
+	// Token: 0x02003D8F RID: 15759
+	public class Caravan_BedsTracker : IExposable
 	{
-	}
-
-	public Caravan_BedsTracker(Caravan caravan)
-	{
-		this.caravan = caravan;
-	}
-
-	public void BedsTrackerTickInterval(int delta)
-	{
-		RecalculateUsedBeds();
-		foreach (KeyValuePair<Pawn, Building_Bed> usedBed in usedBeds)
+		// Token: 0x06015769 RID: 87913 RVA: 0x0066E848 File Offset: 0x0066CA48
+		public Caravan_BedsTracker()
 		{
-			PawnUtility.GainComfortFromThingIfPossible(usedBed.Key, usedBed.Value, delta);
 		}
-	}
 
-	public void ExposeData()
-	{
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x0601576A RID: 87914 RVA: 0x0066E85B File Offset: 0x0066CA5B
+		public Caravan_BedsTracker(Caravan caravan)
 		{
-			RecalculateUsedBeds();
+			this.caravan = caravan;
 		}
-	}
 
-	private void RecalculateUsedBeds()
-	{
-		usedBeds.Clear();
-		if (!caravan.Spawned)
+		// Token: 0x0601576B RID: 87915 RVA: 0x0066E878 File Offset: 0x0066CA78
+		public void BedsTrackerTickInterval(int delta)
 		{
-			return;
-		}
-		tmpUsableBeds.Clear();
-		GetUsableBeds(tmpUsableBeds);
-		if (!caravan.pather.MovingNow)
-		{
-			tmpUsableBeds.SortByDescending((Building_Bed x) => x.GetStatValue(StatDefOf.BedRestEffectiveness));
-			for (int num = 0; num < caravan.pawns.Count; num++)
+			this.RecalculateUsedBeds();
+			foreach (KeyValuePair<Pawn, Building_Bed> keyValuePair in this.usedBeds)
 			{
-				Pawn pawn = caravan.pawns[num];
-				if (pawn.needs != null && pawn.needs.rest != null)
+				PawnUtility.GainComfortFromThingIfPossible(keyValuePair.Key, keyValuePair.Value, delta);
+			}
+		}
+
+		// Token: 0x0601576C RID: 87916 RVA: 0x0066E8E0 File Offset: 0x0066CAE0
+		public void ExposeData()
+		{
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				this.RecalculateUsedBeds();
+			}
+		}
+
+		// Token: 0x0601576D RID: 87917 RVA: 0x0066E8F0 File Offset: 0x0066CAF0
+		private void RecalculateUsedBeds()
+		{
+			this.usedBeds.Clear();
+			if (!this.caravan.Spawned)
+			{
+				return;
+			}
+			Caravan_BedsTracker.tmpUsableBeds.Clear();
+			this.GetUsableBeds(Caravan_BedsTracker.tmpUsableBeds);
+			if (!this.caravan.pather.MovingNow)
+			{
+				Caravan_BedsTracker.tmpUsableBeds.SortByDescending((Building_Bed x) => x.GetStatValue(StatDefOf.BedRestEffectiveness, true, -1));
+				for (int i = 0; i < this.caravan.pawns.Count; i++)
 				{
-					Building_Bed andRemoveFirstAvailableBedFor = GetAndRemoveFirstAvailableBedFor(pawn, tmpUsableBeds);
-					if (andRemoveFirstAvailableBedFor != null)
+					Pawn pawn = this.caravan.pawns[i];
+					if (pawn.needs != null && pawn.needs.rest != null)
 					{
-						usedBeds.Add(pawn, andRemoveFirstAvailableBedFor);
+						Building_Bed andRemoveFirstAvailableBedFor = this.GetAndRemoveFirstAvailableBedFor(pawn, Caravan_BedsTracker.tmpUsableBeds);
+						if (andRemoveFirstAvailableBedFor != null)
+						{
+							this.usedBeds.Add(pawn, andRemoveFirstAvailableBedFor);
+						}
+					}
+				}
+			}
+			else
+			{
+				Caravan_BedsTracker.tmpUsableBeds.SortByDescending((Building_Bed x) => x.GetStatValue(StatDefOf.ImmunityGainSpeedFactor, true, -1));
+				for (int j = 0; j < this.caravan.pawns.Count; j++)
+				{
+					Pawn pawn2 = this.caravan.pawns[j];
+					if (pawn2.needs != null && pawn2.needs.rest != null && CaravanBedUtility.WouldBenefitFromRestingInBed(pawn2) && (!this.caravan.pather.MovingNow || pawn2.CarriedByCaravan()))
+					{
+						Building_Bed andRemoveFirstAvailableBedFor2 = this.GetAndRemoveFirstAvailableBedFor(pawn2, Caravan_BedsTracker.tmpUsableBeds);
+						if (andRemoveFirstAvailableBedFor2 != null)
+						{
+							this.usedBeds.Add(pawn2, andRemoveFirstAvailableBedFor2);
+						}
+					}
+				}
+			}
+			Caravan_BedsTracker.tmpUsableBeds.Clear();
+		}
+
+		// Token: 0x0601576E RID: 87918 RVA: 0x0066EA8E File Offset: 0x0066CC8E
+		public void Notify_CaravanSpawned()
+		{
+			this.RecalculateUsedBeds();
+		}
+
+		// Token: 0x0601576F RID: 87919 RVA: 0x0066EA8E File Offset: 0x0066CC8E
+		public void Notify_PawnRemoved()
+		{
+			this.RecalculateUsedBeds();
+		}
+
+		// Token: 0x06015770 RID: 87920 RVA: 0x0066EA98 File Offset: 0x0066CC98
+		public Building_Bed GetBedUsedBy(Pawn p)
+		{
+			Building_Bed building_Bed;
+			if (this.usedBeds.TryGetValue(p, out building_Bed) && !building_Bed.DestroyedOrNull())
+			{
+				return building_Bed;
+			}
+			return null;
+		}
+
+		// Token: 0x06015771 RID: 87921 RVA: 0x0066EAC0 File Offset: 0x0066CCC0
+		public bool IsInBed(Pawn p)
+		{
+			return this.GetBedUsedBy(p) != null;
+		}
+
+		// Token: 0x06015772 RID: 87922 RVA: 0x0066EACC File Offset: 0x0066CCCC
+		public int GetUsedBedCount()
+		{
+			return this.usedBeds.Count;
+		}
+
+		// Token: 0x06015773 RID: 87923 RVA: 0x0066EADC File Offset: 0x0066CCDC
+		private void GetUsableBeds(List<Building_Bed> outBeds)
+		{
+			outBeds.Clear();
+			List<Thing> list = CaravanInventoryUtility.AllInventoryItems(this.caravan);
+			for (int i = 0; i < list.Count; i++)
+			{
+				Building_Bed building_Bed = list[i].GetInnerIfMinified() as Building_Bed;
+				if (building_Bed != null && building_Bed.def.building.bed_caravansCanUse)
+				{
+					for (int j = 0; j < list[i].stackCount; j++)
+					{
+						for (int k = 0; k < building_Bed.SleepingSlotsCount; k++)
+						{
+							outBeds.Add(building_Bed);
+						}
 					}
 				}
 			}
 		}
-		else
+
+		// Token: 0x06015774 RID: 87924 RVA: 0x0066EB68 File Offset: 0x0066CD68
+		private Building_Bed GetAndRemoveFirstAvailableBedFor(Pawn p, List<Building_Bed> beds)
 		{
-			tmpUsableBeds.SortByDescending((Building_Bed x) => x.GetStatValue(StatDefOf.ImmunityGainSpeedFactor));
-			for (int num2 = 0; num2 < caravan.pawns.Count; num2++)
+			for (int i = 0; i < beds.Count; i++)
 			{
-				Pawn pawn2 = caravan.pawns[num2];
-				if (pawn2.needs != null && pawn2.needs.rest != null && CaravanBedUtility.WouldBenefitFromRestingInBed(pawn2) && (!caravan.pather.MovingNow || pawn2.CarriedByCaravan()))
+				if (RestUtility.CanUseBedEver(p, beds[i].def))
 				{
-					Building_Bed andRemoveFirstAvailableBedFor2 = GetAndRemoveFirstAvailableBedFor(pawn2, tmpUsableBeds);
-					if (andRemoveFirstAvailableBedFor2 != null)
-					{
-						usedBeds.Add(pawn2, andRemoveFirstAvailableBedFor2);
-					}
+					Building_Bed result = beds[i];
+					beds.RemoveAt(i);
+					return result;
 				}
 			}
+			return null;
 		}
-		tmpUsableBeds.Clear();
-	}
 
-	public void Notify_CaravanSpawned()
-	{
-		RecalculateUsedBeds();
-	}
-
-	public void Notify_PawnRemoved()
-	{
-		RecalculateUsedBeds();
-	}
-
-	public Building_Bed GetBedUsedBy(Pawn p)
-	{
-		if (usedBeds.TryGetValue(p, out var value) && !value.DestroyedOrNull())
+		// Token: 0x06015775 RID: 87925 RVA: 0x0066EBAC File Offset: 0x0066CDAC
+		public string GetInBedForMedicalReasonsInspectStringLine()
 		{
-			return value;
-		}
-		return null;
-	}
-
-	public bool IsInBed(Pawn p)
-	{
-		return GetBedUsedBy(p) != null;
-	}
-
-	public int GetUsedBedCount()
-	{
-		return usedBeds.Count;
-	}
-
-	private void GetUsableBeds(List<Building_Bed> outBeds)
-	{
-		outBeds.Clear();
-		List<Thing> list = CaravanInventoryUtility.AllInventoryItems(caravan);
-		for (int i = 0; i < list.Count; i++)
-		{
-			if (!(list[i].GetInnerIfMinified() is Building_Bed building_Bed) || !building_Bed.def.building.bed_caravansCanUse)
+			if (this.usedBeds.Count == 0)
 			{
-				continue;
+				return null;
 			}
-			for (int j = 0; j < list[i].stackCount; j++)
+			Caravan_BedsTracker.tmpPawnLabels.Clear();
+			foreach (KeyValuePair<Pawn, Building_Bed> keyValuePair in this.usedBeds)
 			{
-				for (int k = 0; k < building_Bed.SleepingSlotsCount; k++)
+				if (!this.caravan.carryTracker.IsCarried(keyValuePair.Key) && CaravanBedUtility.WouldBenefitFromRestingInBed(keyValuePair.Key))
 				{
-					outBeds.Add(building_Bed);
+					Caravan_BedsTracker.tmpPawnLabels.Add(keyValuePair.Key.LabelShort);
 				}
 			}
-		}
-	}
-
-	private Building_Bed GetAndRemoveFirstAvailableBedFor(Pawn p, List<Building_Bed> beds)
-	{
-		for (int i = 0; i < beds.Count; i++)
-		{
-			if (RestUtility.CanUseBedEver(p, beds[i].def))
+			if (!Caravan_BedsTracker.tmpPawnLabels.Any<string>())
 			{
-				Building_Bed result = beds[i];
-				beds.RemoveAt(i);
-				return result;
+				return null;
 			}
+			string t = (Caravan_BedsTracker.tmpPawnLabels.Count > 5) ? (Caravan_BedsTracker.tmpPawnLabels.Take(5).ToCommaList(false, false) + "...") : Caravan_BedsTracker.tmpPawnLabels.ToCommaList(true, false);
+			Caravan_BedsTracker.tmpPawnLabels.Clear();
+			return "UsingBedrollsDueToIllness".Translate() + ": " + t;
 		}
-		return null;
-	}
 
-	public string GetInBedForMedicalReasonsInspectStringLine()
-	{
-		if (usedBeds.Count == 0)
-		{
-			return null;
-		}
-		tmpPawnLabels.Clear();
-		foreach (KeyValuePair<Pawn, Building_Bed> usedBed in usedBeds)
-		{
-			if (!caravan.carryTracker.IsCarried(usedBed.Key) && CaravanBedUtility.WouldBenefitFromRestingInBed(usedBed.Key))
-			{
-				tmpPawnLabels.Add(usedBed.Key.LabelShort);
-			}
-		}
-		if (!tmpPawnLabels.Any())
-		{
-			return null;
-		}
-		string text = ((tmpPawnLabels.Count > 5) ? (tmpPawnLabels.Take(5).ToCommaList() + "...") : tmpPawnLabels.ToCommaList(useAnd: true));
-		tmpPawnLabels.Clear();
-		return "UsingBedrollsDueToIllness".Translate() + ": " + text;
+		// Token: 0x0400EEEE RID: 61166
+		public Caravan caravan;
+
+		// Token: 0x0400EEEF RID: 61167
+		private Dictionary<Pawn, Building_Bed> usedBeds = new Dictionary<Pawn, Building_Bed>();
+
+		// Token: 0x0400EEF0 RID: 61168
+		private static List<Building_Bed> tmpUsableBeds = new List<Building_Bed>();
+
+		// Token: 0x0400EEF1 RID: 61169
+		private static List<string> tmpPawnLabels = new List<string>();
 	}
 }

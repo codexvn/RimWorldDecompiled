@@ -1,29 +1,44 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Thought_Situational_GeneticChemicalDependency : Thought_Situational
+namespace RimWorld
 {
-	private static readonly SimpleCurve MoodOffsetCurve = new SimpleCurve
+	// Token: 0x020018C4 RID: 6340
+	public class Thought_Situational_GeneticChemicalDependency : Thought_Situational
 	{
-		new CurvePoint(0f, 0f),
-		new CurvePoint(1f, -4f),
-		new CurvePoint(6f, -20f)
-	};
-
-	public override float MoodOffset()
-	{
-		if (ThoughtUtility.ThoughtNullified(pawn, def))
+		// Token: 0x060090AB RID: 37035 RVA: 0x002A9D00 File Offset: 0x002A7F00
+		public override float MoodOffset()
 		{
+			if (ThoughtUtility.ThoughtNullified(this.pawn, this.def))
+			{
+				return 0f;
+			}
+			foreach (Gene gene in this.pawn.genes.GenesListForReading)
+			{
+				Gene_ChemicalDependency gene_ChemicalDependency = gene as Gene_ChemicalDependency;
+				if (gene_ChemicalDependency != null && gene_ChemicalDependency.def.chemical == this.def.chemicalDef && gene_ChemicalDependency.LinkedHediff != null)
+				{
+					return Thought_Situational_GeneticChemicalDependency.MoodOffsetCurve.Evaluate(gene_ChemicalDependency.LinkedHediff.Severity);
+				}
+			}
 			return 0f;
 		}
-		foreach (Gene item in pawn.genes.GenesListForReading)
+
+		// Token: 0x04005C4A RID: 23626
+		private static readonly SimpleCurve MoodOffsetCurve = new SimpleCurve
 		{
-			if (item is Gene_ChemicalDependency gene_ChemicalDependency && gene_ChemicalDependency.def.chemical == def.chemicalDef && gene_ChemicalDependency.LinkedHediff != null)
 			{
-				return MoodOffsetCurve.Evaluate(gene_ChemicalDependency.LinkedHediff.Severity);
+				new CurvePoint(0f, 0f),
+				true
+			},
+			{
+				new CurvePoint(1f, -4f),
+				true
+			},
+			{
+				new CurvePoint(6f, -20f),
+				true
 			}
-		}
-		return 0f;
+		};
 	}
 }

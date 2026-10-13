@@ -1,20 +1,25 @@
+﻿using System;
 using RimWorld.Planet;
 
-namespace Verse.AI;
-
-public class JobGiver_ExitMapFollowOverseer : JobGiver_ExitMapBest
+namespace Verse.AI
 {
-	public JobGiver_ExitMapFollowOverseer()
+	// Token: 0x02001007 RID: 4103
+	public class JobGiver_ExitMapFollowOverseer : JobGiver_ExitMapBest
 	{
-		failIfCantJoinOrCreateCaravan = true;
-	}
-
-	protected override Job TryGiveJob(Pawn pawn)
-	{
-		if (!CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(pawn))
+		// Token: 0x060064A7 RID: 25767 RVA: 0x001FE075 File Offset: 0x001FC275
+		public JobGiver_ExitMapFollowOverseer()
 		{
-			return null;
+			this.failIfCantJoinOrCreateCaravan = true;
 		}
-		return base.TryGiveJob(pawn);
+
+		// Token: 0x060064A8 RID: 25768 RVA: 0x001FE084 File Offset: 0x001FC284
+		protected override Job TryGiveJob(Pawn pawn)
+		{
+			if (!CaravanExitMapUtility.CanExitMapAndJoinOrCreateCaravanNow(pawn))
+			{
+				return null;
+			}
+			return base.TryGiveJob(pawn);
+		}
 	}
 }

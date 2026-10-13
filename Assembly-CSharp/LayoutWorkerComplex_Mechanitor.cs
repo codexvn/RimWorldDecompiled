@@ -1,44 +1,45 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using RimWorld;
 using Verse;
 
+// Token: 0x02000017 RID: 23
 public class LayoutWorkerComplex_Mechanitor : LayoutWorkerComplex
 {
-	private const string MechanitorCasketOpenedSignal = "MechanitorCasketOpened";
-
-	private const string MechanitorCasketUnfoggedSignal = "MechanitorCasketUnfogged";
-
-	private static readonly IntRange RandomMechanitorCorpseAge = new IntRange(0, 360000000);
-
-	private readonly List<CellRect> tmpAllRoomRects = new List<CellRect>();
-
-	public LayoutWorkerComplex_Mechanitor(LayoutDef def)
-		: base(def)
+	// Token: 0x06000058 RID: 88 RVA: 0x00003750 File Offset: 0x00001950
+	public LayoutWorkerComplex_Mechanitor(LayoutDef def) : base(def)
 	{
 	}
 
+	// Token: 0x06000059 RID: 89 RVA: 0x00003764 File Offset: 0x00001964
 	public override Faction GetFixedHostileFactionForThreats()
 	{
 		return Faction.OfMechanoids;
 	}
 
+	// Token: 0x0600005A RID: 90 RVA: 0x0000376C File Offset: 0x0000196C
 	protected override void PreSpawnThreats(List<LayoutRoom> rooms, Map map, List<Thing> allSpawnedThings)
 	{
+		LayoutWorkerComplex_Mechanitor.<>c__DisplayClass6_0 CS$<>8__locals1 = new LayoutWorkerComplex_Mechanitor.<>c__DisplayClass6_0();
 		base.PreSpawnThreats(rooms, map, allSpawnedThings);
-		tmpAllRoomRects.Clear();
-		tmpAllRoomRects.AddRange(rooms.Where((LayoutRoom r) => r.requiredDef == null).SelectMany((LayoutRoom r) => r.rects));
-		CellRect bounds = tmpAllRoomRects[0];
-		for (int num = 0; num < tmpAllRoomRects.Count; num++)
+		this.tmpAllRoomRects.Clear();
+		this.tmpAllRoomRects.AddRange((from r in rooms
+		where r.requiredDef == null
+		select r).SelectMany((LayoutRoom r) => r.rects));
+		CS$<>8__locals1.bounds = this.tmpAllRoomRects[0];
+		for (int i = 0; i < this.tmpAllRoomRects.Count; i++)
 		{
-			bounds = bounds.Encapsulate(tmpAllRoomRects[num]);
+			CS$<>8__locals1.bounds = CS$<>8__locals1.bounds.Encapsulate(this.tmpAllRoomRects[i]);
 		}
 		bool flag = false;
-		foreach (CellRect item in tmpAllRoomRects.OrderBy(OrderRoomsBy))
+		foreach (CellRect room in this.tmpAllRoomRects.OrderBy(new Func<CellRect, float>(CS$<>8__locals1.<PreSpawnThreats>g__OrderRoomsBy|2)))
 		{
-			if (TryPlaceDeceasedMechanitor(item, map, out var casket))
+			Building_AncientCryptosleepPod item;
+			if (this.TryPlaceDeceasedMechanitor(room, map, out item))
 			{
-				allSpawnedThings.Add(casket);
+				allSpawnedThings.Add(item);
 				flag = true;
 				break;
 			}
@@ -47,73 +48,86 @@ public class LayoutWorkerComplex_Mechanitor : LayoutWorkerComplex
 		{
 			Log.Error("Failed to place mechanitor in ancient mechanitor complex.");
 		}
-		tmpAllRoomRects.Clear();
-		float OrderRoomsBy(CellRect r)
-		{
-			if (r.Contains(bounds.CenterCell))
-			{
-				return 0f;
-			}
-			return r.CenterCell.DistanceTo(bounds.CenterCell);
-		}
+		this.tmpAllRoomRects.Clear();
 	}
 
+	// Token: 0x0600005B RID: 91 RVA: 0x000038AC File Offset: 0x00001AAC
 	private bool TryPlaceDeceasedMechanitor(CellRect room, Map map, out Building_AncientCryptosleepPod casket)
 	{
-		foreach (IntVec3 item in room.Cells.InRandomOrder())
+		LayoutWorkerComplex_Mechanitor.<>c__DisplayClass7_0 CS$<>8__locals1;
+		CS$<>8__locals1.map = map;
+		foreach (IntVec3 intVec in room.Cells.InRandomOrder(null))
 		{
-			if (CanPlaceCasketAt(item))
+			if (LayoutWorkerComplex_Mechanitor.<TryPlaceDeceasedMechanitor>g__CanPlaceCasketAt|7_0(intVec, ref CS$<>8__locals1))
 			{
-				casket = (Building_AncientCryptosleepPod)GenSpawn.Spawn(ThingDefOf.AncientCryptosleepPod, item, map);
-				casket.openedSignal = "MechanitorCasketOpened" + Find.UniqueIDsManager.GetNextSignalTagID();
-				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Mechanitor_Basic, Faction.OfAncients, PawnGenerationContext.NonPlayer, map.Tile, forceGenerateNewPawn: false, allowDead: false, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: true, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: true));
-				pawn.Corpse.Age = RandomMechanitorCorpseAge.RandomInRange;
+				casket = (Building_AncientCryptosleepPod)GenSpawn.Spawn(ThingDefOf.AncientCryptosleepPod, intVec, CS$<>8__locals1.map, WipeMode.Vanish);
+				casket.openedSignal = "MechanitorCasketOpened" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
+				Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.Mechanitor_Basic, Faction.OfAncients, PawnGenerationContext.NonPlayer, null, false, false, false, true, false, 1f, false, true, false, true, true, false, true, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, true, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false));
+				pawn.Corpse.Age = LayoutWorkerComplex_Mechanitor.RandomMechanitorCorpseAge.RandomInRange;
 				pawn.relations.hidePawnRelations = true;
-				pawn.Corpse.GetComp<CompRottable>().RotProgress += pawn.Corpse.Age;
-				casket.TryAcceptThing(pawn.Corpse, allowSpecialEffects: false);
-				SignalAction_Message obj = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message);
-				obj.signalTag = casket.openedSignal;
-				obj.message = "MessageMechanitorCasketOpened".Translate(pawn, HediffDefOf.MechlinkImplant);
-				obj.messageType = MessageTypeDefOf.PositiveEvent;
-				obj.lookTargets = pawn.Corpse;
-				GenSpawn.Spawn(obj, item, map);
-				SignalAction_Letter obj2 = (SignalAction_Letter)ThingMaker.MakeThing(ThingDefOf.SignalAction_Letter);
-				obj2.signalTag = casket.openedSignal;
-				obj2.letterDef = LetterDefOf.NeutralEvent;
-				obj2.letterLabelKey = "LetterLabelMechanitorCasketOpened";
-				obj2.letterMessageKey = "LetterMechanitorCasketOpened";
-				obj2.fixedPawnReference = pawn;
-				obj2.lookTargets = pawn.Corpse;
-				GenSpawn.Spawn(obj2, item, map);
-				SignalAction_SoundOneShot obj3 = (SignalAction_SoundOneShot)ThingMaker.MakeThing(ThingDefOf.SignalAction_SoundOneShot);
-				obj3.signalTag = casket.openedSignal;
-				obj3.sound = SoundDefOf.MechlinkCorpseReveal;
-				GenSpawn.Spawn(obj3, item, map);
-				TriggerUnfogged triggerUnfogged = (TriggerUnfogged)ThingMaker.MakeThing(ThingDefOf.TriggerUnfogged);
-				triggerUnfogged.signalTag = "MechanitorCasketUnfogged" + Find.UniqueIDsManager.GetNextSignalTagID();
-				GenSpawn.Spawn(triggerUnfogged, casket.Position, map);
-				SignalAction_Letter obj4 = (SignalAction_Letter)ThingMaker.MakeThing(ThingDefOf.SignalAction_Letter);
-				obj4.signalTag = triggerUnfogged.signalTag;
-				obj4.letterDef = LetterDefOf.NeutralEvent;
-				obj4.letterLabelKey = "LetterLabelMechanitorCasketFound";
-				obj4.letterMessageKey = "LetterMechanitorCasketFound";
-				GenSpawn.Spawn(obj4, item, map);
-				ScatterDebrisUtility.ScatterFilthAroundThing(casket, map, ThingDefOf.Filth_MachineBits);
+				pawn.Corpse.GetComp<CompRottable>().RotProgress += (float)pawn.Corpse.Age;
+				casket.TryAcceptThing(pawn.Corpse, false);
+				SignalAction_Message signalAction_Message = (SignalAction_Message)ThingMaker.MakeThing(ThingDefOf.SignalAction_Message, null);
+				signalAction_Message.signalTag = casket.openedSignal;
+				signalAction_Message.message = "MessageMechanitorCasketOpened".Translate(pawn, HediffDefOf.MechlinkImplant);
+				signalAction_Message.messageType = MessageTypeDefOf.PositiveEvent;
+				signalAction_Message.lookTargets = pawn.Corpse;
+				GenSpawn.Spawn(signalAction_Message, intVec, CS$<>8__locals1.map, WipeMode.Vanish);
+				SignalAction_Letter signalAction_Letter = (SignalAction_Letter)ThingMaker.MakeThing(ThingDefOf.SignalAction_Letter, null);
+				signalAction_Letter.signalTag = casket.openedSignal;
+				signalAction_Letter.letterDef = LetterDefOf.NeutralEvent;
+				signalAction_Letter.letterLabelKey = "LetterLabelMechanitorCasketOpened";
+				signalAction_Letter.letterMessageKey = "LetterMechanitorCasketOpened";
+				signalAction_Letter.fixedPawnReference = pawn;
+				signalAction_Letter.lookTargets = pawn.Corpse;
+				GenSpawn.Spawn(signalAction_Letter, intVec, CS$<>8__locals1.map, WipeMode.Vanish);
+				SignalAction_SoundOneShot signalAction_SoundOneShot = (SignalAction_SoundOneShot)ThingMaker.MakeThing(ThingDefOf.SignalAction_SoundOneShot, null);
+				signalAction_SoundOneShot.signalTag = casket.openedSignal;
+				signalAction_SoundOneShot.sound = SoundDefOf.MechlinkCorpseReveal;
+				GenSpawn.Spawn(signalAction_SoundOneShot, intVec, CS$<>8__locals1.map, WipeMode.Vanish);
+				TriggerUnfogged triggerUnfogged = (TriggerUnfogged)ThingMaker.MakeThing(ThingDefOf.TriggerUnfogged, null);
+				triggerUnfogged.signalTag = "MechanitorCasketUnfogged" + Find.UniqueIDsManager.GetNextSignalTagID().ToString();
+				GenSpawn.Spawn(triggerUnfogged, casket.Position, CS$<>8__locals1.map, WipeMode.Vanish);
+				SignalAction_Letter signalAction_Letter2 = (SignalAction_Letter)ThingMaker.MakeThing(ThingDefOf.SignalAction_Letter, null);
+				signalAction_Letter2.signalTag = triggerUnfogged.signalTag;
+				signalAction_Letter2.letterDef = LetterDefOf.NeutralEvent;
+				signalAction_Letter2.letterLabelKey = "LetterLabelMechanitorCasketFound";
+				signalAction_Letter2.letterMessageKey = "LetterMechanitorCasketFound";
+				GenSpawn.Spawn(signalAction_Letter2, intVec, CS$<>8__locals1.map, WipeMode.Vanish);
+				ScatterDebrisUtility.ScatterFilthAroundThing(casket, CS$<>8__locals1.map, ThingDefOf.Filth_MachineBits, 0.5f, 1, int.MaxValue, null);
 				return true;
 			}
 		}
 		casket = null;
 		return false;
-		bool CanPlaceCasketAt(IntVec3 cell)
+	}
+
+	// Token: 0x0600005D RID: 93 RVA: 0x00003C30 File Offset: 0x00001E30
+	[CompilerGenerated]
+	internal static bool <TryPlaceDeceasedMechanitor>g__CanPlaceCasketAt|7_0(IntVec3 cell, ref LayoutWorkerComplex_Mechanitor.<>c__DisplayClass7_0 A_1)
+	{
+		using (CellRect.Enumerator enumerator = GenAdj.OccupiedRect(cell, Rot4.North, ThingDefOf.AncientCryptosleepPod.Size).ExpandedBy(1).GetEnumerator())
 		{
-			foreach (IntVec3 item2 in GenAdj.OccupiedRect(cell, Rot4.North, ThingDefOf.AncientCryptosleepPod.Size).ExpandedBy(1))
+			while (enumerator.MoveNext())
 			{
-				if (item2.GetEdifice(map) != null)
+				if (enumerator.Current.GetEdifice(A_1.map) != null)
 				{
 					return false;
 				}
 			}
-			return true;
 		}
+		return true;
 	}
+
+	// Token: 0x04000021 RID: 33
+	private const string MechanitorCasketOpenedSignal = "MechanitorCasketOpened";
+
+	// Token: 0x04000022 RID: 34
+	private const string MechanitorCasketUnfoggedSignal = "MechanitorCasketUnfogged";
+
+	// Token: 0x04000023 RID: 35
+	private static readonly IntRange RandomMechanitorCorpseAge = new IntRange(0, 360000000);
+
+	// Token: 0x04000024 RID: 36
+	private readonly List<CellRect> tmpAllRoomRects = new List<CellRect>();
 }

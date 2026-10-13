@@ -1,7 +1,10 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Building_GeothermalVent : Building
+namespace RimWorld
 {
+	// Token: 0x02002A0C RID: 10764
+	public class Building_GeothermalVent : Building
+	{
+	}
 }

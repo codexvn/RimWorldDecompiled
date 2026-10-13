@@ -1,250 +1,302 @@
+﻿using System;
 using System.Text;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public class Hediff_Injury : HediffWithComps
+namespace Verse
 {
-	public bool destroysBodyParts = true;
-
-	private static readonly Color PermanentInjuryColor = new Color(0.72f, 0.72f, 0.72f);
-
-	public override int UIGroupKey
+	// Token: 0x02000749 RID: 1865
+	public class Hediff_Injury : HediffWithComps
 	{
-		get
+		// Token: 0x1700082B RID: 2091
+		// (get) Token: 0x06002D7D RID: 11645 RVA: 0x000EA618 File Offset: 0x000E8818
+		public override int UIGroupKey
 		{
-			int num = base.UIGroupKey;
-			if (this.IsTended())
+			get
 			{
-				num = Gen.HashCombineInt(num, 152235495);
+				int num = base.UIGroupKey;
+				if (this.IsTended())
+				{
+					num = Gen.HashCombineInt(num, 152235495);
+				}
+				return num;
 			}
-			return num;
 		}
-	}
 
-	public override string LabelBase
-	{
-		get
+		// Token: 0x1700082C RID: 2092
+		// (get) Token: 0x06002D7E RID: 11646 RVA: 0x000EA644 File Offset: 0x000E8844
+		public override string LabelBase
 		{
-			HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
-			if (hediffComp_GetsPermanent != null && hediffComp_GetsPermanent.IsPermanent)
+			get
 			{
-				if (base.Part != null && base.Part.def.delicate && !hediffComp_GetsPermanent.Props.instantlyPermanentLabel.NullOrEmpty())
+				HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
+				if (hediffComp_GetsPermanent != null && hediffComp_GetsPermanent.IsPermanent)
 				{
-					return hediffComp_GetsPermanent.Props.instantlyPermanentLabel;
+					if (base.Part != null && base.Part.def.delicate && !hediffComp_GetsPermanent.Props.instantlyPermanentLabel.NullOrEmpty())
+					{
+						return hediffComp_GetsPermanent.Props.instantlyPermanentLabel;
+					}
+					if (!hediffComp_GetsPermanent.Props.permanentLabel.NullOrEmpty())
+					{
+						return hediffComp_GetsPermanent.Props.permanentLabel;
+					}
 				}
-				if (!hediffComp_GetsPermanent.Props.permanentLabel.NullOrEmpty())
-				{
-					return hediffComp_GetsPermanent.Props.permanentLabel;
-				}
+				return base.LabelBase;
 			}
-			return base.LabelBase;
 		}
-	}
 
-	public override string LabelInBrackets
-	{
-		get
+		// Token: 0x1700082D RID: 2093
+		// (get) Token: 0x06002D7F RID: 11647 RVA: 0x000EA6C0 File Offset: 0x000E88C0
+		public override string LabelInBrackets
 		{
-			StringBuilder stringBuilder = new StringBuilder();
-			stringBuilder.Append(base.LabelInBrackets);
-			if (sourceHediffDef != null)
+			get
 			{
-				if (stringBuilder.Length != 0)
+				StringBuilder stringBuilder = new StringBuilder();
+				stringBuilder.Append(base.LabelInBrackets);
+				if (this.sourceHediffDef != null)
 				{
-					stringBuilder.Append(", ");
+					if (stringBuilder.Length != 0)
+					{
+						stringBuilder.Append(", ");
+					}
+					stringBuilder.Append(this.sourceHediffDef.label);
 				}
-				stringBuilder.Append(sourceHediffDef.label);
+				else if (this.sourceDef != null)
+				{
+					if (stringBuilder.Length != 0)
+					{
+						stringBuilder.Append(", ");
+					}
+					if (!this.sourceToolLabel.NullOrEmpty())
+					{
+						stringBuilder.Append("SourceToolLabel".Translate(this.sourceLabel, this.sourceToolLabel));
+					}
+					else if (this.sourceBodyPartGroup != null)
+					{
+						stringBuilder.Append("SourceToolLabel".Translate(this.sourceLabel, this.sourceBodyPartGroup.LabelShort));
+					}
+					else
+					{
+						stringBuilder.Append(this.sourceLabel);
+					}
+				}
+				HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
+				if (hediffComp_GetsPermanent != null && hediffComp_GetsPermanent.IsPermanent && hediffComp_GetsPermanent.PainCategory != PainCategory.Painless)
+				{
+					if (stringBuilder.Length != 0)
+					{
+						stringBuilder.Append(", ");
+					}
+					stringBuilder.Append(("PainCategory_" + hediffComp_GetsPermanent.PainCategory.ToString()).Translate());
+				}
+				return stringBuilder.ToString();
 			}
-			else if (sourceDef != null)
-			{
-				if (stringBuilder.Length != 0)
-				{
-					stringBuilder.Append(", ");
-				}
-				if (!sourceToolLabel.NullOrEmpty())
-				{
-					stringBuilder.Append("SourceToolLabel".Translate(sourceLabel, sourceToolLabel));
-				}
-				else if (sourceBodyPartGroup != null)
-				{
-					stringBuilder.Append("SourceToolLabel".Translate(sourceLabel, sourceBodyPartGroup.LabelShort));
-				}
-				else
-				{
-					stringBuilder.Append(sourceLabel);
-				}
-			}
-			HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
-			if (hediffComp_GetsPermanent != null && hediffComp_GetsPermanent.IsPermanent && hediffComp_GetsPermanent.PainCategory != PainCategory.Painless)
-			{
-				if (stringBuilder.Length != 0)
-				{
-					stringBuilder.Append(", ");
-				}
-				stringBuilder.Append(("PainCategory_" + hediffComp_GetsPermanent.PainCategory).Translate());
-			}
-			return stringBuilder.ToString();
 		}
-	}
 
-	public override Color LabelColor
-	{
-		get
+		// Token: 0x1700082E RID: 2094
+		// (get) Token: 0x06002D80 RID: 11648 RVA: 0x000EA818 File Offset: 0x000E8A18
+		public override Color LabelColor
 		{
-			if (this.IsPermanent())
+			get
 			{
-				return PermanentInjuryColor;
+				if (this.IsPermanent())
+				{
+					return Hediff_Injury.PermanentInjuryColor;
+				}
+				return Color.white;
 			}
-			return Color.white;
 		}
-	}
 
-	public override string SeverityLabel
-	{
-		get
+		// Token: 0x1700082F RID: 2095
+		// (get) Token: 0x06002D81 RID: 11649 RVA: 0x000EA830 File Offset: 0x000E8A30
+		public override string SeverityLabel
 		{
-			if (Severity == 0f)
+			get
 			{
-				return null;
+				if (this.Severity == 0f)
+				{
+					return null;
+				}
+				return this.Severity.ToString("F1");
 			}
-			return Severity.ToString("F1");
 		}
-	}
 
-	public override float SummaryHealthPercentImpact
-	{
-		get
+		// Token: 0x17000830 RID: 2096
+		// (get) Token: 0x06002D82 RID: 11650 RVA: 0x000EA85F File Offset: 0x000E8A5F
+		public override float SummaryHealthPercentImpact
 		{
-			if (this.IsPermanent() || !Visible)
+			get
 			{
-				return 0f;
-			}
-			return Severity / (75f * pawn.HealthScale);
-		}
-	}
-
-	public override float PainOffset
-	{
-		get
-		{
-			if (pawn.Dead || (base.Part != null && pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(base.Part)) || causesNoPain)
-			{
-				return 0f;
-			}
-			HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
-			float num = ((hediffComp_GetsPermanent == null || !hediffComp_GetsPermanent.IsPermanent) ? (Severity * def.injuryProps.painPerSeverity) : (Severity * def.injuryProps.averagePainPerSeverityPermanent * hediffComp_GetsPermanent.PainFactor));
-			return num / pawn.HealthScale;
-		}
-	}
-
-	public override float BleedRate
-	{
-		get
-		{
-			if (pawn.Dead)
-			{
-				return 0f;
-			}
-			if (BleedingStoppedDueToAge)
-			{
-				return 0f;
-			}
-			if (!pawn.health.CanBleed)
-			{
-				return 0f;
-			}
-			if ((base.Part != null && base.Part.def.IsSolid(base.Part, pawn.health.hediffSet.hediffs)) || this.IsTended() || this.IsPermanent())
-			{
-				return 0f;
-			}
-			if (base.Part != null)
-			{
-				Hediff directlyAddedPartFor = pawn.health.hediffSet.GetDirectlyAddedPartFor(base.Part);
-				if (directlyAddedPartFor != null && !directlyAddedPartFor.def.organicAddedBodypart)
+				if (this.IsPermanent() || !this.Visible)
 				{
 					return 0f;
 				}
+				return this.Severity / (75f * this.pawn.HealthScale);
 			}
-			float num = Severity * def.injuryProps.bleedRate * pawn.RaceProps.bleedRateFactor;
-			if (base.Part != null)
+		}
+
+		// Token: 0x17000831 RID: 2097
+		// (get) Token: 0x06002D83 RID: 11651 RVA: 0x000EA890 File Offset: 0x000E8A90
+		public override float PainOffset
+		{
+			get
 			{
-				num *= base.Part.def.bleedRate;
+				if (this.pawn.Dead || (base.Part != null && this.pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(base.Part)) || this.causesNoPain)
+				{
+					return 0f;
+				}
+				HediffComp_GetsPermanent hediffComp_GetsPermanent = this.TryGetComp<HediffComp_GetsPermanent>();
+				float num;
+				if (hediffComp_GetsPermanent != null && hediffComp_GetsPermanent.IsPermanent)
+				{
+					num = this.Severity * this.def.injuryProps.averagePainPerSeverityPermanent * hediffComp_GetsPermanent.PainFactor;
+				}
+				else
+				{
+					num = this.Severity * this.def.injuryProps.painPerSeverity;
+				}
+				return num / this.pawn.HealthScale;
 			}
-			return num;
 		}
-	}
 
-	private int AgeTicksToStopBleeding
-	{
-		get
+		// Token: 0x17000832 RID: 2098
+		// (get) Token: 0x06002D84 RID: 11652 RVA: 0x000EA938 File Offset: 0x000E8B38
+		public override float BleedRate
 		{
-			float t = Mathf.Clamp(Mathf.InverseLerp(1f, 30f, Severity), 0f, 1f);
-			return 90000 + Mathf.RoundToInt(Mathf.Lerp(0f, 90000f, t));
-		}
-	}
-
-	private bool BleedingStoppedDueToAge => ageTicks >= AgeTicksToStopBleeding;
-
-	public override void TickInterval(int delta)
-	{
-		bool bleedingStoppedDueToAge = BleedingStoppedDueToAge;
-		base.TickInterval(delta);
-		bool bleedingStoppedDueToAge2 = BleedingStoppedDueToAge;
-		if (bleedingStoppedDueToAge != bleedingStoppedDueToAge2)
-		{
-			pawn.health.Notify_HediffChanged(this);
-		}
-	}
-
-	public override void Heal(float amount)
-	{
-		Severity -= amount;
-		if (comps != null)
-		{
-			for (int i = 0; i < comps.Count; i++)
+			get
 			{
-				comps[i].CompPostInjuryHeal(amount);
+				if (this.pawn.Dead)
+				{
+					return 0f;
+				}
+				if (this.BleedingStoppedDueToAge)
+				{
+					return 0f;
+				}
+				if (!this.pawn.health.CanBleed)
+				{
+					return 0f;
+				}
+				if ((base.Part != null && base.Part.def.IsSolid(base.Part, this.pawn.health.hediffSet.hediffs)) || this.IsTended() || this.IsPermanent())
+				{
+					return 0f;
+				}
+				if (base.Part != null)
+				{
+					Hediff directlyAddedPartFor = this.pawn.health.hediffSet.GetDirectlyAddedPartFor(base.Part);
+					if (directlyAddedPartFor != null && !directlyAddedPartFor.def.organicAddedBodypart)
+					{
+						return 0f;
+					}
+				}
+				float num = this.Severity * this.def.injuryProps.bleedRate * this.pawn.RaceProps.bleedRateFactor;
+				if (base.Part != null)
+				{
+					num *= base.Part.def.bleedRate;
+				}
+				return num;
 			}
 		}
-		pawn.health.Notify_HediffChanged(this);
-	}
 
-	public override bool TryMergeWith(Hediff other)
-	{
-		if (!(other is Hediff_Injury hediff_Injury) || hediff_Injury.def != def || hediff_Injury.Part != base.Part || hediff_Injury.IsTended() || hediff_Injury.IsPermanent() || this.IsTended() || this.IsPermanent() || !def.injuryProps.canMerge)
+		// Token: 0x17000833 RID: 2099
+		// (get) Token: 0x06002D85 RID: 11653 RVA: 0x000EAA48 File Offset: 0x000E8C48
+		private int AgeTicksToStopBleeding
 		{
-			return false;
+			get
+			{
+				int num = 90000;
+				float t = Mathf.Clamp(Mathf.InverseLerp(1f, 30f, this.Severity), 0f, 1f);
+				return num + Mathf.RoundToInt(Mathf.Lerp(0f, 90000f, t));
+			}
 		}
-		return base.TryMergeWith(other);
-	}
 
-	public override void PostAdd(DamageInfo? dinfo)
-	{
-		base.PostAdd(dinfo);
-		if (base.Part != null && base.Part.coverageAbs <= 0f && (!dinfo.HasValue || dinfo.Value.Def != DamageDefOf.SurgicalCut))
+		// Token: 0x17000834 RID: 2100
+		// (get) Token: 0x06002D86 RID: 11654 RVA: 0x000EAA95 File Offset: 0x000E8C95
+		private bool BleedingStoppedDueToAge
 		{
-			Log.Error("Added injury to " + base.Part.def?.ToString() + " but it should be impossible to hit it. pawn=" + pawn.ToStringSafe() + " dinfo=" + dinfo.ToStringSafe());
+			get
+			{
+				return this.ageTicks >= this.AgeTicksToStopBleeding;
+			}
 		}
-	}
 
-	public override void PostRemoved()
-	{
-		base.PostRemoved();
-		pawn.Drawer.renderer.WoundOverlays.ClearCache();
-		PortraitsCache.SetDirty(pawn);
-		GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(pawn);
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref destroysBodyParts, "destroysBodyParts", defaultValue: true);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit && base.Part == null)
+		// Token: 0x06002D87 RID: 11655 RVA: 0x000EAAA8 File Offset: 0x000E8CA8
+		public override void TickInterval(int delta)
 		{
-			Log.Error("Hediff_Injury has null part after loading.");
-			pawn.health.hediffSet.hediffs.Remove(this);
+			bool bleedingStoppedDueToAge = this.BleedingStoppedDueToAge;
+			base.TickInterval(delta);
+			bool bleedingStoppedDueToAge2 = this.BleedingStoppedDueToAge;
+			if (bleedingStoppedDueToAge != bleedingStoppedDueToAge2)
+			{
+				this.pawn.health.Notify_HediffChanged(this);
+			}
 		}
+
+		// Token: 0x06002D88 RID: 11656 RVA: 0x000EAAE0 File Offset: 0x000E8CE0
+		public override void Heal(float amount)
+		{
+			this.Severity -= amount;
+			if (this.comps != null)
+			{
+				for (int i = 0; i < this.comps.Count; i++)
+				{
+					this.comps[i].CompPostInjuryHeal(amount);
+				}
+			}
+			this.pawn.health.Notify_HediffChanged(this);
+		}
+
+		// Token: 0x06002D89 RID: 11657 RVA: 0x000EAB3C File Offset: 0x000E8D3C
+		public override bool TryMergeWith(Hediff other)
+		{
+			Hediff_Injury hediff_Injury = other as Hediff_Injury;
+			return hediff_Injury != null && hediff_Injury.def == this.def && hediff_Injury.Part == base.Part && !hediff_Injury.IsTended() && !hediff_Injury.IsPermanent() && !this.IsTended() && !this.IsPermanent() && this.def.injuryProps.canMerge && base.TryMergeWith(other);
+		}
+
+		// Token: 0x06002D8A RID: 11658 RVA: 0x000EABAC File Offset: 0x000E8DAC
+		public override void PostAdd(DamageInfo? dinfo)
+		{
+			base.PostAdd(dinfo);
+			if (base.Part != null && base.Part.coverageAbs <= 0f && (dinfo == null || dinfo.Value.Def != DamageDefOf.SurgicalCut))
+			{
+				string[] array = new string[6];
+				array[0] = "Added injury to ";
+				int num = 1;
+				BodyPartDef def = base.Part.def;
+				array[num] = ((def != null) ? def.ToString() : null);
+				array[2] = " but it should be impossible to hit it. pawn=";
+				array[3] = this.pawn.ToStringSafe<Pawn>();
+				array[4] = " dinfo=";
+				array[5] = dinfo.ToStringSafe<DamageInfo?>();
+				Log.Error(string.Concat(array));
+			}
+		}
+
+		// Token: 0x06002D8B RID: 11659 RVA: 0x000EAC55 File Offset: 0x000E8E55
+		public override void PostRemoved()
+		{
+			base.PostRemoved();
+			this.pawn.Drawer.renderer.WoundOverlays.ClearCache();
+			PortraitsCache.SetDirty(this.pawn);
+			GlobalTextureAtlasManager.TryMarkPawnFrameSetDirty(this.pawn);
+		}
+
+		// Token: 0x06002D8C RID: 11660 RVA: 0x000EAC90 File Offset: 0x000E8E90
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<bool>(ref this.destroysBodyParts, "destroysBodyParts", true, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit && base.Part == null)
+			{
+				Log.Error("Hediff_Injury has null part after loading.");
+				this.pawn.health.hediffSet.hediffs.Remove(this);
+			}
+		}
+
+		// Token: 0x04002408 RID: 9224
+		public bool destroysBodyParts = true;
+
+		// Token: 0x04002409 RID: 9225
+		private static readonly Color PermanentInjuryColor = new Color(0.72f, 0.72f, 0.72f);
 	}
 }

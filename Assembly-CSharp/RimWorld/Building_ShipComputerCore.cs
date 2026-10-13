@@ -1,57 +1,75 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class Building_ShipComputerCore : Building
+namespace RimWorld
 {
-	private bool CanLaunchNow => !ShipUtility.LaunchFailReasons(this).Any();
-
-	public override IEnumerable<Gizmo> GetGizmos()
+	// Token: 0x02002989 RID: 10633
+	public class Building_ShipComputerCore : Building
 	{
-		foreach (Gizmo gizmo in base.GetGizmos())
+		// Token: 0x170023BC RID: 9148
+		// (get) Token: 0x0600E9CA RID: 59850 RVA: 0x00440878 File Offset: 0x0043EA78
+		private bool CanLaunchNow
 		{
-			yield return gizmo;
+			get
+			{
+				return !ShipUtility.LaunchFailReasons(this).Any<string>();
+			}
 		}
-		foreach (Gizmo item in ShipUtility.ShipStartupGizmos(this))
-		{
-			yield return item;
-		}
-		Command_Action command_Action = new Command_Action
-		{
-			action = TryLaunch,
-			defaultLabel = "CommandShipLaunch".Translate(),
-			defaultDesc = "CommandShipLaunchDesc".Translate(),
-			hotKey = KeyBindingDefOf.Misc1,
-			icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip")
-		};
-		if (!CanLaunchNow)
-		{
-			command_Action.Disable(ShipUtility.LaunchFailReasons(this).First());
-		}
-		if (ShipCountdown.CountingDown)
-		{
-			command_Action.Disable();
-		}
-		yield return command_Action;
-	}
 
-	public void ForceLaunch()
-	{
-		ShipCountdown.InitiateCountdown(this);
-		if (base.Spawned)
+		// Token: 0x0600E9CB RID: 59851 RVA: 0x00440888 File Offset: 0x0043EA88
+		public override IEnumerable<Gizmo> GetGizmos()
 		{
-			QuestUtility.SendQuestTargetSignals(base.Map.Parent.questTags, "LaunchedShip");
+			foreach (Gizmo gizmo in base.GetGizmos())
+			{
+				yield return gizmo;
+			}
+			IEnumerator<Gizmo> enumerator = null;
+			foreach (Gizmo gizmo2 in ShipUtility.ShipStartupGizmos(this))
+			{
+				yield return gizmo2;
+			}
+			enumerator = null;
+			Command_Action command_Action = new Command_Action
+			{
+				action = new Action(this.TryLaunch),
+				defaultLabel = "CommandShipLaunch".Translate(),
+				defaultDesc = "CommandShipLaunchDesc".Translate(),
+				hotKey = KeyBindingDefOf.Misc1,
+				icon = ContentFinder<Texture2D>.Get("UI/Commands/LaunchShip", true)
+			};
+			if (!this.CanLaunchNow)
+			{
+				command_Action.Disable(ShipUtility.LaunchFailReasons(this).First<string>());
+			}
+			if (ShipCountdown.CountingDown)
+			{
+				command_Action.Disable(null);
+			}
+			yield return command_Action;
+			yield break;
+			yield break;
 		}
-	}
 
-	private void TryLaunch()
-	{
-		if (CanLaunchNow)
+		// Token: 0x0600E9CC RID: 59852 RVA: 0x00440898 File Offset: 0x0043EA98
+		public void ForceLaunch()
 		{
-			ForceLaunch();
+			ShipCountdown.InitiateCountdown(this);
+			if (base.Spawned)
+			{
+				QuestUtility.SendQuestTargetSignals(base.Map.Parent.questTags, "LaunchedShip");
+			}
+		}
+
+		// Token: 0x0600E9CD RID: 59853 RVA: 0x004408C2 File Offset: 0x0043EAC2
+		private void TryLaunch()
+		{
+			if (this.CanLaunchNow)
+			{
+				this.ForceLaunch();
+			}
 		}
 	}
 }

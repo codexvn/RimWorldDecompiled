@@ -1,24 +1,25 @@
+﻿using System;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordJob_GorehulkAssault : LordJob
+namespace RimWorld
 {
-	public override StateGraph CreateGraph()
+	// Token: 0x02001658 RID: 5720
+	public class LordJob_GorehulkAssault : LordJob
 	{
-		StateGraph stateGraph = new StateGraph();
-		LordToil toil = new LordToil_GorehulkAssault();
-		stateGraph.AddToil(toil);
-		return stateGraph;
-	}
-
-	public override bool ShouldRemovePawn(Pawn p, PawnLostCondition reason)
-	{
-		if (reason == PawnLostCondition.Incapped)
+		// Token: 0x060086E0 RID: 34528 RVA: 0x0028466C File Offset: 0x0028286C
+		public override StateGraph CreateGraph()
 		{
-			return false;
+			StateGraph stateGraph = new StateGraph();
+			LordToil toil = new LordToil_GorehulkAssault();
+			stateGraph.AddToil(toil);
+			return stateGraph;
 		}
-		return true;
+
+		// Token: 0x060086E1 RID: 34529 RVA: 0x00283118 File Offset: 0x00281318
+		public override bool ShouldRemovePawn(Pawn p, PawnLostCondition reason)
+		{
+			return reason != PawnLostCondition.Incapped;
+		}
 	}
 }

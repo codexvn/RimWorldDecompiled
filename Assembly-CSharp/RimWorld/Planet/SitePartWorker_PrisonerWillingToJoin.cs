@@ -1,35 +1,49 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.QuestGen;
 using Verse;
 using Verse.Grammar;
 
-namespace RimWorld.Planet;
-
-public class SitePartWorker_PrisonerWillingToJoin : SitePartWorker
+namespace RimWorld.Planet
 {
-	public override void Notify_GeneratedByQuestGen(SitePart part, Slate slate, List<Rule> outExtraDescriptionRules, Dictionary<string, string> outExtraDescriptionConstants)
+	// Token: 0x02003DF6 RID: 15862
+	public class SitePartWorker_PrisonerWillingToJoin : SitePartWorker
 	{
-		base.Notify_GeneratedByQuestGen(part, slate, outExtraDescriptionRules, outExtraDescriptionConstants);
-		Pawn pawn = PrisonerWillingToJoinQuestUtility.GeneratePrisoner(part.site.Tile, part.site.Faction);
-		part.things = new ThingOwner<Pawn>(part, oneStackOnly: true);
-		part.things.TryAdd(pawn);
-		PawnRelationUtility.Notify_PawnsSeenByPlayer(Gen.YieldSingle(pawn), out var pawnRelationsInfo, informEvenIfSeenBefore: true, writeSeenPawnsNames: false);
-		string output = (pawnRelationsInfo.NullOrEmpty() ? "" : ((string)("\n\n" + "PawnHasTheseRelationshipsWithColonists".Translate(pawn.LabelShort, pawn) + "\n\n" + pawnRelationsInfo)));
-		slate.Set("prisoner", pawn);
-		outExtraDescriptionRules.Add(new Rule_String("prisonerFullRelationInfo", output));
-	}
+		// Token: 0x06015A34 RID: 88628 RVA: 0x0067A270 File Offset: 0x00678470
+		public override void Notify_GeneratedByQuestGen(SitePart part, Slate slate, List<Rule> outExtraDescriptionRules, Dictionary<string, string> outExtraDescriptionConstants)
+		{
+			base.Notify_GeneratedByQuestGen(part, slate, outExtraDescriptionRules, outExtraDescriptionConstants);
+			Pawn pawn = PrisonerWillingToJoinQuestUtility.GeneratePrisoner(part.site.Tile, part.site.Faction);
+			part.things = new ThingOwner<Pawn>(part, true, LookMode.Deep, true);
+			part.things.TryAdd(pawn, true);
+			string text;
+			PawnRelationUtility.Notify_PawnsSeenByPlayer(Gen.YieldSingle<Pawn>(pawn), out text, true, false);
+			string output;
+			if (!text.NullOrEmpty())
+			{
+				output = "\n\n" + "PawnHasTheseRelationshipsWithColonists".Translate(pawn.LabelShort, pawn) + "\n\n" + text;
+			}
+			else
+			{
+				output = "";
+			}
+			slate.Set<Pawn>("prisoner", pawn, false);
+			outExtraDescriptionRules.Add(new Rule_String("prisonerFullRelationInfo", output));
+		}
 
-	public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
-	{
-		string text = base.GetPostProcessedThreatLabel(site, sitePart);
-		if (sitePart.things != null && sitePart.things.Any)
+		// Token: 0x06015A35 RID: 88629 RVA: 0x0067A33C File Offset: 0x0067853C
+		public override string GetPostProcessedThreatLabel(Site site, SitePart sitePart)
 		{
-			text = text + ": " + sitePart.things[0].LabelShortCap;
+			string text = base.GetPostProcessedThreatLabel(site, sitePart);
+			if (sitePart.things != null && sitePart.things.Any)
+			{
+				text = text + ": " + sitePart.things[0].LabelShortCap;
+			}
+			if (site.HasWorldObjectTimeout)
+			{
+				text += " (" + "DurationLeft".Translate(site.WorldObjectTimeoutTicksLeft.ToStringTicksToPeriod(true, false, true, true, false)) + ")";
+			}
+			return text;
 		}
-		if (site.HasWorldObjectTimeout)
-		{
-			text += " (" + "DurationLeft".Translate(site.WorldObjectTimeoutTicksLeft.ToStringTicksToPeriod()) + ")";
-		}
-		return text;
 	}
 }

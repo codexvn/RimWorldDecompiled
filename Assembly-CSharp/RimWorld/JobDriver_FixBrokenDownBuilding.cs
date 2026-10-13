@@ -1,56 +1,75 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_FixBrokenDownBuilding : JobDriver
+namespace RimWorld
 {
-	private const TargetIndex BuildingInd = TargetIndex.A;
-
-	private const TargetIndex ComponentInd = TargetIndex.B;
-
-	private const int TicksDuration = 1000;
-
-	private Building Building => (Building)job.GetTarget(TargetIndex.A).Thing;
-
-	private Thing Components => job.GetTarget(TargetIndex.B).Thing;
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02001172 RID: 4466
+	public class JobDriver_FixBrokenDownBuilding : JobDriver
 	{
-		if (pawn.Reserve(Building, job, 1, -1, null, errorOnFailed))
+		// Token: 0x170010E3 RID: 4323
+		// (get) Token: 0x06006D41 RID: 27969 RVA: 0x00223D0C File Offset: 0x00221F0C
+		private Building Building
 		{
-			return pawn.Reserve(Components, job, 1, -1, null, errorOnFailed);
+			get
+			{
+				return (Building)this.job.GetTarget(TargetIndex.A).Thing;
+			}
 		}
-		return false;
-	}
 
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-		yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
-		yield return Toils_Haul.StartCarryThing(TargetIndex.B);
-		yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnDespawnedOrNull(TargetIndex.A);
-		Toil toil = Toils_General.Wait(1000);
-		toil.FailOnDespawnedOrNull(TargetIndex.A);
-		toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
-		toil.WithEffect(Building.def.repairEffect, TargetIndex.A);
-		toil.WithProgressBarToilDelay(TargetIndex.A);
-		toil.activeSkill = () => SkillDefOf.Construction;
-		yield return toil;
-		Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-		toil2.initAction = delegate
+		// Token: 0x170010E4 RID: 4324
+		// (get) Token: 0x06006D42 RID: 27970 RVA: 0x00223D34 File Offset: 0x00221F34
+		private Thing Components
 		{
-			Components.Destroy();
-			if (Rand.Value > pawn.GetStatValue(StatDefOf.FixBrokenDownBuildingSuccessChance))
+			get
 			{
-				MoteMaker.ThrowText((pawn.DrawPos + Building.DrawPos) / 2f, base.Map, "TextMote_FixBrokenDownBuildingFail".Translate(), 3.65f);
+				return this.job.GetTarget(TargetIndex.B).Thing;
 			}
-			else
+		}
+
+		// Token: 0x06006D43 RID: 27971 RVA: 0x00223D58 File Offset: 0x00221F58
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return this.pawn.Reserve(this.Building, this.job, 1, -1, null, errorOnFailed, false) && this.pawn.Reserve(this.Components, this.job, 1, -1, null, errorOnFailed, false);
+		}
+
+		// Token: 0x06006D44 RID: 27972 RVA: 0x00223DAB File Offset: 0x00221FAB
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+			yield return Toils_Goto.GotoThing(TargetIndex.B, PathEndMode.Touch, false).FailOnDespawnedNullOrForbidden(TargetIndex.B).FailOnSomeonePhysicallyInteracting(TargetIndex.B);
+			yield return Toils_Haul.StartCarryThing(TargetIndex.B, false, false, false, true, false);
+			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnDespawnedOrNull(TargetIndex.A);
+			Toil toil = Toils_General.Wait(1000, TargetIndex.None);
+			toil.FailOnDespawnedOrNull(TargetIndex.A);
+			toil.FailOnCannotTouch(TargetIndex.A, PathEndMode.Touch);
+			toil.WithEffect(this.Building.def.repairEffect, TargetIndex.A, null);
+			toil.WithProgressBarToilDelay(TargetIndex.A, false, -0.5f);
+			toil.activeSkill = (() => SkillDefOf.Construction);
+			yield return toil;
+			Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
+			toil2.initAction = delegate()
 			{
-				Building.GetComp<CompBreakdownable>().Notify_Repaired();
-			}
-		};
-		yield return toil2;
+				this.Components.Destroy(DestroyMode.Vanish);
+				if (Rand.Value > this.pawn.GetStatValue(StatDefOf.FixBrokenDownBuildingSuccessChance, true, -1))
+				{
+					MoteMaker.ThrowText((this.pawn.DrawPos + this.Building.DrawPos) / 2f, base.Map, "TextMote_FixBrokenDownBuildingFail".Translate(), 3.65f);
+					return;
+				}
+				this.Building.GetComp<CompBreakdownable>().Notify_Repaired();
+			};
+			yield return toil2;
+			yield break;
+		}
+
+		// Token: 0x04004C8B RID: 19595
+		private const TargetIndex BuildingInd = TargetIndex.A;
+
+		// Token: 0x04004C8C RID: 19596
+		private const TargetIndex ComponentInd = TargetIndex.B;
+
+		// Token: 0x04004C8D RID: 19597
+		private const int TicksDuration = 1000;
 	}
 }

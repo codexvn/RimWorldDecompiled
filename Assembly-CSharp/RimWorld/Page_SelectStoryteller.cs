@@ -1,75 +1,93 @@
+﻿using System;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class Page_SelectStoryteller : Page
+namespace RimWorld
 {
-	private StorytellerDef storyteller;
-
-	private DifficultyDef difficulty;
-
-	private Difficulty difficultyValues = new Difficulty();
-
-	private Listing_Standard selectedStorytellerInfoListing = new Listing_Standard();
-
-	public override string PageTitle => "ChooseAIStoryteller".Translate();
-
-	public override void PreOpen()
+	// Token: 0x020032A5 RID: 12965
+	public class Page_SelectStoryteller : Page
 	{
-		base.PreOpen();
-		if (storyteller == null)
+		// Token: 0x17002F0B RID: 12043
+		// (get) Token: 0x060123E7 RID: 74727 RVA: 0x0055D755 File Offset: 0x0055B955
+		public override string PageTitle
 		{
-			storyteller = (from d in DefDatabase<StorytellerDef>.AllDefs
+			get
+			{
+				return "ChooseAIStoryteller".Translate();
+			}
+		}
+
+		// Token: 0x060123E8 RID: 74728 RVA: 0x0055D768 File Offset: 0x0055B968
+		public override void PreOpen()
+		{
+			base.PreOpen();
+			if (this.storyteller == null)
+			{
+				this.storyteller = (from d in DefDatabase<StorytellerDef>.AllDefs
 				where d.listVisible
 				orderby d.listOrder
-				select d).First();
+				select d).First<StorytellerDef>();
+			}
+			StorytellerUI.ResetStorytellerSelectionInterface();
 		}
-		StorytellerUI.ResetStorytellerSelectionInterface();
-	}
 
-	public override void DoWindowContents(Rect rect)
-	{
-		DrawPageTitle(rect);
-		StorytellerUI.DrawStorytellerSelectionInterface(GetMainRect(rect), ref storyteller, ref difficulty, ref difficultyValues, selectedStorytellerInfoListing);
-		DoBottomButtons(rect);
-		Rect rect2 = new Rect(rect.xMax - Page.BottomButSize.x - 200f - 6f, rect.yMax - Page.BottomButSize.y, 200f, Page.BottomButSize.y);
-		Text.Font = GameFont.Tiny;
-		Text.Anchor = TextAnchor.MiddleRight;
-		Widgets.Label(rect2, "CanChangeStorytellerSettingsDuringPlay".Translate());
-		Text.Anchor = TextAnchor.UpperLeft;
-	}
-
-	protected override bool CanDoNext()
-	{
-		if (!base.CanDoNext())
+		// Token: 0x060123E9 RID: 74729 RVA: 0x0055D7E0 File Offset: 0x0055B9E0
+		public override void DoWindowContents(Rect rect)
 		{
-			return false;
+			base.DrawPageTitle(rect);
+			StorytellerUI.DrawStorytellerSelectionInterface(base.GetMainRect(rect, 0f, false), ref this.storyteller, ref this.difficulty, ref this.difficultyValues, this.selectedStorytellerInfoListing);
+			base.DoBottomButtons(rect, null, null, null, true, true);
+			Rect rect2 = new Rect(rect.xMax - Page.BottomButSize.x - 200f - 6f, rect.yMax - Page.BottomButSize.y, 200f, Page.BottomButSize.y);
+			Text.Font = GameFont.Tiny;
+			Text.Anchor = TextAnchor.MiddleRight;
+			Widgets.Label(rect2, "CanChangeStorytellerSettingsDuringPlay".Translate());
+			Text.Anchor = TextAnchor.UpperLeft;
 		}
-		if (difficulty == null)
+
+		// Token: 0x060123EA RID: 74730 RVA: 0x0055D890 File Offset: 0x0055BA90
+		protected override bool CanDoNext()
 		{
-			if (!Prefs.DevMode)
+			if (!base.CanDoNext())
 			{
-				Messages.Message("MustChooseDifficulty".Translate(), MessageTypeDefOf.RejectInput, historical: false);
 				return false;
 			}
-			Messages.Message("Difficulty has been automatically selected (debug mode only)", MessageTypeDefOf.SilentInput, historical: false);
-			difficulty = DifficultyDefOf.Rough;
-			difficultyValues = new Difficulty(difficulty);
-		}
-		if (!Find.GameInitData.permadeathChosen)
-		{
-			if (!Prefs.DevMode)
+			if (this.difficulty == null)
 			{
-				Messages.Message("MustChoosePermadeath".Translate(), MessageTypeDefOf.RejectInput, historical: false);
-				return false;
+				if (!Prefs.DevMode)
+				{
+					Messages.Message("MustChooseDifficulty".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				Messages.Message("Difficulty has been automatically selected (debug mode only)", MessageTypeDefOf.SilentInput, false);
+				this.difficulty = DifficultyDefOf.Rough;
+				this.difficultyValues = new Difficulty(this.difficulty);
 			}
-			Messages.Message("Reload anytime mode has been automatically selected (debug mode only)", MessageTypeDefOf.SilentInput, historical: false);
-			Find.GameInitData.permadeathChosen = true;
-			Find.GameInitData.permadeath = false;
+			if (!Find.GameInitData.permadeathChosen)
+			{
+				if (!Prefs.DevMode)
+				{
+					Messages.Message("MustChoosePermadeath".Translate(), MessageTypeDefOf.RejectInput, false);
+					return false;
+				}
+				Messages.Message("Reload anytime mode has been automatically selected (debug mode only)", MessageTypeDefOf.SilentInput, false);
+				Find.GameInitData.permadeathChosen = true;
+				Find.GameInitData.permadeath = false;
+			}
+			Current.Game.storyteller = new Storyteller(this.storyteller, this.difficulty, this.difficultyValues);
+			return true;
 		}
-		Current.Game.storyteller = new Storyteller(storyteller, difficulty, difficultyValues);
-		return true;
+
+		// Token: 0x0400BDD5 RID: 48597
+		private StorytellerDef storyteller;
+
+		// Token: 0x0400BDD6 RID: 48598
+		private DifficultyDef difficulty;
+
+		// Token: 0x0400BDD7 RID: 48599
+		private Difficulty difficultyValues = new Difficulty();
+
+		// Token: 0x0400BDD8 RID: 48600
+		private Listing_Standard selectedStorytellerInfoListing = new Listing_Standard();
 	}
 }

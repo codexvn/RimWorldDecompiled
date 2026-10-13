@@ -1,20 +1,25 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Interior_Storage : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private const float SpawnPassiveCoolerIfTemperatureAbove = 15f;
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x020039A0 RID: 14752
+	public class SymbolResolver_Interior_Storage : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		BaseGen.symbolStack.Push("stockpile", rp);
-		if (map.mapTemperature.OutdoorTemp > 15f)
+		// Token: 0x060143F2 RID: 82930 RVA: 0x0060AFEC File Offset: 0x006091EC
+		public override void Resolve(ResolveParams rp)
 		{
-			ResolveParams resolveParams = rp;
-			resolveParams.singleThingDef = ThingDefOf.PassiveCooler;
-			BaseGen.symbolStack.Push("edgeThing", resolveParams);
+			Map map = BaseGen.globalSettings.map;
+			BaseGen.symbolStack.Push("stockpile", rp, null);
+			if (map.mapTemperature.OutdoorTemp > 15f)
+			{
+				ResolveParams resolveParams = rp;
+				resolveParams.singleThingDef = ThingDefOf.PassiveCooler;
+				BaseGen.symbolStack.Push("edgeThing", resolveParams, null);
+			}
 		}
+
+		// Token: 0x0400DFB6 RID: 57270
+		private const float SpawnPassiveCoolerIfTemperatureAbove = 15f;
 	}
 }

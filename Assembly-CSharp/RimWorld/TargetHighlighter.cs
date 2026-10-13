@@ -1,101 +1,108 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public static class TargetHighlighter
+namespace RimWorld
 {
-	private static List<Vector3> arrowPositions = new List<Vector3>();
-
-	private static List<Pair<Vector3, float>> circleOverlays = new List<Pair<Vector3, float>>();
-
-	public static void Highlight(GlobalTargetInfo target, bool arrow = true, bool colonistBar = true, bool circleOverlay = false)
+	// Token: 0x020034AD RID: 13485
+	public static class TargetHighlighter
 	{
-		if (!target.IsValid)
+		// Token: 0x06012F51 RID: 77649 RVA: 0x0059F04C File Offset: 0x0059D24C
+		public static void Highlight(GlobalTargetInfo target, bool arrow = true, bool colonistBar = true, bool circleOverlay = false)
 		{
-			return;
-		}
-		if (arrow)
-		{
-			GlobalTargetInfo adjustedTarget = CameraJumper.GetAdjustedTarget(target);
-			if (adjustedTarget.IsMapTarget && adjustedTarget.Map != null && adjustedTarget.Map == Find.CurrentMap)
+			if (!target.IsValid)
 			{
-				Vector3 centerVector = ((TargetInfo)adjustedTarget).CenterVector3;
-				if (!arrowPositions.Contains(centerVector))
+				return;
+			}
+			if (arrow)
+			{
+				GlobalTargetInfo adjustedTarget = CameraJumper.GetAdjustedTarget(target);
+				if (adjustedTarget.IsMapTarget && adjustedTarget.Map != null && adjustedTarget.Map == Find.CurrentMap)
 				{
-					arrowPositions.Add(centerVector);
-				}
-			}
-		}
-		if (colonistBar)
-		{
-			if (target.Thing is Pawn)
-			{
-				Find.ColonistBar.Highlight((Pawn)target.Thing);
-			}
-			else if (target.Thing is Corpse)
-			{
-				Find.ColonistBar.Highlight(((Corpse)target.Thing).InnerPawn);
-			}
-			else if (target.WorldObject is Caravan)
-			{
-				Caravan caravan = (Caravan)target.WorldObject;
-				if (caravan != null)
-				{
-					for (int i = 0; i < caravan.pawns.Count; i++)
+					Vector3 centerVector = ((TargetInfo)adjustedTarget).CenterVector3;
+					if (!TargetHighlighter.arrowPositions.Contains(centerVector))
 					{
-						Find.ColonistBar.Highlight(caravan.pawns[i]);
+						TargetHighlighter.arrowPositions.Add(centerVector);
 					}
 				}
 			}
-		}
-		if (!circleOverlay || target.Thing == null || !target.Thing.Spawned || target.Thing.Map != Find.CurrentMap)
-		{
-			return;
-		}
-		float num;
-		if (target.Thing is Pawn pawn)
-		{
-			if (pawn.RaceProps.Humanlike)
+			if (colonistBar)
 			{
-				num = 1.6f;
+				if (target.Thing is Pawn)
+				{
+					Find.ColonistBar.Highlight((Pawn)target.Thing);
+				}
+				else if (target.Thing is Corpse)
+				{
+					Find.ColonistBar.Highlight(((Corpse)target.Thing).InnerPawn);
+				}
+				else if (target.WorldObject is Caravan)
+				{
+					Caravan caravan = (Caravan)target.WorldObject;
+					if (caravan != null)
+					{
+						for (int i = 0; i < caravan.pawns.Count; i++)
+						{
+							Find.ColonistBar.Highlight(caravan.pawns[i]);
+						}
+					}
+				}
 			}
-			else
+			if (circleOverlay && target.Thing != null && target.Thing.Spawned && target.Thing.Map == Find.CurrentMap)
 			{
-				num = pawn.ageTracker.CurLifeStage.bodySizeFactor * pawn.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.y;
-				num = Mathf.Max(num, 1f);
+				Pawn pawn = target.Thing as Pawn;
+				float num;
+				if (pawn != null)
+				{
+					if (pawn.RaceProps.Humanlike)
+					{
+						num = 1.6f;
+					}
+					else
+					{
+						num = pawn.ageTracker.CurLifeStage.bodySizeFactor * pawn.ageTracker.CurKindLifeStage.bodyGraphicData.drawSize.y;
+						num = Mathf.Max(num, 1f);
+					}
+				}
+				else
+				{
+					num = (float)Mathf.Max(target.Thing.def.size.x, target.Thing.def.size.z);
+				}
+				Pair<Vector3, float> item = new Pair<Vector3, float>(target.Thing.DrawPos, num * 0.5f);
+				if (!TargetHighlighter.circleOverlays.Contains(item))
+				{
+					TargetHighlighter.circleOverlays.Add(item);
+				}
 			}
 		}
-		else
-		{
-			num = Mathf.Max(target.Thing.def.size.x, target.Thing.def.size.z);
-		}
-		Pair<Vector3, float> item = new Pair<Vector3, float>(target.Thing.DrawPos, num * 0.5f);
-		if (!circleOverlays.Contains(item))
-		{
-			circleOverlays.Add(item);
-		}
-	}
 
-	public static void TargetHighlighterUpdate()
-	{
-		if (WorldRendererUtility.DrawingMap)
+		// Token: 0x06012F52 RID: 77650 RVA: 0x0059F264 File Offset: 0x0059D464
+		public static void TargetHighlighterUpdate()
 		{
-			for (int i = 0; i < arrowPositions.Count; i++)
+			if (WorldRendererUtility.DrawingMap)
 			{
-				GenDraw.DrawArrowPointingAt(arrowPositions[i]);
+				for (int i = 0; i < TargetHighlighter.arrowPositions.Count; i++)
+				{
+					GenDraw.DrawArrowPointingAt(TargetHighlighter.arrowPositions[i], false);
+				}
 			}
-		}
-		arrowPositions.Clear();
-		if (WorldRendererUtility.DrawingMap)
-		{
-			for (int j = 0; j < circleOverlays.Count; j++)
+			TargetHighlighter.arrowPositions.Clear();
+			if (WorldRendererUtility.DrawingMap)
 			{
-				GenDraw.DrawCircleOutline(circleOverlays[j].First, circleOverlays[j].Second);
+				for (int j = 0; j < TargetHighlighter.circleOverlays.Count; j++)
+				{
+					GenDraw.DrawCircleOutline(TargetHighlighter.circleOverlays[j].First, TargetHighlighter.circleOverlays[j].Second);
+				}
 			}
+			TargetHighlighter.circleOverlays.Clear();
 		}
-		circleOverlays.Clear();
+
+		// Token: 0x0400C480 RID: 50304
+		private static List<Vector3> arrowPositions = new List<Vector3>();
+
+		// Token: 0x0400C481 RID: 50305
+		private static List<Pair<Vector3, float>> circleOverlays = new List<Pair<Vector3, float>>();
 	}
 }

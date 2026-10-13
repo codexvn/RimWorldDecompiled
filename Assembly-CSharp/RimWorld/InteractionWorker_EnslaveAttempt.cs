@@ -1,55 +1,53 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class InteractionWorker_EnslaveAttempt : InteractionWorker
+namespace RimWorld
 {
-	private const float BaseWillReductionPerInteraction = 1f;
-
-	private const float MaxMoodForWarning = 0.4f;
-
-	public override void Interacted(Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks, out string letterText, out string letterLabel, out LetterDef letterDef, out LookTargets lookTargets)
+	// Token: 0x020023FB RID: 9211
+	public class InteractionWorker_EnslaveAttempt : InteractionWorker
 	{
-		letterText = null;
-		letterLabel = null;
-		letterDef = null;
-		lookTargets = null;
-		bool flag = initiator.InspirationDef == InspirationDefOf.Inspired_Recruitment && recipient.guest.IsInteractionEnabled(PrisonerInteractionModeDefOf.Enslave);
-		if (recipient.guest.will > 0f && !flag)
+		// Token: 0x0600C7A8 RID: 51112 RVA: 0x003A360C File Offset: 0x003A180C
+		public override void Interacted(Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks, out string letterText, out string letterLabel, out LetterDef letterDef, out LookTargets lookTargets)
 		{
-			float num = 1f;
-			num *= initiator.GetStatValue(StatDefOf.NegotiationAbility);
-			num = Mathf.Min(num, recipient.guest.will);
-			float will = recipient.guest.will;
-			recipient.guest.will = Mathf.Max(0f, recipient.guest.will - num);
-			_ = recipient.guest.will;
-			string text = "TextMote_WillReduced".Translate(will.ToString("F1"), recipient.guest.will.ToString("F1"));
-			if (recipient.needs.mood != null && recipient.needs.mood.CurLevelPercentage < 0.4f)
+			letterText = null;
+			letterLabel = null;
+			letterDef = null;
+			lookTargets = null;
+			bool flag = initiator.InspirationDef == InspirationDefOf.Inspired_Recruitment;
+			if (recipient.guest.will > 0f && !flag)
 			{
-				text += "\n(" + "lowMood".Translate() + ")";
-			}
-			MoteMaker.ThrowText((initiator.DrawPos + recipient.DrawPos) / 2f, initiator.Map, text, 8f);
-			if (recipient.guest.will == 0f)
-			{
-				TaggedString taggedString = "MessagePrisonerWillBroken".Translate(initiator, recipient);
-				if (recipient.guest.IsInteractionEnabled(PrisonerInteractionModeDefOf.AttemptRecruit))
+				float num = 1f;
+				num *= initiator.GetStatValue(StatDefOf.NegotiationAbility, true, -1);
+				num = Mathf.Min(num, recipient.guest.will);
+				float will = recipient.guest.will;
+				recipient.guest.will = Mathf.Max(0f, recipient.guest.will - num);
+				float will2 = recipient.guest.will;
+				string text = "TextMote_WillReduced".Translate(will.ToString("F1"), recipient.guest.will.ToString("F1"));
+				if (recipient.needs.mood != null && recipient.needs.mood.CurLevelPercentage < 0.4f)
 				{
-					taggedString += " " + "MessagePrisonerWillBroken_RecruitAttempsWillBegin".Translate();
+					text += "\n(" + "lowMood".Translate() + ")";
 				}
-				Messages.Message(taggedString, recipient, MessageTypeDefOf.PositiveEvent);
+				MoteMaker.ThrowText((initiator.DrawPos + recipient.DrawPos) / 2f, initiator.Map, text, 8f);
+				if (recipient.guest.will == 0f)
+				{
+					TaggedString taggedString = "MessagePrisonerWillBroken".Translate(initiator, recipient);
+					if (recipient.guest.IsInteractionEnabled(PrisonerInteractionModeDefOf.AttemptRecruit))
+					{
+						taggedString += " " + "MessagePrisonerWillBroken_RecruitAttempsWillBegin".Translate();
+					}
+					Messages.Message(taggedString, recipient, MessageTypeDefOf.PositiveEvent, true);
+					return;
+				}
 			}
-		}
-		else
-		{
-			if (!recipient.guest.IsInteractionDisabled(PrisonerInteractionModeDefOf.ReduceWill))
+			else if (recipient.guest.IsInteractionDisabled(PrisonerInteractionModeDefOf.ReduceWill))
 			{
-				return;
-			}
-			QuestUtility.SendQuestTargetSignals(recipient.questTags, "Enslaved", recipient.Named("SUBJECT"));
-			if (GenGuest.TryEnslavePrisoner(initiator, recipient))
-			{
+				QuestUtility.SendQuestTargetSignals(recipient.questTags, "Enslaved", recipient.Named("SUBJECT"));
+				if (!GenGuest.TryEnslavePrisoner(initiator, recipient))
+				{
+					return;
+				}
 				if (!letterLabel.NullOrEmpty())
 				{
 					letterDef = LetterDefOf.PositiveEvent;
@@ -57,7 +55,11 @@ public class InteractionWorker_EnslaveAttempt : InteractionWorker
 				letterLabel = "LetterLabelEnslavementSuccess".Translate() + ": " + recipient.LabelCap;
 				letterText = "LetterEnslavementSuccess".Translate(initiator, recipient);
 				letterDef = LetterDefOf.PositiveEvent;
-				lookTargets = new LookTargets(recipient, initiator);
+				lookTargets = new LookTargets(new TargetInfo[]
+				{
+					recipient,
+					initiator
+				});
 				if (flag)
 				{
 					initiator.mindState.inspirationHandler.EndInspiration(InspirationDefOf.Inspired_Recruitment);
@@ -65,5 +67,11 @@ public class InteractionWorker_EnslaveAttempt : InteractionWorker
 				extraSentencePacks.Add(RulePackDefOf.Sentence_RecruitAttemptAccepted);
 			}
 		}
+
+		// Token: 0x04008835 RID: 34869
+		private const float BaseWillReductionPerInteraction = 1f;
+
+		// Token: 0x04008836 RID: 34870
+		private const float MaxMoodForWarning = 0.4f;
 	}
 }

@@ -1,120 +1,135 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class JobDriver_AttackStatic : JobDriver
+namespace Verse.AI
 {
-	private const int AutotargetRadius = 4;
-
-	private bool startedIncapacitated;
-
-	private int numAttacksMade;
-
-	public override void ExposeData()
+	// Token: 0x02000E95 RID: 3733
+	public class JobDriver_AttackStatic : JobDriver
 	{
-		base.ExposeData();
-		Scribe_Values.Look(ref startedIncapacitated, "startedIncapacitated", defaultValue: false);
-		Scribe_Values.Look(ref numAttacksMade, "numAttacksMade", 0);
-	}
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
-	{
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		AddFinishAction(delegate
+		// Token: 0x06005E18 RID: 24088 RVA: 0x001DF7D3 File Offset: 0x001DD9D3
+		public override void ExposeData()
 		{
-			if (pawn.IsPlayerControlled && pawn.Drafted && !base.job.playerInterruptedForced)
+			base.ExposeData();
+			Scribe_Values.Look<bool>(ref this.startedIncapacitated, "startedIncapacitated", false, false);
+			Scribe_Values.Look<int>(ref this.numAttacksMade, "numAttacksMade", 0, false);
+		}
+
+		// Token: 0x06005E19 RID: 24089 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return true;
+		}
+
+		// Token: 0x06005E1A RID: 24090 RVA: 0x001DF7FF File Offset: 0x001DD9FF
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			base.AddFinishAction(delegate(JobCondition jobCondition)
 			{
-				Thing targetThingA = base.TargetThingA;
-				if (targetThingA != null && targetThingA.def.autoTargetNearbyIdenticalThings)
+				if (!this.pawn.IsPlayerControlled || !this.pawn.Drafted)
 				{
-					Verb verb = pawn.TryGetAttackVerb(base.TargetA.Thing, !pawn.IsColonist);
-					foreach (IntVec3 item in GenRadial.RadialCellsAround(base.TargetThingA.Position, 4f, useCenter: false).InRandomOrder())
+					return;
+				}
+				if (!this.job.playerInterruptedForced)
+				{
+					Thing targetThingA = this.TargetThingA;
+					if (targetThingA != null && targetThingA.def.autoTargetNearbyIdenticalThings)
 					{
-						if (item.InBounds(base.Map))
+						Verb verb = this.pawn.TryGetAttackVerb(this.TargetA.Thing, !this.pawn.IsColonist, false);
+						foreach (IntVec3 c in GenRadial.RadialCellsAround(this.TargetThingA.Position, 4f, false).InRandomOrder(null))
 						{
-							foreach (Thing thing in item.GetThingList(base.Map))
+							if (c.InBounds(this.Map))
 							{
-								if (thing.def == base.TargetThingA.def && verb != null && verb.CanHitTargetFrom(pawn.Position, thing) && pawn.jobs.jobQueue.Count == 0)
+								foreach (Thing thing in c.GetThingList(this.Map))
 								{
-									Job job = base.job.Clone();
-									job.targetA = thing;
-									job.endIfCantShootTargetFromCurPos = true;
-									pawn.jobs.jobQueue.EnqueueFirst(job);
-									return;
+									if (thing.def == this.TargetThingA.def && verb != null && verb.CanHitTargetFrom(this.pawn.Position, thing) && this.pawn.jobs.jobQueue.Count == 0)
+									{
+										Job job = this.job.Clone();
+										job.targetA = thing;
+										job.endIfCantShootTargetFromCurPos = true;
+										this.pawn.jobs.jobQueue.EnqueueFirst(job, null);
+										return;
+									}
 								}
 							}
 						}
 					}
 				}
-			}
-		});
-		yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
-		Toil init = ToilMaker.MakeToil("MakeNewToils");
-		init.initAction = delegate
-		{
-			if (base.TargetThingA is Pawn pawn)
+			});
+			yield return Toils_Misc.ThrowColonistAttackingMote(TargetIndex.A);
+			Toil init = ToilMaker.MakeToil("MakeNewToils");
+			init.initAction = delegate()
 			{
-				startedIncapacitated = pawn.Downed;
-			}
-			base.pawn.pather.StopDead();
-		};
-		init.tickIntervalAction = delegate
-		{
-			if (!base.TargetA.IsValid)
-			{
-				EndJobWith(JobCondition.Succeeded);
-			}
-			else
-			{
-				if (base.TargetA.HasThing)
+				Pawn pawn = this.TargetThingA as Pawn;
+				if (pawn != null)
 				{
-					Pawn pawn = base.TargetA.Thing as Pawn;
-					if (base.TargetA.Thing.Destroyed || (pawn != null && !startedIncapacitated && pawn.Downed) || (pawn != null && pawn.IsPsychologicallyInvisible()))
+					this.startedIncapacitated = pawn.Downed;
+				}
+				this.pawn.pather.StopDead();
+			};
+			init.tickIntervalAction = delegate(int delta)
+			{
+				if (!this.TargetA.IsValid)
+				{
+					this.EndJobWith(JobCondition.Succeeded);
+					return;
+				}
+				if (this.TargetA.HasThing)
+				{
+					Pawn pawn = this.TargetA.Thing as Pawn;
+					if (this.TargetA.Thing.Destroyed || (pawn != null && !this.startedIncapacitated && pawn.Downed) || (pawn != null && pawn.IsPsychologicallyInvisible()))
 					{
-						EndJobWith(JobCondition.Succeeded);
+						this.EndJobWith(JobCondition.Succeeded);
 						return;
 					}
 				}
-				if (numAttacksMade >= job.maxNumStaticAttacks && !base.pawn.stances.FullBodyBusy)
+				if (this.numAttacksMade >= this.job.maxNumStaticAttacks && !this.pawn.stances.FullBodyBusy)
 				{
-					EndJobWith(JobCondition.Succeeded);
+					this.EndJobWith(JobCondition.Succeeded);
+					return;
 				}
-				else if (base.pawn.TryStartAttack(base.TargetA))
+				if (this.pawn.TryStartAttack(this.TargetA))
 				{
-					numAttacksMade++;
+					this.numAttacksMade++;
+					return;
 				}
-				else if (!base.pawn.stances.FullBodyBusy)
+				if (!this.pawn.stances.FullBodyBusy)
 				{
-					Verb verb = base.pawn.TryGetAttackVerb(base.TargetA.Thing, !base.pawn.IsColonist);
-					if (job.endIfCantShootTargetFromCurPos && (verb == null || !verb.CanHitTargetFrom(base.pawn.Position, base.TargetA)))
+					Verb verb = this.pawn.TryGetAttackVerb(this.TargetA.Thing, !this.pawn.IsColonist, false);
+					if (this.job.endIfCantShootTargetFromCurPos && (verb == null || !verb.CanHitTargetFrom(this.pawn.Position, this.TargetA)))
 					{
-						EndJobWith(JobCondition.Incompletable);
+						this.EndJobWith(JobCondition.Incompletable);
+						return;
 					}
-					else if (job.endIfCantShootInMelee)
+					if (this.job.endIfCantShootInMelee)
 					{
 						if (verb == null)
 						{
-							EndJobWith(JobCondition.Incompletable);
+							this.EndJobWith(JobCondition.Incompletable);
+							return;
 						}
-						else
+						float num = verb.verbProps.EffectiveMinRange(this.TargetA, this.pawn);
+						if ((float)this.pawn.Position.DistanceToSquared(this.TargetA.Cell) < num * num && this.pawn.Position.AdjacentTo8WayOrInside(this.TargetA.Cell))
 						{
-							float num = verb.verbProps.EffectiveMinRange(base.TargetA, base.pawn);
-							if ((float)base.pawn.Position.DistanceToSquared(base.TargetA.Cell) < num * num && base.pawn.Position.AdjacentTo8WayOrInside(base.TargetA.Cell))
-							{
-								EndJobWith(JobCondition.Incompletable);
-							}
+							this.EndJobWith(JobCondition.Incompletable);
+							return;
 						}
 					}
 				}
-			}
-		};
-		init.defaultCompleteMode = ToilCompleteMode.Never;
-		init.activeSkill = () => Toils_Combat.GetActiveSkillForToil(init);
-		yield return init;
+			};
+			init.defaultCompleteMode = ToilCompleteMode.Never;
+			init.activeSkill = (() => Toils_Combat.GetActiveSkillForToil(init));
+			yield return init;
+			yield break;
+		}
+
+		// Token: 0x040043FE RID: 17406
+		private const int AutotargetRadius = 4;
+
+		// Token: 0x040043FF RID: 17407
+		private bool startedIncapacitated;
+
+		// Token: 0x04004400 RID: 17408
+		private int numAttacksMade;
 	}
 }

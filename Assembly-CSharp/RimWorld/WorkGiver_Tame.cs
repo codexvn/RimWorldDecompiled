@@ -1,60 +1,75 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_Tame : WorkGiver_InteractAnimal
+namespace RimWorld
 {
-	public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
+	// Token: 0x02001555 RID: 5461
+	public class WorkGiver_Tame : WorkGiver_InteractAnimal
 	{
-		foreach (Designation item in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Tame))
+		// Token: 0x0600819D RID: 33181 RVA: 0x0027055F File Offset: 0x0026E75F
+		public override IEnumerable<Thing> PotentialWorkThingsGlobal(Pawn pawn)
 		{
-			yield return item.target.Thing;
-		}
-	}
-
-	public override bool ShouldSkip(Pawn pawn, bool forced = false)
-	{
-		return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Tame);
-	}
-
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		if (!(t is Pawn pawn2) || !TameUtility.CanTame(pawn2))
-		{
-			return null;
-		}
-		if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Tame) == null)
-		{
-			return null;
-		}
-		if (!CanInteractWithAnimal(pawn, pawn2, forced))
-		{
-			return null;
-		}
-		if (TameUtility.TriedToTameTooRecently(pawn2))
-		{
-			JobFailReason.Is(WorkGiver_InteractAnimal.AnimalInteractedTooRecentlyTrans);
-			return null;
-		}
-		Thing thing = null;
-		int count = -1;
-		if (pawn2.RaceProps.EatsFood && pawn2.needs?.food != null && !HasFoodToInteractAnimal(pawn, pawn2))
-		{
-			thing = FoodUtility.BestFoodSourceOnMap(pawn, pawn2, desperate: false, out var foodDef, FoodPreferability.RawTasty, allowPlant: false, allowDrug: false, allowCorpse: false, allowDispenserFull: false, allowDispenserEmpty: false, allowForbidden: false, allowSociallyImproper: false, allowHarvest: false, forceScanWholeMap: false, ignoreReservations: false, calculateWantedStackCount: false, FoodPreferability.Undefined, JobDriver_InteractAnimal.RequiredNutritionPerFeed(pawn2) * 2f * 4f);
-			if (thing == null)
+			foreach (Designation designation in pawn.Map.designationManager.SpawnedDesignationsOfDef(DesignationDefOf.Tame))
 			{
-				JobFailReason.Is("NoFood".Translate());
+				yield return designation.target.Thing;
+			}
+			IEnumerator<Designation> enumerator = null;
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0600819E RID: 33182 RVA: 0x0027056F File Offset: 0x0026E76F
+		public override bool ShouldSkip(Pawn pawn, bool forced = false)
+		{
+			return !pawn.Map.designationManager.AnySpawnedDesignationOfDef(DesignationDefOf.Tame);
+		}
+
+		// Token: 0x0600819F RID: 33183 RVA: 0x0027058C File Offset: 0x0026E78C
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
+		{
+			Pawn pawn2 = t as Pawn;
+			if (pawn2 == null || !TameUtility.CanTame(pawn2))
+			{
 				return null;
 			}
-			float num = JobDriver_InteractAnimal.RequiredNutritionPerFeed(pawn2) * 2f * 4f;
-			float nutrition = FoodUtility.GetNutrition(pawn2, thing, foodDef);
-			count = Mathf.CeilToInt(num / nutrition);
+			if (pawn.Map.designationManager.DesignationOn(t, DesignationDefOf.Tame) == null)
+			{
+				return null;
+			}
+			if (!this.CanInteractWithAnimal(pawn, pawn2, forced))
+			{
+				return null;
+			}
+			if (TameUtility.TriedToTameTooRecently(pawn2))
+			{
+				JobFailReason.Is(WorkGiver_InteractAnimal.AnimalInteractedTooRecentlyTrans, null);
+				return null;
+			}
+			Thing thing = null;
+			int count = -1;
+			if (pawn2.RaceProps.EatsFood)
+			{
+				Pawn_NeedsTracker needs = pawn2.needs;
+				if (((needs != null) ? needs.food : null) != null && !base.HasFoodToInteractAnimal(pawn, pawn2))
+				{
+					ThingDef foodDef;
+					thing = FoodUtility.BestFoodSourceOnMap(pawn, pawn2, false, out foodDef, FoodPreferability.RawTasty, false, false, false, false, false, false, false, false, false, false, false, FoodPreferability.Undefined, new float?(JobDriver_InteractAnimal.RequiredNutritionPerFeed(pawn2) * 2f * 4f), false);
+					if (thing == null)
+					{
+						JobFailReason.Is("NoFood".Translate(), null);
+						return null;
+					}
+					float num = JobDriver_InteractAnimal.RequiredNutritionPerFeed(pawn2) * 2f * 4f;
+					float nutrition = FoodUtility.GetNutrition(pawn2, thing, foodDef);
+					count = Mathf.CeilToInt(num / nutrition);
+				}
+			}
+			Job job = JobMaker.MakeJob(JobDefOf.Tame, t, null, thing);
+			job.count = count;
+			return job;
 		}
-		Job job = JobMaker.MakeJob(JobDefOf.Tame, t, null, thing);
-		job.count = count;
-		return job;
 	}
 }

@@ -1,45 +1,50 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualRoleConvertee : RitualRole
+namespace RimWorld
 {
-	public override bool AppliesToPawn(Pawn p, out string reason, TargetInfo selectedTarget, LordJob_Ritual ritual = null, RitualRoleAssignments assignments = null, Precept_Ritual precept = null, bool skipReason = false)
+	// Token: 0x020027BB RID: 10171
+	public class RitualRoleConvertee : RitualRole
 	{
-		if (!AppliesIfChild(p, out reason, skipReason))
+		// Token: 0x0600DED9 RID: 57049 RVA: 0x00418718 File Offset: 0x00416918
+		public override bool AppliesToPawn(Pawn p, out string reason, TargetInfo selectedTarget, LordJob_Ritual ritual = null, RitualRoleAssignments assignments = null, Precept_Ritual precept = null, bool skipReason = false)
 		{
-			return false;
-		}
-		if (!p.RaceProps.Humanlike)
-		{
-			if (!skipReason)
+			if (!base.AppliesIfChild(p, out reason, skipReason))
 			{
-				reason = "MessageRitualRoleMustBeHumanlike".Translate(base.Label);
+				return false;
 			}
-			return false;
-		}
-		if ((assignments == null || !assignments.Forced(p)) && p.Ideo == assignments?.Ritual.ideo)
-		{
-			if (!skipReason)
+			if (!p.RaceProps.Humanlike)
 			{
-				reason = "MessageRitualPawnIsAlreadyBelievingIdeo".Translate(p, Find.ActiveLanguageWorker.WithIndefiniteArticle(p.Ideo.memberName, p.gender));
+				if (!skipReason)
+				{
+					reason = "MessageRitualRoleMustBeHumanlike".Translate(base.Label);
+				}
+				return false;
 			}
-			return false;
-		}
-		if (p.DevelopmentalStage.Baby())
-		{
-			if (!skipReason)
+			if ((assignments == null || !assignments.Forced(p)) && p.Ideo == ((assignments != null) ? assignments.Ritual.ideo : null))
 			{
-				reason = "MessageRitualRoleCannotBeABaby".Translate(base.Label);
+				if (!skipReason)
+				{
+					reason = "MessageRitualPawnIsAlreadyBelievingIdeo".Translate(p, Find.ActiveLanguageWorker.WithIndefiniteArticle(p.Ideo.memberName, p.gender, false, false));
+				}
+				return false;
 			}
-			return false;
+			if (p.DevelopmentalStage.Baby())
+			{
+				if (!skipReason)
+				{
+					reason = "MessageRitualRoleCannotBeABaby".Translate(base.Label);
+				}
+				return false;
+			}
+			return true;
 		}
-		return true;
-	}
 
-	public override bool AppliesToRole(Precept_Role role, out string reason, Precept_Ritual ritual = null, Pawn p = null, bool skipReason = false)
-	{
-		reason = null;
-		return false;
+		// Token: 0x0600DEDA RID: 57050 RVA: 0x00417DBD File Offset: 0x00415FBD
+		public override bool AppliesToRole(Precept_Role role, out string reason, Precept_Ritual ritual = null, Pawn p = null, bool skipReason = false)
+		{
+			reason = null;
+			return false;
+		}
 	}
 }

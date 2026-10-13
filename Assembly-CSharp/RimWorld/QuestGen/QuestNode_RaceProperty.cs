@@ -1,111 +1,90 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public abstract class QuestNode_RaceProperty : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<object> value;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AA8 RID: 15016
+	public abstract class QuestNode_RaceProperty : QuestNode
 	{
-		if (Matches(value.GetValue(slate)))
+		// Token: 0x060147E0 RID: 83936 RVA: 0x0061E168 File Offset: 0x0061C368
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.Matches(this.value.GetValue(slate)))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		if (Matches(value.GetValue(slate)))
+		// Token: 0x060147E1 RID: 83937 RVA: 0x0061E1B8 File Offset: 0x0061C3B8
+		protected override void RunInt()
 		{
-			if (node != null)
+			Slate slate = QuestGen.slate;
+			if (this.Matches(this.value.GetValue(slate)))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
-	}
 
-	private bool Matches(object obj)
-	{
-		if (obj == null)
+		// Token: 0x060147E2 RID: 83938 RVA: 0x0061E208 File Offset: 0x0061C408
+		private bool Matches(object obj)
 		{
-			return false;
-		}
-		if (obj is PawnKindDef)
-		{
-			return Matches(((PawnKindDef)obj).RaceProps);
-		}
-		if (obj is ThingDef)
-		{
-			if (((ThingDef)obj).race != null)
+			if (obj == null)
 			{
-				return Matches(((ThingDef)obj).race);
+				return false;
 			}
-			return false;
-		}
-		if (obj is Pawn)
-		{
-			return Matches(((Pawn)obj).RaceProps);
-		}
-		if (obj is Faction)
-		{
-			if (((Faction)obj).def.basicMemberKind != null)
+			if (obj is PawnKindDef)
 			{
-				return Matches(((Faction)obj).def.basicMemberKind);
+				return this.Matches(((PawnKindDef)obj).RaceProps);
 			}
-			return false;
-		}
-		if (obj is IEnumerable<Pawn>)
-		{
-			if (((IEnumerable<Pawn>)obj).Any())
+			if (obj is ThingDef)
 			{
-				return ((IEnumerable<Pawn>)obj).All((Pawn x) => Matches(x.RaceProps));
+				return ((ThingDef)obj).race != null && this.Matches(((ThingDef)obj).race);
 			}
-			return false;
-		}
-		if (obj is IEnumerable<Thing>)
-		{
-			if (((IEnumerable<Thing>)obj).Any())
+			if (obj is Pawn)
 			{
-				return ((IEnumerable<Thing>)obj).All((Thing x) => x is Pawn && Matches(((Pawn)x).RaceProps));
+				return this.Matches(((Pawn)obj).RaceProps);
 			}
-			return false;
-		}
-		if (obj is IEnumerable<object>)
-		{
-			if (((IEnumerable<object>)obj).Any())
+			if (obj is Faction)
 			{
-				return ((IEnumerable<object>)obj).All((object x) => x is Pawn && Matches(((Pawn)x).RaceProps));
+				return ((Faction)obj).def.basicMemberKind != null && this.Matches(((Faction)obj).def.basicMemberKind);
 			}
-			return false;
+			if (obj is IEnumerable<Pawn>)
+			{
+				return ((IEnumerable<Pawn>)obj).Any<Pawn>() && ((IEnumerable<Pawn>)obj).All((Pawn x) => this.Matches(x.RaceProps));
+			}
+			if (obj is IEnumerable<Thing>)
+			{
+				return ((IEnumerable<Thing>)obj).Any<Thing>() && ((IEnumerable<Thing>)obj).All((Thing x) => x is Pawn && this.Matches(((Pawn)x).RaceProps));
+			}
+			if (obj is IEnumerable<object>)
+			{
+				return ((IEnumerable<object>)obj).Any<object>() && ((IEnumerable<object>)obj).All((object x) => x is Pawn && this.Matches(((Pawn)x).RaceProps));
+			}
+			return obj is string && !((string)obj).NullOrEmpty() && this.Matches(DefDatabase<PawnKindDef>.GetNamed((string)obj, true).RaceProps);
 		}
-		if (obj is string && !((string)obj).NullOrEmpty())
-		{
-			return Matches(DefDatabase<PawnKindDef>.GetNamed((string)obj).RaceProps);
-		}
-		return false;
-	}
 
-	protected abstract bool Matches(RaceProperties raceProperties);
+		// Token: 0x060147E3 RID: 83939
+		protected abstract bool Matches(RaceProperties raceProperties);
+
+		// Token: 0x0400E2EC RID: 58092
+		[NoTranslate]
+		public SlateRef<object> value;
+
+		// Token: 0x0400E2ED RID: 58093
+		public QuestNode node;
+
+		// Token: 0x0400E2EE RID: 58094
+		public QuestNode elseNode;
+	}
 }

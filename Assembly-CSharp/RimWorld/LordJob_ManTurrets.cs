@@ -1,14 +1,18 @@
+﻿using System;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordJob_ManTurrets : LordJob
+namespace RimWorld
 {
-	public override StateGraph CreateGraph()
+	// Token: 0x02001662 RID: 5730
+	public class LordJob_ManTurrets : LordJob
 	{
-		return new StateGraph
+		// Token: 0x0600871A RID: 34586 RVA: 0x002858BE File Offset: 0x00283ABE
+		public override StateGraph CreateGraph()
 		{
-			StartingToil = new LordToil_ManClosestTurrets()
-		};
+			return new StateGraph
+			{
+				StartingToil = new LordToil_ManClosestTurrets()
+			};
+		}
 	}
 }

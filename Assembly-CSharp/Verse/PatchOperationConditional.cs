@@ -1,30 +1,32 @@
+﻿using System;
 using System.Xml;
 
-namespace Verse;
-
-public class PatchOperationConditional : PatchOperationPathed
+namespace Verse
 {
-	private PatchOperation match;
-
-	private PatchOperation nomatch;
-
-	protected override bool ApplyWorker(XmlDocument xml)
+	// Token: 0x020005A1 RID: 1441
+	public class PatchOperationConditional : PatchOperationPathed
 	{
-		if (xml.SelectSingleNode(xpath) != null)
+		// Token: 0x06002569 RID: 9577 RVA: 0x000C11F4 File Offset: 0x000BF3F4
+		protected override bool ApplyWorker(XmlDocument xml)
 		{
-			if (match != null)
+			if (xml.SelectSingleNode(this.xpath) != null)
 			{
-				return match.Apply(xml);
+				if (this.match != null)
+				{
+					return this.match.Apply(xml);
+				}
 			}
+			else if (this.nomatch != null)
+			{
+				return this.nomatch.Apply(xml);
+			}
+			return this.match != null || this.nomatch != null;
 		}
-		else if (nomatch != null)
-		{
-			return nomatch.Apply(xml);
-		}
-		if (match == null)
-		{
-			return nomatch != null;
-		}
-		return true;
+
+		// Token: 0x04001EB2 RID: 7858
+		private PatchOperation match;
+
+		// Token: 0x04001EB3 RID: 7859
+		private PatchOperation nomatch;
 	}
 }

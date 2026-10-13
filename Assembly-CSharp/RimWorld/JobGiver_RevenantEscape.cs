@@ -1,38 +1,44 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_RevenantEscape : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x020014C3 RID: 5315
+	public class JobGiver_RevenantEscape : ThinkNode_JobGiver
 	{
-		IntVec3 intVec = RevenantUtility.FindEscapeCell(pawn);
-		if (!intVec.IsValid)
+		// Token: 0x06007F3C RID: 32572 RVA: 0x0026512C File Offset: 0x0026332C
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
-		}
-		using (PawnPath pawnPath = pawn.Map.pathFinder.FindPathNow(pawn.Position, intVec, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.PassDoors)))
-		{
-			if (!pawnPath.Found)
+			IntVec3 c = RevenantUtility.FindEscapeCell(pawn);
+			if (!c.IsValid)
 			{
-				using PawnPath path = pawn.Map.pathFinder.FindPathNow(pawn.Position, intVec, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.PassAllDestroyableThings));
-				IntVec3 cellBefore;
-				Thing thing = path.FirstBlockingBuilding(out cellBefore, pawn);
-				if (thing != null)
+				return null;
+			}
+			using (PawnPath pawnPath = pawn.Map.pathFinder.FindPathNow(pawn.Position, c, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.PassDoors, false, false, false, true), null, PathEndMode.OnCell, null))
+			{
+				if (!pawnPath.Found)
 				{
-					Job job = DigUtility.PassBlockerJob(pawn, thing, cellBefore, canMineMineables: true, canMineNonMineables: true);
-					if (job != null)
+					using (PawnPath pawnPath2 = pawn.Map.pathFinder.FindPathNow(pawn.Position, c, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.PassAllDestroyableThings, false, false, false, true), null, PathEndMode.OnCell, null))
 					{
-						return job;
+						IntVec3 cellBeforeBlocker;
+						Thing thing = pawnPath2.FirstBlockingBuilding(out cellBeforeBlocker, pawn);
+						if (thing != null)
+						{
+							Job job = DigUtility.PassBlockerJob(pawn, thing, cellBeforeBlocker, true, true);
+							if (job != null)
+							{
+								return job;
+							}
+						}
 					}
 				}
 			}
+			Job job2 = JobMaker.MakeJob(JobDefOf.RevenantEscape, c);
+			job2.locomotionUrgency = LocomotionUrgency.Sprint;
+			job2.canBashDoors = true;
+			job2.canBashFences = true;
+			return job2;
 		}
-		Job job2 = JobMaker.MakeJob(JobDefOf.RevenantEscape, intVec);
-		job2.locomotionUrgency = LocomotionUrgency.Sprint;
-		job2.canBashDoors = true;
-		job2.canBashFences = true;
-		return job2;
 	}
 }

@@ -1,6 +1,11 @@
-namespace Verse;
+﻿using System;
 
-public static class DamageTuning
+namespace Verse
 {
-	public const float SpreadDamageChance = 0.5f;
+	// Token: 0x02000662 RID: 1634
+	public static class DamageTuning
+	{
+		// Token: 0x040021A9 RID: 8617
+		public const float SpreadDamageChance = 0.5f;
+	}
 }

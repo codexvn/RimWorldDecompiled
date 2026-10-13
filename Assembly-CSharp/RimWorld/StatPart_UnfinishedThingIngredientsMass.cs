@@ -1,39 +1,48 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_UnfinishedThingIngredientsMass : StatPart
+namespace RimWorld
 {
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x0200372B RID: 14123
+	public class StatPart_UnfinishedThingIngredientsMass : StatPart
 	{
-		if (TryGetValue(req, out var value))
+		// Token: 0x0601392D RID: 80173 RVA: 0x005CDA04 File Offset: 0x005CBC04
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val += value;
+			float num;
+			if (this.TryGetValue(req, out num))
+			{
+				val += num;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (TryGetValue(req, out var value))
+		// Token: 0x0601392E RID: 80174 RVA: 0x005CDA24 File Offset: 0x005CBC24
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReport_IngredientsMass".Translate() + ": " + value.ToStringMassOffset();
+			float mass;
+			if (this.TryGetValue(req, out mass))
+			{
+				return "StatsReport_IngredientsMass".Translate() + ": " + mass.ToStringMassOffset();
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool TryGetValue(StatRequest req, out float value)
-	{
-		if (!(req.Thing is UnfinishedThing unfinishedThing))
+		// Token: 0x0601392F RID: 80175 RVA: 0x005CDA64 File Offset: 0x005CBC64
+		private bool TryGetValue(StatRequest req, out float value)
 		{
-			value = 0f;
-			return false;
+			UnfinishedThing unfinishedThing = req.Thing as UnfinishedThing;
+			if (unfinishedThing == null)
+			{
+				value = 0f;
+				return false;
+			}
+			float num = 0f;
+			for (int i = 0; i < unfinishedThing.ingredients.Count; i++)
+			{
+				num += unfinishedThing.ingredients[i].GetStatValue(StatDefOf.Mass, true, -1) * (float)unfinishedThing.ingredients[i].stackCount;
+			}
+			value = num;
+			return true;
 		}
-		float num = 0f;
-		for (int i = 0; i < unfinishedThing.ingredients.Count; i++)
-		{
-			num += unfinishedThing.ingredients[i].GetStatValue(StatDefOf.Mass) * (float)unfinishedThing.ingredients[i].stackCount;
-		}
-		value = num;
-		return true;
 	}
 }

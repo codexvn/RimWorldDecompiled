@@ -1,23 +1,27 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_TraderAndAllTraderCaravanGuardsLost : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010E3 RID: 4323
+	public class Trigger_TraderAndAllTraderCaravanGuardsLost : Trigger
 	{
-		if (signal.type == TriggerSignalType.PawnLost)
+		// Token: 0x06006948 RID: 26952 RVA: 0x00212F28 File Offset: 0x00211128
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.PawnLost)
 			{
-				TraderCaravanRole traderCaravanRole = lord.ownedPawns[i].GetTraderCaravanRole();
-				if (traderCaravanRole == TraderCaravanRole.Trader || traderCaravanRole == TraderCaravanRole.Guard)
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					return false;
+					TraderCaravanRole traderCaravanRole = lord.ownedPawns[i].GetTraderCaravanRole();
+					if (traderCaravanRole == TraderCaravanRole.Trader || traderCaravanRole == TraderCaravanRole.Guard)
+					{
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
+			return false;
 		}
-		return false;
 	}
 }

@@ -1,223 +1,257 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public class CompPowerPlantWater : CompPowerPlant
+namespace RimWorld
 {
-	private float spinPosition;
-
-	private bool cacheDirty = true;
-
-	private bool waterUsable;
-
-	private bool waterDoubleUsed;
-
-	private float spinRate = 1f;
-
-	private const float PowerFactorIfWaterDoubleUsed = 0.3f;
-
-	private const float SpinRateFactor = 1f / 150f;
-
-	private const float BladeOffset = 2.36f;
-
-	private const int BladeCount = 9;
-
-	private const int RebuildCacheIntervalTicks = 1200;
-
-	public static readonly Material BladesMat = MaterialPool.MatFrom("Things/Building/Power/WatermillGenerator/WatermillGeneratorBlades");
-
-	protected override float DesiredPowerOutput
+	// Token: 0x0200213C RID: 8508
+	[StaticConstructorOnStartup]
+	public class CompPowerPlantWater : CompPowerPlant
 	{
-		get
+		// Token: 0x17001C3C RID: 7228
+		// (get) Token: 0x0600B9B2 RID: 47538 RVA: 0x003592C6 File Offset: 0x003574C6
+		protected override float DesiredPowerOutput
 		{
-			if (cacheDirty)
+			get
 			{
-				RebuildCache();
-			}
-			if (!waterUsable)
-			{
-				return 0f;
-			}
-			if (waterDoubleUsed)
-			{
-				return base.DesiredPowerOutput * 0.3f;
-			}
-			return base.DesiredPowerOutput;
-		}
-	}
-
-	public override void PostSpawnSetup(bool respawningAfterLoad)
-	{
-		base.PostSpawnSetup(respawningAfterLoad);
-		spinPosition = Rand.Range(0f, 15f);
-		RebuildCache();
-		ForceOthersToRebuildCache(parent.Map);
-	}
-
-	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-	{
-		base.PostDeSpawn(map, mode);
-		ForceOthersToRebuildCache(map);
-	}
-
-	private void ClearCache()
-	{
-		cacheDirty = true;
-	}
-
-	private void RebuildCache()
-	{
-		waterUsable = true;
-		foreach (IntVec3 item in WaterCells())
-		{
-			if (item.InBounds(parent.Map) && !item.GetAffordances(parent.Map).Contains(TerrainAffordanceDefOf.MovingFluid))
-			{
-				waterUsable = false;
-				break;
-			}
-		}
-		waterDoubleUsed = false;
-		List<Building> list = parent.Map.listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.WatermillGenerator);
-		foreach (IntVec3 item2 in WaterUseCells())
-		{
-			if (!item2.InBounds(parent.Map))
-			{
-				continue;
-			}
-			foreach (Building item3 in list)
-			{
-				if (item3 != parent && item3.GetComp<CompPowerPlantWater>().WaterUseRect().Contains(item2))
+				if (this.cacheDirty)
 				{
-					waterDoubleUsed = true;
+					this.RebuildCache();
+				}
+				if (!this.waterUsable)
+				{
+					return 0f;
+				}
+				if (this.waterDoubleUsed)
+				{
+					return base.DesiredPowerOutput * 0.3f;
+				}
+				return base.DesiredPowerOutput;
+			}
+		}
+
+		// Token: 0x0600B9B3 RID: 47539 RVA: 0x003592FF File Offset: 0x003574FF
+		public override void PostSpawnSetup(bool respawningAfterLoad)
+		{
+			base.PostSpawnSetup(respawningAfterLoad);
+			this.spinPosition = Rand.Range(0f, 15f);
+			this.RebuildCache();
+			this.ForceOthersToRebuildCache(this.parent.Map);
+		}
+
+		// Token: 0x0600B9B4 RID: 47540 RVA: 0x00359334 File Offset: 0x00357534
+		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+		{
+			base.PostDeSpawn(map, mode);
+			this.ForceOthersToRebuildCache(map);
+		}
+
+		// Token: 0x0600B9B5 RID: 47541 RVA: 0x00359345 File Offset: 0x00357545
+		private void ClearCache()
+		{
+			this.cacheDirty = true;
+		}
+
+		// Token: 0x0600B9B6 RID: 47542 RVA: 0x00359350 File Offset: 0x00357550
+		private void RebuildCache()
+		{
+			this.waterUsable = true;
+			foreach (IntVec3 c in this.WaterCells())
+			{
+				if (c.InBounds(this.parent.Map) && !c.GetAffordances(this.parent.Map).Contains(TerrainAffordanceDefOf.MovingFluid))
+				{
+					this.waterUsable = false;
 					break;
 				}
 			}
+			this.waterDoubleUsed = false;
+			List<Building> list = this.parent.Map.listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.WatermillGenerator);
+			foreach (IntVec3 c2 in this.WaterUseCells())
+			{
+				if (c2.InBounds(this.parent.Map))
+				{
+					foreach (Building building in list)
+					{
+						if (building != this.parent && building.GetComp<CompPowerPlantWater>().WaterUseRect().Contains(c2))
+						{
+							this.waterDoubleUsed = true;
+							break;
+						}
+					}
+				}
+			}
+			if (!this.waterUsable)
+			{
+				this.spinRate = 0f;
+				return;
+			}
+			Vector3 vector = Vector3.zero;
+			foreach (IntVec3 intVec in this.WaterCells())
+			{
+				vector += this.parent.Map.waterInfo.GetWaterMovement(intVec.ToVector3Shifted());
+			}
+			this.spinRate = Mathf.Sign(Vector3.Dot(vector, this.parent.Rotation.Rotated(RotationDirection.Clockwise).FacingCell.ToVector3()));
+			this.spinRate *= Rand.RangeSeeded(0.9f, 1.1f, this.parent.thingIDNumber * 60509 + 33151);
+			if (this.waterDoubleUsed)
+			{
+				this.spinRate *= 0.5f;
+			}
+			this.cacheDirty = false;
 		}
-		if (!waterUsable)
+
+		// Token: 0x0600B9B7 RID: 47543 RVA: 0x003595A8 File Offset: 0x003577A8
+		private void ForceOthersToRebuildCache(Map map)
 		{
-			spinRate = 0f;
-			return;
+			foreach (Building building in map.listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.WatermillGenerator))
+			{
+				building.GetComp<CompPowerPlantWater>().ClearCache();
+			}
 		}
-		Vector3 zero = Vector3.zero;
-		foreach (IntVec3 item4 in WaterCells())
+
+		// Token: 0x0600B9B8 RID: 47544 RVA: 0x00359608 File Offset: 0x00357808
+		public override void CompTick()
 		{
-			zero += parent.Map.waterInfo.GetWaterMovement(item4.ToVector3Shifted());
+			base.CompTick();
+			if (base.PowerOutput > 0.01f)
+			{
+				this.spinPosition = (this.spinPosition + 0.006666667f * this.spinRate + 6.2831855f) % 6.2831855f;
+			}
+			if (this.parent.IsHashIntervalTick(1200))
+			{
+				this.RebuildCache();
+			}
 		}
-		spinRate = Mathf.Sign(Vector3.Dot(zero, parent.Rotation.Rotated(RotationDirection.Clockwise).FacingCell.ToVector3()));
-		spinRate *= Rand.RangeSeeded(0.9f, 1.1f, parent.thingIDNumber * 60509 + 33151);
-		if (waterDoubleUsed)
+
+		// Token: 0x0600B9B9 RID: 47545 RVA: 0x00359665 File Offset: 0x00357865
+		public IEnumerable<IntVec3> WaterCells()
 		{
-			spinRate *= 0.5f;
+			return CompPowerPlantWater.WaterCells(this.parent.Position, this.parent.Rotation);
 		}
-		cacheDirty = false;
-	}
 
-	private void ForceOthersToRebuildCache(Map map)
-	{
-		foreach (Building item in map.listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.WatermillGenerator))
+		// Token: 0x0600B9BA RID: 47546 RVA: 0x00359682 File Offset: 0x00357882
+		public static IEnumerable<IntVec3> WaterCells(IntVec3 loc, Rot4 rot)
 		{
-			item.GetComp<CompPowerPlantWater>().ClearCache();
+			IntVec3 perpOffset = rot.Rotated(RotationDirection.Counterclockwise).FacingCell;
+			yield return loc + rot.FacingCell * 3;
+			yield return loc + rot.FacingCell * 3 - perpOffset;
+			yield return loc + rot.FacingCell * 3 - perpOffset * 2;
+			yield return loc + rot.FacingCell * 3 + perpOffset;
+			yield return loc + rot.FacingCell * 3 + perpOffset * 2;
+			yield break;
 		}
-	}
 
-	public override void CompTick()
-	{
-		base.CompTick();
-		if (base.PowerOutput > 0.01f)
+		// Token: 0x0600B9BB RID: 47547 RVA: 0x00359699 File Offset: 0x00357899
+		public CellRect WaterUseRect()
 		{
-			spinPosition = (spinPosition + 1f / 150f * spinRate + MathF.PI * 2f) % (MathF.PI * 2f);
+			return CompPowerPlantWater.WaterUseRect(this.parent.Position, this.parent.Rotation);
 		}
-		if (parent.IsHashIntervalTick(1200))
+
+		// Token: 0x0600B9BC RID: 47548 RVA: 0x003596B8 File Offset: 0x003578B8
+		public static CellRect WaterUseRect(IntVec3 loc, Rot4 rot)
 		{
-			RebuildCache();
+			int width = rot.IsHorizontal ? 7 : 13;
+			int height = rot.IsHorizontal ? 13 : 7;
+			return CellRect.CenteredOn(loc + rot.FacingCell * 4, width, height);
 		}
-	}
 
-	public IEnumerable<IntVec3> WaterCells()
-	{
-		return WaterCells(parent.Position, parent.Rotation);
-	}
-
-	public static IEnumerable<IntVec3> WaterCells(IntVec3 loc, Rot4 rot)
-	{
-		IntVec3 perpOffset = rot.Rotated(RotationDirection.Counterclockwise).FacingCell;
-		yield return loc + rot.FacingCell * 3;
-		yield return loc + rot.FacingCell * 3 - perpOffset;
-		yield return loc + rot.FacingCell * 3 - perpOffset * 2;
-		yield return loc + rot.FacingCell * 3 + perpOffset;
-		yield return loc + rot.FacingCell * 3 + perpOffset * 2;
-	}
-
-	public CellRect WaterUseRect()
-	{
-		return WaterUseRect(parent.Position, parent.Rotation);
-	}
-
-	public static CellRect WaterUseRect(IntVec3 loc, Rot4 rot)
-	{
-		int width = (rot.IsHorizontal ? 7 : 13);
-		int height = (rot.IsHorizontal ? 13 : 7);
-		return CellRect.CenteredOn(loc + rot.FacingCell * 4, width, height);
-	}
-
-	public IEnumerable<IntVec3> WaterUseCells()
-	{
-		return WaterUseCells(parent.Position, parent.Rotation);
-	}
-
-	public static IEnumerable<IntVec3> WaterUseCells(IntVec3 loc, Rot4 rot)
-	{
-		foreach (IntVec3 item in WaterUseRect(loc, rot))
+		// Token: 0x0600B9BD RID: 47549 RVA: 0x003596FD File Offset: 0x003578FD
+		public IEnumerable<IntVec3> WaterUseCells()
 		{
-			yield return item;
+			return CompPowerPlantWater.WaterUseCells(this.parent.Position, this.parent.Rotation);
 		}
-	}
 
-	public IEnumerable<IntVec3> GroundCells()
-	{
-		return GroundCells(parent.Position, parent.Rotation);
-	}
-
-	public static IEnumerable<IntVec3> GroundCells(IntVec3 loc, Rot4 rot)
-	{
-		IntVec3 perpOffset = rot.Rotated(RotationDirection.Counterclockwise).FacingCell;
-		yield return loc - rot.FacingCell;
-		yield return loc - rot.FacingCell - perpOffset;
-		yield return loc - rot.FacingCell + perpOffset;
-		yield return loc;
-		yield return loc - perpOffset;
-		yield return loc + perpOffset;
-	}
-
-	public override void PostDraw()
-	{
-		base.PostDraw();
-		Vector3 vector = parent.TrueCenter();
-		vector += parent.Rotation.FacingCell.ToVector3() * 2.36f;
-		for (int i = 0; i < 9; i++)
+		// Token: 0x0600B9BE RID: 47550 RVA: 0x0035971A File Offset: 0x0035791A
+		public static IEnumerable<IntVec3> WaterUseCells(IntVec3 loc, Rot4 rot)
 		{
-			float num = spinPosition + MathF.PI * 2f * (float)i / 9f;
-			float x = Mathf.Abs(4f * Mathf.Sin(num));
-			bool num2 = num % (MathF.PI * 2f) < MathF.PI;
-			Vector2 vector2 = new Vector2(x, 1f);
-			Vector3 s = new Vector3(vector2.x, 1f, vector2.y);
-			Matrix4x4 matrix = default(Matrix4x4);
-			matrix.SetTRS(vector + Vector3.up * 0.03658537f * Mathf.Cos(num), parent.Rotation.AsQuat, s);
-			Graphics.DrawMesh(num2 ? MeshPool.plane10 : MeshPool.plane10Flip, matrix, BladesMat, 0);
+			foreach (IntVec3 intVec in CompPowerPlantWater.WaterUseRect(loc, rot))
+			{
+				yield return intVec;
+			}
+			yield break;
+			yield break;
 		}
-	}
 
-	public override string CompInspectStringExtra()
-	{
-		string text = base.CompInspectStringExtra();
-		if (waterUsable && waterDoubleUsed)
+		// Token: 0x0600B9BF RID: 47551 RVA: 0x00359731 File Offset: 0x00357931
+		public IEnumerable<IntVec3> GroundCells()
 		{
-			text += "\n" + "Watermill_WaterUsedTwice".Translate();
+			return CompPowerPlantWater.GroundCells(this.parent.Position, this.parent.Rotation);
 		}
-		return text;
+
+		// Token: 0x0600B9C0 RID: 47552 RVA: 0x0035974E File Offset: 0x0035794E
+		public static IEnumerable<IntVec3> GroundCells(IntVec3 loc, Rot4 rot)
+		{
+			IntVec3 perpOffset = rot.Rotated(RotationDirection.Counterclockwise).FacingCell;
+			yield return loc - rot.FacingCell;
+			yield return loc - rot.FacingCell - perpOffset;
+			yield return loc - rot.FacingCell + perpOffset;
+			yield return loc;
+			yield return loc - perpOffset;
+			yield return loc + perpOffset;
+			yield break;
+		}
+
+		// Token: 0x0600B9C1 RID: 47553 RVA: 0x00359768 File Offset: 0x00357968
+		public override void PostDraw()
+		{
+			base.PostDraw();
+			Vector3 a = this.parent.TrueCenter();
+			a += this.parent.Rotation.FacingCell.ToVector3() * 2.36f;
+			for (int i = 0; i < 9; i++)
+			{
+				float num = this.spinPosition + 6.2831855f * (float)i / 9f;
+				float x = Mathf.Abs(4f * Mathf.Sin(num));
+				bool flag = num % 6.2831855f < 3.1415927f;
+				Vector2 vector = new Vector2(x, 1f);
+				Vector3 s = new Vector3(vector.x, 1f, vector.y);
+				Matrix4x4 matrix = default(Matrix4x4);
+				matrix.SetTRS(a + Vector3.up * 0.03658537f * Mathf.Cos(num), this.parent.Rotation.AsQuat, s);
+				Graphics.DrawMesh(flag ? MeshPool.plane10 : MeshPool.plane10Flip, matrix, CompPowerPlantWater.BladesMat, 0);
+			}
+		}
+
+		// Token: 0x0600B9C2 RID: 47554 RVA: 0x00359888 File Offset: 0x00357A88
+		public override string CompInspectStringExtra()
+		{
+			string text = base.CompInspectStringExtra();
+			if (this.waterUsable && this.waterDoubleUsed)
+			{
+				text += "\n" + "Watermill_WaterUsedTwice".Translate();
+			}
+			return text;
+		}
+
+		// Token: 0x04007FFB RID: 32763
+		private float spinPosition;
+
+		// Token: 0x04007FFC RID: 32764
+		private bool cacheDirty = true;
+
+		// Token: 0x04007FFD RID: 32765
+		private bool waterUsable;
+
+		// Token: 0x04007FFE RID: 32766
+		private bool waterDoubleUsed;
+
+		// Token: 0x04007FFF RID: 32767
+		private float spinRate = 1f;
+
+		// Token: 0x04008000 RID: 32768
+		private const float PowerFactorIfWaterDoubleUsed = 0.3f;
+
+		// Token: 0x04008001 RID: 32769
+		private const float SpinRateFactor = 0.006666667f;
+
+		// Token: 0x04008002 RID: 32770
+		private const float BladeOffset = 2.36f;
+
+		// Token: 0x04008003 RID: 32771
+		private const int BladeCount = 9;
+
+		// Token: 0x04008004 RID: 32772
+		private const int RebuildCacheIntervalTicks = 1200;
+
+		// Token: 0x04008005 RID: 32773
+		public static readonly Material BladesMat = MaterialPool.MatFrom("Things/Building/Power/WatermillGenerator/WatermillGeneratorBlades");
 	}
 }

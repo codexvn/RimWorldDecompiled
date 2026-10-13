@@ -1,15 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RecordWorker_TimeAsColonistOrColonyAnimal : RecordWorker
+namespace RimWorld
 {
-	public override bool ShouldMeasureTimeNow(Pawn pawn)
+	// Token: 0x020023BB RID: 9147
+	public class RecordWorker_TimeAsColonistOrColonyAnimal : RecordWorker
 	{
-		if (pawn.Faction == Faction.OfPlayer && !pawn.HasExtraHomeFaction() && !pawn.IsSlave)
+		// Token: 0x0600C695 RID: 50837 RVA: 0x0039E0C1 File Offset: 0x0039C2C1
+		public override bool ShouldMeasureTimeNow(Pawn pawn)
 		{
-			return !pawn.IsPrisoner;
+			return pawn.Faction == Faction.OfPlayer && !pawn.HasExtraHomeFaction(null) && !pawn.IsSlave && !pawn.IsPrisoner;
 		}
-		return false;
 	}
 }

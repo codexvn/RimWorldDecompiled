@@ -1,35 +1,41 @@
-using System;
+﻿using System;
 using Unity.Collections;
 using Verse;
 
-namespace RimWorld;
-
-public class UsedRectPathGridCustomizer : PathRequest.IPathGridCustomizer, IDisposable
+namespace RimWorld
 {
-	private NativeArray<ushort> grid;
-
-	public UsedRectPathGridCustomizer(Map map)
+	// Token: 0x0200203C RID: 8252
+	public class UsedRectPathGridCustomizer : PathRequest.IPathGridCustomizer, IDisposable
 	{
-		grid = new NativeArray<ushort>(map.cellIndices.NumGridCells, Allocator.Persistent);
-		foreach (CellRect usedRect in MapGenerator.UsedRects)
+		// Token: 0x0600B54E RID: 46414 RVA: 0x0034222C File Offset: 0x0034042C
+		public UsedRectPathGridCustomizer(Map map)
 		{
-			foreach (IntVec3 cell in usedRect.ExpandedBy(2).Cells)
+			this.grid = new NativeArray<ushort>(map.cellIndices.NumGridCells, Allocator.Persistent, NativeArrayOptions.ClearMemory);
+			foreach (CellRect cellRect in MapGenerator.UsedRects)
 			{
-				if (cell.InBounds(map))
+				foreach (IntVec3 c in cellRect.ExpandedBy(2).Cells)
 				{
-					grid[map.cellIndices.CellToIndex(cell)] = 10000;
+					if (c.InBounds(map))
+					{
+						this.grid[map.cellIndices.CellToIndex(c)] = 10000;
+					}
 				}
 			}
 		}
-	}
 
-	public NativeArray<ushort> GetOffsetGrid()
-	{
-		return grid;
-	}
+		// Token: 0x0600B54F RID: 46415 RVA: 0x003422FC File Offset: 0x003404FC
+		public NativeArray<ushort> GetOffsetGrid()
+		{
+			return this.grid;
+		}
 
-	public void Dispose()
-	{
-		grid.Dispose();
+		// Token: 0x0600B550 RID: 46416 RVA: 0x00342304 File Offset: 0x00340504
+		public void Dispose()
+		{
+			this.grid.Dispose();
+		}
+
+		// Token: 0x04007C84 RID: 31876
+		private NativeArray<ushort> grid;
 	}
 }

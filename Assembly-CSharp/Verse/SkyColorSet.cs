@@ -1,61 +1,76 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public struct SkyColorSet
+namespace Verse
 {
-	public Color sky;
-
-	public Color shadow;
-
-	public Color overlay;
-
-	public float saturation;
-
-	public SkyColorSet(Color sky, Color shadow, Color overlay, float saturation)
+	// Token: 0x0200025F RID: 607
+	public struct SkyColorSet
 	{
-		this.sky = sky;
-		this.shadow = shadow;
-		this.overlay = overlay;
-		this.saturation = saturation;
-	}
-
-	public static SkyColorSet Lerp(SkyColorSet A, SkyColorSet B, float t)
-	{
-		return new SkyColorSet
+		// Token: 0x06000F76 RID: 3958 RVA: 0x000491CD File Offset: 0x000473CD
+		public SkyColorSet(Color sky, Color shadow, Color overlay, float saturation)
 		{
-			sky = Color.Lerp(A.sky, B.sky, t),
-			shadow = Color.Lerp(A.shadow, B.shadow, t),
-			overlay = Color.Lerp(A.overlay, B.overlay, t),
-			saturation = Mathf.Lerp(A.saturation, B.saturation, t)
-		};
-	}
+			this.sky = sky;
+			this.shadow = shadow;
+			this.overlay = overlay;
+			this.saturation = saturation;
+		}
 
-	public static SkyColorSet LerpDarken(SkyColorSet A, SkyColorSet B, float t)
-	{
-		return new SkyColorSet
+		// Token: 0x06000F77 RID: 3959 RVA: 0x000491EC File Offset: 0x000473EC
+		public static SkyColorSet Lerp(SkyColorSet A, SkyColorSet B, float t)
 		{
-			sky = Color.Lerp(A.sky, A.sky.Min(B.sky), t),
-			shadow = Color.Lerp(A.shadow, A.shadow.Min(B.shadow), t),
-			overlay = Color.Lerp(A.overlay, A.overlay.Min(B.overlay), t),
-			saturation = Mathf.Lerp(A.saturation, Mathf.Min(A.saturation, B.saturation), t)
-		};
-	}
+			return new SkyColorSet
+			{
+				sky = Color.Lerp(A.sky, B.sky, t),
+				shadow = Color.Lerp(A.shadow, B.shadow, t),
+				overlay = Color.Lerp(A.overlay, B.overlay, t),
+				saturation = Mathf.Lerp(A.saturation, B.saturation, t)
+			};
+		}
 
-	public override string ToString()
-	{
-		string[] obj = new string[9] { "(sky=", null, null, null, null, null, null, null, null };
-		Color color = sky;
-		obj[1] = color.ToString();
-		obj[2] = ", shadow=";
-		color = shadow;
-		obj[3] = color.ToString();
-		obj[4] = ", overlay=";
-		color = overlay;
-		obj[5] = color.ToString();
-		obj[6] = ", sat=";
-		obj[7] = saturation.ToString();
-		obj[8] = ")";
-		return string.Concat(obj);
+		// Token: 0x06000F78 RID: 3960 RVA: 0x00049268 File Offset: 0x00047468
+		public static SkyColorSet LerpDarken(SkyColorSet A, SkyColorSet B, float t)
+		{
+			return new SkyColorSet
+			{
+				sky = Color.Lerp(A.sky, A.sky.Min(B.sky), t),
+				shadow = Color.Lerp(A.shadow, A.shadow.Min(B.shadow), t),
+				overlay = Color.Lerp(A.overlay, A.overlay.Min(B.overlay), t),
+				saturation = Mathf.Lerp(A.saturation, Mathf.Min(A.saturation, B.saturation), t)
+			};
+		}
+
+		// Token: 0x06000F79 RID: 3961 RVA: 0x00049310 File Offset: 0x00047510
+		public override string ToString()
+		{
+			string[] array = new string[9];
+			array[0] = "(sky=";
+			int num = 1;
+			Color color = this.sky;
+			array[num] = color.ToString();
+			array[2] = ", shadow=";
+			int num2 = 3;
+			color = this.shadow;
+			array[num2] = color.ToString();
+			array[4] = ", overlay=";
+			int num3 = 5;
+			color = this.overlay;
+			array[num3] = color.ToString();
+			array[6] = ", sat=";
+			array[7] = this.saturation.ToString();
+			array[8] = ")";
+			return string.Concat(array);
+		}
+
+		// Token: 0x04000B3C RID: 2876
+		public Color sky;
+
+		// Token: 0x04000B3D RID: 2877
+		public Color shadow;
+
+		// Token: 0x04000B3E RID: 2878
+		public Color overlay;
+
+		// Token: 0x04000B3F RID: 2879
+		public float saturation;
 	}
 }

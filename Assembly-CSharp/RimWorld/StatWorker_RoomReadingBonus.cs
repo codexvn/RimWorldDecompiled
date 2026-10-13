@@ -1,23 +1,20 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatWorker_RoomReadingBonus : StatWorker
+namespace RimWorld
 {
-	public override bool ShouldShowFor(StatRequest req)
+	// Token: 0x02003755 RID: 14165
+	public class StatWorker_RoomReadingBonus : StatWorker
 	{
-		if (!base.ShouldShowFor(req))
+		// Token: 0x06013A2E RID: 80430 RVA: 0x005D5360 File Offset: 0x005D3560
+		public override bool ShouldShowFor(StatRequest req)
 		{
-			return false;
+			if (!base.ShouldShowFor(req))
+			{
+				return false;
+			}
+			ThingDef thingDef = req.Def as ThingDef;
+			return thingDef != null && typeof(Building_Bookcase).IsAssignableFrom(thingDef.thingClass);
 		}
-		if (!(req.Def is ThingDef thingDef))
-		{
-			return false;
-		}
-		if (typeof(Building_Bookcase).IsAssignableFrom(thingDef.thingClass))
-		{
-			return true;
-		}
-		return false;
 	}
 }

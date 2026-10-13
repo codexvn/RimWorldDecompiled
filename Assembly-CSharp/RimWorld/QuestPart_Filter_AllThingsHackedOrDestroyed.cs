@@ -1,23 +1,27 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_Filter_AllThingsHackedOrDestroyed : QuestPart_Filter_AllThingsHacked
+namespace RimWorld
 {
-	protected override bool Pass(SignalArgs args)
+	// Token: 0x02001BA0 RID: 7072
+	public class QuestPart_Filter_AllThingsHackedOrDestroyed : QuestPart_Filter_AllThingsHacked
 	{
-		if (things.Count == 0)
+		// Token: 0x06009DBB RID: 40379 RVA: 0x002DB17C File Offset: 0x002D937C
+		protected override bool Pass(SignalArgs args)
 		{
-			return true;
-		}
-		int num = 0;
-		for (int i = 0; i < things.Count; i++)
-		{
-			if (things[i].DestroyedOrNull() || things[i].IsHacked())
+			if (this.things.Count == 0)
 			{
-				num++;
+				return true;
 			}
+			int num = 0;
+			for (int i = 0; i < this.things.Count; i++)
+			{
+				if (this.things[i].DestroyedOrNull() || this.things[i].IsHacked())
+				{
+					num++;
+				}
+			}
+			return num >= this.things.Count;
 		}
-		return num >= things.Count;
 	}
 }

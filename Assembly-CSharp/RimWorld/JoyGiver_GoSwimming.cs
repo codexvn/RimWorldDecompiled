@@ -1,83 +1,66 @@
+﻿using System;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_GoSwimming : JoyGiver
+namespace RimWorld
 {
-	private const float MinSwimmingTemperature = 10f;
-
-	public static bool HappyToSwimOutsideOnMap(Map map)
+	// Token: 0x020014EC RID: 5356
+	public class JoyGiver_GoSwimming : JoyGiver
 	{
-		if (map.mapTemperature.OutdoorTemp < 10f)
+		// Token: 0x06007FD3 RID: 32723 RVA: 0x0026787E File Offset: 0x00265A7E
+		public static bool HappyToSwimOutsideOnMap(Map map)
 		{
-			return false;
+			return map.mapTemperature.OutdoorTemp >= 10f && !map.Biome.inVacuum && map.gameConditionManager.AllowEnjoyableOutsideNow(map);
 		}
-		if (map.Biome.inVacuum)
-		{
-			return false;
-		}
-		if (!map.gameConditionManager.AllowEnjoyableOutsideNow(map))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public override Job TryGiveJob(Pawn pawn)
-	{
-		if (!ModLister.CheckOdyssey("Swimming"))
+		// Token: 0x06007FD4 RID: 32724 RVA: 0x002678B4 File Offset: 0x00265AB4
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
-		}
-		if (PawnUtility.WillSoonHaveBasicNeed(pawn))
-		{
-			return null;
-		}
-		if (!CellFinder.TryFindClosestRegionWith(pawn.GetRegion(), TraverseParms.For(pawn), RegionValidator, 100, out var result))
-		{
-			return null;
-		}
-		if (!result.TryFindRandomCellInRegionUnforbidden(pawn, CellValidator, out var result2))
-		{
-			return null;
-		}
-		if (!SwimPathFinder.TryFindSwimPath(pawn, result2, out var result3))
-		{
-			return null;
-		}
-		Job job = JobMaker.MakeJob(def.jobDef, result3[0]);
-		job.targetQueueA = new List<LocalTargetInfo>();
-		for (int i = 1; i < result3.Count; i++)
-		{
-			job.targetQueueA.Add(result3[i]);
-		}
-		job.locomotionUrgency = LocomotionUrgency.Walk;
-		return job;
-		bool CellValidator(IntVec3 x)
-		{
-			if (!PawnUtility.KnownDangerAt(x, pawn.Map, pawn) && x.GetTerrain(pawn.Map).IsWater && x.GetTerrain(pawn.Map).toxicBuildupFactor == 0f && !x.Fogged(pawn.Map))
+			JoyGiver_GoSwimming.<>c__DisplayClass2_0 CS$<>8__locals1 = new JoyGiver_GoSwimming.<>c__DisplayClass2_0();
+			CS$<>8__locals1.pawn = pawn;
+			if (!ModLister.CheckOdyssey("Swimming"))
 			{
-				return x.Standable(pawn.Map);
+				return null;
 			}
-			return false;
+			if (PawnUtility.WillSoonHaveBasicNeed(CS$<>8__locals1.pawn, 0.05f))
+			{
+				return null;
+			}
+			Region reg;
+			if (!CellFinder.TryFindClosestRegionWith(CS$<>8__locals1.pawn.GetRegion(RegionType.Set_Passable), TraverseParms.For(CS$<>8__locals1.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), new Predicate<Region>(CS$<>8__locals1.<TryGiveJob>g__RegionValidator|2), 100, out reg, RegionType.Set_Passable))
+			{
+				return null;
+			}
+			IntVec3 root;
+			if (!reg.TryFindRandomCellInRegionUnforbidden(CS$<>8__locals1.pawn, new Predicate<IntVec3>(CS$<>8__locals1.<TryGiveJob>g__CellValidator|1), out root))
+			{
+				return null;
+			}
+			List<IntVec3> list;
+			if (!SwimPathFinder.TryFindSwimPath(CS$<>8__locals1.pawn, root, out list))
+			{
+				return null;
+			}
+			Job job = JobMaker.MakeJob(this.def.jobDef, list[0]);
+			job.targetQueueA = new List<LocalTargetInfo>();
+			for (int i = 1; i < list.Count; i++)
+			{
+				job.targetQueueA.Add(list[i]);
+			}
+			job.locomotionUrgency = LocomotionUrgency.Walk;
+			return job;
 		}
-		static bool EnjoyableInsideNow(Room room)
+
+		// Token: 0x06007FD6 RID: 32726 RVA: 0x002679BB File Offset: 0x00265BBB
+		[CompilerGenerated]
+		internal static bool <TryGiveJob>g__EnjoyableInsideNow|2_0(Room room)
 		{
 			return room.Temperature > 10f;
 		}
-		bool RegionValidator(Region x)
-		{
-			if ((x.Room.PsychologicallyOutdoors ? HappyToSwimOutsideOnMap(pawn.Map) : EnjoyableInsideNow(x.Room)) && !x.IsForbiddenEntirely(pawn) && x.TryFindRandomCellInRegionUnforbidden(pawn, CellValidator, out var _))
-			{
-				if (pawn.ConcernedByVacuum)
-				{
-					return x.Room.Vacuum < 0.5f;
-				}
-				return true;
-			}
-			return false;
-		}
+
+		// Token: 0x0400557E RID: 21886
+		private const float MinSwimmingTemperature = 10f;
 	}
 }

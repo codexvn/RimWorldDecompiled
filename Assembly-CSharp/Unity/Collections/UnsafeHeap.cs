@@ -1,242 +1,297 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using Unity.Collections.LowLevel.Unsafe;
 
-namespace Unity.Collections;
-
-[DebuggerDisplay("Count = {Count}")]
-[DebuggerTypeProxy(typeof(NativeHeapDebugView<, >))]
-public struct UnsafeHeap<T, U> : IDisposable where T : unmanaged where U : unmanaged, IComparer<T>
+namespace Unity.Collections
 {
-	public const int DEFAULT_CAPACITY = 128;
-
-	internal const int VALIDATION_ERROR_WRONG_INSTANCE = 1;
-
-	internal const int VALIDATION_ERROR_INVALID = 2;
-
-	internal const int VALIDATION_ERROR_REMOVED = 3;
-
-	[NativeDisableUnsafePtrRestriction]
-	internal unsafe HeapData<T, U>* Data;
-
-	internal Allocator Allocator;
-
-	public unsafe int Capacity
+	// Token: 0x02000062 RID: 98
+	[DebuggerDisplay("Count = {Count}")]
+	[DebuggerTypeProxy(typeof(NativeHeapDebugView<, >))]
+	public struct UnsafeHeap<[IsUnmanaged] T, [IsUnmanaged] U> : IDisposable where T : struct, ValueType where U : struct, ValueType, IComparer<T>
 	{
-		get
+		// Token: 0x1700005B RID: 91
+		// (get) Token: 0x06000212 RID: 530 RVA: 0x0000BE64 File Offset: 0x0000A064
+		// (set) Token: 0x06000213 RID: 531 RVA: 0x0000BE74 File Offset: 0x0000A074
+		public unsafe int Capacity
 		{
-			return Data->Capacity;
-		}
-		set
-		{
-			TableValue* ptr = (TableValue*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<TableValue>() * value, UnsafeUtility.AlignOf<TableValue>(), Allocator);
-			HeapNode<T>* ptr2 = (HeapNode<T>*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode<T>>() * value, UnsafeUtility.AlignOf<HeapNode<T>>(), Allocator);
-			int num = ((Data->Capacity < value) ? Data->Capacity : value);
-			UnsafeUtility.MemCpy(ptr, Data->Table, num * UnsafeUtility.SizeOf<TableValue>());
-			UnsafeUtility.MemCpy(ptr2, Data->Heap, num * UnsafeUtility.SizeOf<HeapNode<T>>());
-			for (int i = 0; i < value - Data->Capacity; i++)
+			get
 			{
-				ptr2[i + Data->Capacity] = new HeapNode<T>
+				return this.Data->Capacity;
+			}
+			set
+			{
+				TableValue* ptr = (TableValue*)UnsafeUtility.Malloc((long)(UnsafeUtility.SizeOf<TableValue>() * value), UnsafeUtility.AlignOf<TableValue>(), this.Allocator);
+				HeapNode<T>* ptr2 = (HeapNode<T>*)UnsafeUtility.Malloc((long)(UnsafeUtility.SizeOf<HeapNode<T>>() * value), UnsafeUtility.AlignOf<HeapNode<T>>(), this.Allocator);
+				int num = (this.Data->Capacity < value) ? this.Data->Capacity : value;
+				UnsafeUtility.MemCpy((void*)ptr, (void*)this.Data->Table, (long)(num * UnsafeUtility.SizeOf<TableValue>()));
+				UnsafeUtility.MemCpy((void*)ptr2, (void*)this.Data->Heap, (long)(num * UnsafeUtility.SizeOf<HeapNode<T>>()));
+				for (int i = 0; i < value - this.Data->Capacity; i++)
 				{
-					TableIndex = i + Data->Capacity
-				};
-			}
-			UnsafeUtility.Free(Data->Table, Allocator);
-			UnsafeUtility.Free(Data->Heap, Allocator);
-			Data->Table = ptr;
-			Data->Heap = ptr2;
-			Data->Capacity = value;
-		}
-	}
-
-	public unsafe int Count => Data->Count;
-
-	public unsafe U Comparator
-	{
-		get
-		{
-			return Data->Comparator;
-		}
-		set
-		{
-			Data->Comparator = value;
-		}
-	}
-
-	public unsafe bool IsCreated => Data != null;
-
-	public UnsafeHeap(Allocator allocator, int initialCapacity = 128, U comparator = default(U))
-		: this(initialCapacity, comparator, allocator)
-	{
-	}
-
-	public unsafe void Dispose()
-	{
-		Data->Count = 0;
-		Data->Capacity = 0;
-		UnsafeUtility.Free(Data->Heap, Allocator);
-		UnsafeUtility.Free(Data->Table, Allocator);
-		UnsafeUtility.Free(Data, Allocator);
-		Data = null;
-	}
-
-	public unsafe void Clear()
-	{
-		Data->Count = 0;
-	}
-
-	public T Peek()
-	{
-		if (!TryPeek(out var t))
-		{
-			throw new InvalidOperationException("Cannot Peek NativeHeap when the count is zero.");
-		}
-		return t;
-	}
-
-	public unsafe bool TryPeek(out T t)
-	{
-		if (Data->Count == 0)
-		{
-			t = default(T);
-			return false;
-		}
-		t = Data->Heap->Item;
-		return true;
-	}
-
-	public T Pop()
-	{
-		if (!TryPop(out var t))
-		{
-			throw new InvalidOperationException("Cannot Pop NativeHeap when the count is zero.");
-		}
-		return t;
-	}
-
-	public unsafe bool TryPop(out T t)
-	{
-		if (Data->Count == 0)
-		{
-			t = default(T);
-			return false;
-		}
-		HeapNode<T> heap = *Data->Heap;
-		int num = --Data->Count;
-		HeapNode<T> node = Data->Heap[num];
-		Data->Heap[num] = heap;
-		InsertAndBubbleDown(node, 0);
-		t = heap.Item;
-		return true;
-	}
-
-	public unsafe NativeHeapIndex Insert(in T t)
-	{
-		if (Data->Count == Data->Capacity)
-		{
-			Capacity *= 2;
-		}
-		HeapNode<T> node = Data->Heap[Data->Count];
-		node.Item = t;
-		int insertIndex = Data->Count++;
-		InsertAndBubbleUp(node, insertIndex);
-		return new NativeHeapIndex
-		{
-			TableIndex = node.TableIndex
-		};
-	}
-
-	public unsafe T Remove(NativeHeapIndex index)
-	{
-		int heapIndex = Data->Table[index.TableIndex].HeapIndex;
-		HeapNode<T> value = Data->Heap[heapIndex];
-		HeapNode<T> node = Data->Heap[--Data->Count];
-		UnsafeUtility.WriteArrayElement(Data->Heap, Data->Count, value);
-		if (heapIndex != 0)
-		{
-			int num = (heapIndex - 1) / 2;
-			HeapNode<T> heapNode = Data->Heap[num];
-			if (Data->Comparator.Compare(node.Item, heapNode.Item) < 0)
-			{
-				InsertAndBubbleUp(node, heapIndex);
-				return value.Item;
+					ptr2[(IntPtr)(i + this.Data->Capacity) * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = new HeapNode<T>
+					{
+						TableIndex = i + this.Data->Capacity
+					};
+				}
+				UnsafeUtility.Free((void*)this.Data->Table, this.Allocator);
+				UnsafeUtility.Free((void*)this.Data->Heap, this.Allocator);
+				this.Data->Table = ptr;
+				this.Data->Heap = ptr2;
+				this.Data->Capacity = value;
 			}
 		}
-		InsertAndBubbleDown(node, heapIndex);
-		return value.Item;
-	}
 
-	internal unsafe UnsafeHeap(int initialCapacity, U comparator, Allocator allocator)
-	{
-		Data = (HeapData<T, U>*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapData<T, U>>(), UnsafeUtility.AlignOf<HeapData<T, U>>(), allocator);
-		Data->Heap = (HeapNode<T>*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<HeapNode<T>>() * initialCapacity, UnsafeUtility.AlignOf<HeapNode<T>>(), allocator);
-		Data->Table = (TableValue*)UnsafeUtility.Malloc(UnsafeUtility.SizeOf<TableValue>() * initialCapacity, UnsafeUtility.AlignOf<TableValue>(), allocator);
-		Allocator = allocator;
-		for (int i = 0; i < initialCapacity; i++)
+		// Token: 0x1700005C RID: 92
+		// (get) Token: 0x06000214 RID: 532 RVA: 0x0000BFA4 File Offset: 0x0000A1A4
+		public unsafe int Count
 		{
-			Data->Heap[i] = new HeapNode<T>
+			get
 			{
-				TableIndex = i
+				return this.Data->Count;
+			}
+		}
+
+		// Token: 0x1700005D RID: 93
+		// (get) Token: 0x06000215 RID: 533 RVA: 0x0000BFB1 File Offset: 0x0000A1B1
+		// (set) Token: 0x06000216 RID: 534 RVA: 0x0000BFBE File Offset: 0x0000A1BE
+		public unsafe U Comparator
+		{
+			get
+			{
+				return this.Data->Comparator;
+			}
+			set
+			{
+				this.Data->Comparator = value;
+			}
+		}
+
+		// Token: 0x06000217 RID: 535 RVA: 0x0000BFCC File Offset: 0x0000A1CC
+		public UnsafeHeap(Allocator allocator, int initialCapacity = 128, U comparator = default(U))
+		{
+			this = new UnsafeHeap<T, U>(initialCapacity, comparator, allocator);
+		}
+
+		// Token: 0x1700005E RID: 94
+		// (get) Token: 0x06000218 RID: 536 RVA: 0x0000BFD7 File Offset: 0x0000A1D7
+		public bool IsCreated
+		{
+			get
+			{
+				return this.Data != null;
+			}
+		}
+
+		// Token: 0x06000219 RID: 537 RVA: 0x0000BFE8 File Offset: 0x0000A1E8
+		public unsafe void Dispose()
+		{
+			this.Data->Count = 0;
+			this.Data->Capacity = 0;
+			UnsafeUtility.Free((void*)this.Data->Heap, this.Allocator);
+			UnsafeUtility.Free((void*)this.Data->Table, this.Allocator);
+			UnsafeUtility.Free((void*)this.Data, this.Allocator);
+			this.Data = null;
+		}
+
+		// Token: 0x0600021A RID: 538 RVA: 0x0000C052 File Offset: 0x0000A252
+		public unsafe void Clear()
+		{
+			this.Data->Count = 0;
+		}
+
+		// Token: 0x0600021B RID: 539 RVA: 0x0000C060 File Offset: 0x0000A260
+		public T Peek()
+		{
+			T result;
+			if (!this.TryPeek(out result))
+			{
+				throw new InvalidOperationException("Cannot Peek NativeHeap when the count is zero.");
+			}
+			return result;
+		}
+
+		// Token: 0x0600021C RID: 540 RVA: 0x0000C083 File Offset: 0x0000A283
+		public unsafe bool TryPeek(out T t)
+		{
+			if (this.Data->Count == 0)
+			{
+				t = default(T);
+				return false;
+			}
+			t = this.Data->Heap->Item;
+			return true;
+		}
+
+		// Token: 0x0600021D RID: 541 RVA: 0x0000C0B4 File Offset: 0x0000A2B4
+		public T Pop()
+		{
+			T result;
+			if (!this.TryPop(out result))
+			{
+				throw new InvalidOperationException("Cannot Pop NativeHeap when the count is zero.");
+			}
+			return result;
+		}
+
+		// Token: 0x0600021E RID: 542 RVA: 0x0000C0D8 File Offset: 0x0000A2D8
+		public unsafe bool TryPop(out T t)
+		{
+			if (this.Data->Count == 0)
+			{
+				t = default(T);
+				return false;
+			}
+			HeapNode<T> heapNode = *this.Data->Heap;
+			HeapData<T, U>* data = this.Data;
+			int num = data->Count - 1;
+			data->Count = num;
+			int num2 = num;
+			HeapNode<T> node = this.Data->Heap[(IntPtr)num2 * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+			this.Data->Heap[(IntPtr)num2 * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = heapNode;
+			this.InsertAndBubbleDown(node, 0);
+			t = heapNode.Item;
+			return true;
+		}
+
+		// Token: 0x0600021F RID: 543 RVA: 0x0000C16C File Offset: 0x0000A36C
+		public unsafe NativeHeapIndex Insert(in T t)
+		{
+			if (this.Data->Count == this.Data->Capacity)
+			{
+				this.Capacity *= 2;
+			}
+			HeapNode<T> heapNode = this.Data->Heap[(IntPtr)this.Data->Count * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+			heapNode.Item = t;
+			HeapData<T, U>* data = this.Data;
+			int count = data->Count;
+			data->Count = count + 1;
+			int insertIndex = count;
+			this.InsertAndBubbleUp(heapNode, insertIndex);
+			return new NativeHeapIndex
+			{
+				TableIndex = heapNode.TableIndex
 			};
 		}
-		Data->Count = 0;
-		Data->Capacity = initialCapacity;
-		Data->Comparator = comparator;
-	}
 
-	internal unsafe void InsertAndBubbleDown(HeapNode<T> node, int insertIndex)
-	{
-		while (true)
+		// Token: 0x06000220 RID: 544 RVA: 0x0000C204 File Offset: 0x0000A404
+		public unsafe T Remove(NativeHeapIndex index)
 		{
-			int num = insertIndex * 2 + 1;
-			int num2 = insertIndex * 2 + 2;
-			if (num >= Data->Count)
+			int heapIndex = this.Data->Table[index.TableIndex].HeapIndex;
+			HeapNode<T> heapNode = this.Data->Heap[(IntPtr)heapIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+			IntPtr heap = this.Data->Heap;
+			HeapData<T, U>* data = this.Data;
+			int num = data->Count - 1;
+			data->Count = num;
+			HeapNode<T> heapNode2 = *(heap + (IntPtr)num * (IntPtr)sizeof(HeapNode<T>));
+			UnsafeUtility.WriteArrayElement<HeapNode<T>>((void*)this.Data->Heap, this.Data->Count, heapNode);
+			if (heapIndex != 0)
 			{
-				break;
+				int num2 = (heapIndex - 1) / 2;
+				HeapNode<T> heapNode3 = this.Data->Heap[(IntPtr)num2 * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+				if (this.Data->Comparator.Compare(heapNode2.Item, heapNode3.Item) < 0)
+				{
+					this.InsertAndBubbleUp(heapNode2, heapIndex);
+					return heapNode.Item;
+				}
 			}
-			if (num2 >= Data->Count || Data->Comparator.Compare(Data->Heap[num].Item, Data->Heap[num2].Item) <= 0)
+			this.InsertAndBubbleDown(heapNode2, heapIndex);
+			return heapNode.Item;
+		}
+
+		// Token: 0x06000221 RID: 545 RVA: 0x0000C300 File Offset: 0x0000A500
+		internal unsafe UnsafeHeap(int initialCapacity, U comparator, Allocator allocator)
+		{
+			this.Data = (HeapData<T, U>*)UnsafeUtility.Malloc((long)UnsafeUtility.SizeOf<HeapData<T, U>>(), UnsafeUtility.AlignOf<HeapData<T, U>>(), allocator);
+			this.Data->Heap = (HeapNode<T>*)UnsafeUtility.Malloc((long)(UnsafeUtility.SizeOf<HeapNode<T>>() * initialCapacity), UnsafeUtility.AlignOf<HeapNode<T>>(), allocator);
+			this.Data->Table = (TableValue*)UnsafeUtility.Malloc((long)(UnsafeUtility.SizeOf<TableValue>() * initialCapacity), UnsafeUtility.AlignOf<TableValue>(), allocator);
+			this.Allocator = allocator;
+			for (int i = 0; i < initialCapacity; i++)
 			{
-				HeapNode<T> heapNode = Data->Heap[num];
-				if (Data->Comparator.Compare(node.Item, heapNode.Item) <= 0)
+				this.Data->Heap[(IntPtr)i * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = new HeapNode<T>
+				{
+					TableIndex = i
+				};
+			}
+			this.Data->Count = 0;
+			this.Data->Capacity = initialCapacity;
+			this.Data->Comparator = comparator;
+		}
+
+		// Token: 0x06000222 RID: 546 RVA: 0x0000C3C4 File Offset: 0x0000A5C4
+		internal unsafe void InsertAndBubbleDown(HeapNode<T> node, int insertIndex)
+		{
+			for (;;)
+			{
+				int num = insertIndex * 2 + 1;
+				int num2 = insertIndex * 2 + 2;
+				if (num >= this.Data->Count)
 				{
 					break;
 				}
-				Data->Heap[insertIndex] = heapNode;
-				Data->Table[heapNode.TableIndex].HeapIndex = insertIndex;
+				if (num2 >= this.Data->Count || this.Data->Comparator.Compare(this.Data->Heap[(IntPtr)num * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)].Item, this.Data->Heap[(IntPtr)num2 * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)].Item) <= 0)
+				{
+					HeapNode<T> heapNode = this.Data->Heap[(IntPtr)num * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+					if (this.Data->Comparator.Compare(node.Item, heapNode.Item) <= 0)
+					{
+						break;
+					}
+					this.Data->Heap[(IntPtr)insertIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = heapNode;
+					this.Data->Table[heapNode.TableIndex].HeapIndex = insertIndex;
+					insertIndex = num;
+				}
+				else
+				{
+					HeapNode<T> heapNode2 = this.Data->Heap[(IntPtr)num2 * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+					if (this.Data->Comparator.Compare(node.Item, heapNode2.Item) <= 0)
+					{
+						break;
+					}
+					this.Data->Heap[(IntPtr)insertIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = heapNode2;
+					this.Data->Table[heapNode2.TableIndex].HeapIndex = insertIndex;
+					insertIndex = num2;
+				}
+			}
+			this.Data->Heap[(IntPtr)insertIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = node;
+			this.Data->Table[node.TableIndex].HeapIndex = insertIndex;
+		}
+
+		// Token: 0x06000223 RID: 547 RVA: 0x0000C590 File Offset: 0x0000A790
+		internal unsafe void InsertAndBubbleUp(HeapNode<T> node, int insertIndex)
+		{
+			while (insertIndex != 0)
+			{
+				int num = (insertIndex - 1) / 2;
+				HeapNode<T> heapNode = this.Data->Heap[(IntPtr)num * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)];
+				if (this.Data->Comparator.Compare(heapNode.Item, node.Item) <= 0)
+				{
+					break;
+				}
+				this.Data->Heap[(IntPtr)insertIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = heapNode;
+				this.Data->Table[heapNode.TableIndex].HeapIndex = insertIndex;
 				insertIndex = num;
 			}
-			else
-			{
-				HeapNode<T> heapNode2 = Data->Heap[num2];
-				if (Data->Comparator.Compare(node.Item, heapNode2.Item) <= 0)
-				{
-					break;
-				}
-				Data->Heap[insertIndex] = heapNode2;
-				Data->Table[heapNode2.TableIndex].HeapIndex = insertIndex;
-				insertIndex = num2;
-			}
+			this.Data->Heap[(IntPtr)insertIndex * (IntPtr)sizeof(HeapNode<T>) / (IntPtr)sizeof(HeapNode<T>)] = node;
+			this.Data->Table[node.TableIndex].HeapIndex = insertIndex;
 		}
-		Data->Heap[insertIndex] = node;
-		Data->Table[node.TableIndex].HeapIndex = insertIndex;
-	}
 
-	internal unsafe void InsertAndBubbleUp(HeapNode<T> node, int insertIndex)
-	{
-		while (insertIndex != 0)
-		{
-			int num = (insertIndex - 1) / 2;
-			HeapNode<T> heapNode = Data->Heap[num];
-			if (Data->Comparator.Compare(heapNode.Item, node.Item) <= 0)
-			{
-				break;
-			}
-			Data->Heap[insertIndex] = heapNode;
-			Data->Table[heapNode.TableIndex].HeapIndex = insertIndex;
-			insertIndex = num;
-		}
-		Data->Heap[insertIndex] = node;
-		Data->Table[node.TableIndex].HeapIndex = insertIndex;
+		// Token: 0x04000106 RID: 262
+		public const int DEFAULT_CAPACITY = 128;
+
+		// Token: 0x04000107 RID: 263
+		internal const int VALIDATION_ERROR_WRONG_INSTANCE = 1;
+
+		// Token: 0x04000108 RID: 264
+		internal const int VALIDATION_ERROR_INVALID = 2;
+
+		// Token: 0x04000109 RID: 265
+		internal const int VALIDATION_ERROR_REMOVED = 3;
+
+		// Token: 0x0400010A RID: 266
+		[NativeDisableUnsafePtrRestriction]
+		internal unsafe HeapData<T, U>* Data;
+
+		// Token: 0x0400010B RID: 267
+		internal Allocator Allocator;
 	}
 }

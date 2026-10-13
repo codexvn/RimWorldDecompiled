@@ -1,25 +1,18 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class HorrorMonolithAdvancedTransition : MusicTransition
+namespace RimWorld
 {
-	private const int TransitionTicksDuration = 3600;
-
-	public override bool IsTransitionSatisfied()
+	// Token: 0x0200290A RID: 10506
+	public class HorrorMonolithAdvancedTransition : MusicTransition
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x0600E5E4 RID: 58852 RVA: 0x00431323 File Offset: 0x0042F523
+		public override bool IsTransitionSatisfied()
 		{
-			return false;
+			return ModsConfig.AnomalyActive && base.IsTransitionSatisfied() && Find.Anomaly.Level > 0 && Find.Anomaly.TicksSinceLastLevelChange <= 3600;
 		}
-		if (!base.IsTransitionSatisfied())
-		{
-			return false;
-		}
-		if (Find.Anomaly.Level > 0)
-		{
-			return Find.Anomaly.TicksSinceLastLevelChange <= 3600;
-		}
-		return false;
+
+		// Token: 0x040099C2 RID: 39362
+		private const int TransitionTicksDuration = 3600;
 	}
 }

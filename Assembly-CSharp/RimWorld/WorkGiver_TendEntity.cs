@@ -1,47 +1,53 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_TendEntity : WorkGiver_EntityOnPlatform
+namespace RimWorld
 {
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	// Token: 0x0200161E RID: 5662
+	public class WorkGiver_TendEntity : WorkGiver_EntityOnPlatform
 	{
-		if (!pawn.CanReserve(t, 1, -1, null, forced))
+		// Token: 0x06008591 RID: 34193 RVA: 0x0027E878 File Offset: 0x0027CA78
+		public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return false;
+			if (!pawn.CanReserve(t, 1, -1, null, forced))
+			{
+				return false;
+			}
+			Pawn entity = this.GetEntity(t);
+			return entity != null && HealthAIUtility.ShouldBeTendedNowByPlayer(entity);
 		}
-		Pawn entity = GetEntity(t);
-		if (entity != null)
+
+		// Token: 0x06008592 RID: 34194 RVA: 0x0027E8AC File Offset: 0x0027CAAC
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return HealthAIUtility.ShouldBeTendedNowByPlayer(entity);
+			Pawn entity = this.GetEntity(t);
+			if (entity == null)
+			{
+				return null;
+			}
+			Thing thing = HealthAIUtility.FindBestMedicine(pawn, entity, false);
+			JobDef tendEntity = JobDefOf.TendEntity;
+			LocalTargetInfo targetA = t;
+			Thing thing2 = thing;
+			return JobMaker.MakeJob(tendEntity, targetA, (thing2 != null) ? thing2 : LocalTargetInfo.Invalid);
 		}
-		return false;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		Pawn entity = GetEntity(t);
-		if (entity == null)
+		// Token: 0x06008593 RID: 34195 RVA: 0x0027E8F1 File Offset: 0x0027CAF1
+		protected override Pawn GetEntity(Thing potentialPlatform)
 		{
-			return null;
+			return WorkGiver_TendEntity.GetTendableEnityFromPotentialPlatform(potentialPlatform);
 		}
-		Thing thing = HealthAIUtility.FindBestMedicine(pawn, entity);
-		JobDef tendEntity = JobDefOf.TendEntity;
-		LocalTargetInfo targetA = t;
-		Thing thing2 = thing;
-		return JobMaker.MakeJob(tendEntity, targetA, (thing2 != null) ? ((LocalTargetInfo)thing2) : LocalTargetInfo.Invalid);
-	}
 
-	protected override Pawn GetEntity(Thing potentialPlatform)
-	{
-		return GetTendableEnityFromPotentialPlatform(potentialPlatform);
-	}
-
-	public static Pawn GetTendableEnityFromPotentialPlatform(Thing potentialPlatform)
-	{
-		if (potentialPlatform is Building_HoldingPlatform { HeldPawn: var heldPawn })
+		// Token: 0x06008594 RID: 34196 RVA: 0x0027E8FC File Offset: 0x0027CAFC
+		public static Pawn GetTendableEnityFromPotentialPlatform(Thing potentialPlatform)
 		{
+			Building_HoldingPlatform building_HoldingPlatform = potentialPlatform as Building_HoldingPlatform;
+			if (building_HoldingPlatform == null)
+			{
+				return null;
+			}
+			Pawn heldPawn = building_HoldingPlatform.HeldPawn;
 			if (heldPawn == null)
 			{
 				return null;
@@ -53,6 +59,5 @@ public class WorkGiver_TendEntity : WorkGiver_EntityOnPlatform
 			}
 			return heldPawn;
 		}
-		return null;
 	}
 }

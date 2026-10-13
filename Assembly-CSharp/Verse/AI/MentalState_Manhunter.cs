@@ -1,47 +1,44 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_Manhunter : MentalState
+namespace Verse.AI
 {
-	public override void PostStart(string reason)
+	// Token: 0x02000F78 RID: 3960
+	public class MentalState_Manhunter : MentalState
 	{
-		base.PostStart(reason);
-		LessonAutoActivator.TeachOpportunity(ConceptDefOf.AnimalsDontAttackDoors, OpportunityType.Critical);
-	}
-
-	public override bool ForceHostileTo(Thing t)
-	{
-		if (t is Pawn { Roamer: not false })
+		// Token: 0x060061E3 RID: 25059 RVA: 0x001EF4A0 File Offset: 0x001ED6A0
+		public override void PostStart(string reason)
 		{
-			return false;
+			base.PostStart(reason);
+			LessonAutoActivator.TeachOpportunity(ConceptDefOf.AnimalsDontAttackDoors, OpportunityType.Critical);
 		}
-		if (t.Faction == null)
+
+		// Token: 0x060061E4 RID: 25060 RVA: 0x001EF4B4 File Offset: 0x001ED6B4
+		public override bool ForceHostileTo(Thing t)
 		{
-			if (t is Pawn pawn2)
+			Pawn pawn = t as Pawn;
+			if (pawn != null && pawn.RaceProps.Roamer)
 			{
-				return pawn2.RaceProps.Humanlike;
+				return false;
 			}
-			return false;
+			if (t.Faction == null)
+			{
+				Pawn pawn2 = t as Pawn;
+				return pawn2 != null && pawn2.RaceProps.Humanlike;
+			}
+			return this.ForceHostileTo(t.Faction);
 		}
-		return ForceHostileTo(t.Faction);
-	}
 
-	public override bool ForceHostileTo(Faction f)
-	{
-		if (ModsConfig.AnomalyActive && f == Faction.OfEntities)
+		// Token: 0x060061E5 RID: 25061 RVA: 0x001EF506 File Offset: 0x001ED706
+		public override bool ForceHostileTo(Faction f)
 		{
-			return true;
+			return (ModsConfig.AnomalyActive && f == Faction.OfEntities) || f.def.humanlikeFaction || f == Faction.OfMechanoids;
 		}
-		if (!f.def.humanlikeFaction)
-		{
-			return f == Faction.OfMechanoids;
-		}
-		return true;
-	}
 
-	public override RandomSocialMode SocialModeMax()
-	{
-		return RandomSocialMode.Off;
+		// Token: 0x060061E6 RID: 25062 RVA: 0x00002501 File Offset: 0x00000701
+		public override RandomSocialMode SocialModeMax()
+		{
+			return RandomSocialMode.Off;
+		}
 	}
 }

@@ -1,78 +1,94 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class ScenPart_GameCondition : ScenPart
+namespace RimWorld
 {
-	private float durationDays;
-
-	private string durationDaysBuf;
-
-	public override string Label => def.gameCondition.LabelCap;
-
-	public override void ExposeData()
+	// Token: 0x02002872 RID: 10354
+	public class ScenPart_GameCondition : ScenPart
 	{
-		base.ExposeData();
-		Scribe_Values.Look(ref durationDays, "durationDayS", 0f);
-	}
-
-	public override string Summary(Scenario scen)
-	{
-		return def.gameCondition.LabelCap + ": " + def.gameCondition.description + " (" + ((int)(durationDays * 60000f)).ToStringTicksToDays() + ")";
-	}
-
-	public override void Randomize()
-	{
-		durationDays = Mathf.Round(def.durationRandomRange.RandomInRange);
-	}
-
-	public override void DoEditInterface(Listing_ScenEdit listing)
-	{
-		Widgets.TextFieldNumericLabeled(listing.GetScenPartRect(this, ScenPart.RowHeight), "durationDays".Translate(), ref durationDays, ref durationDaysBuf);
-	}
-
-	public override void GenerateIntoMap(Map map)
-	{
-		if (!def.gameConditionTargetsWorld)
+		// Token: 0x17002288 RID: 8840
+		// (get) Token: 0x0600E291 RID: 58001 RVA: 0x00425A53 File Offset: 0x00423C53
+		public override string Label
 		{
-			map.gameConditionManager.RegisterCondition(MakeCondition());
+			get
+			{
+				return this.def.gameCondition.LabelCap;
+			}
 		}
-	}
 
-	public override void PostWorldGenerate()
-	{
-		if (def.gameConditionTargetsWorld)
+		// Token: 0x0600E292 RID: 58002 RVA: 0x00425A6A File Offset: 0x00423C6A
+		public override void ExposeData()
 		{
-			Find.World.gameConditionManager.RegisterCondition(MakeCondition());
+			base.ExposeData();
+			Scribe_Values.Look<float>(ref this.durationDays, "durationDayS", 0f, false);
 		}
-	}
 
-	private GameCondition MakeCondition()
-	{
-		return GameConditionMaker.MakeCondition(def.gameCondition, (int)(durationDays * 60000f));
-	}
-
-	public override bool CanCoexistWith(ScenPart other)
-	{
-		if (other is ScenPart_GameCondition scenPart_GameCondition && !scenPart_GameCondition.def.gameCondition.CanCoexistWith(def.gameCondition))
+		// Token: 0x0600E293 RID: 58003 RVA: 0x00425A88 File Offset: 0x00423C88
+		public override string Summary(Scenario scen)
 		{
-			return false;
+			return this.def.gameCondition.LabelCap + ": " + this.def.gameCondition.description + " (" + ((int)(this.durationDays * 60000f)).ToStringTicksToDays("F1") + ")";
 		}
-		return true;
-	}
 
-	public override bool HasNullDefs()
-	{
-		if (!base.HasNullDefs())
+		// Token: 0x0600E294 RID: 58004 RVA: 0x00425AF9 File Offset: 0x00423CF9
+		public override void Randomize()
 		{
-			return def.gameCondition == null;
+			this.durationDays = Mathf.Round(this.def.durationRandomRange.RandomInRange);
 		}
-		return true;
-	}
 
-	public override int GetHashCode()
-	{
-		return base.GetHashCode() ^ durationDays.GetHashCode();
+		// Token: 0x0600E295 RID: 58005 RVA: 0x00425B16 File Offset: 0x00423D16
+		public override void DoEditInterface(Listing_ScenEdit listing)
+		{
+			Widgets.TextFieldNumericLabeled<float>(listing.GetScenPartRect(this, ScenPart.RowHeight), "durationDays".Translate(), ref this.durationDays, ref this.durationDaysBuf, 0f, 1E+09f);
+		}
+
+		// Token: 0x0600E296 RID: 58006 RVA: 0x00425B4E File Offset: 0x00423D4E
+		public override void GenerateIntoMap(Map map)
+		{
+			if (!this.def.gameConditionTargetsWorld)
+			{
+				map.gameConditionManager.RegisterCondition(this.MakeCondition());
+			}
+		}
+
+		// Token: 0x0600E297 RID: 58007 RVA: 0x00425B6E File Offset: 0x00423D6E
+		public override void PostWorldGenerate()
+		{
+			if (this.def.gameConditionTargetsWorld)
+			{
+				Find.World.gameConditionManager.RegisterCondition(this.MakeCondition());
+			}
+		}
+
+		// Token: 0x0600E298 RID: 58008 RVA: 0x00425B92 File Offset: 0x00423D92
+		private GameCondition MakeCondition()
+		{
+			return GameConditionMaker.MakeCondition(this.def.gameCondition, (int)(this.durationDays * 60000f));
+		}
+
+		// Token: 0x0600E299 RID: 58009 RVA: 0x00425BB4 File Offset: 0x00423DB4
+		public override bool CanCoexistWith(ScenPart other)
+		{
+			ScenPart_GameCondition scenPart_GameCondition = other as ScenPart_GameCondition;
+			return scenPart_GameCondition == null || scenPart_GameCondition.def.gameCondition.CanCoexistWith(this.def.gameCondition);
+		}
+
+		// Token: 0x0600E29A RID: 58010 RVA: 0x00425BEB File Offset: 0x00423DEB
+		public override bool HasNullDefs()
+		{
+			return base.HasNullDefs() || this.def.gameCondition == null;
+		}
+
+		// Token: 0x0600E29B RID: 58011 RVA: 0x00425C05 File Offset: 0x00423E05
+		public override int GetHashCode()
+		{
+			return base.GetHashCode() ^ this.durationDays.GetHashCode();
+		}
+
+		// Token: 0x04009804 RID: 38916
+		private float durationDays;
+
+		// Token: 0x04009805 RID: 38917
+		private string durationDaysBuf;
 	}
 }

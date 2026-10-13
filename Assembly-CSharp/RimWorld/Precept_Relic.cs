@@ -1,291 +1,389 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class Precept_Relic : Precept_ThingStyle
+namespace RimWorld
 {
-	private static List<ThingDef> usedThingsTmp = new List<ThingDef>();
-
-	public ThingDef stuff;
-
-	private bool relicGenerated;
-
-	private Thing generatedRelic;
-
-	private string tipLabelCached;
-
-	public override string TipLabel
+	// Token: 0x0200266A RID: 9834
+	public class Precept_Relic : Precept_ThingStyle
 	{
-		get
+		// Token: 0x1700210A RID: 8458
+		// (get) Token: 0x0600D7BA RID: 55226 RVA: 0x003FF7F7 File Offset: 0x003FD9F7
+		public override string TipLabel
 		{
-			if (tipLabelCached == null)
+			get
 			{
-				tipLabelCached = base.LabelCap + "\n" + base.ThingDef.LabelCap;
+				if (this.tipLabelCached == null)
+				{
+					this.tipLabelCached = base.LabelCap + "\n" + base.ThingDef.LabelCap;
+				}
+				return this.tipLabelCached;
 			}
-			return tipLabelCached;
 		}
-	}
 
-	public override bool CanRegenerate => false;
-
-	public bool CanGenerateRelic => !relicGenerated;
-
-	public Thing GeneratedRelic => generatedRelic;
-
-	protected override string ThingLabelCap => Find.ActiveLanguageWorker.PostProcessThingLabelForRelic(base.ThingLabelCap);
-
-	public override string DescriptionForTip => base.ThingDef?.description ?? base.Description;
-
-	public bool RelicInPlayerPossession
-	{
-		get
+		// Token: 0x1700210B RID: 8459
+		// (get) Token: 0x0600D7BB RID: 55227 RVA: 0x00002501 File Offset: 0x00000701
+		public override bool CanRegenerate
 		{
-			Thing thing = GeneratedRelic;
-			if (thing == null || thing.Destroyed || !thing.EverSeenByPlayer || (thing.MapHeld == null && !ThingOwnerUtility.AnyParentIs<Caravan>(thing) && !ThingOwnerUtility.AnyParentIs<TravellingTransporters>(thing)))
+			get
 			{
 				return false;
 			}
-			return true;
 		}
-	}
 
-	protected override string NameRootSymbol => "r_ideoRelicName";
-
-	public static ThingDef GenerateStuffFor(ThingDef thing, Ideo ideo = null)
-	{
-		IEnumerable<ThingDef> source = GenStuff.AllowedStuffsFor(thing);
-		if (ideo != null)
+		// Token: 0x1700210C RID: 8460
+		// (get) Token: 0x0600D7BC RID: 55228 RVA: 0x003FF832 File Offset: 0x003FDA32
+		public bool CanGenerateRelic
 		{
-			IEnumerable<ThingDef> alreadyUsedStuffs = (from p in ideo.PreceptsListForReading
-				where p is Precept_Relic precept_Relic && precept_Relic.ThingDef == thing
+			get
+			{
+				return !this.relicGenerated;
+			}
+		}
+
+		// Token: 0x1700210D RID: 8461
+		// (get) Token: 0x0600D7BD RID: 55229 RVA: 0x003FF83D File Offset: 0x003FDA3D
+		public Thing GeneratedRelic
+		{
+			get
+			{
+				return this.generatedRelic;
+			}
+		}
+
+		// Token: 0x1700210E RID: 8462
+		// (get) Token: 0x0600D7BE RID: 55230 RVA: 0x003FF845 File Offset: 0x003FDA45
+		protected override string ThingLabelCap
+		{
+			get
+			{
+				return Find.ActiveLanguageWorker.PostProcessThingLabelForRelic(base.ThingLabelCap);
+			}
+		}
+
+		// Token: 0x1700210F RID: 8463
+		// (get) Token: 0x0600D7BF RID: 55231 RVA: 0x003FF857 File Offset: 0x003FDA57
+		public override string DescriptionForTip
+		{
+			get
+			{
+				ThingDef thingDef = base.ThingDef;
+				return ((thingDef != null) ? thingDef.description : null) ?? base.Description;
+			}
+		}
+
+		// Token: 0x17002110 RID: 8464
+		// (get) Token: 0x0600D7C0 RID: 55232 RVA: 0x003FF878 File Offset: 0x003FDA78
+		public bool RelicInPlayerPossession
+		{
+			get
+			{
+				Thing thing = this.GeneratedRelic;
+				return thing != null && !thing.Destroyed && thing.EverSeenByPlayer && (thing.MapHeld != null || ThingOwnerUtility.AnyParentIs<Caravan>(thing) || ThingOwnerUtility.AnyParentIs<TravellingTransporters>(thing));
+			}
+		}
+
+		// Token: 0x17002111 RID: 8465
+		// (get) Token: 0x0600D7C1 RID: 55233 RVA: 0x003FF8BA File Offset: 0x003FDABA
+		protected override string NameRootSymbol
+		{
+			get
+			{
+				return "r_ideoRelicName";
+			}
+		}
+
+		// Token: 0x0600D7C2 RID: 55234 RVA: 0x003FF8C4 File Offset: 0x003FDAC4
+		public static ThingDef GenerateStuffFor(ThingDef thing, Ideo ideo = null)
+		{
+			IEnumerable<ThingDef> source = GenStuff.AllowedStuffsFor(thing, TechLevel.Undefined, false);
+			if (ideo != null)
+			{
+				IEnumerable<ThingDef> alreadyUsedStuffs = (from p in ideo.PreceptsListForReading.Where(delegate(Precept p)
+				{
+					Precept_Relic precept_Relic = p as Precept_Relic;
+					return precept_Relic != null && precept_Relic.ThingDef == thing;
+				})
 				select ((Precept_Relic)p).stuff into p
 				where p != null
-				select p).Distinct();
-			source = source.Where((ThingDef stuff) => !alreadyUsedStuffs.Contains(stuff));
-		}
-		return source.RandomElementByWeight((ThingDef stuff) => stuff.BaseMarketValue);
-	}
-
-	public void SetRandomStuff()
-	{
-		if (base.ThingDef.MadeFromStuff)
-		{
-			stuff = GenerateStuffFor(base.ThingDef, ideo);
-		}
-		else
-		{
-			stuff = null;
-		}
-	}
-
-	protected override void Notify_ThingDefSet()
-	{
-		base.Notify_ThingDefSet();
-		SetRandomStuff();
-	}
-
-	public override string GenerateNameRaw()
-	{
-		CompProperties_GeneratedName compProperties = base.ThingDef.GetCompProperties<CompProperties_GeneratedName>();
-		if (compProperties != null)
-		{
-			return CompGeneratedNames.GenerateName(compProperties);
-		}
-		return base.GenerateNameRaw();
-	}
-
-	public Thing GenerateRelic()
-	{
-		if (stuff == null && base.ThingDef.MadeFromStuff)
-		{
-			Log.Warning("Tried generating relic with stuff, but precept had no stuff set? If this is an old savegame from testing this warning is to be expected.");
-			stuff = GenerateStuffFor(base.ThingDef, ideo);
-		}
-		Thing thing = ((base.ThingDef.CompDefFor<CompQuality>() == null) ? ThingMaker.MakeThing(base.ThingDef, stuff) : new ThingStuffPairWithQuality(base.ThingDef, stuff, QualityCategory.Legendary).MakeThing(forceQuality: true));
-		thing.StyleSourcePrecept = this;
-		relicGenerated = true;
-		generatedRelic = thing;
-		return thing;
-	}
-
-	public override void ClearTipCache()
-	{
-		base.ClearTipCache();
-		tipLabelCached = null;
-	}
-
-	public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
-	{
-		yield return EditFloatMenuOption();
-	}
-
-	public override string GetTip()
-	{
-		return base.GetTip() + "\n\n" + (ideo.classicMode ? "RelicTipClassic" : "RelicTip").Translate().Colorize(Color.grey);
-	}
-
-	public override void DrawIcon(Rect rect)
-	{
-		Widgets.DefIcon(rect, base.ThingDef, stuff, 1f, ideo.GetStyleFor(base.ThingDef));
-	}
-
-	public override void Notify_ThingLost(Thing thing, bool destroyed = false)
-	{
-		if (thing.def != base.ThingDef || QuestPart_NewColony.IsGeneratingNewColony)
-		{
-			return;
-		}
-		Find.HistoryEventsManager.RecordEvent(new HistoryEvent(destroyed ? HistoryEventDefOf.RelicDestroyed : HistoryEventDefOf.RelicLost, thing.Named("SUBJECT")));
-		List<Faction> list = new List<Faction>();
-		HashSet<Pawn> hashSet = new HashSet<Pawn>();
-		if (thing.EverSeenByPlayer)
-		{
-			list.Add(Faction.OfPlayer);
-		}
-		if (thing.MapHeld != null)
-		{
-			foreach (Pawn item in thing.MapHeld.mapPawns.AllPawnsSpawned)
-			{
-				if (!item.Dead && item.Faction != null && !list.Contains(item.Faction))
-				{
-					list.Add(item.Faction);
-				}
+				select p).Distinct<ThingDef>();
+				source = from stuff in source
+				where !alreadyUsedStuffs.Contains(stuff)
+				select stuff;
 			}
+			return source.RandomElementByWeight((ThingDef stuff) => stuff.BaseMarketValue);
 		}
-		foreach (Pawn item2 in PawnsFinder.AllMapsAndWorld_Alive)
+
+		// Token: 0x0600D7C3 RID: 55235 RVA: 0x003FF99A File Offset: 0x003FDB9A
+		public void SetRandomStuff()
 		{
-			if (item2.needs != null && item2.needs.mood != null && item2.needs.mood.thoughts != null && item2.needs.mood.thoughts.memories != null && !hashSet.Contains(item2) && list.Contains(item2.Faction))
+			if (base.ThingDef.MadeFromStuff)
 			{
-				item2.needs.mood.thoughts.memories.TryGainMemory(destroyed ? ThoughtDefOf.RelicDestroyed : ThoughtDefOf.RelicLost);
-				if (item2.Faction == Faction.OfPlayer)
-				{
-					hashSet.Add(item2);
-				}
+				this.stuff = Precept_Relic.GenerateStuffFor(base.ThingDef, this.ideo);
+				return;
 			}
+			this.stuff = null;
 		}
-		if (list.Contains(Faction.OfPlayer) && (destroyed || thing.MapHeld == null || !thing.MapHeld.IsPlayerHome))
-		{
-			TaggedString label = (destroyed ? "LetterLabelRelicDestroyed" : "LetterLabelRelicLost").Translate() + ": " + base.LabelCap;
-			TaggedString text = (destroyed ? "LetterTextRelicDestroyed" : "LetterTextRelicLost").Translate(base.LabelCap, hashSet.Select((Pawn p) => p.LabelNoCountColored.Resolve()).ToList().ToLineList("- "));
-			Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NegativeEvent, new LookTargets(hashSet.Where((Pawn p) => p.Faction == Faction.OfPlayer)));
-		}
-	}
 
-	public void Notify_NewColonyStarted()
-	{
-		if (relicGenerated && !RelicInPlayerPossession)
+		// Token: 0x0600D7C4 RID: 55236 RVA: 0x003FF9C8 File Offset: 0x003FDBC8
+		protected override void Notify_ThingDefSet()
 		{
-			relicGenerated = false;
+			base.Notify_ThingDefSet();
+			this.SetRandomStuff();
 		}
-	}
 
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats(Thing thing)
-	{
-		if (ideo.classicMode)
+		// Token: 0x0600D7C5 RID: 55237 RVA: 0x003FF9D8 File Offset: 0x003FDBD8
+		public override string GenerateNameRaw()
 		{
-			yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelicStatus".Translate(), "Relic".Translate().CapitalizeFirst(), "Stat_Thing_RelicStatus_Desc".Translate(), 1109);
+			CompProperties_GeneratedName compProperties = base.ThingDef.GetCompProperties<CompProperties_GeneratedName>();
+			if (compProperties != null)
+			{
+				return CompGeneratedNames.GenerateName(compProperties);
+			}
+			return base.GenerateNameRaw();
+		}
+
+		// Token: 0x0600D7C6 RID: 55238 RVA: 0x003FFA04 File Offset: 0x003FDC04
+		public Thing GenerateRelic()
+		{
+			if (this.stuff == null && base.ThingDef.MadeFromStuff)
+			{
+				Log.Warning("Tried generating relic with stuff, but precept had no stuff set? If this is an old savegame from testing this warning is to be expected.");
+				this.stuff = Precept_Relic.GenerateStuffFor(base.ThingDef, this.ideo);
+			}
+			Thing thing;
+			if (base.ThingDef.CompDefFor<CompQuality>() != null)
+			{
+				ThingStuffPairWithQuality thingStuffPairWithQuality = new ThingStuffPairWithQuality(base.ThingDef, this.stuff, QualityCategory.Legendary);
+				thing = thingStuffPairWithQuality.MakeThing(true);
+			}
+			else
+			{
+				thing = ThingMaker.MakeThing(base.ThingDef, this.stuff);
+			}
+			thing.StyleSourcePrecept = this;
+			this.relicGenerated = true;
+			this.generatedRelic = thing;
+			return thing;
+		}
+
+		// Token: 0x0600D7C7 RID: 55239 RVA: 0x003FFA9B File Offset: 0x003FDC9B
+		public override void ClearTipCache()
+		{
+			base.ClearTipCache();
+			this.tipLabelCached = null;
+		}
+
+		// Token: 0x0600D7C8 RID: 55240 RVA: 0x003FFAAA File Offset: 0x003FDCAA
+		public override IEnumerable<FloatMenuOption> EditFloatMenuOptions()
+		{
+			yield return base.EditFloatMenuOption();
 			yield break;
 		}
-		yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelicOf_Name".Translate(), ideo.name, "Stat_Thing_RelicOf_Desc".Translate(), 1109, null, new Dialog_InfoCard.Hyperlink[1]
-		{
-			new Dialog_InfoCard.Hyperlink(ideo)
-		});
-	}
 
-	public override string TransformThingLabel(string label)
-	{
-		return name + ", " + "Relic".Translate();
-	}
-
-	public override string InspectStringExtra(Thing thing)
-	{
-		if (ideo.classicMode)
+		// Token: 0x0600D7C9 RID: 55241 RVA: 0x003FFABA File Offset: 0x003FDCBA
+		public override string GetTip()
 		{
-			return "Relic".Translate().CapitalizeFirst();
+			return base.GetTip() + "\n\n" + (this.ideo.classicMode ? "RelicTipClassic" : "RelicTip").Translate().Colorize(Color.grey);
 		}
-		return "RelicOf".Translate(ideo.Named("IDEO")).Resolve();
-	}
 
-	private IEnumerable<Quest> GetQuestsToDeactivateIfLost()
-	{
-		List<Quest> allQuests = Find.QuestManager.QuestsListForReading;
-		for (int i = 0; i < allQuests.Count; i++)
+		// Token: 0x0600D7CA RID: 55242 RVA: 0x003FFAF4 File Offset: 0x003FDCF4
+		public override void DrawIcon(Rect rect)
 		{
-			if (allQuests[i].Historical)
+			Widgets.DefIcon(rect, base.ThingDef, this.stuff, 1f, this.ideo.GetStyleFor(base.ThingDef), false, null, null, null, 1f);
+		}
+
+		// Token: 0x0600D7CB RID: 55243 RVA: 0x003FFB44 File Offset: 0x003FDD44
+		public override void Notify_ThingLost(Thing thing, bool destroyed = false)
+		{
+			if (thing.def == base.ThingDef && !QuestPart_NewColony.IsGeneratingNewColony)
 			{
-				continue;
-			}
-			List<QuestPart> partsListForReading = allQuests[i].PartsListForReading;
-			for (int j = 0; j < partsListForReading.Count; j++)
-			{
-				if (partsListForReading[j] is QuestPart_SubquestGenerator_RelicHunt questPart_SubquestGenerator_RelicHunt && questPart_SubquestGenerator_RelicHunt.relic == this)
+				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(destroyed ? HistoryEventDefOf.RelicDestroyed : HistoryEventDefOf.RelicLost, thing.Named("SUBJECT")), true);
+				List<Faction> list = new List<Faction>();
+				HashSet<Pawn> hashSet = new HashSet<Pawn>();
+				if (thing.EverSeenByPlayer)
 				{
-					yield return allQuests[i];
-					break;
+					list.Add(Faction.OfPlayer);
+				}
+				if (thing.MapHeld != null)
+				{
+					foreach (Pawn pawn in thing.MapHeld.mapPawns.AllPawnsSpawned)
+					{
+						if (!pawn.Dead && pawn.Faction != null && !list.Contains(pawn.Faction))
+						{
+							list.Add(pawn.Faction);
+						}
+					}
+				}
+				foreach (Pawn pawn2 in PawnsFinder.AllMapsAndWorld_Alive)
+				{
+					if (pawn2.needs != null && pawn2.needs.mood != null && pawn2.needs.mood.thoughts != null && pawn2.needs.mood.thoughts.memories != null && !hashSet.Contains(pawn2) && list.Contains(pawn2.Faction))
+					{
+						pawn2.needs.mood.thoughts.memories.TryGainMemory(destroyed ? ThoughtDefOf.RelicDestroyed : ThoughtDefOf.RelicLost, null, null);
+						if (pawn2.Faction == Faction.OfPlayer)
+						{
+							hashSet.Add(pawn2);
+						}
+					}
+				}
+				if (list.Contains(Faction.OfPlayer) && (destroyed || thing.MapHeld == null || !thing.MapHeld.IsPlayerHome))
+				{
+					TaggedString label = (destroyed ? "LetterLabelRelicDestroyed" : "LetterLabelRelicLost").Translate() + ": " + base.LabelCap;
+					TaggedString text = (destroyed ? "LetterTextRelicDestroyed" : "LetterTextRelicLost").Translate(base.LabelCap, (from p in hashSet
+					select p.LabelNoCountColored.Resolve()).ToList<string>().ToLineList("- "));
+					Find.LetterStack.ReceiveLetter(label, text, LetterDefOf.NegativeEvent, new LookTargets(from p in hashSet
+					where p.Faction == Faction.OfPlayer
+					select p), null, null, null, null, 0, true);
 				}
 			}
 		}
-	}
 
-	public override bool TryGetLostByReformingWarning(out string warning)
-	{
-		warning = null;
-		IEnumerable<Quest> questsToDeactivateIfLost = GetQuestsToDeactivateIfLost();
-		if (questsToDeactivateIfLost.Any())
+		// Token: 0x0600D7CC RID: 55244 RVA: 0x003FFE04 File Offset: 0x003FE004
+		public void Notify_NewColonyStarted()
 		{
-			foreach (Quest item in questsToDeactivateIfLost)
+			if (this.relicGenerated && !this.RelicInPlayerPossession)
 			{
-				if (!warning.NullOrEmpty())
+				this.relicGenerated = false;
+			}
+		}
+
+		// Token: 0x0600D7CD RID: 55245 RVA: 0x003FFE1D File Offset: 0x003FE01D
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats(Thing thing)
+		{
+			if (this.ideo.classicMode)
+			{
+				yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelicStatus".Translate(), "Relic".Translate().CapitalizeFirst(), "Stat_Thing_RelicStatus_Desc".Translate(), 1109, null, null, false, false);
+			}
+			else
+			{
+				yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelicOf_Name".Translate(), this.ideo.name, "Stat_Thing_RelicOf_Desc".Translate(), 1109, null, new Dialog_InfoCard.Hyperlink[]
 				{
-					warning += "\n\n";
-				}
-				warning += "ReformIdeoRelicHuntQuestEnd".Translate(base.LabelCap, item.name);
+					new Dialog_InfoCard.Hyperlink(this.ideo)
+				}, false, false);
 			}
-			return true;
+			yield break;
 		}
-		return false;
-	}
 
-	public override void Notify_RemovedByReforming()
-	{
-		foreach (Quest item in GetQuestsToDeactivateIfLost())
+		// Token: 0x0600D7CE RID: 55246 RVA: 0x003FFE2D File Offset: 0x003FE02D
+		public override string TransformThingLabel(string label)
 		{
-			item.hidden = true;
-			item.End(QuestEndOutcome.Unknown, sendLetter: false);
+			return this.name + ", " + "Relic".Translate();
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Defs.Look(ref stuff, "stuff");
-		if (!GameDataSaveLoader.IsSavingOrLoadingExternalIdeo)
+		// Token: 0x0600D7CF RID: 55247 RVA: 0x003FFE54 File Offset: 0x003FE054
+		public override string InspectStringExtra(Thing thing)
 		{
-			if (Scribe.mode == LoadSaveMode.Saving && relicGenerated && generatedRelic != null && (generatedRelic.Destroyed || generatedRelic.Discarded))
+			if (this.ideo.classicMode)
 			{
-				relicGenerated = false;
-				generatedRelic = null;
+				return "Relic".Translate().CapitalizeFirst();
 			}
-			Scribe_Values.Look(ref relicGenerated, "everGenerated", defaultValue: false);
-			Scribe_References.Look(ref generatedRelic, "generatedRelic");
+			return "RelicOf".Translate(this.ideo.Named("IDEO")).Resolve();
 		}
-	}
 
-	public override void CopyTo(Precept other)
-	{
-		base.CopyTo(other);
-		Precept_Relic obj = (Precept_Relic)other;
-		obj.stuff = stuff;
-		obj.relicGenerated = relicGenerated;
-		obj.generatedRelic = generatedRelic;
-	}
+		// Token: 0x0600D7D0 RID: 55248 RVA: 0x003FFEA8 File Offset: 0x003FE0A8
+		private IEnumerable<Quest> GetQuestsToDeactivateIfLost()
+		{
+			List<Quest> allQuests = Find.QuestManager.QuestsListForReading;
+			int num;
+			for (int i = 0; i < allQuests.Count; i = num + 1)
+			{
+				if (!allQuests[i].Historical)
+				{
+					List<QuestPart> partsListForReading = allQuests[i].PartsListForReading;
+					for (int j = 0; j < partsListForReading.Count; j++)
+					{
+						QuestPart_SubquestGenerator_RelicHunt questPart_SubquestGenerator_RelicHunt = partsListForReading[j] as QuestPart_SubquestGenerator_RelicHunt;
+						if (questPart_SubquestGenerator_RelicHunt != null && questPart_SubquestGenerator_RelicHunt.relic == this)
+						{
+							yield return allQuests[i];
+							break;
+						}
+					}
+				}
+				num = i;
+			}
+			yield break;
+		}
 
-	public override string ToString()
-	{
-		return "Relic - " + base.LabelCap;
+		// Token: 0x0600D7D1 RID: 55249 RVA: 0x003FFEB8 File Offset: 0x003FE0B8
+		public override bool TryGetLostByReformingWarning(out string warning)
+		{
+			warning = null;
+			IEnumerable<Quest> questsToDeactivateIfLost = this.GetQuestsToDeactivateIfLost();
+			if (questsToDeactivateIfLost.Any<Quest>())
+			{
+				foreach (Quest quest in questsToDeactivateIfLost)
+				{
+					if (!warning.NullOrEmpty())
+					{
+						warning += "\n\n";
+					}
+					warning += "ReformIdeoRelicHuntQuestEnd".Translate(base.LabelCap, quest.name);
+				}
+				return true;
+			}
+			return false;
+		}
+
+		// Token: 0x0600D7D2 RID: 55250 RVA: 0x003FFF54 File Offset: 0x003FE154
+		public override void Notify_RemovedByReforming()
+		{
+			foreach (Quest quest in this.GetQuestsToDeactivateIfLost())
+			{
+				quest.hidden = true;
+				quest.End(QuestEndOutcome.Unknown, false, true);
+			}
+		}
+
+		// Token: 0x0600D7D3 RID: 55251 RVA: 0x003FFFA8 File Offset: 0x003FE1A8
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Defs.Look<ThingDef>(ref this.stuff, "stuff");
+			if (!GameDataSaveLoader.IsSavingOrLoadingExternalIdeo)
+			{
+				if (Scribe.mode == LoadSaveMode.Saving && this.relicGenerated && this.generatedRelic != null && (this.generatedRelic.Destroyed || this.generatedRelic.Discarded))
+				{
+					this.relicGenerated = false;
+					this.generatedRelic = null;
+				}
+				Scribe_Values.Look<bool>(ref this.relicGenerated, "everGenerated", false, false);
+				Scribe_References.Look<Thing>(ref this.generatedRelic, "generatedRelic", false);
+			}
+		}
+
+		// Token: 0x0600D7D4 RID: 55252 RVA: 0x00400035 File Offset: 0x003FE235
+		public override void CopyTo(Precept other)
+		{
+			base.CopyTo(other);
+			Precept_Relic precept_Relic = (Precept_Relic)other;
+			precept_Relic.stuff = this.stuff;
+			precept_Relic.relicGenerated = this.relicGenerated;
+			precept_Relic.generatedRelic = this.generatedRelic;
+		}
+
+		// Token: 0x0600D7D5 RID: 55253 RVA: 0x00400067 File Offset: 0x003FE267
+		public override string ToString()
+		{
+			return "Relic - " + base.LabelCap;
+		}
+
+		// Token: 0x04009257 RID: 37463
+		private static List<ThingDef> usedThingsTmp = new List<ThingDef>();
+
+		// Token: 0x04009258 RID: 37464
+		public ThingDef stuff;
+
+		// Token: 0x04009259 RID: 37465
+		private bool relicGenerated;
+
+		// Token: 0x0400925A RID: 37466
+		private Thing generatedRelic;
+
+		// Token: 0x0400925B RID: 37467
+		private string tipLabelCached;
 	}
 }

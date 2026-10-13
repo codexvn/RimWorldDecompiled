@@ -1,108 +1,118 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 
-namespace Verse.AI;
-
-public static class WanderUtility
+namespace Verse.AI
 {
-	private static List<IntVec3> gatherSpots = new List<IntVec3>();
-
-	private static List<IntVec3> candidateCells = new List<IntVec3>();
-
-	private static List<Building> candidateBuildingsInRandomOrder = new List<Building>();
-
-	public static IntVec3 BestCloseWanderRoot(IntVec3 trueWanderRoot, Pawn pawn)
+	// Token: 0x0200102F RID: 4143
+	public static class WanderUtility
 	{
-		for (int i = 0; i < 50; i++)
+		// Token: 0x0600652F RID: 25903 RVA: 0x001FF79C File Offset: 0x001FD99C
+		public static IntVec3 BestCloseWanderRoot(IntVec3 trueWanderRoot, Pawn pawn)
 		{
-			IntVec3 intVec = ((i >= 8) ? (trueWanderRoot + GenRadial.RadialPattern[i - 8 + 1] * 7) : (trueWanderRoot + GenRadial.RadialPattern[i]));
-			if (intVec.InBounds(pawn.Map) && intVec.WalkableBy(pawn.Map, pawn) && pawn.CanReach(intVec, PathEndMode.OnCell, Danger.Some))
+			for (int i = 0; i < 50; i++)
 			{
-				return intVec;
-			}
-		}
-		return IntVec3.Invalid;
-	}
-
-	public static bool InSameRoom(IntVec3 locA, IntVec3 locB, Map map)
-	{
-		Room room = locA.GetRoom(map);
-		if (room == null)
-		{
-			return true;
-		}
-		return room == locB.GetRoom(map);
-	}
-
-	public static IntVec3 GetColonyWanderRoot(Pawn pawn)
-	{
-		if (pawn.RaceProps.Humanlike && !pawn.IsSubhuman)
-		{
-			gatherSpots.Clear();
-			for (int i = 0; i < pawn.Map.gatherSpotLister.activeSpots.Count; i++)
-			{
-				IntVec3 position = pawn.Map.gatherSpotLister.activeSpots[i].parent.Position;
-				if (!position.IsForbidden(pawn) && pawn.CanReach(position, PathEndMode.Touch, Danger.None))
+				IntVec3 intVec;
+				if (i < 8)
 				{
-					gatherSpots.Add(position);
+					intVec = trueWanderRoot + GenRadial.RadialPattern[i];
+				}
+				else
+				{
+					intVec = trueWanderRoot + GenRadial.RadialPattern[i - 8 + 1] * 7;
+				}
+				if (intVec.InBounds(pawn.Map) && intVec.WalkableBy(pawn.Map, pawn) && pawn.CanReach(intVec, PathEndMode.OnCell, Danger.Some, false, false, TraverseMode.ByPawn))
+				{
+					return intVec;
 				}
 			}
-			if (gatherSpots.Count > 0)
-			{
-				return gatherSpots.RandomElement();
-			}
+			return IntVec3.Invalid;
 		}
-		candidateCells.Clear();
-		candidateBuildingsInRandomOrder.Clear();
-		candidateBuildingsInRandomOrder.AddRange(pawn.Map.listerBuildings.allBuildingsColonist);
-		candidateBuildingsInRandomOrder.Shuffle();
-		int num = 0;
-		int num2 = 0;
-		while (num2 < candidateBuildingsInRandomOrder.Count)
+
+		// Token: 0x06006530 RID: 25904 RVA: 0x001FF824 File Offset: 0x001FDA24
+		public static bool InSameRoom(IntVec3 locA, IntVec3 locB, Map map)
 		{
-			if (num > 80 && candidateCells.Count > 0)
+			Room room = locA.GetRoom(map);
+			return room == null || room == locB.GetRoom(map);
+		}
+
+		// Token: 0x06006531 RID: 25905 RVA: 0x001FF848 File Offset: 0x001FDA48
+		public static IntVec3 GetColonyWanderRoot(Pawn pawn)
+		{
+			if (pawn.RaceProps.Humanlike && !pawn.IsSubhuman)
 			{
-				return candidateCells.RandomElement();
-			}
-			Building building = candidateBuildingsInRandomOrder[num2];
-			if ((building.def == ThingDefOf.Wall || building.def.building.ai_chillDestination) && !building.Position.IsForbidden(pawn) && pawn.Map.areaManager.Home[building.Position])
-			{
-				IntVec3 intVec = GenAdjFast.AdjacentCells8Way(building).RandomElement();
-				if (intVec.Standable(building.Map) && !intVec.IsForbidden(pawn) && pawn.CanReach(intVec, PathEndMode.OnCell, Danger.None) && !intVec.IsInPrisonCell(pawn.Map))
+				WanderUtility.gatherSpots.Clear();
+				for (int i = 0; i < pawn.Map.gatherSpotLister.activeSpots.Count; i++)
 				{
-					candidateCells.Add(intVec);
-					if ((pawn.Position - building.Position).LengthHorizontalSquared <= 1225)
+					IntVec3 position = pawn.Map.gatherSpotLister.activeSpots[i].parent.Position;
+					if (!position.IsForbidden(pawn) && pawn.CanReach(position, PathEndMode.Touch, Danger.None, false, false, TraverseMode.ByPawn))
 					{
-						return intVec;
+						WanderUtility.gatherSpots.Add(position);
 					}
 				}
+				if (WanderUtility.gatherSpots.Count > 0)
+				{
+					return WanderUtility.gatherSpots.RandomElement<IntVec3>();
+				}
 			}
-			num2++;
-			num++;
+			WanderUtility.candidateCells.Clear();
+			WanderUtility.candidateBuildingsInRandomOrder.Clear();
+			WanderUtility.candidateBuildingsInRandomOrder.AddRange(pawn.Map.listerBuildings.allBuildingsColonist);
+			WanderUtility.candidateBuildingsInRandomOrder.Shuffle<Building>();
+			int num = 0;
+			int j = 0;
+			while (j < WanderUtility.candidateBuildingsInRandomOrder.Count)
+			{
+				if (num > 80 && WanderUtility.candidateCells.Count > 0)
+				{
+					return WanderUtility.candidateCells.RandomElement<IntVec3>();
+				}
+				Building building = WanderUtility.candidateBuildingsInRandomOrder[j];
+				if ((building.def == ThingDefOf.Wall || building.def.building.ai_chillDestination) && !building.Position.IsForbidden(pawn) && pawn.Map.areaManager.Home[building.Position])
+				{
+					IntVec3 intVec = GenAdjFast.AdjacentCells8Way(building).RandomElement<IntVec3>();
+					if (intVec.Standable(building.Map) && !intVec.IsForbidden(pawn) && pawn.CanReach(intVec, PathEndMode.OnCell, Danger.None, false, false, TraverseMode.ByPawn) && !intVec.IsInPrisonCell(pawn.Map))
+					{
+						WanderUtility.candidateCells.Add(intVec);
+						if ((pawn.Position - building.Position).LengthHorizontalSquared <= 1225)
+						{
+							return intVec;
+						}
+					}
+				}
+				j++;
+				num++;
+			}
+			Pawn pawn2;
+			if ((from c in pawn.Map.mapPawns.FreeColonistsSpawned
+			where !c.Position.IsForbidden(pawn) && pawn.CanReach(c.Position, PathEndMode.Touch, Danger.None, false, false, TraverseMode.ByPawn)
+			select c).TryRandomElement(out pawn2))
+			{
+				return pawn2.Position;
+			}
+			return pawn.Position;
 		}
-		if (pawn.Map.mapPawns.FreeColonistsSpawned.Where((Pawn c) => !c.Position.IsForbidden(pawn) && pawn.CanReach(c.Position, PathEndMode.Touch, Danger.None)).TryRandomElement(out var result))
-		{
-			return result.Position;
-		}
-		return pawn.Position;
-	}
 
-	public static IntVec3 GetHerdWanderRoot(Pawn pawn, Predicate<Thing> isHerdValidator)
-	{
-		Predicate<Thing> validator = delegate(Thing t)
+		// Token: 0x06006532 RID: 25906 RVA: 0x001FFAF0 File Offset: 0x001FDCF0
+		public static IntVec3 GetHerdWanderRoot(Pawn pawn, Predicate<Thing> isHerdValidator)
 		{
-			if (t.Position.IsForbidden(pawn))
+			Predicate<Thing> validator = (Thing t) => !t.Position.IsForbidden(pawn) && pawn.CanReach(t, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn) && Rand.Value >= 0.5f && isHerdValidator(t);
+			Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 35f, validator, null, 13, -1, false, RegionType.Set_Passable, false, false);
+			if (thing == null)
 			{
-				return false;
+				return pawn.Position;
 			}
-			if (!pawn.CanReach(t, PathEndMode.OnCell, Danger.Deadly))
-			{
-				return false;
-			}
-			return !(Rand.Value < 0.5f) && isHerdValidator(t);
-		};
-		return GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Pawn), PathEndMode.OnCell, TraverseParms.For(pawn), 35f, validator, null, 13)?.Position ?? pawn.Position;
+			return thing.Position;
+		}
+
+		// Token: 0x04004833 RID: 18483
+		private static List<IntVec3> gatherSpots = new List<IntVec3>();
+
+		// Token: 0x04004834 RID: 18484
+		private static List<IntVec3> candidateCells = new List<IntVec3>();
+
+		// Token: 0x04004835 RID: 18485
+		private static List<Building> candidateBuildingsInRandomOrder = new List<Building>();
 	}
 }

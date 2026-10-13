@@ -1,46 +1,55 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_HitchedAnimalHungryNoFood : Alert
+namespace RimWorld
 {
-	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
-
-	private List<string> animalNames = new List<string>();
-
-	public Alert_HitchedAnimalHungryNoFood()
+	// Token: 0x02003033 RID: 12339
+	public class Alert_HitchedAnimalHungryNoFood : Alert
 	{
-		defaultLabel = "AlertHitchedAnimalHungryNoFood".Translate();
-	}
-
-	private void CalculateTargets()
-	{
-		targets.Clear();
-		foreach (Pawn item in PawnsFinder.AllMaps_SpawnedPawnsInFaction(Faction.OfPlayer))
+		// Token: 0x0601158A RID: 71050 RVA: 0x004F9D68 File Offset: 0x004F7F68
+		public Alert_HitchedAnimalHungryNoFood()
 		{
-			Pawn_RopeTracker roping = item.roping;
-			if (roping != null && roping.IsRopedToHitchingPost && item.needs.food.TicksStarving > 2500)
+			this.defaultLabel = "AlertHitchedAnimalHungryNoFood".Translate();
+		}
+
+		// Token: 0x0601158B RID: 71051 RVA: 0x004F9D9C File Offset: 0x004F7F9C
+		private void CalculateTargets()
+		{
+			this.targets.Clear();
+			foreach (Pawn pawn in PawnsFinder.AllMaps_SpawnedPawnsInFaction(Faction.OfPlayer))
 			{
-				targets.Add(item);
+				Pawn_RopeTracker roping = pawn.roping;
+				if (roping != null && roping.IsRopedToHitchingPost && pawn.needs.food.TicksStarving > 2500)
+				{
+					this.targets.Add(pawn);
+				}
 			}
 		}
-	}
 
-	public override TaggedString GetExplanation()
-	{
-		animalNames.Clear();
-		foreach (GlobalTargetInfo target in targets)
+		// Token: 0x0601158C RID: 71052 RVA: 0x004F9E34 File Offset: 0x004F8034
+		public override TaggedString GetExplanation()
 		{
-			animalNames.Add(((Pawn)target.Thing).NameShortColored.Resolve());
+			this.animalNames.Clear();
+			foreach (GlobalTargetInfo globalTargetInfo in this.targets)
+			{
+				this.animalNames.Add(((Pawn)globalTargetInfo.Thing).NameShortColored.Resolve());
+			}
+			return "AlertHitchedAnimalHungryNoFoodDesc".Translate(this.animalNames.ToLineList("  - "));
 		}
-		return "AlertHitchedAnimalHungryNoFoodDesc".Translate(animalNames.ToLineList("  - "));
-	}
 
-	public override AlertReport GetReport()
-	{
-		CalculateTargets();
-		return AlertReport.CulpritsAre(targets);
+		// Token: 0x0601158D RID: 71053 RVA: 0x004F9ED0 File Offset: 0x004F80D0
+		public override AlertReport GetReport()
+		{
+			this.CalculateTargets();
+			return AlertReport.CulpritsAre(this.targets);
+		}
+
+		// Token: 0x0400B3A6 RID: 45990
+		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
+
+		// Token: 0x0400B3A7 RID: 45991
+		private List<string> animalNames = new List<string>();
 	}
 }

@@ -1,104 +1,130 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class FleshmassMapComponent : MapComponent
+namespace RimWorld
 {
-	private Queue<Thing> fleshmassToDestroy = new Queue<Thing>();
-
-	private Queue<int> fleshmassDestroyTicks = new Queue<int>();
-
-	private bool destroyInChunks;
-
-	public FleshmassMapComponent(Map map)
-		: base(map)
+	// Token: 0x02001F76 RID: 8054
+	public class FleshmassMapComponent : MapComponent
 	{
-	}
-
-	public override void MapComponentTick()
-	{
-		if (fleshmassDestroyTicks == null || fleshmassDestroyTicks.Count == 0)
+		// Token: 0x0600B1FC RID: 45564 RVA: 0x0032DA1C File Offset: 0x0032BC1C
+		public FleshmassMapComponent(Map map) : base(map)
 		{
-			return;
 		}
-		int num = fleshmassDestroyTicks.Peek();
-		while (Find.TickManager.TicksGame >= num && fleshmassToDestroy.Count > 0)
+
+		// Token: 0x0600B1FD RID: 45565 RVA: 0x0032DA3C File Offset: 0x0032BC3C
+		public override void MapComponentTick()
 		{
-			Thing thing = fleshmassToDestroy.Dequeue();
-			fleshmassDestroyTicks.Dequeue();
-			if (thing != null && !thing.Destroyed)
+			if (this.fleshmassDestroyTicks == null || this.fleshmassDestroyTicks.Count == 0)
 			{
-				if (destroyInChunks)
+				return;
+			}
+			int num = this.fleshmassDestroyTicks.Peek();
+			while (Find.TickManager.TicksGame >= num && this.fleshmassToDestroy.Count > 0)
+			{
+				Thing thing = this.fleshmassToDestroy.Dequeue();
+				this.fleshmassDestroyTicks.Dequeue();
+				if (thing != null && !thing.Destroyed)
 				{
-					thing.Kill();
+					if (this.destroyInChunks)
+					{
+						thing.Kill(null, null);
+					}
+					else
+					{
+						thing.Destroy(DestroyMode.KillFinalize);
+					}
 				}
-				else
+				if (this.fleshmassDestroyTicks.Count > 0)
 				{
-					thing.Destroy(DestroyMode.KillFinalize);
+					num = this.fleshmassDestroyTicks.Peek();
 				}
 			}
-			if (fleshmassDestroyTicks.Count > 0)
-			{
-				num = fleshmassDestroyTicks.Peek();
-			}
 		}
-	}
 
-	public void DestroyFleshmass(int destructionPeriodTicks, float rateExponent = 1f, bool destroyInChunks = false, Thing onlyFromSource = null)
-	{
-		PriorityQueue<Thing, int> priorityQueue = new PriorityQueue<Thing, int>();
-		List<Thing> list = fleshmassToDestroy.ToList();
-		List<int> list2 = fleshmassDestroyTicks.ToList();
-		for (int i = 0; i < fleshmassToDestroy.Count; i++)
+		// Token: 0x0600B1FE RID: 45566 RVA: 0x0032DAE8 File Offset: 0x0032BCE8
+		public void DestroyFleshmass(int destructionPeriodTicks, float rateExponent = 1f, bool destroyInChunks = false, Thing onlyFromSource = null)
 		{
-			priorityQueue.Enqueue(list[i], list2[i]);
-		}
-		fleshmassToDestroy.Clear();
-		fleshmassDestroyTicks.Clear();
-		this.destroyInChunks = destroyInChunks;
-		foreach (Thing item in map.listerThings.ThingsOfDef(ThingDefOf.Fleshmass_Active))
-		{
-			if (onlyFromSource == null || item.TryGetComp<CompFleshmass>()?.source == onlyFromSource)
+			PriorityQueue<Thing, int> priorityQueue = new PriorityQueue<Thing, int>();
+			List<Thing> list = this.fleshmassToDestroy.ToList<Thing>();
+			List<int> list2 = this.fleshmassDestroyTicks.ToList<int>();
+			for (int i = 0; i < this.fleshmassToDestroy.Count; i++)
 			{
+				priorityQueue.Enqueue(list[i], list2[i]);
+			}
+			this.fleshmassToDestroy.Clear();
+			this.fleshmassDestroyTicks.Clear();
+			this.destroyInChunks = destroyInChunks;
+			foreach (Thing thing in this.map.listerThings.ThingsOfDef(ThingDefOf.Fleshmass_Active))
+			{
+				if (onlyFromSource != null)
+				{
+					CompFleshmass compFleshmass = thing.TryGetComp<CompFleshmass>();
+					if (((compFleshmass != null) ? compFleshmass.source : null) != onlyFromSource)
+					{
+						continue;
+					}
+				}
 				float num = 1f - Mathf.Pow(Rand.Value, rateExponent);
-				priorityQueue.Enqueue(item, Find.TickManager.TicksGame + Mathf.RoundToInt((float)destructionPeriodTicks * num));
+				priorityQueue.Enqueue(thing, Find.TickManager.TicksGame + Mathf.RoundToInt((float)destructionPeriodTicks * num));
 			}
-		}
-		if (onlyFromSource == null)
-		{
-			foreach (Thing item2 in map.listerThings.ThingsOfDef(ThingDefOf.Fleshmass))
+			if (onlyFromSource != null)
 			{
-				float num2 = 1f - Mathf.Pow(Rand.Value, rateExponent);
-				priorityQueue.Enqueue(item2, Find.TickManager.TicksGame + Mathf.RoundToInt((float)destructionPeriodTicks * num2));
+				goto IL_193;
 			}
-		}
-		while (priorityQueue.Count > 0)
-		{
-			priorityQueue.TryPeek(out var element, out var priority);
+			using (List<Thing>.Enumerator enumerator = this.map.listerThings.ThingsOfDef(ThingDefOf.Fleshmass).GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					Thing element = enumerator.Current;
+					float num2 = 1f - Mathf.Pow(Rand.Value, rateExponent);
+					priorityQueue.Enqueue(element, Find.TickManager.TicksGame + Mathf.RoundToInt((float)destructionPeriodTicks * num2));
+				}
+				goto IL_193;
+			}
+			IL_167:
+			Thing item;
+			int item2;
+			priorityQueue.TryPeek(out item, out item2);
 			priorityQueue.Dequeue();
-			fleshmassToDestroy.Enqueue(element);
-			fleshmassDestroyTicks.Enqueue(priority);
+			this.fleshmassToDestroy.Enqueue(item);
+			this.fleshmassDestroyTicks.Enqueue(item2);
+			IL_193:
+			if (priorityQueue.Count <= 0)
+			{
+				return;
+			}
+			goto IL_167;
 		}
-	}
 
-	public override void ExposeData()
-	{
-		Scribe_Collections.Look(ref fleshmassToDestroy, "fleshmassToDestroy", LookMode.Reference);
-		Scribe_Collections.Look(ref fleshmassDestroyTicks, "fleshmassDestroyTicks", LookMode.Value);
-		Scribe_Values.Look(ref destroyInChunks, "destroyInChunks", defaultValue: false);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x0600B1FF RID: 45567 RVA: 0x0032DCB0 File Offset: 0x0032BEB0
+		public override void ExposeData()
 		{
-			if (fleshmassToDestroy == null)
+			Scribe_Collections.Look<Thing>(ref this.fleshmassToDestroy, "fleshmassToDestroy", LookMode.Reference);
+			Scribe_Collections.Look<int>(ref this.fleshmassDestroyTicks, "fleshmassDestroyTicks", LookMode.Value);
+			Scribe_Values.Look<bool>(ref this.destroyInChunks, "destroyInChunks", false, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				fleshmassToDestroy = new Queue<Thing>();
-			}
-			if (fleshmassDestroyTicks == null)
-			{
-				fleshmassDestroyTicks = new Queue<int>();
+				if (this.fleshmassToDestroy == null)
+				{
+					this.fleshmassToDestroy = new Queue<Thing>();
+				}
+				if (this.fleshmassDestroyTicks == null)
+				{
+					this.fleshmassDestroyTicks = new Queue<int>();
+				}
 			}
 		}
+
+		// Token: 0x040079AA RID: 31146
+		private Queue<Thing> fleshmassToDestroy = new Queue<Thing>();
+
+		// Token: 0x040079AB RID: 31147
+		private Queue<int> fleshmassDestroyTicks = new Queue<int>();
+
+		// Token: 0x040079AC RID: 31148
+		private bool destroyInChunks;
 	}
 }

@@ -1,60 +1,69 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_RoyalTitleApparelMinQualityNotMet : ThoughtWorker
+namespace RimWorld
 {
-	private RoyalTitle Validate(Pawn p, out QualityCategory minQuality)
+	// Token: 0x020018A1 RID: 6305
+	public class ThoughtWorker_RoyalTitleApparelMinQualityNotMet : ThoughtWorker
 	{
-		minQuality = QualityCategory.Awful;
-		foreach (RoyalTitle item in p.royalty.AllTitlesInEffectForReading)
+		// Token: 0x06009040 RID: 36928 RVA: 0x002A8CC0 File Offset: 0x002A6EC0
+		private RoyalTitle Validate(Pawn p, out QualityCategory minQuality)
 		{
-			List<Apparel> wornApparel = p.apparel.WornApparel;
-			minQuality = item.def.requiredMinimumApparelQuality;
-			for (int i = 0; i < wornApparel.Count; i++)
+			minQuality = QualityCategory.Awful;
+			foreach (RoyalTitle royalTitle in p.royalty.AllTitlesInEffectForReading)
 			{
-				if (wornApparel[i].TryGetQuality(out var qc) && (int)qc < (int)item.def.requiredMinimumApparelQuality)
+				List<Apparel> wornApparel = p.apparel.WornApparel;
+				minQuality = royalTitle.def.requiredMinimumApparelQuality;
+				for (int i = 0; i < wornApparel.Count; i++)
 				{
-					return item;
+					QualityCategory qualityCategory;
+					if (wornApparel[i].TryGetQuality(out qualityCategory) && qualityCategory < royalTitle.def.requiredMinimumApparelQuality)
+					{
+						return royalTitle;
+					}
 				}
 			}
+			return null;
 		}
-		return null;
-	}
 
-	public override string PostProcessLabel(Pawn p, string label)
-	{
-		QualityCategory minQuality;
-		RoyalTitle royalTitle = Validate(p, out minQuality);
-		if (royalTitle == null)
+		// Token: 0x06009041 RID: 36929 RVA: 0x002A8D6C File Offset: 0x002A6F6C
+		public override string PostProcessLabel(Pawn p, string label)
 		{
-			return string.Empty;
+			QualityCategory qualityCategory;
+			RoyalTitle royalTitle = this.Validate(p, out qualityCategory);
+			if (royalTitle == null)
+			{
+				return string.Empty;
+			}
+			return label.Formatted(royalTitle.Named("TITLE"), p.Named("PAWN"));
 		}
-		return label.Formatted(royalTitle.Named("TITLE"), p.Named("PAWN"));
-	}
 
-	public override string PostProcessDescription(Pawn p, string description)
-	{
-		QualityCategory minQuality;
-		RoyalTitle royalTitle = Validate(p, out minQuality);
-		if (royalTitle == null)
+		// Token: 0x06009042 RID: 36930 RVA: 0x002A8DB0 File Offset: 0x002A6FB0
+		public override string PostProcessDescription(Pawn p, string description)
 		{
-			return string.Empty;
+			QualityCategory cat;
+			RoyalTitle royalTitle = this.Validate(p, out cat);
+			if (royalTitle == null)
+			{
+				return string.Empty;
+			}
+			return description.Formatted(royalTitle.Named("TITLE"), cat.GetLabel().Named("QUALITY"), p.Named("PAWN")).CapitalizeFirst();
 		}
-		return description.Formatted(royalTitle.Named("TITLE"), minQuality.GetLabel().Named("QUALITY"), p.Named("PAWN")).CapitalizeFirst();
-	}
 
-	protected override ThoughtState CurrentStateInternal(Pawn p)
-	{
-		if (p.royalty == null)
+		// Token: 0x06009043 RID: 36931 RVA: 0x002A8E0C File Offset: 0x002A700C
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return false;
+			if (p.royalty == null)
+			{
+				return false;
+			}
+			QualityCategory qualityCategory;
+			if (this.Validate(p, out qualityCategory) == null)
+			{
+				return ThoughtState.Inactive;
+			}
+			return ThoughtState.ActiveAtStage(0);
 		}
-		if (Validate(p, out var _) == null)
-		{
-			return ThoughtState.Inactive;
-		}
-		return ThoughtState.ActiveAtStage(0);
 	}
 }

@@ -1,30 +1,36 @@
+﻿using System;
 using System.Xml;
 
-namespace Verse;
-
-public class PatchOperationAddModExtension : PatchOperationPathed
+namespace Verse
 {
-	private XmlContainer value;
-
-	protected override bool ApplyWorker(XmlDocument xml)
+	// Token: 0x02000595 RID: 1429
+	public class PatchOperationAddModExtension : PatchOperationPathed
 	{
-		XmlNode node = value.node;
-		bool result = false;
-		foreach (object item in xml.SelectNodes(xpath))
+		// Token: 0x06002551 RID: 9553 RVA: 0x000C0B24 File Offset: 0x000BED24
+		protected override bool ApplyWorker(XmlDocument xml)
 		{
-			XmlNode xmlNode = item as XmlNode;
-			XmlNode xmlNode2 = xmlNode["modExtensions"];
-			if (xmlNode2 == null)
+			XmlNode node = this.value.node;
+			bool result = false;
+			foreach (object obj in xml.SelectNodes(this.xpath))
 			{
-				xmlNode2 = xmlNode.OwnerDocument.CreateElement("modExtensions");
-				xmlNode.AppendChild(xmlNode2);
+				XmlNode xmlNode = obj as XmlNode;
+				XmlNode xmlNode2 = xmlNode["modExtensions"];
+				if (xmlNode2 == null)
+				{
+					xmlNode2 = xmlNode.OwnerDocument.CreateElement("modExtensions");
+					xmlNode.AppendChild(xmlNode2);
+				}
+				foreach (object obj2 in node.ChildNodes)
+				{
+					XmlNode node2 = (XmlNode)obj2;
+					xmlNode2.AppendChild(xmlNode.OwnerDocument.ImportNode(node2, true));
+				}
+				result = true;
 			}
-			foreach (XmlNode childNode in node.ChildNodes)
-			{
-				xmlNode2.AppendChild(xmlNode.OwnerDocument.ImportNode(childNode, deep: true));
-			}
-			result = true;
+			return result;
 		}
-		return result;
+
+		// Token: 0x04001EA5 RID: 7845
+		private XmlContainer value;
 	}
 }

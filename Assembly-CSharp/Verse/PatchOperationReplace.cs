@@ -1,27 +1,32 @@
+﻿using System;
 using System.Linq;
 using System.Xml;
 
-namespace Verse;
-
-public class PatchOperationReplace : PatchOperationPathed
+namespace Verse
 {
-	private XmlContainer value;
-
-	protected override bool ApplyWorker(XmlDocument xml)
+	// Token: 0x02000599 RID: 1433
+	public class PatchOperationReplace : PatchOperationPathed
 	{
-		XmlNode node = value.node;
-		bool result = false;
-		XmlNode[] array = xml.SelectNodes(xpath).Cast<XmlNode>().ToArray();
-		foreach (XmlNode xmlNode in array)
+		// Token: 0x06002557 RID: 9559 RVA: 0x000C0DB8 File Offset: 0x000BEFB8
+		protected override bool ApplyWorker(XmlDocument xml)
 		{
-			result = true;
-			XmlNode parentNode = xmlNode.ParentNode;
-			foreach (XmlNode childNode in node.ChildNodes)
+			XmlNode node = this.value.node;
+			bool result = false;
+			foreach (XmlNode xmlNode in xml.SelectNodes(this.xpath).Cast<XmlNode>().ToArray<XmlNode>())
 			{
-				parentNode.InsertBefore(parentNode.OwnerDocument.ImportNode(childNode, deep: true), xmlNode);
+				result = true;
+				XmlNode parentNode = xmlNode.ParentNode;
+				foreach (object obj in node.ChildNodes)
+				{
+					XmlNode node2 = (XmlNode)obj;
+					parentNode.InsertBefore(parentNode.OwnerDocument.ImportNode(node2, true), xmlNode);
+				}
+				parentNode.RemoveChild(xmlNode);
 			}
-			parentNode.RemoveChild(xmlNode);
+			return result;
 		}
-		return result;
+
+		// Token: 0x04001EAB RID: 7851
+		private XmlContainer value;
 	}
 }

@@ -1,21 +1,25 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class ConditionalStatAffecter_InSunlight : ConditionalStatAffecter
+namespace Verse
 {
-	public override string Label => "StatsReport_InSunlight".Translate();
-
-	public override bool Applies(StatRequest req)
+	// Token: 0x020001B9 RID: 441
+	public class ConditionalStatAffecter_InSunlight : ConditionalStatAffecter
 	{
-		if (!ModsConfig.BiotechActive)
+		// Token: 0x170001E8 RID: 488
+		// (get) Token: 0x06000C47 RID: 3143 RVA: 0x0003A3CB File Offset: 0x000385CB
+		public override string Label
 		{
-			return false;
+			get
+			{
+				return "StatsReport_InSunlight".Translate();
+			}
 		}
-		if (req.HasThing && req.Thing.Spawned)
+
+		// Token: 0x06000C48 RID: 3144 RVA: 0x0003A3DC File Offset: 0x000385DC
+		public override bool Applies(StatRequest req)
 		{
-			return req.Thing.Position.InSunlight(req.Thing.Map);
+			return ModsConfig.BiotechActive && (req.HasThing && req.Thing.Spawned) && req.Thing.Position.InSunlight(req.Thing.Map);
 		}
-		return false;
 	}
 }

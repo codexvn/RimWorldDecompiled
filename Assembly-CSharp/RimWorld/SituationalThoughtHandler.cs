@@ -1,271 +1,339 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public sealed class SituationalThoughtHandler
+namespace RimWorld
 {
-	private class CachedSocialThoughts
+	// Token: 0x02002531 RID: 9521
+	public sealed class SituationalThoughtHandler
 	{
-		public readonly List<Thought_SituationalSocial> thoughts = new List<Thought_SituationalSocial>();
-
-		public readonly List<Thought_SituationalSocial> activeThoughts = new List<Thought_SituationalSocial>();
-
-		public int lastRecalculationTick = -99999;
-
-		public int lastQueryTick = -99999;
-
-		private const int ExpireAfterTicks = 300;
-
-		public bool Expired => Find.TickManager.TicksGame - lastQueryTick >= 300;
-
-		public bool ShouldRecalculateState => Find.TickManager.TicksGame - lastRecalculationTick >= 100;
-	}
-
-	public Pawn pawn;
-
-	private readonly List<Thought_Situational> cachedThoughts = new List<Thought_Situational>();
-
-	private readonly Dictionary<Pawn, CachedSocialThoughts> cachedSocialThoughts = new Dictionary<Pawn, CachedSocialThoughts>();
-
-	private bool thoughtsDirty = true;
-
-	private const int RecalculateStateEveryTicks = 100;
-
-	private readonly HashSet<ThoughtDef> tmpCachedSocialThoughts = new HashSet<ThoughtDef>();
-
-	public SituationalThoughtHandler(Pawn pawn)
-	{
-		this.pawn = pawn;
-	}
-
-	public void SituationalThoughtInterval()
-	{
-		UpdateAllMoodThoughts();
-		RemoveExpiredThoughtsFromCache();
-	}
-
-	public void AppendMoodThoughts(List<Thought> outThoughts)
-	{
-		if (thoughtsDirty)
+		// Token: 0x0600D041 RID: 53313 RVA: 0x003D3F9D File Offset: 0x003D219D
+		public SituationalThoughtHandler(Pawn pawn)
 		{
-			UpdateAllMoodThoughts();
+			this.pawn = pawn;
 		}
-		foreach (Thought_Situational cachedThought in cachedThoughts)
+
+		// Token: 0x0600D042 RID: 53314 RVA: 0x003D3FD4 File Offset: 0x003D21D4
+		public void SituationalThoughtInterval()
 		{
-			if (cachedThought.Active)
+			this.UpdateAllMoodThoughts();
+			this.RemoveExpiredThoughtsFromCache();
+		}
+
+		// Token: 0x0600D043 RID: 53315 RVA: 0x003D3FE4 File Offset: 0x003D21E4
+		public void AppendMoodThoughts(List<Thought> outThoughts)
+		{
+			if (this.thoughtsDirty)
 			{
-				outThoughts.Add(cachedThought);
+				this.UpdateAllMoodThoughts();
 			}
-		}
-	}
-
-	public void AppendMoodThoughts(ThoughtDef def, List<Thought> thoughts)
-	{
-		bool flag = false;
-		foreach (Thought_Situational cachedThought in cachedThoughts)
-		{
-			if (cachedThought.def == def && cachedThought.Active)
+			foreach (Thought_Situational thought_Situational in this.cachedThoughts)
 			{
-				cachedThought.RecalculateState();
-				if (cachedThought.Active)
+				if (thought_Situational.Active)
 				{
-					flag = true;
-					thoughts.Add(cachedThought);
+					outThoughts.Add(thought_Situational);
 				}
 			}
 		}
-		if (!flag)
-		{
-			Thought_Situational thought_Situational = TryCreateThought(def);
-			if (thought_Situational != null)
-			{
-				cachedThoughts.Add(thought_Situational);
-				thoughts.Add(thought_Situational);
-			}
-		}
-	}
 
-	public void AppendSocialThoughts(Pawn otherPawn, List<ISocialThought> outThoughts)
-	{
-		CheckRecalculateSocialThoughts(otherPawn);
-		CachedSocialThoughts obj = cachedSocialThoughts[otherPawn];
-		obj.lastQueryTick = Find.TickManager.TicksGame;
-		List<Thought_SituationalSocial> activeThoughts = obj.activeThoughts;
-		for (int i = 0; i < activeThoughts.Count; i++)
-		{
-			outThoughts.Add(activeThoughts[i]);
-		}
-	}
-
-	private void UpdateAllMoodThoughts()
-	{
-		thoughtsDirty = false;
-		List<ThoughtDef> situationalNonSocialThoughtDefs = ThoughtUtility.situationalNonSocialThoughtDefs;
-		foreach (Thought_Situational cachedThought in cachedThoughts)
-		{
-			cachedThought.RecalculateState();
-		}
-		foreach (ThoughtDef item in situationalNonSocialThoughtDefs)
+		// Token: 0x0600D044 RID: 53316 RVA: 0x003D4050 File Offset: 0x003D2250
+		public void AppendMoodThoughts(ThoughtDef def, List<Thought> thoughts)
 		{
 			bool flag = false;
-			foreach (Thought_Situational cachedThought2 in cachedThoughts)
+			foreach (Thought_Situational thought_Situational in this.cachedThoughts)
 			{
-				if (cachedThought2.def == item)
+				if (thought_Situational.def == def && thought_Situational.Active)
 				{
-					flag = true;
-				}
-			}
-			if (!flag)
-			{
-				Thought_Situational thought_Situational = TryCreateThought(item);
-				if (thought_Situational != null)
-				{
-					cachedThoughts.Add(thought_Situational);
-				}
-			}
-		}
-		if (!ModsConfig.IdeologyActive || pawn.Ideo == null)
-		{
-			return;
-		}
-		foreach (Precept item2 in pawn.Ideo.PreceptsListForReading)
-		{
-			foreach (Thought_Situational item3 in item2.SituationThoughtsToAdd(pawn, cachedThoughts))
-			{
-				cachedThoughts.Add(item3);
-			}
-		}
-	}
-
-	private void CheckRecalculateSocialThoughts(Pawn otherPawn)
-	{
-		try
-		{
-			if (!cachedSocialThoughts.TryGetValue(otherPawn, out var value))
-			{
-				value = new CachedSocialThoughts();
-				cachedSocialThoughts.Add(otherPawn, value);
-			}
-			if (!value.ShouldRecalculateState)
-			{
-				return;
-			}
-			value.lastRecalculationTick = Find.TickManager.TicksGame;
-			tmpCachedSocialThoughts.Clear();
-			for (int i = 0; i < value.thoughts.Count; i++)
-			{
-				Thought_SituationalSocial thought_SituationalSocial = value.thoughts[i];
-				thought_SituationalSocial.RecalculateState();
-				tmpCachedSocialThoughts.Add(thought_SituationalSocial.def);
-			}
-			List<ThoughtDef> situationalSocialThoughtDefs = ThoughtUtility.situationalSocialThoughtDefs;
-			int j = 0;
-			for (int count = situationalSocialThoughtDefs.Count; j < count; j++)
-			{
-				if (!tmpCachedSocialThoughts.Contains(situationalSocialThoughtDefs[j]))
-				{
-					Thought_SituationalSocial thought_SituationalSocial2 = TryCreateSocialThought(situationalSocialThoughtDefs[j], otherPawn);
-					if (thought_SituationalSocial2 != null)
+					thought_Situational.RecalculateState();
+					if (thought_Situational.Active)
 					{
-						value.thoughts.Add(thought_SituationalSocial2);
+						flag = true;
+						thoughts.Add(thought_Situational);
 					}
 				}
 			}
-			value.activeThoughts.Clear();
-			for (int k = 0; k < value.thoughts.Count; k++)
+			if (flag)
 			{
-				Thought_SituationalSocial thought_SituationalSocial3 = value.thoughts[k];
-				if (thought_SituationalSocial3.Active)
+				return;
+			}
+			Thought_Situational thought_Situational2 = this.TryCreateThought(def);
+			if (thought_Situational2 != null)
+			{
+				this.cachedThoughts.Add(thought_Situational2);
+				thoughts.Add(thought_Situational2);
+			}
+		}
+
+		// Token: 0x0600D045 RID: 53317 RVA: 0x003D40E8 File Offset: 0x003D22E8
+		public void AppendSocialThoughts(Pawn otherPawn, List<ISocialThought> outThoughts)
+		{
+			this.CheckRecalculateSocialThoughts(otherPawn);
+			SituationalThoughtHandler.CachedSocialThoughts cachedSocialThoughts = this.cachedSocialThoughts[otherPawn];
+			cachedSocialThoughts.lastQueryTick = Find.TickManager.TicksGame;
+			List<Thought_SituationalSocial> activeThoughts = cachedSocialThoughts.activeThoughts;
+			for (int i = 0; i < activeThoughts.Count; i++)
+			{
+				outThoughts.Add(activeThoughts[i]);
+			}
+		}
+
+		// Token: 0x0600D046 RID: 53318 RVA: 0x003D413C File Offset: 0x003D233C
+		private void UpdateAllMoodThoughts()
+		{
+			this.thoughtsDirty = false;
+			List<ThoughtDef> situationalNonSocialThoughtDefs = ThoughtUtility.situationalNonSocialThoughtDefs;
+			foreach (Thought_Situational thought_Situational in this.cachedThoughts)
+			{
+				thought_Situational.RecalculateState();
+			}
+			foreach (ThoughtDef thoughtDef in situationalNonSocialThoughtDefs)
+			{
+				bool flag = false;
+				using (List<Thought_Situational>.Enumerator enumerator = this.cachedThoughts.GetEnumerator())
 				{
-					value.activeThoughts.Add(thought_SituationalSocial3);
+					while (enumerator.MoveNext())
+					{
+						if (enumerator.Current.def == thoughtDef)
+						{
+							flag = true;
+						}
+					}
+				}
+				if (!flag)
+				{
+					Thought_Situational thought_Situational2 = this.TryCreateThought(thoughtDef);
+					if (thought_Situational2 != null)
+					{
+						this.cachedThoughts.Add(thought_Situational2);
+					}
+				}
+			}
+			if (ModsConfig.IdeologyActive && this.pawn.Ideo != null)
+			{
+				foreach (Precept precept in this.pawn.Ideo.PreceptsListForReading)
+				{
+					foreach (Thought_Situational item in precept.SituationThoughtsToAdd(this.pawn, this.cachedThoughts))
+					{
+						this.cachedThoughts.Add(item);
+					}
 				}
 			}
 		}
-		catch (Exception arg)
-		{
-			Log.Error($"Exception when recalculating social thoughts for pawn {pawn}: {arg}");
-		}
-		finally
-		{
-		}
-	}
 
-	private Thought_Situational TryCreateThought(ThoughtDef def)
-	{
-		Thought_Situational thought_Situational = null;
-		try
+		// Token: 0x0600D047 RID: 53319 RVA: 0x003D42E8 File Offset: 0x003D24E8
+		private void CheckRecalculateSocialThoughts(Pawn otherPawn)
 		{
-			if (!ThoughtUtility.CanGetThought(pawn, def))
+			try
 			{
-				return null;
+				SituationalThoughtHandler.CachedSocialThoughts cachedSocialThoughts;
+				if (!this.cachedSocialThoughts.TryGetValue(otherPawn, out cachedSocialThoughts))
+				{
+					cachedSocialThoughts = new SituationalThoughtHandler.CachedSocialThoughts();
+					this.cachedSocialThoughts.Add(otherPawn, cachedSocialThoughts);
+				}
+				if (cachedSocialThoughts.ShouldRecalculateState)
+				{
+					cachedSocialThoughts.lastRecalculationTick = Find.TickManager.TicksGame;
+					this.tmpCachedSocialThoughts.Clear();
+					for (int i = 0; i < cachedSocialThoughts.thoughts.Count; i++)
+					{
+						Thought_SituationalSocial thought_SituationalSocial = cachedSocialThoughts.thoughts[i];
+						thought_SituationalSocial.RecalculateState();
+						this.tmpCachedSocialThoughts.Add(thought_SituationalSocial.def);
+					}
+					List<ThoughtDef> situationalSocialThoughtDefs = ThoughtUtility.situationalSocialThoughtDefs;
+					int j = 0;
+					int count = situationalSocialThoughtDefs.Count;
+					while (j < count)
+					{
+						if (!this.tmpCachedSocialThoughts.Contains(situationalSocialThoughtDefs[j]))
+						{
+							Thought_SituationalSocial thought_SituationalSocial2 = this.TryCreateSocialThought(situationalSocialThoughtDefs[j], otherPawn);
+							if (thought_SituationalSocial2 != null)
+							{
+								cachedSocialThoughts.thoughts.Add(thought_SituationalSocial2);
+							}
+						}
+						j++;
+					}
+					cachedSocialThoughts.activeThoughts.Clear();
+					for (int k = 0; k < cachedSocialThoughts.thoughts.Count; k++)
+					{
+						Thought_SituationalSocial thought_SituationalSocial3 = cachedSocialThoughts.thoughts[k];
+						if (thought_SituationalSocial3.Active)
+						{
+							cachedSocialThoughts.activeThoughts.Add(thought_SituationalSocial3);
+						}
+					}
+				}
 			}
-			if (!def.Worker.CurrentState(pawn).ActiveFor(def))
+			catch (Exception arg)
 			{
-				return null;
+				Log.Error(string.Format("Exception when recalculating social thoughts for pawn {0}: {1}", this.pawn, arg));
 			}
-			thought_Situational = (Thought_Situational)ThoughtMaker.MakeThought(def);
-			thought_Situational.pawn = pawn;
-			if (def.Worker is ThoughtWorker_Precept)
+			finally
 			{
-				thought_Situational.sourcePrecept = pawn.Ideo.GetFirstPreceptAllowingSituationalThought(def);
 			}
-			thought_Situational.RecalculateState();
 		}
-		catch (Exception ex)
-		{
-			Log.Error("Exception while recalculating " + def?.ToString() + " thought state for pawn " + pawn?.ToString() + ": " + ex);
-		}
-		return thought_Situational;
-	}
 
-	private Thought_SituationalSocial TryCreateSocialThought(ThoughtDef def, Pawn otherPawn)
-	{
-		Thought_SituationalSocial thought_SituationalSocial = null;
-		try
+		// Token: 0x0600D048 RID: 53320 RVA: 0x003D4470 File Offset: 0x003D2670
+		private Thought_Situational TryCreateThought(ThoughtDef def)
 		{
-			if (!ThoughtUtility.CanGetThought(pawn, def))
+			Thought_Situational thought_Situational = null;
+			try
 			{
-				return null;
+				if (!ThoughtUtility.CanGetThought(this.pawn, def, false))
+				{
+					return null;
+				}
+				if (!def.Worker.CurrentState(this.pawn).ActiveFor(def))
+				{
+					return null;
+				}
+				thought_Situational = (Thought_Situational)ThoughtMaker.MakeThought(def);
+				thought_Situational.pawn = this.pawn;
+				if (def.Worker is ThoughtWorker_Precept)
+				{
+					thought_Situational.sourcePrecept = this.pawn.Ideo.GetFirstPreceptAllowingSituationalThought(def);
+				}
+				thought_Situational.RecalculateState();
 			}
-			if (!def.Worker.CurrentSocialState(pawn, otherPawn).ActiveFor(def))
+			catch (Exception ex)
 			{
-				return null;
+				string[] array = new string[6];
+				array[0] = "Exception while recalculating ";
+				array[1] = ((def != null) ? def.ToString() : null);
+				array[2] = " thought state for pawn ";
+				int num = 3;
+				Pawn pawn = this.pawn;
+				array[num] = ((pawn != null) ? pawn.ToString() : null);
+				array[4] = ": ";
+				int num2 = 5;
+				Exception ex2 = ex;
+				array[num2] = ((ex2 != null) ? ex2.ToString() : null);
+				Log.Error(string.Concat(array));
 			}
-			if (!def.socialTargetDevelopmentalStageFilter.HasAny(otherPawn.DevelopmentalStage))
-			{
-				return null;
-			}
-			if (def.ignoreSubhumans && otherPawn.IsSubhuman)
-			{
-				return null;
-			}
-			thought_SituationalSocial = (Thought_SituationalSocial)ThoughtMaker.MakeThought(def);
-			thought_SituationalSocial.pawn = pawn;
-			thought_SituationalSocial.otherPawn = otherPawn;
-			if (def.Worker is ThoughtWorker_Precept_Social)
-			{
-				thought_SituationalSocial.sourcePrecept = pawn.Ideo.GetFirstPreceptAllowingSituationalThought(def);
-			}
-			thought_SituationalSocial.RecalculateState();
+			return thought_Situational;
 		}
-		catch (Exception ex)
+
+		// Token: 0x0600D049 RID: 53321 RVA: 0x003D4570 File Offset: 0x003D2770
+		private Thought_SituationalSocial TryCreateSocialThought(ThoughtDef def, Pawn otherPawn)
 		{
-			Log.Error("Exception while recalculating " + def?.ToString() + " thought state for pawn " + pawn?.ToString() + ": " + ex);
+			Thought_SituationalSocial thought_SituationalSocial = null;
+			try
+			{
+				if (!ThoughtUtility.CanGetThought(this.pawn, def, false))
+				{
+					return null;
+				}
+				if (!def.Worker.CurrentSocialState(this.pawn, otherPawn).ActiveFor(def))
+				{
+					return null;
+				}
+				if (!def.socialTargetDevelopmentalStageFilter.HasAny(otherPawn.DevelopmentalStage))
+				{
+					return null;
+				}
+				if (def.ignoreSubhumans && otherPawn.IsSubhuman)
+				{
+					return null;
+				}
+				thought_SituationalSocial = (Thought_SituationalSocial)ThoughtMaker.MakeThought(def);
+				thought_SituationalSocial.pawn = this.pawn;
+				thought_SituationalSocial.otherPawn = otherPawn;
+				if (def.Worker is ThoughtWorker_Precept_Social)
+				{
+					thought_SituationalSocial.sourcePrecept = this.pawn.Ideo.GetFirstPreceptAllowingSituationalThought(def);
+				}
+				thought_SituationalSocial.RecalculateState();
+			}
+			catch (Exception ex)
+			{
+				string[] array = new string[6];
+				array[0] = "Exception while recalculating ";
+				array[1] = ((def != null) ? def.ToString() : null);
+				array[2] = " thought state for pawn ";
+				int num = 3;
+				Pawn pawn = this.pawn;
+				array[num] = ((pawn != null) ? pawn.ToString() : null);
+				array[4] = ": ";
+				int num2 = 5;
+				Exception ex2 = ex;
+				array[num2] = ((ex2 != null) ? ex2.ToString() : null);
+				Log.Error(string.Concat(array));
+			}
+			return thought_SituationalSocial;
 		}
-		return thought_SituationalSocial;
-	}
 
-	public void Notify_SituationalThoughtsDirty()
-	{
-		cachedThoughts.Clear();
-		cachedSocialThoughts.Clear();
-		thoughtsDirty = true;
-	}
+		// Token: 0x0600D04A RID: 53322 RVA: 0x003D46A8 File Offset: 0x003D28A8
+		public void Notify_SituationalThoughtsDirty()
+		{
+			this.cachedThoughts.Clear();
+			this.cachedSocialThoughts.Clear();
+			this.thoughtsDirty = true;
+		}
 
-	private void RemoveExpiredThoughtsFromCache()
-	{
-		cachedSocialThoughts.RemoveAll((KeyValuePair<Pawn, CachedSocialThoughts> x) => x.Value.Expired || x.Key.Discarded);
+		// Token: 0x0600D04B RID: 53323 RVA: 0x003D46C7 File Offset: 0x003D28C7
+		private void RemoveExpiredThoughtsFromCache()
+		{
+			this.cachedSocialThoughts.RemoveAll((KeyValuePair<Pawn, SituationalThoughtHandler.CachedSocialThoughts> x) => x.Value.Expired || x.Key.Discarded);
+		}
+
+		// Token: 0x04008DB3 RID: 36275
+		public Pawn pawn;
+
+		// Token: 0x04008DB4 RID: 36276
+		private readonly List<Thought_Situational> cachedThoughts = new List<Thought_Situational>();
+
+		// Token: 0x04008DB5 RID: 36277
+		private readonly Dictionary<Pawn, SituationalThoughtHandler.CachedSocialThoughts> cachedSocialThoughts = new Dictionary<Pawn, SituationalThoughtHandler.CachedSocialThoughts>();
+
+		// Token: 0x04008DB6 RID: 36278
+		private bool thoughtsDirty = true;
+
+		// Token: 0x04008DB7 RID: 36279
+		private const int RecalculateStateEveryTicks = 100;
+
+		// Token: 0x04008DB8 RID: 36280
+		private readonly HashSet<ThoughtDef> tmpCachedSocialThoughts = new HashSet<ThoughtDef>();
+
+		// Token: 0x02002532 RID: 9522
+		private class CachedSocialThoughts
+		{
+			// Token: 0x17001FF5 RID: 8181
+			// (get) Token: 0x0600D04C RID: 53324 RVA: 0x003D46F4 File Offset: 0x003D28F4
+			public bool Expired
+			{
+				get
+				{
+					return Find.TickManager.TicksGame - this.lastQueryTick >= 300;
+				}
+			}
+
+			// Token: 0x17001FF6 RID: 8182
+			// (get) Token: 0x0600D04D RID: 53325 RVA: 0x003D4711 File Offset: 0x003D2911
+			public bool ShouldRecalculateState
+			{
+				get
+				{
+					return Find.TickManager.TicksGame - this.lastRecalculationTick >= 100;
+				}
+			}
+
+			// Token: 0x04008DB9 RID: 36281
+			public readonly List<Thought_SituationalSocial> thoughts = new List<Thought_SituationalSocial>();
+
+			// Token: 0x04008DBA RID: 36282
+			public readonly List<Thought_SituationalSocial> activeThoughts = new List<Thought_SituationalSocial>();
+
+			// Token: 0x04008DBB RID: 36283
+			public int lastRecalculationTick = -99999;
+
+			// Token: 0x04008DBC RID: 36284
+			public int lastQueryTick = -99999;
+
+			// Token: 0x04008DBD RID: 36285
+			private const int ExpireAfterTicks = 300;
+		}
 	}
 }

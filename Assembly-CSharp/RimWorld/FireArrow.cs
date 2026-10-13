@@ -1,41 +1,54 @@
+﻿using System;
+using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class FireArrow : Projectile
+namespace RimWorld
 {
-	private static FloatRange FireSizeRange = new FloatRange(0.5f, 0.8f);
-
-	private const int FuelToSpreadOnImpact = 4;
-
-	private const int MaxCellsToSpread = 30;
-
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
+	// Token: 0x02002B3C RID: 11068
+	public class FireArrow : Projectile
 	{
-		if (!base.Position.GetTerrain(base.Map).IsWater)
+		// Token: 0x0600F785 RID: 63365 RVA: 0x0047F594 File Offset: 0x0047D794
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			int remainingFuel = 4;
-			base.Map.floodFiller.FloodFill(base.Position, (IntVec3 c) => c.InBounds(base.Map) && !c.Filled(base.Map), delegate(IntVec3 c)
+			if (!base.Position.GetTerrain(base.Map).IsWater)
 			{
-				foreach (Thing thing in c.GetThingList(base.Map))
+				int remainingFuel = 4;
+				base.Map.floodFiller.FloodFill(base.Position, (IntVec3 c) => c.InBounds(base.Map) && !c.Filled(base.Map), delegate(IntVec3 c)
 				{
-					if (thing.def == ThingDefOf.Filth_Fuel)
+					using (List<Thing>.Enumerator enumerator = c.GetThingList(this.Map).GetEnumerator())
 					{
-						return false;
+						while (enumerator.MoveNext())
+						{
+							if (enumerator.Current.def == ThingDefOf.Filth_Fuel)
+							{
+								return false;
+							}
+						}
 					}
-				}
-				if (FilthMaker.TryMakeFilth(c, base.Map, ThingDefOf.Filth_Fuel))
-				{
-					remainingFuel--;
-				}
-				return remainingFuel <= 0;
-			}, 30);
-			FireUtility.TryStartFireIn(base.Position, base.Map, FireSizeRange.RandomInRange, launcher);
+					int remainingFuel;
+					if (FilthMaker.TryMakeFilth(c, this.Map, ThingDefOf.Filth_Fuel, 1, FilthSourceFlags.None, true))
+					{
+						remainingFuel = remainingFuel;
+						remainingFuel--;
+					}
+					return remainingFuel <= 0;
+				}, 30, false, null);
+				FireUtility.TryStartFireIn(base.Position, base.Map, FireArrow.FireSizeRange.RandomInRange, this.launcher, null);
+			}
+			FleckCreationData dataStatic = FleckMaker.GetDataStatic(this.DrawPos, base.Map, FleckDefOf.MicroSparksFast, 1f);
+			dataStatic.velocitySpeed = 0.8f;
+			dataStatic.velocityAngle = this.ExactRotation.eulerAngles.y;
+			base.Map.flecks.CreateFleck(dataStatic);
+			base.Impact(hitThing, blockedByShield);
 		}
-		FleckCreationData dataStatic = FleckMaker.GetDataStatic(DrawPos, base.Map, FleckDefOf.MicroSparksFast);
-		dataStatic.velocitySpeed = 0.8f;
-		dataStatic.velocityAngle = ExactRotation.eulerAngles.y;
-		base.Map.flecks.CreateFleck(dataStatic);
-		base.Impact(hitThing, blockedByShield);
+
+		// Token: 0x0400A2DE RID: 41694
+		private static FloatRange FireSizeRange = new FloatRange(0.5f, 0.8f);
+
+		// Token: 0x0400A2DF RID: 41695
+		private const int FuelToSpreadOnImpact = 4;
+
+		// Token: 0x0400A2E0 RID: 41696
+		private const int MaxCellsToSpread = 30;
 	}
 }

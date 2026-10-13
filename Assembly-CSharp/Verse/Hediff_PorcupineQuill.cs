@@ -1,13 +1,18 @@
-namespace Verse;
+﻿using System;
 
-public class Hediff_PorcupineQuill : HediffWithComps
+namespace Verse
 {
-	public override void PostAdd(DamageInfo? dinfo)
+	// Token: 0x0200075D RID: 1885
+	public class Hediff_PorcupineQuill : HediffWithComps
 	{
-		base.PostAdd(dinfo);
-		if (pawn != null && pawn.RaceProps != null && !pawn.RaceProps.IsFlesh)
+		// Token: 0x06002E3A RID: 11834 RVA: 0x000EDC9C File Offset: 0x000EBE9C
+		public override void PostAdd(DamageInfo? dinfo)
 		{
-			pawn.health.RemoveHediff(this);
+			base.PostAdd(dinfo);
+			if (this.pawn != null && this.pawn.RaceProps != null && !this.pawn.RaceProps.IsFlesh)
+			{
+				this.pawn.health.RemoveHediff(this);
+			}
 		}
 	}
 }

@@ -1,7 +1,13 @@
-namespace RimWorld;
+﻿using System;
 
-public enum BackstorySlot : byte
+namespace RimWorld
 {
-	Childhood,
-	Adulthood
+	// Token: 0x020019EE RID: 6638
+	public enum BackstorySlot : byte
+	{
+		// Token: 0x040061E2 RID: 25058
+		Childhood,
+		// Token: 0x040061E3 RID: 25059
+		Adulthood
+	}
 }

@@ -1,31 +1,32 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse.AI;
-
-public class JobDriver_FollowRoper : JobDriver
+namespace Verse.AI
 {
-	private const TargetIndex RoperInd = TargetIndex.A;
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02000E4A RID: 3658
+	public class JobDriver_FollowRoper : JobDriver
 	{
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnDespawnedOrNull(TargetIndex.A);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.tickIntervalAction = delegate
+		// Token: 0x06005C25 RID: 23589 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			Pawn pawn = job.GetTarget(TargetIndex.A).Thing as Pawn;
-			if (!base.pawn.CanReach(pawn, PathEndMode.Touch, Danger.Deadly))
+			return true;
+		}
+
+		// Token: 0x06005C26 RID: 23590 RVA: 0x001D7802 File Offset: 0x001D5A02
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			this.FailOnDespawnedOrNull(TargetIndex.A);
+			Toil toil = ToilMaker.MakeToil("MakeNewToils");
+			toil.tickIntervalAction = delegate(int delta)
 			{
-				EndJobWith(JobCondition.Incompletable);
-			}
-			else
-			{
+				Pawn pawn = this.job.GetTarget(TargetIndex.A).Thing as Pawn;
+				if (!this.pawn.CanReach(pawn, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn))
+				{
+					base.EndJobWith(JobCondition.Incompletable);
+					return;
+				}
 				IntVec3 intVec = IntVec3.Invalid;
 				if (pawn.jobs.curDriver is JobDriver_RopeToDestination)
 				{
@@ -33,72 +34,78 @@ public class JobDriver_FollowRoper : JobDriver
 				}
 				if (intVec.IsValid && pawn.Position == intVec)
 				{
-					GotoStandCell(intVec);
+					this.GotoStandCell(intVec);
+					return;
 				}
-				else
+				this.FollowRoper(pawn);
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			yield return toil;
+			yield break;
+		}
+
+		// Token: 0x06005C27 RID: 23591 RVA: 0x001D7814 File Offset: 0x001D5A14
+		private void FollowRoper(Pawn roper)
+		{
+			LocalTargetInfo localTargetInfo = new LocalTargetInfo(roper);
+			PathEndMode peMode = PathEndMode.Touch;
+			if (roper.Position.InHorDistOf(this.pawn.Position, 7.2f) && roper.pather.Moving && roper.pather.curPath != null)
+			{
+				int marchingPos = Mathf.Abs(roper.roping.Ropees.IndexOf(this.pawn));
+				IntVec3 c = this.MarchingOrder(roper, marchingPos);
+				if (c.IsValid)
 				{
-					FollowRoper(pawn);
+					localTargetInfo = c;
+					peMode = PathEndMode.OnCell;
 				}
 			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Never;
-		yield return toil;
-	}
-
-	private void FollowRoper(Pawn roper)
-	{
-		LocalTargetInfo localTargetInfo = new LocalTargetInfo(roper);
-		PathEndMode peMode = PathEndMode.Touch;
-		if (roper.Position.InHorDistOf(pawn.Position, 7.2f) && roper.pather.Moving && roper.pather.curPath != null)
-		{
-			int marchingPos = Mathf.Abs(roper.roping.Ropees.IndexOf(pawn));
-			IntVec3 intVec = MarchingOrder(roper, marchingPos);
-			if (intVec.IsValid)
+			if (!this.pawn.pather.Moving || this.pawn.pather.Destination != localTargetInfo)
 			{
-				localTargetInfo = intVec;
-				peMode = PathEndMode.OnCell;
+				this.pawn.pather.StartPath(localTargetInfo, peMode);
 			}
 		}
-		if (!pawn.pather.Moving || pawn.pather.Destination != localTargetInfo)
-		{
-			pawn.pather.StartPath(localTargetInfo, peMode);
-		}
-	}
 
-	private IntVec3 MarchingOrder(Pawn roper, int marchingPos)
-	{
-		PawnPath curPath = roper.pather.curPath;
-		if (curPath.NodesLeftCount <= 0)
+		// Token: 0x06005C28 RID: 23592 RVA: 0x001D78E0 File Offset: 0x001D5AE0
+		private IntVec3 MarchingOrder(Pawn roper, int marchingPos)
 		{
-			return IntVec3.Invalid;
-		}
-		Map map = pawn.Map;
-		int value = -2 - marchingPos % 4;
-		value = Mathf.Clamp(value, -curPath.NodesConsumedCount, curPath.NodesLeftCount);
-		IntVec3 intVec = curPath.Peek(value);
-		int num = Mathf.Abs(pawn.HashOffset()) % 3;
-		if (value + 1 < curPath.NodesLeftCount && num != 0)
-		{
-			IntVec3 orig = curPath.Peek(value + 1) - intVec;
-			IntVec3 intVec2 = ((num == 1) ? (intVec + orig.RotatedBy(Rot4.East)) : (intVec + orig.RotatedBy(Rot4.West)));
-			if (intVec2.InBounds(map) && intVec2.Standable(map) && intVec2.GetDistrict(map) == intVec.GetDistrict(map))
+			PawnPath curPath = roper.pather.curPath;
+			if (curPath.NodesLeftCount <= 0)
 			{
-				intVec = intVec2;
+				return IntVec3.Invalid;
+			}
+			Map map = this.pawn.Map;
+			int num = -2 - marchingPos % 4;
+			num = Mathf.Clamp(num, -curPath.NodesConsumedCount, curPath.NodesLeftCount);
+			IntVec3 intVec = curPath.Peek(num);
+			int num2 = Mathf.Abs(this.pawn.HashOffset()) % 3;
+			if (num + 1 < curPath.NodesLeftCount && num2 != 0)
+			{
+				IntVec3 orig = curPath.Peek(num + 1) - intVec;
+				IntVec3 intVec2 = (num2 == 1) ? (intVec + orig.RotatedBy(Rot4.East)) : (intVec + orig.RotatedBy(Rot4.West));
+				if (intVec2.InBounds(map) && intVec2.Standable(map) && intVec2.GetDistrict(map, RegionType.Set_Passable) == intVec.GetDistrict(map, RegionType.Set_Passable))
+				{
+					intVec = intVec2;
+				}
+			}
+			return intVec;
+		}
+
+		// Token: 0x06005C29 RID: 23593 RVA: 0x001D79C8 File Offset: 0x001D5BC8
+		private void GotoStandCell(IntVec3 standCell)
+		{
+			if (!this.pawn.pather.Moving || this.pawn.pather.Destination != standCell)
+			{
+				this.pawn.pather.StartPath(standCell, PathEndMode.OnCell);
 			}
 		}
-		return intVec;
-	}
 
-	private void GotoStandCell(IntVec3 standCell)
-	{
-		if (!pawn.pather.Moving || pawn.pather.Destination != standCell)
+		// Token: 0x06005C2A RID: 23594 RVA: 0x001D7A1B File Offset: 0x001D5C1B
+		public override bool IsContinuation(Job j)
 		{
-			pawn.pather.StartPath(standCell, PathEndMode.OnCell);
+			return this.job.GetTarget(TargetIndex.A) == j.GetTarget(TargetIndex.A);
 		}
-	}
 
-	public override bool IsContinuation(Job j)
-	{
-		return job.GetTarget(TargetIndex.A) == j.GetTarget(TargetIndex.A);
+		// Token: 0x040042C5 RID: 17093
+		private const TargetIndex RoperInd = TargetIndex.A;
 	}
 }

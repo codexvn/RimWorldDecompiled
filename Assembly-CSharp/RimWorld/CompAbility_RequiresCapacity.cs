@@ -1,19 +1,31 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompAbility_RequiresCapacity : AbilityComp
+namespace RimWorld
 {
-	public CompProperties_AbilityRequiresCapacity Props => (CompProperties_AbilityRequiresCapacity)props;
-
-	public override bool GizmoDisabled(out string reason)
+	// Token: 0x020022B1 RID: 8881
+	public class CompAbility_RequiresCapacity : AbilityComp
 	{
-		if (!parent.pawn.health.capacities.CapableOf(Props.capacity))
+		// Token: 0x17001D93 RID: 7571
+		// (get) Token: 0x0600C132 RID: 49458 RVA: 0x0037F196 File Offset: 0x0037D396
+		public CompProperties_AbilityRequiresCapacity Props
 		{
-			reason = "AbilityDisabledNoCapacity".Translate(parent.pawn, Props.capacity.label);
-			return true;
+			get
+			{
+				return (CompProperties_AbilityRequiresCapacity)this.props;
+			}
 		}
-		reason = null;
-		return false;
+
+		// Token: 0x0600C133 RID: 49459 RVA: 0x0037F1A4 File Offset: 0x0037D3A4
+		public override bool GizmoDisabled(out string reason)
+		{
+			if (!this.parent.pawn.health.capacities.CapableOf(this.Props.capacity))
+			{
+				reason = "AbilityDisabledNoCapacity".Translate(this.parent.pawn, this.Props.capacity.label);
+				return true;
+			}
+			reason = null;
+			return false;
+		}
 	}
 }

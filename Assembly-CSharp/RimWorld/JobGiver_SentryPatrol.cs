@@ -1,38 +1,42 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_SentryPatrol : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x020013E4 RID: 5092
+	public class JobGiver_SentryPatrol : ThinkNode_JobGiver
 	{
-		CompSentryDrone comp = pawn.GetComp<CompSentryDrone>();
-		if (comp == null)
+		// Token: 0x06007C54 RID: 31828 RVA: 0x00257170 File Offset: 0x00255370
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
-		}
-		if (comp.Mode != CompSentryDrone.SentryDroneMode.Patrol)
-		{
-			return null;
-		}
-		if (pawn.CurJobDef == JobDefOf.GotoPatrolDest && pawn.CurJob.jobGiver == this)
-		{
-			LocalTargetInfo destination = pawn.pather.Destination;
-			if (destination.IsValid && destination.Cell.DistanceTo(pawn.Position) >= 1f)
+			CompSentryDrone comp = pawn.GetComp<CompSentryDrone>();
+			if (comp == null)
 			{
-				return pawn.CurJob;
+				return null;
 			}
+			if (comp.Mode != CompSentryDrone.SentryDroneMode.Patrol)
+			{
+				return null;
+			}
+			if (pawn.CurJobDef == JobDefOf.GotoPatrolDest && pawn.CurJob.jobGiver == this)
+			{
+				LocalTargetInfo destination = pawn.pather.Destination;
+				if (destination.IsValid && destination.Cell.DistanceTo(pawn.Position) >= 1f)
+				{
+					return pawn.CurJob;
+				}
+			}
+			IntVec3 nextPatrolDest = comp.GetNextPatrolDest();
+			if (!nextPatrolDest.IsValid)
+			{
+				return null;
+			}
+			if (!pawn.CanReach(nextPatrolDest, PathEndMode.OnCell, Danger.Deadly, false, false, TraverseMode.ByPawn))
+			{
+				return null;
+			}
+			return JobMaker.MakeJob(JobDefOf.GotoPatrolDest, nextPatrolDest);
 		}
-		IntVec3 nextPatrolDest = comp.GetNextPatrolDest();
-		if (!nextPatrolDest.IsValid)
-		{
-			return null;
-		}
-		if (!pawn.CanReach(nextPatrolDest, PathEndMode.OnCell, Danger.Deadly))
-		{
-			return null;
-		}
-		return JobMaker.MakeJob(JobDefOf.GotoPatrolDest, nextPatrolDest);
 	}
 }

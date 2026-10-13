@@ -1,38 +1,55 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_TreeConnection : CompProperties
+namespace RimWorld
 {
-	public float spawnDays = 6f;
-
-	public PawnKindDef pawnKind;
-
-	public FloatRange initialConnectionStrengthRange;
-
-	public float connectionStrengthLossPerDryadDeath = 0.1f;
-
-	public float radiusToBuildingForConnectionStrengthLoss = 7.9f;
-
-	public int maxDryadsWild;
-
-	public SimpleCurve maxDryadsPerConnectionStrengthCurve;
-
-	public SimpleCurve connectionLossPerLevelCurve;
-
-	public SimpleCurve connectionLossDailyPerBuildingDistanceCurve;
-
-	public SimpleCurve connectionStrengthGainPerPlantSkill;
-
-	public float connectionStrengthGainPerHourPruningBase = 0.01f;
-
-	public Vector3 spawningPodOffset;
-
-	public FloatRange spawningPodSizeRange = FloatRange.One;
-
-	public CompProperties_TreeConnection()
+	// Token: 0x02002EAB RID: 11947
+	public class CompProperties_TreeConnection : CompProperties
 	{
-		compClass = typeof(CompTreeConnection);
+		// Token: 0x06010D64 RID: 68964 RVA: 0x004D8EA8 File Offset: 0x004D70A8
+		public CompProperties_TreeConnection()
+		{
+			this.compClass = typeof(CompTreeConnection);
+		}
+
+		// Token: 0x0400AF45 RID: 44869
+		public float spawnDays = 6f;
+
+		// Token: 0x0400AF46 RID: 44870
+		public PawnKindDef pawnKind;
+
+		// Token: 0x0400AF47 RID: 44871
+		public FloatRange initialConnectionStrengthRange;
+
+		// Token: 0x0400AF48 RID: 44872
+		public float connectionStrengthLossPerDryadDeath = 0.1f;
+
+		// Token: 0x0400AF49 RID: 44873
+		public float radiusToBuildingForConnectionStrengthLoss = 7.9f;
+
+		// Token: 0x0400AF4A RID: 44874
+		public int maxDryadsWild;
+
+		// Token: 0x0400AF4B RID: 44875
+		public SimpleCurve maxDryadsPerConnectionStrengthCurve;
+
+		// Token: 0x0400AF4C RID: 44876
+		public SimpleCurve connectionLossPerLevelCurve;
+
+		// Token: 0x0400AF4D RID: 44877
+		public SimpleCurve connectionLossDailyPerBuildingDistanceCurve;
+
+		// Token: 0x0400AF4E RID: 44878
+		public SimpleCurve connectionStrengthGainPerPlantSkill;
+
+		// Token: 0x0400AF4F RID: 44879
+		public float connectionStrengthGainPerHourPruningBase = 0.01f;
+
+		// Token: 0x0400AF50 RID: 44880
+		public Vector3 spawningPodOffset;
+
+		// Token: 0x0400AF51 RID: 44881
+		public FloatRange spawningPodSizeRange = FloatRange.One;
 	}
 }

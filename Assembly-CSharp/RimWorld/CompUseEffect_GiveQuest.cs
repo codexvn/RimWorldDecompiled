@@ -1,28 +1,45 @@
+﻿using System;
 using RimWorld.QuestGen;
 using Verse;
 
-namespace RimWorld;
-
-public class CompUseEffect_GiveQuest : CompUseEffect
+namespace RimWorld
 {
-	public CompProperties_UseEffectGiveQuest Props => (CompProperties_UseEffectGiveQuest)props;
-
-	public override void DoEffect(Pawn user)
+	// Token: 0x02002F61 RID: 12129
+	public class CompUseEffect_GiveQuest : CompUseEffect
 	{
-		if (!Props.skipIfMechlinkAlreadySentMechs || !(parent is Mechlink { sentMechsToPlayer: not false }))
+		// Token: 0x17002C34 RID: 11316
+		// (get) Token: 0x06011180 RID: 70016 RVA: 0x004E8855 File Offset: 0x004E6A55
+		public CompProperties_UseEffectGiveQuest Props
 		{
-			Slate slate = new Slate();
-			slate.Set("points", StorytellerUtility.DefaultThreatPointsNow(user.Map));
-			slate.Set("asker", user);
-			slate.Set("map", user.Map);
-			if (Props.discovered.HasValue)
+			get
 			{
-				slate.Set("discovered", Props.discovered.Value);
+				return (CompProperties_UseEffectGiveQuest)this.props;
 			}
-			Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(Props.quest, slate);
+		}
+
+		// Token: 0x06011181 RID: 70017 RVA: 0x004E8864 File Offset: 0x004E6A64
+		public override void DoEffect(Pawn user)
+		{
+			if (this.Props.skipIfMechlinkAlreadySentMechs)
+			{
+				Mechlink mechlink = this.parent as Mechlink;
+				if (mechlink != null && mechlink.sentMechsToPlayer)
+				{
+					return;
+				}
+			}
+			Slate slate = new Slate();
+			slate.Set<float>("points", StorytellerUtility.DefaultThreatPointsNow(user.Map), false);
+			slate.Set<Pawn>("asker", user, false);
+			slate.Set<Map>("map", user.Map, false);
+			if (this.Props.discovered != null)
+			{
+				slate.Set<bool>("discovered", this.Props.discovered.Value, false);
+			}
+			Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(this.Props.quest, slate);
 			if (!quest.hidden && quest.root.sendAvailableLetter)
 			{
-				QuestUtility.SendLetterQuestAvailable(quest);
+				QuestUtility.SendLetterQuestAvailable(quest, null);
 			}
 		}
 	}

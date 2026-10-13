@@ -1,114 +1,125 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_EmptyRoomRounded : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private List<IntVec3> wallCells = new List<IntVec3>();
-
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x02003916 RID: 14614
+	public class SymbolResolver_EmptyRoomRounded : SymbolResolver
 	{
-		if (!base.CanResolve(rp))
+		// Token: 0x06014248 RID: 82504 RVA: 0x0060026C File Offset: 0x005FE46C
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return false;
-		}
-		if (rp.cornerRadius.HasValue)
-		{
-			int num = Mathf.Min(rp.rect.Width, rp.rect.Height);
-			if (rp.cornerRadius * 2 > num)
+			if (!base.CanResolve(rp))
 			{
 				return false;
 			}
+			if (rp.cornerRadius != null)
+			{
+				int num = Mathf.Min(rp.rect.Width, rp.rect.Height);
+				int? num2 = rp.cornerRadius * 2;
+				int num3 = num;
+				if (num2.GetValueOrDefault() > num3 & num2 != null)
+				{
+					return false;
+				}
+			}
+			return true;
 		}
-		return true;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		ThingDef thingDef = rp.wallStuff ?? BaseGenUtility.RandomCheapWallStuff(rp.faction, notVeryFlammable: true);
-		TerrainDef floorDef = rp.floorDef ?? BaseGenUtility.CorrespondingTerrainDef(thingDef, beautiful: true, rp.faction);
-		int num = Mathf.Min(rp.rect.Width, rp.rect.Height);
-		int num2 = rp.cornerRadius ?? (num / 4);
-		if (num2 > num / 2)
+		// Token: 0x06014249 RID: 82505 RVA: 0x006002F4 File Offset: 0x005FE4F4
+		public override void Resolve(ResolveParams rp)
 		{
-			num2 = Mathf.FloorToInt((float)num / 2f);
-		}
-		CellRect cellRect = new CellRect(rp.rect.minX + num2, rp.rect.minZ, rp.rect.Width - 2 * num2, rp.rect.Height);
-		CellRect cellRect2 = new CellRect(rp.rect.minX, rp.rect.minZ + num2, num2, rp.rect.Height - 2 * num2);
-		CellRect cellRect3 = new CellRect(rp.rect.maxX - num2 + 1, rp.rect.minZ + num2, num2, rp.rect.Height - 2 * num2);
-		foreach (IntVec3 corner in rp.rect.Corners)
-		{
-			int newX = ((corner.x < rp.rect.CenterCell.x) ? 1 : (-1));
-			int newZ = ((corner.z < rp.rect.CenterCell.z) ? 1 : (-1));
-			IntVec3 intVec = new IntVec3(newX, 0, newZ);
-			IntVec3 center = corner + intVec * num2;
-			CellRect cellRect4 = new CellRect(Mathf.Min(center.x, corner.x), Mathf.Min(center.z, corner.z), num2, num2);
-			foreach (IntVec3 item in GenRadial.RadialCellsAround(center, num2 - 1, num2))
+			ThingDef thingDef = rp.wallStuff ?? BaseGenUtility.RandomCheapWallStuff(rp.faction, true);
+			TerrainDef floorDef = rp.floorDef ?? BaseGenUtility.CorrespondingTerrainDef(thingDef, true, rp.faction);
+			int num = Mathf.Min(rp.rect.Width, rp.rect.Height);
+			int num2 = rp.cornerRadius ?? (num / 4);
+			if (num2 > num / 2)
 			{
-				if (cellRect4.Contains(item))
-				{
-					ResolveParams resolveParams = rp;
-					resolveParams.wallStuff = thingDef;
-					resolveParams.rect = CellRect.CenteredOn(item, 1, 1);
-					BaseGen.symbolStack.Push("edgeWalls", resolveParams);
-				}
+				num2 = Mathf.FloorToInt((float)num / 2f);
 			}
-			foreach (IntVec3 item2 in GenRadial.RadialCellsAround(center, num2, useCenter: true))
+			CellRect cellRect = new CellRect(rp.rect.minX + num2, rp.rect.minZ, rp.rect.Width - 2 * num2, rp.rect.Height);
+			CellRect cellRect2 = new CellRect(rp.rect.minX, rp.rect.minZ + num2, num2, rp.rect.Height - 2 * num2);
+			CellRect cellRect3 = new CellRect(rp.rect.maxX - num2 + 1, rp.rect.minZ + num2, num2, rp.rect.Height - 2 * num2);
+			foreach (IntVec3 intVec in rp.rect.Corners)
 			{
-				if (cellRect4.Contains(item2))
+				int newX = (intVec.x < rp.rect.CenterCell.x) ? 1 : -1;
+				int newZ = (intVec.z < rp.rect.CenterCell.z) ? 1 : -1;
+				IntVec3 a = new IntVec3(newX, 0, newZ);
+				IntVec3 intVec2 = intVec + a * num2;
+				CellRect cellRect4 = new CellRect(Mathf.Min(intVec2.x, intVec.x), Mathf.Min(intVec2.z, intVec.z), num2, num2);
+				foreach (IntVec3 intVec3 in GenRadial.RadialCellsAround(intVec2, (float)(num2 - 1), (float)num2))
 				{
-					ResolveParams resolveParams2 = rp;
-					resolveParams2.rect = CellRect.CenteredOn(item2, 1, 1);
-					resolveParams2.floorDef = floorDef;
-					if (!rp.noRoof.HasValue || !rp.noRoof.Value)
+					if (cellRect4.Contains(intVec3))
 					{
-						BaseGen.symbolStack.Push("roof", resolveParams2);
+						ResolveParams resolveParams = rp;
+						resolveParams.wallStuff = thingDef;
+						resolveParams.rect = CellRect.CenteredOn(intVec3, 1, 1);
+						BaseGen.symbolStack.Push("edgeWalls", resolveParams, null);
 					}
-					BaseGen.symbolStack.Push("floor", resolveParams2);
-					BaseGen.symbolStack.Push("clear", resolveParams2);
 				}
-			}
-		}
-		wallCells.Clear();
-		if ((float)cellRect.Area > 0f)
-		{
-			wallCells.AddRange(cellRect.GetEdgeCells(Rot4.North));
-			wallCells.AddRange(cellRect.GetEdgeCells(Rot4.South));
-		}
-		if ((float)cellRect2.Area > 0f)
-		{
-			wallCells.AddRange(cellRect2.GetEdgeCells(Rot4.West));
-		}
-		if ((float)cellRect3.Area > 0f)
-		{
-			wallCells.AddRange(cellRect3.GetEdgeCells(Rot4.East));
-		}
-		ResolveParams resolveParams3 = rp;
-		foreach (IntVec3 wallCell in wallCells)
-		{
-			resolveParams3.wallStuff = thingDef;
-			resolveParams3.rect = CellRect.CenteredOn(wallCell, 1, 1);
-			BaseGen.symbolStack.Push("edgeWalls", resolveParams3);
-		}
-		ResolveParams resolveParams4 = rp;
-		resolveParams4.floorDef = floorDef;
-		CellRect[] array = new CellRect[3] { cellRect, cellRect2, cellRect3 };
-		for (int i = 0; i < array.Length; i++)
-		{
-			CellRect rect = array[i];
-			if (!((float)rect.Area <= 0f))
-			{
-				resolveParams4.rect = rect;
-				if (!rp.noRoof.HasValue || !rp.noRoof.Value)
+				foreach (IntVec3 intVec4 in GenRadial.RadialCellsAround(intVec2, (float)num2, true))
 				{
-					BaseGen.symbolStack.Push("roof", resolveParams4);
+					if (cellRect4.Contains(intVec4))
+					{
+						ResolveParams resolveParams2 = rp;
+						resolveParams2.rect = CellRect.CenteredOn(intVec4, 1, 1);
+						resolveParams2.floorDef = floorDef;
+						if (rp.noRoof == null || !rp.noRoof.Value)
+						{
+							BaseGen.symbolStack.Push("roof", resolveParams2, null);
+						}
+						BaseGen.symbolStack.Push("floor", resolveParams2, null);
+						BaseGen.symbolStack.Push("clear", resolveParams2, null);
+					}
 				}
-				BaseGen.symbolStack.Push("floor", resolveParams4);
-				BaseGen.symbolStack.Push("clear", resolveParams4);
 			}
+			this.wallCells.Clear();
+			if ((float)cellRect.Area > 0f)
+			{
+				this.wallCells.AddRange(cellRect.GetEdgeCells(Rot4.North));
+				this.wallCells.AddRange(cellRect.GetEdgeCells(Rot4.South));
+			}
+			if ((float)cellRect2.Area > 0f)
+			{
+				this.wallCells.AddRange(cellRect2.GetEdgeCells(Rot4.West));
+			}
+			if ((float)cellRect3.Area > 0f)
+			{
+				this.wallCells.AddRange(cellRect3.GetEdgeCells(Rot4.East));
+			}
+			ResolveParams resolveParams3 = rp;
+			foreach (IntVec3 center in this.wallCells)
+			{
+				resolveParams3.wallStuff = thingDef;
+				resolveParams3.rect = CellRect.CenteredOn(center, 1, 1);
+				BaseGen.symbolStack.Push("edgeWalls", resolveParams3, null);
+			}
+			ResolveParams resolveParams4 = rp;
+			resolveParams4.floorDef = floorDef;
+			foreach (CellRect rect in new CellRect[]
+			{
+				cellRect,
+				cellRect2,
+				cellRect3
+			})
+			{
+				if ((float)rect.Area > 0f)
+				{
+					resolveParams4.rect = rect;
+					if (rp.noRoof == null || !rp.noRoof.Value)
+					{
+						BaseGen.symbolStack.Push("roof", resolveParams4, null);
+					}
+					BaseGen.symbolStack.Push("floor", resolveParams4, null);
+					BaseGen.symbolStack.Push("clear", resolveParams4, null);
+				}
+			}
+			this.wallCells.Clear();
 		}
-		wallCells.Clear();
+
+		// Token: 0x0400DED0 RID: 57040
+		private List<IntVec3> wallCells = new List<IntVec3>();
 	}
 }

@@ -1,6 +1,11 @@
-namespace Verse.Sound;
+﻿using System;
 
-public interface ISizeReporter
+namespace Verse.Sound
 {
-	float CurrentSize();
+	// Token: 0x02000E3A RID: 3642
+	public interface ISizeReporter
+	{
+		// Token: 0x06005BE8 RID: 23528
+		float CurrentSize();
+	}
 }

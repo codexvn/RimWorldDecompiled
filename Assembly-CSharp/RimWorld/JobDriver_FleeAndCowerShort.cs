@@ -1,28 +1,37 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_FleeAndCowerShort : JobDriver_Flee
+namespace RimWorld
 {
-	private const int CowerTicks = 30;
-
-	public override string GetReport()
+	// Token: 0x02001281 RID: 4737
+	public class JobDriver_FleeAndCowerShort : JobDriver_Flee
 	{
-		if (pawn.CurJob == job && pawn.Position == job.GetTarget(TargetIndex.A).Cell)
+		// Token: 0x060073E6 RID: 29670 RVA: 0x0023900C File Offset: 0x0023720C
+		public override string GetReport()
 		{
-			return "ReportCowering".Translate();
+			if (this.pawn.CurJob == this.job && this.pawn.Position == this.job.GetTarget(TargetIndex.A).Cell)
+			{
+				return "ReportCowering".Translate();
+			}
+			return base.GetReport();
 		}
-		return base.GetReport();
-	}
 
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		foreach (Toil item in base.MakeNewToils())
+		// Token: 0x060073E7 RID: 29671 RVA: 0x00239068 File Offset: 0x00237268
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			yield return item;
+			foreach (Toil toil in base.MakeNewToils())
+			{
+				yield return toil;
+			}
+			IEnumerator<Toil> enumerator = null;
+			yield return Toils_General.Wait(30, TargetIndex.None);
+			yield break;
+			yield break;
 		}
-		yield return Toils_General.Wait(30);
+
+		// Token: 0x04004FC9 RID: 20425
+		private const int CowerTicks = 30;
 	}
 }

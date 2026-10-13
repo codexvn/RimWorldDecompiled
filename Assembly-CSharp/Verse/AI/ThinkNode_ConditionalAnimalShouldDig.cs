@@ -1,9 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class ThinkNode_ConditionalAnimalShouldDig : ThinkNode_Conditional
+namespace Verse.AI
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02000FF5 RID: 4085
+	public class ThinkNode_ConditionalAnimalShouldDig : ThinkNode_Conditional
 	{
-		return pawn.playerSettings.animalDig;
+		// Token: 0x06006478 RID: 25720 RVA: 0x001FD620 File Offset: 0x001FB820
+		protected override bool Satisfied(Pawn pawn)
+		{
+			return pawn.playerSettings.animalDig;
+		}
 	}
 }

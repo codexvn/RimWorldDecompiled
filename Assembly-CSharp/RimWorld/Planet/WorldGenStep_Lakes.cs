@@ -1,43 +1,70 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldGenStep_Lakes : WorldGenStep
+namespace RimWorld.Planet
 {
-	private const int LakeMaxSize = 15;
-
-	public override int SeedPart => 401463656;
-
-	public override void GenerateFresh(string seed, PlanetLayer layer)
+	// Token: 0x02003CF3 RID: 15603
+	public class WorldGenStep_Lakes : WorldGenStep
 	{
-		GenerateLakes(layer);
-	}
-
-	private void GenerateLakes(PlanetLayer layer)
-	{
-		bool[] touched = new bool[layer.TilesCount];
-		List<int> oceanChunk = new List<int>();
-		foreach (Tile tile2 in layer.Tiles)
+		// Token: 0x170034EC RID: 13548
+		// (get) Token: 0x060153B7 RID: 86967 RVA: 0x00659E78 File Offset: 0x00658078
+		public override int SeedPart
 		{
-			PlanetTile tile = tile2.tile;
-			if (touched[tile.tileId] || layer[tile.tileId].PrimaryBiome != BiomeDefOf.Ocean)
+			get
 			{
-				continue;
+				return 401463656;
 			}
-			layer.Filler.FloodFill(tile, (PlanetTile tid) => layer[tid].PrimaryBiome == BiomeDefOf.Ocean, delegate(PlanetTile planetTile)
+		}
+
+		// Token: 0x060153B8 RID: 86968 RVA: 0x00659E7F File Offset: 0x0065807F
+		public override void GenerateFresh(string seed, PlanetLayer layer)
+		{
+			this.GenerateLakes(layer);
+		}
+
+		// Token: 0x060153B9 RID: 86969 RVA: 0x00659E88 File Offset: 0x00658088
+		private void GenerateLakes(PlanetLayer layer)
+		{
+			bool[] touched = new bool[layer.TilesCount];
+			List<int> oceanChunk = new List<int>();
+			Predicate<PlanetTile> <>9__0;
+			Action<PlanetTile> <>9__1;
+			foreach (Tile tile3 in layer.Tiles)
 			{
-				oceanChunk.Add(planetTile.tileId);
-				touched[planetTile.tileId] = true;
-			});
-			if (oceanChunk.Count <= 15)
-			{
-				for (int num = 0; num < oceanChunk.Count; num++)
+				PlanetTile tile2 = tile3.tile;
+				if (!touched[tile2.tileId] && layer[tile2.tileId].PrimaryBiome == BiomeDefOf.Ocean)
 				{
-					layer[oceanChunk[num]].PrimaryBiome = BiomeDefOf.Lake;
+					WorldFloodFiller filler = layer.Filler;
+					PlanetTile rootTile = tile2;
+					Predicate<PlanetTile> passCheck;
+					if ((passCheck = <>9__0) == null)
+					{
+						passCheck = (<>9__0 = ((PlanetTile tid) => layer[tid].PrimaryBiome == BiomeDefOf.Ocean));
+					}
+					Action<PlanetTile> processor;
+					if ((processor = <>9__1) == null)
+					{
+						processor = (<>9__1 = delegate(PlanetTile tile)
+						{
+							oceanChunk.Add(tile.tileId);
+							touched[tile.tileId] = true;
+						});
+					}
+					filler.FloodFill(rootTile, passCheck, processor, int.MaxValue, null);
+					if (oceanChunk.Count <= 15)
+					{
+						for (int i = 0; i < oceanChunk.Count; i++)
+						{
+							layer[oceanChunk[i]].PrimaryBiome = BiomeDefOf.Lake;
+						}
+					}
+					oceanChunk.Clear();
 				}
 			}
-			oceanChunk.Clear();
 		}
+
+		// Token: 0x0400ECB6 RID: 60598
+		private const int LakeMaxSize = 15;
 	}
 }

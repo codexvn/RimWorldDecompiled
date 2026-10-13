@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class CompProperties_ScannerMineralsDeep : CompProperties_Scanner
+namespace RimWorld
 {
-	public CompProperties_ScannerMineralsDeep()
+	// Token: 0x02002F09 RID: 12041
+	public class CompProperties_ScannerMineralsDeep : CompProperties_Scanner
 	{
-		compClass = typeof(CompDeepScanner);
+		// Token: 0x0601100B RID: 69643 RVA: 0x004E42BB File Offset: 0x004E24BB
+		public CompProperties_ScannerMineralsDeep()
+		{
+			this.compClass = typeof(CompDeepScanner);
+		}
 	}
 }

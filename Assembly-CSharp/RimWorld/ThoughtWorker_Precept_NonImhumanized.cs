@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_Precept_NonImhumanized : ThoughtWorker_Precept
+namespace RimWorld
 {
-	protected override ThoughtState ShouldHaveThought(Pawn p)
+	// Token: 0x0200183E RID: 6206
+	public class ThoughtWorker_Precept_NonImhumanized : ThoughtWorker_Precept
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x06008F53 RID: 36691 RVA: 0x002A583A File Offset: 0x002A3A3A
+		protected override ThoughtState ShouldHaveThought(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (!ModsConfig.AnomalyActive)
+			{
+				return ThoughtState.Inactive;
+			}
+			return !p.Inhumanized();
 		}
-		return !p.Inhumanized();
 	}
 }

@@ -1,32 +1,38 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public static class SettlementNameGenerator
+namespace RimWorld.Planet
 {
-	private static readonly List<string> usedNames = new List<string>();
-
-	public static string GenerateSettlementName(WorldObject worldObject, RulePackDef rulePack = null)
+	// Token: 0x02003DBE RID: 15806
+	public static class SettlementNameGenerator
 	{
-		if (rulePack == null)
+		// Token: 0x060158BF RID: 88255 RVA: 0x00674074 File Offset: 0x00672274
+		public static string GenerateSettlementName(WorldObject worldObject, RulePackDef rulePack = null)
 		{
-			if (worldObject.Faction?.def.settlementNameMaker == null)
+			if (rulePack == null)
 			{
-				return worldObject.def.label;
+				Faction faction = worldObject.Faction;
+				if (((faction != null) ? faction.def.settlementNameMaker : null) == null)
+				{
+					return worldObject.def.label;
+				}
+				rulePack = worldObject.Faction.def.settlementNameMaker;
 			}
-			rulePack = worldObject.Faction.def.settlementNameMaker;
-		}
-		usedNames.Clear();
-		List<Settlement> settlements = Find.WorldObjects.Settlements;
-		for (int i = 0; i < settlements.Count; i++)
-		{
-			Settlement settlement = settlements[i];
-			if (settlement.Name != null)
+			SettlementNameGenerator.usedNames.Clear();
+			List<Settlement> settlements = Find.WorldObjects.Settlements;
+			for (int i = 0; i < settlements.Count; i++)
 			{
-				usedNames.Add(settlement.Name);
+				Settlement settlement = settlements[i];
+				if (settlement.Name != null)
+				{
+					SettlementNameGenerator.usedNames.Add(settlement.Name);
+				}
 			}
+			return NameGenerator.GenerateName(rulePack, SettlementNameGenerator.usedNames, true, null);
 		}
-		return NameGenerator.GenerateName(rulePack, usedNames, appendNumberIfNameUsed: true);
+
+		// Token: 0x0400EF95 RID: 61333
+		private static readonly List<string> usedNames = new List<string>();
 	}
 }

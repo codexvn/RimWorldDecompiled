@@ -1,117 +1,118 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_OutdoorsPath : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static readonly List<IntVec3> cellsInRandomOrder = new List<IntVec3>();
-
-	private static readonly List<IntVec3> path = new List<IntVec3>();
-
-	private static readonly SimpleCurve ChanceToSkipPathOverDistanceCurve = new SimpleCurve
+	// Token: 0x0200392C RID: 14636
+	public class SymbolResolver_OutdoorsPath : SymbolResolver
 	{
-		new CurvePoint(10f, 0f),
-		new CurvePoint(20f, 0f),
-		new CurvePoint(50f, 1f)
-	};
-
-	public override bool CanResolve(ResolveParams rp)
-	{
-		return base.CanResolve(rp);
-	}
-
-	public override void Resolve(ResolveParams rp)
-	{
-		cellsInRandomOrder.Clear();
-		cellsInRandomOrder.AddRange(rp.rect.Cells);
-		cellsInRandomOrder.Shuffle();
-		Map map = BaseGen.globalSettings.map;
-		for (int i = 0; i < cellsInRandomOrder.Count; i++)
+		// Token: 0x06014297 RID: 82583 RVA: 0x005FC6A6 File Offset: 0x005FA8A6
+		public override bool CanResolve(ResolveParams rp)
 		{
-			IntVec3 intVec = cellsInRandomOrder[i];
-			if (intVec.GetDoor(BaseGen.globalSettings.map) == null || !map.reachability.CanReachMapEdge(intVec, TraverseParms.For(TraverseMode.NoPassClosedDoorsOrWater)))
+			return base.CanResolve(rp);
+		}
+
+		// Token: 0x06014298 RID: 82584 RVA: 0x00601E34 File Offset: 0x00600034
+		public override void Resolve(ResolveParams rp)
+		{
+			SymbolResolver_OutdoorsPath.cellsInRandomOrder.Clear();
+			SymbolResolver_OutdoorsPath.cellsInRandomOrder.AddRange(rp.rect.Cells);
+			SymbolResolver_OutdoorsPath.cellsInRandomOrder.Shuffle<IntVec3>();
+			Map map = BaseGen.globalSettings.map;
+			for (int i = 0; i < SymbolResolver_OutdoorsPath.cellsInRandomOrder.Count; i++)
 			{
-				continue;
-			}
-			bool found = false;
-			IntVec3 foundDest = IntVec3.Invalid;
-			map.floodFiller.FloodFill(intVec, (IntVec3 x) => !found && CanTraverse(x), delegate(IntVec3 x)
-			{
-				if (x.OnEdge(map))
+				IntVec3 intVec = SymbolResolver_OutdoorsPath.cellsInRandomOrder[i];
+				if (intVec.GetDoor(BaseGen.globalSettings.map) != null && map.reachability.CanReachMapEdge(intVec, TraverseParms.For(TraverseMode.NoPassClosedDoorsOrWater, Danger.Deadly, false, false, false, true, false)))
 				{
-					found = true;
-					foundDest = x;
-				}
-			}, int.MaxValue, rememberParents: true);
-			if (!found)
-			{
-				continue;
-			}
-			path.Clear();
-			map.floodFiller.ReconstructLastFloodFillPath(foundDest, path);
-			for (int num = 0; num < path.Count; num++)
-			{
-				IntVec3 intVec2 = path[num];
-				if (Rand.Chance(ChanceToSkipPathOverDistanceCurve.Evaluate(intVec.DistanceTo(intVec2))) || !CanPlacePath(intVec2))
-				{
-					continue;
-				}
-				List<Thing> thingList = intVec2.GetThingList(map);
-				for (int num2 = thingList.Count - 1; num2 >= 0; num2--)
-				{
-					if (thingList[num2].def.destroyable)
+					bool found = false;
+					IntVec3 foundDest = IntVec3.Invalid;
+					map.floodFiller.FloodFill(intVec, (IntVec3 x) => !found && this.CanTraverse(x), delegate(IntVec3 x)
 					{
-						thingList[num2].Destroy();
+						if (x.OnEdge(map))
+						{
+							found = true;
+							foundDest = x;
+						}
+					}, int.MaxValue, true, null);
+					if (found)
+					{
+						SymbolResolver_OutdoorsPath.path.Clear();
+						map.floodFiller.ReconstructLastFloodFillPath(foundDest, SymbolResolver_OutdoorsPath.path);
+						for (int j = 0; j < SymbolResolver_OutdoorsPath.path.Count; j++)
+						{
+							IntVec3 intVec2 = SymbolResolver_OutdoorsPath.path[j];
+							if (!Rand.Chance(SymbolResolver_OutdoorsPath.ChanceToSkipPathOverDistanceCurve.Evaluate(intVec.DistanceTo(intVec2))) && this.CanPlacePath(intVec2))
+							{
+								List<Thing> thingList = intVec2.GetThingList(map);
+								for (int k = thingList.Count - 1; k >= 0; k--)
+								{
+									if (thingList[k].def.destroyable)
+									{
+										thingList[k].Destroy(DestroyMode.Vanish);
+									}
+								}
+								map.terrainGrid.SetTerrain(intVec2, rp.floorDef ?? TerrainDefOf.Gravel);
+							}
+						}
+						break;
 					}
 				}
-				map.terrainGrid.SetTerrain(intVec2, rp.floorDef ?? TerrainDefOf.Gravel);
 			}
-			break;
+			SymbolResolver_OutdoorsPath.path.Clear();
+			SymbolResolver_OutdoorsPath.cellsInRandomOrder.Clear();
 		}
-		path.Clear();
-		cellsInRandomOrder.Clear();
-	}
 
-	private bool CanTraverse(IntVec3 c)
-	{
-		Map map = BaseGen.globalSettings.map;
-		if (c.GetDoor(map) == null)
+		// Token: 0x06014299 RID: 82585 RVA: 0x00602054 File Offset: 0x00600254
+		private bool CanTraverse(IntVec3 c)
 		{
-			Room room = c.GetRoom(map);
-			if (room != null && !room.PsychologicallyOutdoors)
+			Map map = BaseGen.globalSettings.map;
+			if (c.GetDoor(map) == null)
 			{
-				return false;
+				Room room = c.GetRoom(map);
+				if (room != null && !room.PsychologicallyOutdoors)
+				{
+					return false;
+				}
 			}
+			Building edifice = c.GetEdifice(map);
+			return !this.IsWallOrRock(edifice);
 		}
-		Building edifice = c.GetEdifice(map);
-		if (IsWallOrRock(edifice))
-		{
-			return false;
-		}
-		return true;
-	}
 
-	private bool CanPlacePath(IntVec3 c)
-	{
-		Map map = BaseGen.globalSettings.map;
-		if (c.GetDoor(map) != null || c.GetTerrain(map).IsWater)
+		// Token: 0x0601429A RID: 82586 RVA: 0x006020A0 File Offset: 0x006002A0
+		private bool CanPlacePath(IntVec3 c)
 		{
-			return false;
+			Map map = BaseGen.globalSettings.map;
+			return c.GetDoor(map) == null && !c.GetTerrain(map).IsWater;
 		}
-		return true;
-	}
 
-	private bool IsWallOrRock(Building b)
-	{
-		if (b != null)
+		// Token: 0x0601429B RID: 82587 RVA: 0x00601012 File Offset: 0x005FF212
+		private bool IsWallOrRock(Building b)
 		{
-			if (b.def != ThingDefOf.Wall)
+			return b != null && (b.def == ThingDefOf.Wall || b.def.building.isNaturalRock);
+		}
+
+		// Token: 0x0400DEF5 RID: 57077
+		private static readonly List<IntVec3> cellsInRandomOrder = new List<IntVec3>();
+
+		// Token: 0x0400DEF6 RID: 57078
+		private static readonly List<IntVec3> path = new List<IntVec3>();
+
+		// Token: 0x0400DEF7 RID: 57079
+		private static readonly SimpleCurve ChanceToSkipPathOverDistanceCurve = new SimpleCurve
+		{
 			{
-				return b.def.building.isNaturalRock;
+				new CurvePoint(10f, 0f),
+				true
+			},
+			{
+				new CurvePoint(20f, 0f),
+				true
+			},
+			{
+				new CurvePoint(50f, 1f),
+				true
 			}
-			return true;
-		}
-		return false;
+		};
 	}
 }

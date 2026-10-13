@@ -1,109 +1,121 @@
-using System;
+﻿using System;
 using System.IO;
 using RimWorld;
 using Steamworks;
 using UnityEngine;
 using Verse.Steam;
 
-namespace Verse;
-
-public static class ScreenshotTaker
+namespace Verse
 {
-	private static int lastShotFrame = -999;
-
-	private static int screenshotCount = 0;
-
-	private static string lastShotFilePath;
-
-	private static bool suppressMessage;
-
-	private static bool takeScreenshot;
-
-	public static void Update()
+	// Token: 0x02000D57 RID: 3415
+	public static class ScreenshotTaker
 	{
-		if (LongEventHandler.ShouldWaitForEvent)
+		// Token: 0x060056F0 RID: 22256 RVA: 0x001BF390 File Offset: 0x001BD590
+		public static void Update()
 		{
-			return;
-		}
-		if (KeyBindingDefOf.TakeScreenshot.JustPressed || takeScreenshot)
-		{
-			TakeShot();
-			takeScreenshot = false;
-		}
-		if (Time.frameCount == lastShotFrame + 1)
-		{
-			if (suppressMessage)
+			if (LongEventHandler.ShouldWaitForEvent)
 			{
-				suppressMessage = false;
+				return;
 			}
-			else
+			if (KeyBindingDefOf.TakeScreenshot.JustPressed || ScreenshotTaker.takeScreenshot)
 			{
-				Messages.Message("MessageScreenshotSavedAs".Translate(lastShotFilePath), MessageTypeDefOf.TaskCompletion, historical: false);
+				ScreenshotTaker.TakeShot();
+				ScreenshotTaker.takeScreenshot = false;
+			}
+			if (Time.frameCount == ScreenshotTaker.lastShotFrame + 1)
+			{
+				if (ScreenshotTaker.suppressMessage)
+				{
+					ScreenshotTaker.suppressMessage = false;
+					return;
+				}
+				Messages.Message("MessageScreenshotSavedAs".Translate(ScreenshotTaker.lastShotFilePath), MessageTypeDefOf.TaskCompletion, false);
 			}
 		}
-	}
 
-	public static void QueueSilentScreenshot()
-	{
-		takeScreenshot = (suppressMessage = true);
-	}
-
-	private static void TakeShot()
-	{
-		if (SteamManager.Initialized && SteamUtils.IsOverlayEnabled())
+		// Token: 0x060056F1 RID: 22257 RVA: 0x001BF403 File Offset: 0x001BD603
+		public static void QueueSilentScreenshot()
 		{
+			ScreenshotTaker.takeScreenshot = (ScreenshotTaker.suppressMessage = true);
+		}
+
+		// Token: 0x060056F2 RID: 22258 RVA: 0x001BF414 File Offset: 0x001BD614
+		private static void TakeShot()
+		{
+			if (SteamManager.Initialized && SteamUtils.IsOverlayEnabled())
+			{
+				try
+				{
+					SteamScreenshots.TriggerScreenshot();
+					return;
+				}
+				catch (Exception ex)
+				{
+					string str = "Could not take Steam screenshot. Steam offline? Taking normal screenshot. Exception: ";
+					Exception ex2 = ex;
+					Log.Warning(str + ((ex2 != null) ? ex2.ToString() : null));
+					ScreenshotTaker.TakeNonSteamShot(null);
+					return;
+				}
+			}
+			ScreenshotTaker.TakeNonSteamShot(null);
+		}
+
+		// Token: 0x060056F3 RID: 22259 RVA: 0x001BF474 File Offset: 0x001BD674
+		public static void TakeNonSteamShot(string fileName = null)
+		{
+			string screenshotFolderPath = GenFilePaths.ScreenshotFolderPath;
 			try
 			{
-				SteamScreenshots.TriggerScreenshot();
-				return;
+				DirectoryInfo directoryInfo = new DirectoryInfo(screenshotFolderPath);
+				if (!directoryInfo.Exists)
+				{
+					directoryInfo.Create();
+				}
+				string text;
+				if (fileName != null)
+				{
+					text = string.Format("{0}{1}{2}.png", screenshotFolderPath, Path.DirectorySeparatorChar, fileName);
+				}
+				else
+				{
+					do
+					{
+						ScreenshotTaker.screenshotCount++;
+						text = string.Concat(new string[]
+						{
+							screenshotFolderPath,
+							Path.DirectorySeparatorChar.ToString(),
+							"screenshot",
+							ScreenshotTaker.screenshotCount.ToString(),
+							".png"
+						});
+					}
+					while (File.Exists(text));
+				}
+				ScreenCapture.CaptureScreenshot(text);
+				ScreenshotTaker.lastShotFrame = Time.frameCount;
+				ScreenshotTaker.lastShotFilePath = text;
 			}
 			catch (Exception ex)
 			{
-				Log.Warning("Could not take Steam screenshot. Steam offline? Taking normal screenshot. Exception: " + ex);
-				TakeNonSteamShot();
-				return;
+				Log.Error("Failed to save screenshot in " + screenshotFolderPath + "\nException follows:\n" + ex.ToString());
 			}
 		}
-		TakeNonSteamShot();
-	}
 
-	public static void TakeNonSteamShot(string fileName = null)
-	{
-		string screenshotFolderPath = GenFilePaths.ScreenshotFolderPath;
-		try
-		{
-			DirectoryInfo directoryInfo = new DirectoryInfo(screenshotFolderPath);
-			if (!directoryInfo.Exists)
-			{
-				directoryInfo.Create();
-			}
-			string text;
-			if (fileName != null)
-			{
-				text = $"{screenshotFolderPath}{Path.DirectorySeparatorChar}{fileName}.png";
-			}
-			else
-			{
-				do
-				{
-					screenshotCount++;
-					string[] obj = new string[5] { screenshotFolderPath, null, null, null, null };
-					char directorySeparatorChar = Path.DirectorySeparatorChar;
-					obj[1] = directorySeparatorChar.ToString();
-					obj[2] = "screenshot";
-					obj[3] = screenshotCount.ToString();
-					obj[4] = ".png";
-					text = string.Concat(obj);
-				}
-				while (File.Exists(text));
-			}
-			ScreenCapture.CaptureScreenshot(text);
-			lastShotFrame = Time.frameCount;
-			lastShotFilePath = text;
-		}
-		catch (Exception ex)
-		{
-			Log.Error("Failed to save screenshot in " + screenshotFolderPath + "\nException follows:\n" + ex.ToString());
-		}
+		// Token: 0x04003F49 RID: 16201
+		private static int lastShotFrame = -999;
+
+		// Token: 0x04003F4A RID: 16202
+		private static int screenshotCount = 0;
+
+		// Token: 0x04003F4B RID: 16203
+		private static string lastShotFilePath;
+
+		// Token: 0x04003F4C RID: 16204
+		private static bool suppressMessage;
+
+		// Token: 0x04003F4D RID: 16205
+		private static bool takeScreenshot;
 	}
 }

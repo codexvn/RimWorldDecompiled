@@ -1,174 +1,251 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse.AI.Group;
-
-public class PsychicRitual : IExposable, ILoadReferenceable
+namespace Verse.AI.Group
 {
-	public enum LeftOrCanceled
+	// Token: 0x02001055 RID: 4181
+	public class PsychicRitual : IExposable, ILoadReferenceable
 	{
-		Invalid,
-		Left,
-		Canceled
-	}
-
-	public Lord lord;
-
-	public PsychicRitualDef def;
-
-	public PsychicRitualRoleAssignments assignments;
-
-	public bool canceled;
-
-	public bool succeeded;
-
-	private int loadID = -1;
-
-	public float power;
-
-	public float? maxPower;
-
-	public Map Map => lord.Map;
-
-	public float PowerPercent
-	{
-		get
+		// Token: 0x17000FE6 RID: 4070
+		// (get) Token: 0x06006606 RID: 26118 RVA: 0x00205083 File Offset: 0x00203283
+		public Map Map
 		{
-			if (!maxPower.HasValue)
+			get
 			{
-				return Mathf.Clamp01(power);
+				return this.lord.Map;
 			}
-			return Mathf.Clamp01(power / maxPower.Value);
 		}
-	}
 
-	public PsychicRitual()
-	{
-		loadID = Find.UniqueIDsManager.GetNextPsychicRitualID();
-	}
-
-	public virtual void Start()
-	{
-		power = 0f;
-		foreach (var (psychicRitualRoleDef2, list2) in assignments.RoleAssignments)
+		// Token: 0x17000FE7 RID: 4071
+		// (get) Token: 0x06006607 RID: 26119 RVA: 0x00205090 File Offset: 0x00203290
+		public float PowerPercent
 		{
-			foreach (Pawn item in list2)
+			get
 			{
-				if (!item.Awake() && !psychicRitualRoleDef2.ConditionAllowed(PsychicRitualRoleDef.Condition.Sleeping))
+				if (this.maxPower == null)
 				{
-					if (!item.health.capacities.CanBeAwake)
+					return Mathf.Clamp01(this.power);
+				}
+				return Mathf.Clamp01(this.power / this.maxPower.Value);
+			}
+		}
+
+		// Token: 0x06006608 RID: 26120 RVA: 0x002050C2 File Offset: 0x002032C2
+		public PsychicRitual()
+		{
+			this.loadID = Find.UniqueIDsManager.GetNextPsychicRitualID();
+		}
+
+		// Token: 0x06006609 RID: 26121 RVA: 0x002050E4 File Offset: 0x002032E4
+		public virtual void Start()
+		{
+			this.power = 0f;
+			foreach (KeyValuePair<PsychicRitualRoleDef, List<Pawn>> keyValuePair in this.assignments.RoleAssignments)
+			{
+				PsychicRitualRoleDef psychicRitualRoleDef;
+				List<Pawn> list;
+				keyValuePair.Deconstruct(out psychicRitualRoleDef, out list);
+				PsychicRitualRoleDef psychicRitualRoleDef2 = psychicRitualRoleDef;
+				foreach (Pawn pawn in list)
+				{
+					if (!pawn.Awake() && !psychicRitualRoleDef2.ConditionAllowed(PsychicRitualRoleDef.Condition.Sleeping))
 					{
-						Log.Error($"Attempting to wake {item.ToStringSafe()} for the {def.LabelCap} psychic ritual, but they cannot be awake.");
+						if (!pawn.health.capacities.CanBeAwake)
+						{
+							Log.Error(string.Format("Attempting to wake {0} for the {1} psychic ritual, but they cannot be awake.", pawn.ToStringSafe<Pawn>(), this.def.LabelCap));
+						}
+						RestUtility.WakeUp(pawn, false);
 					}
-					RestUtility.WakeUp(item, startNewJob: false);
+					if (pawn != null)
+					{
+						Pawn_JobTracker jobs = pawn.jobs;
+						if (jobs != null)
+						{
+							jobs.EndCurrentJob(JobCondition.InterruptForced, false, true);
+						}
+					}
+					if (pawn != null)
+					{
+						Pawn_JobTracker jobs2 = pawn.jobs;
+						if (jobs2 != null)
+						{
+							jobs2.ClearQueuedJobs(true);
+						}
+					}
+					if (pawn.Drafted && !psychicRitualRoleDef2.ConditionAllowed(PsychicRitualRoleDef.Condition.Drafted))
+					{
+						pawn.drafter.Drafted = false;
+					}
 				}
-				item?.jobs?.EndCurrentJob(JobCondition.InterruptForced, startNewJob: false);
-				item?.jobs?.ClearQueuedJobs();
-				if (item.Drafted && !psychicRitualRoleDef2.ConditionAllowed(PsychicRitualRoleDef.Condition.Drafted))
-				{
-					item.drafter.Drafted = false;
-				}
 			}
 		}
-	}
 
-	public virtual LeftOrCanceled LeaveOrCancelPsychicRitual(PsychicRitualRoleDef role, Pawn pawn, TaggedString reason)
-	{
-		if (def.nonRequiredPawnsMayLeave && assignments.RoleAssignedCount(role) > role.MinCount)
+		// Token: 0x0600660A RID: 26122 RVA: 0x00205230 File Offset: 0x00203430
+		public virtual PsychicRitual.LeftOrCanceled LeaveOrCancelPsychicRitual(PsychicRitualRoleDef role, Pawn pawn, TaggedString reason)
 		{
-			LeavePsychicRitual(pawn, reason);
-			return LeftOrCanceled.Left;
-		}
-		CancelPsychicRitual(reason);
-		return LeftOrCanceled.Canceled;
-	}
-
-	public virtual void CancelPsychicRitual(TaggedString reason)
-	{
-		if (lord?.faction != null && lord.faction == Faction.OfPlayer)
-		{
-			Find.PsychicRitualManager.ClearCooldown(def);
-			Messages.Message(def.PsychicRitualCanceledMessage(reason).CapitalizeFirst().EndWithPeriod(), assignments.Target, MessageTypeDefOf.NeutralEvent);
-		}
-		if (!(lord.CurLordToil is LordToil_PsychicRitual lordToil_PsychicRitual) || lordToil_PsychicRitual.RitualData.removeLordOnCancel)
-		{
-			lord.lordManager.RemoveLord(lord);
-		}
-		canceled = true;
-	}
-
-	public virtual void LeavePsychicRitual(Pawn pawn, TaggedString reason)
-	{
-		TryMessagePawnLost(pawn, reason);
-		if (lord.ownedPawns.Contains(pawn))
-		{
-			lord.Notify_PawnLost(pawn, PawnLostCondition.LordRejected);
-		}
-	}
-
-	public virtual void ReleaseAllPawnsAndBuildings()
-	{
-		lord.RemoveAllPawns();
-		lord.RemoveAllBuildings();
-	}
-
-	public void TryMessagePawnLost(Pawn pawn, TaggedString reason)
-	{
-		if (lord?.faction == Faction.OfPlayer && PawnUtility.ShouldSendNotificationAbout(pawn))
-		{
-			Messages.Message(def.LeftPsychicRitualMessage(pawn, reason).CapitalizeFirst().EndWithPeriod(), pawn, MessageTypeDefOf.NeutralEvent, historical: false);
-		}
-	}
-
-	public virtual void Notify_PawnLost(Pawn pawn, PawnLostCondition cond)
-	{
-		if (pawn.jobs?.curJob?.lord == lord)
-		{
-			pawn.jobs?.EndCurrentJob(JobCondition.InterruptForced);
-		}
-		if (cond != PawnLostCondition.LordRejected && !succeeded)
-		{
-			TaggedString reason = PsychicRitualRoleDef.PawnLostConditionToPsychicRitualReason(this, pawn, cond);
-			PsychicRitualRoleDef psychicRitualRoleDef = assignments.RoleForPawn(pawn);
-			if (psychicRitualRoleDef != null && assignments.RoleAssignedCount(psychicRitualRoleDef) <= psychicRitualRoleDef.MinCount)
+			if (this.def.nonRequiredPawnsMayLeave && this.assignments.RoleAssignedCount(role) > role.MinCount)
 			{
-				CancelPsychicRitual(reason);
+				this.LeavePsychicRitual(pawn, reason);
+				return PsychicRitual.LeftOrCanceled.Left;
 			}
-			else if (!def.nonRequiredPawnsMayLeave)
+			this.CancelPsychicRitual(reason);
+			return PsychicRitual.LeftOrCanceled.Canceled;
+		}
+
+		// Token: 0x0600660B RID: 26123 RVA: 0x00205268 File Offset: 0x00203468
+		public virtual void CancelPsychicRitual(TaggedString reason)
+		{
+			Lord lord = this.lord;
+			if (((lord != null) ? lord.faction : null) != null && this.lord.faction == Faction.OfPlayer)
 			{
-				CancelPsychicRitual(reason);
+				Find.PsychicRitualManager.ClearCooldown(this.def);
+				Messages.Message(this.def.PsychicRitualCanceledMessage(reason).CapitalizeFirst().EndWithPeriod(), this.assignments.Target, MessageTypeDefOf.NeutralEvent, true);
 			}
-			else if (lord.ownedPawns.Contains(pawn))
+			LordToil_PsychicRitual lordToil_PsychicRitual = this.lord.CurLordToil as LordToil_PsychicRitual;
+			if (lordToil_PsychicRitual == null || lordToil_PsychicRitual.RitualData.removeLordOnCancel)
 			{
-				TryMessagePawnLost(pawn, reason);
+				this.lord.lordManager.RemoveLord(this.lord);
+			}
+			this.canceled = true;
+		}
+
+		// Token: 0x0600660C RID: 26124 RVA: 0x00205328 File Offset: 0x00203528
+		public virtual void LeavePsychicRitual(Pawn pawn, TaggedString reason)
+		{
+			this.TryMessagePawnLost(pawn, reason);
+			if (this.lord.ownedPawns.Contains(pawn))
+			{
+				this.lord.Notify_PawnLost(pawn, PawnLostCondition.LordRejected, null);
 			}
 		}
-	}
 
-	public virtual void ExposeData()
-	{
-		Scribe_References.Look(ref lord, "lord");
-		Scribe_Defs.Look(ref def, "def");
-		Scribe_Values.Look(ref power, "power", 0f);
-		Scribe_Values.Look(ref maxPower, "maxPower");
-		Scribe_Values.Look(ref canceled, "canceled", defaultValue: false);
-		Scribe_Values.Look(ref succeeded, "succeeded", defaultValue: false);
-		if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+		// Token: 0x0600660D RID: 26125 RVA: 0x00205367 File Offset: 0x00203567
+		public virtual void ReleaseAllPawnsAndBuildings()
 		{
-			if (lord.LordJob is LordJob_PsychicRitual lordJob_PsychicRitual)
+			this.lord.RemoveAllPawns(true);
+			this.lord.RemoveAllBuildings();
+		}
+
+		// Token: 0x0600660E RID: 26126 RVA: 0x00205380 File Offset: 0x00203580
+		public void TryMessagePawnLost(Pawn pawn, TaggedString reason)
+		{
+			Lord lord = this.lord;
+			if (((lord != null) ? lord.faction : null) == Faction.OfPlayer && PawnUtility.ShouldSendNotificationAbout(pawn))
 			{
-				assignments = lordJob_PsychicRitual.assignments;
+				Messages.Message(this.def.LeftPsychicRitualMessage(pawn, reason).CapitalizeFirst().EndWithPeriod(), pawn, MessageTypeDefOf.NeutralEvent, false);
+			}
+		}
+
+		// Token: 0x0600660F RID: 26127 RVA: 0x002053E4 File Offset: 0x002035E4
+		public virtual void Notify_PawnLost(Pawn pawn, PawnLostCondition cond)
+		{
+			Pawn_JobTracker jobs = pawn.jobs;
+			Lord lord;
+			if (jobs == null)
+			{
+				lord = null;
 			}
 			else
 			{
+				Job curJob = jobs.curJob;
+				lord = ((curJob != null) ? curJob.lord : null);
+			}
+			if (lord == this.lord)
+			{
+				Pawn_JobTracker jobs2 = pawn.jobs;
+				if (jobs2 != null)
+				{
+					jobs2.EndCurrentJob(JobCondition.InterruptForced, true, true);
+				}
+			}
+			if (cond == PawnLostCondition.LordRejected)
+			{
+				return;
+			}
+			if (this.succeeded)
+			{
+				return;
+			}
+			TaggedString reason = PsychicRitualRoleDef.PawnLostConditionToPsychicRitualReason(this, pawn, cond);
+			PsychicRitualRoleDef psychicRitualRoleDef = this.assignments.RoleForPawn(pawn, true);
+			if (psychicRitualRoleDef != null && this.assignments.RoleAssignedCount(psychicRitualRoleDef) <= psychicRitualRoleDef.MinCount)
+			{
+				this.CancelPsychicRitual(reason);
+				return;
+			}
+			if (!this.def.nonRequiredPawnsMayLeave)
+			{
+				this.CancelPsychicRitual(reason);
+				return;
+			}
+			if (this.lord.ownedPawns.Contains(pawn))
+			{
+				this.TryMessagePawnLost(pawn, reason);
+			}
+		}
+
+		// Token: 0x06006610 RID: 26128 RVA: 0x002054A4 File Offset: 0x002036A4
+		public virtual void ExposeData()
+		{
+			Scribe_References.Look<Lord>(ref this.lord, "lord", false);
+			Scribe_Defs.Look<PsychicRitualDef>(ref this.def, "def");
+			Scribe_Values.Look<float>(ref this.power, "power", 0f, false);
+			Scribe_Values.Look<float?>(ref this.maxPower, "maxPower", null, false);
+			Scribe_Values.Look<bool>(ref this.canceled, "canceled", false, false);
+			Scribe_Values.Look<bool>(ref this.succeeded, "succeeded", false, false);
+			if (Scribe.mode == LoadSaveMode.ResolvingCrossRefs)
+			{
+				LordJob_PsychicRitual lordJob_PsychicRitual = this.lord.LordJob as LordJob_PsychicRitual;
+				if (lordJob_PsychicRitual != null)
+				{
+					this.assignments = lordJob_PsychicRitual.assignments;
+					return;
+				}
 				Log.Error("Error during loading psychic ritual: LordJob is not a LordJob_PsychicRitual.");
 			}
 		}
-	}
 
-	public string GetUniqueLoadID()
-	{
-		return "PsychicRitual_" + loadID;
+		// Token: 0x06006611 RID: 26129 RVA: 0x00205559 File Offset: 0x00203759
+		public string GetUniqueLoadID()
+		{
+			return "PsychicRitual_" + this.loadID.ToString();
+		}
+
+		// Token: 0x040048FE RID: 18686
+		public Lord lord;
+
+		// Token: 0x040048FF RID: 18687
+		public PsychicRitualDef def;
+
+		// Token: 0x04004900 RID: 18688
+		public PsychicRitualRoleAssignments assignments;
+
+		// Token: 0x04004901 RID: 18689
+		public bool canceled;
+
+		// Token: 0x04004902 RID: 18690
+		public bool succeeded;
+
+		// Token: 0x04004903 RID: 18691
+		private int loadID = -1;
+
+		// Token: 0x04004904 RID: 18692
+		public float power;
+
+		// Token: 0x04004905 RID: 18693
+		public float? maxPower;
+
+		// Token: 0x02001056 RID: 4182
+		public enum LeftOrCanceled
+		{
+			// Token: 0x04004907 RID: 18695
+			Invalid,
+			// Token: 0x04004908 RID: 18696
+			Left,
+			// Token: 0x04004909 RID: 18697
+			Canceled
+		}
 	}
 }

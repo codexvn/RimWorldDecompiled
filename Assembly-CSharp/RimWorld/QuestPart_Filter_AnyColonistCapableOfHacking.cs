@@ -1,31 +1,41 @@
+﻿using System;
+using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_Filter_AnyColonistCapableOfHacking : QuestPart_Filter
+namespace RimWorld
 {
-	public MapParent mapParent;
-
-	protected override bool Pass(SignalArgs args)
+	// Token: 0x02001BA2 RID: 7074
+	public class QuestPart_Filter_AnyColonistCapableOfHacking : QuestPart_Filter
 	{
-		if (mapParent == null || !mapParent.HasMap)
+		// Token: 0x06009DC0 RID: 40384 RVA: 0x002DB240 File Offset: 0x002D9440
+		protected override bool Pass(SignalArgs args)
 		{
+			if (this.mapParent == null || !this.mapParent.HasMap)
+			{
+				return false;
+			}
+			using (List<Pawn>.Enumerator enumerator = this.mapParent.Map.mapPawns.FreeColonistsSpawned.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (HackUtility.IsCapableOfHacking(enumerator.Current))
+					{
+						return true;
+					}
+				}
+			}
 			return false;
 		}
-		foreach (Pawn item in mapParent.Map.mapPawns.FreeColonistsSpawned)
-		{
-			if (HackUtility.IsCapableOfHacking(item))
-			{
-				return true;
-			}
-		}
-		return false;
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_References.Look(ref mapParent, "mapParent");
+		// Token: 0x06009DC1 RID: 40385 RVA: 0x002DB2C0 File Offset: 0x002D94C0
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_References.Look<MapParent>(ref this.mapParent, "mapParent", false);
+		}
+
+		// Token: 0x04006D48 RID: 27976
+		public MapParent mapParent;
 	}
 }

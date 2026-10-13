@@ -1,15 +1,22 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class Gene_Bloodfeeder : Gene
+namespace Verse
 {
-	public override void PostAdd()
+	// Token: 0x0200065C RID: 1628
+	public class Gene_Bloodfeeder : Gene
 	{
-		base.PostAdd();
-		if (pawn.IsPrisonerOfColony && pawn.guest != null && pawn.guest.HasInteractionWith((PrisonerInteractionModeDef interaction) => interaction.hideIfNoBloodfeeders))
+		// Token: 0x0600290F RID: 10511 RVA: 0x000D8384 File Offset: 0x000D6584
+		public override void PostAdd()
 		{
-			pawn.guest.SetNoInteraction();
+			base.PostAdd();
+			if (this.pawn.IsPrisonerOfColony && this.pawn.guest != null)
+			{
+				if (this.pawn.guest.HasInteractionWith((PrisonerInteractionModeDef interaction) => interaction.hideIfNoBloodfeeders))
+				{
+					this.pawn.guest.SetNoInteraction();
+				}
+			}
 		}
 	}
 }

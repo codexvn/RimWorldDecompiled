@@ -1,16 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalExitTimedOut : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017A3 RID: 6051
+	public class ThinkNode_ConditionalExitTimedOut : ThinkNode_Conditional
 	{
-		if (pawn.mindState.exitMapAfterTick >= 0)
+		// Token: 0x06008D91 RID: 36241 RVA: 0x002A0D51 File Offset: 0x0029EF51
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return Find.TickManager.TicksGame > pawn.mindState.exitMapAfterTick;
+			return pawn.mindState.exitMapAfterTick >= 0 && Find.TickManager.TicksGame > pawn.mindState.exitMapAfterTick;
 		}
-		return false;
 	}
 }

@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_RitualSignalSender : CompProperties
+namespace RimWorld
 {
-	public CompProperties_RitualSignalSender()
+	// Token: 0x02002DED RID: 11757
+	public class CompProperties_RitualSignalSender : CompProperties
 	{
-		compClass = typeof(CompRitualSignalSender);
+		// Token: 0x060108C8 RID: 67784 RVA: 0x004C57EB File Offset: 0x004C39EB
+		public CompProperties_RitualSignalSender()
+		{
+			this.compClass = typeof(CompRitualSignalSender);
+		}
 	}
 }

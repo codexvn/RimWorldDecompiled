@@ -1,17 +1,20 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class GeneMaker
+namespace RimWorld
 {
-	public static Gene MakeGene(GeneDef def, Pawn pawn)
+	// Token: 0x02003836 RID: 14390
+	public static class GeneMaker
 	{
-		Gene obj = (Gene)Activator.CreateInstance(def.geneClass);
-		obj.def = def;
-		obj.pawn = pawn;
-		obj.loadID = Find.UniqueIDsManager.GetNextGeneID();
-		obj.PostMake();
-		return obj;
+		// Token: 0x06013E28 RID: 81448 RVA: 0x005E73AE File Offset: 0x005E55AE
+		public static Gene MakeGene(GeneDef def, Pawn pawn)
+		{
+			Gene gene = (Gene)Activator.CreateInstance(def.geneClass);
+			gene.def = def;
+			gene.pawn = pawn;
+			gene.loadID = Find.UniqueIDsManager.GetNextGeneID();
+			gene.PostMake();
+			return gene;
+		}
 	}
 }

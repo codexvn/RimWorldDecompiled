@@ -1,32 +1,27 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class InventoryCalculatorsUtility
+namespace RimWorld
 {
-	public static bool ShouldIgnoreInventoryOf(Pawn pawn, IgnorePawnsInventoryMode ignoreMode)
+	// Token: 0x0200366A RID: 13930
+	public static class InventoryCalculatorsUtility
 	{
-		switch (ignoreMode)
+		// Token: 0x06013569 RID: 79209 RVA: 0x005C0D68 File Offset: 0x005BEF68
+		public static bool ShouldIgnoreInventoryOf(Pawn pawn, IgnorePawnsInventoryMode ignoreMode)
 		{
-		case IgnorePawnsInventoryMode.Ignore:
-			return true;
-		case IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload:
-			if (pawn.Spawned)
+			switch (ignoreMode)
 			{
-				return pawn.inventory.UnloadEverything;
+			case IgnorePawnsInventoryMode.Ignore:
+				return true;
+			case IgnorePawnsInventoryMode.IgnoreIfAssignedToUnload:
+				return pawn.Spawned && pawn.inventory.UnloadEverything;
+			case IgnorePawnsInventoryMode.IgnoreIfAssignedToUnloadOrPlayerPawn:
+				return (pawn.Spawned && pawn.inventory.UnloadEverything) || Dialog_FormCaravan.CanListInventorySeparately(pawn);
+			case IgnorePawnsInventoryMode.DontIgnore:
+				return false;
+			default:
+				throw new NotImplementedException("IgnorePawnsInventoryMode");
 			}
-			return false;
-		case IgnorePawnsInventoryMode.IgnoreIfAssignedToUnloadOrPlayerPawn:
-			if (!pawn.Spawned || !pawn.inventory.UnloadEverything)
-			{
-				return Dialog_FormCaravan.CanListInventorySeparately(pawn);
-			}
-			return true;
-		case IgnorePawnsInventoryMode.DontIgnore:
-			return false;
-		default:
-			throw new NotImplementedException("IgnorePawnsInventoryMode");
 		}
 	}
 }

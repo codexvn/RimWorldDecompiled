@@ -1,20 +1,25 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public class Trigger_PawnCannotReachMapEdge : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010D3 RID: 4307
+	public class Trigger_PawnCannotReachMapEdge : Trigger
 	{
-		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
+		// Token: 0x06006926 RID: 26918 RVA: 0x002127FC File Offset: 0x002109FC
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 197 == 0)
 			{
-				Pawn pawn = lord.ownedPawns[i];
-				if (pawn.Spawned && !pawn.Dead && !pawn.Downed && !pawn.CanReachMapEdge())
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					return true;
+					Pawn pawn = lord.ownedPawns[i];
+					if (pawn.Spawned && !pawn.Dead && !pawn.Downed && !pawn.CanReachMapEdge())
+					{
+						return true;
+					}
 				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

@@ -1,0 +1,75 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <AssemblyName>Waylith</AssemblyName>
+    <GenerateAssemblyInfo>False</GenerateAssemblyInfo>
+    <TargetFramework>netcoreapp1.0</TargetFramework>
+  </PropertyGroup>
+  <PropertyGroup>
+    <LangVersion>12.0</LangVersion>
+    <AllowUnsafeBlocks>True</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup />
+  <ItemGroup />
+  <ItemGroup>
+    <Reference Include="Brutal.Core.Collections">
+      <HintPath>Brutal.Core.Collections.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Vulkan">
+      <HintPath>Brutal.Vulkan.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Numerics">
+      <HintPath>Brutal.Core.Numerics.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Glfw">
+      <HintPath>Brutal.Glfw.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Vulkan.Abstractions">
+      <HintPath>Brutal.Vulkan.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Common">
+      <HintPath>Brutal.Core.Common.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Logging">
+      <HintPath>Brutal.Core.Logging.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Stb">
+      <HintPath>Brutal.Stb.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Vulkan.Vma">
+      <HintPath>Brutal.Vulkan.Vma.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Texture">
+      <HintPath>Brutal.Texture.dll</HintPath>
+    </Reference>
+    <Reference Include="PsdSharp">
+      <HintPath>PsdSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Slang">
+      <HintPath>Brutal.Slang.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Strings">
+      <HintPath>Brutal.Core.Strings.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Abstractions">
+      <HintPath>Microsoft.Extensions.Logging.Abstractions.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.Extensions.Logging.Console">
+      <HintPath>Microsoft.Extensions.Logging.Console.dll</HintPath>
+    </Reference>
+    <Reference Include="Brutal.Core.Memory">
+      <HintPath>Brutal.Core.Memory.dll</HintPath>
+    </Reference>
+    <Reference Include="ZstdSharp">
+      <HintPath>ZstdSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="K4os.Compression.LZ4.Streams">
+      <HintPath>K4os.Compression.LZ4.Streams.dll</HintPath>
+    </Reference>
+    <Reference Include="K4os.Compression.LZ4">
+      <HintPath>K4os.Compression.LZ4.dll</HintPath>
+    </Reference>
+    <Reference Include="System.IO.Hashing">
+      <HintPath>System.IO.Hashing.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+</Project>

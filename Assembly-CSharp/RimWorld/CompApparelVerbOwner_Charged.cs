@@ -1,91 +1,149 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Utility;
 using Verse;
 
-namespace RimWorld;
-
-public class CompApparelVerbOwner_Charged : CompApparelVerbOwner, ICompWithCharges
+namespace RimWorld
 {
-	protected int remainingCharges;
-
-	public new CompProperties_ApparelVerbOwnerCharged Props => props as CompProperties_ApparelVerbOwnerCharged;
-
-	public int RemainingCharges => remainingCharges;
-
-	public int MaxCharges => Props.maxCharges;
-
-	public string LabelRemaining => $"{RemainingCharges} / {MaxCharges}";
-
-	public override string GizmoExtraLabel => LabelRemaining;
-
-	public override void PostPostMake()
+	// Token: 0x02002BE6 RID: 11238
+	public class CompApparelVerbOwner_Charged : CompApparelVerbOwner, ICompWithCharges
 	{
-		base.PostPostMake();
-		remainingCharges = MaxCharges;
-	}
-
-	public override string CompInspectStringExtra()
-	{
-		return "ChargesRemaining".Translate(Props.ChargeNounArgument) + ": " + LabelRemaining;
-	}
-
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-	{
-		IEnumerable<StatDrawEntry> enumerable = base.SpecialDisplayStats();
-		if (enumerable != null)
+		// Token: 0x1700277F RID: 10111
+		// (get) Token: 0x0600FB91 RID: 64401 RVA: 0x00490B3A File Offset: 0x0048ED3A
+		public new CompProperties_ApparelVerbOwnerCharged Props
 		{
-			foreach (StatDrawEntry item in enumerable)
+			get
 			{
-				yield return item;
+				return this.props as CompProperties_ApparelVerbOwnerCharged;
 			}
 		}
-		yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_ReloadChargesRemaining_Name".Translate(Props.ChargeNounArgument), LabelRemaining, "Stat_Thing_ReloadChargesRemaining_Desc".Translate(Props.ChargeNounArgument), 2749);
-	}
 
-	public override void PostExposeData()
-	{
-		base.PostExposeData();
-		Scribe_Values.Look(ref remainingCharges, "remainingCharges", -999);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit && remainingCharges == -999)
+		// Token: 0x17002780 RID: 10112
+		// (get) Token: 0x0600FB92 RID: 64402 RVA: 0x00490B47 File Offset: 0x0048ED47
+		public int RemainingCharges
 		{
-			remainingCharges = MaxCharges;
-		}
-	}
-
-	public override IEnumerable<Gizmo> CompGetWornGizmosExtra()
-	{
-		foreach (Gizmo item in base.CompGetWornGizmosExtra())
-		{
-			yield return item;
-		}
-		if (DebugSettings.ShowDevGizmos)
-		{
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "DEV: Reload to full";
-			command_Action.action = delegate
+			get
 			{
-				remainingCharges = MaxCharges;
-			};
-			yield return command_Action;
+				return this.remainingCharges;
+			}
 		}
-	}
 
-	public override string CompTipStringExtra()
-	{
-		TaggedString taggedString = "Stat_Thing_ReloadChargesRemaining_Name".Translate(Props.ChargeNounArgument).CapitalizeFirst();
-		return $"\n\n{taggedString}: {RemainingCharges} / {MaxCharges}";
-	}
+		// Token: 0x17002781 RID: 10113
+		// (get) Token: 0x0600FB93 RID: 64403 RVA: 0x00490B4F File Offset: 0x0048ED4F
+		public int MaxCharges
+		{
+			get
+			{
+				return this.Props.maxCharges;
+			}
+		}
 
-	public override void UsedOnce()
-	{
-		base.UsedOnce();
-		if (remainingCharges > 0)
+		// Token: 0x17002782 RID: 10114
+		// (get) Token: 0x0600FB94 RID: 64404 RVA: 0x00490B5C File Offset: 0x0048ED5C
+		public string LabelRemaining
 		{
-			remainingCharges--;
+			get
+			{
+				return string.Format("{0} / {1}", this.RemainingCharges, this.MaxCharges);
+			}
 		}
-		if (Props.destroyOnEmpty && remainingCharges == 0 && !parent.Destroyed)
+
+		// Token: 0x17002783 RID: 10115
+		// (get) Token: 0x0600FB95 RID: 64405 RVA: 0x00490B7E File Offset: 0x0048ED7E
+		public override string GizmoExtraLabel
 		{
-			parent.Destroy();
+			get
+			{
+				return this.LabelRemaining;
+			}
 		}
+
+		// Token: 0x0600FB96 RID: 64406 RVA: 0x00490B86 File Offset: 0x0048ED86
+		public override void PostPostMake()
+		{
+			base.PostPostMake();
+			this.remainingCharges = this.MaxCharges;
+		}
+
+		// Token: 0x0600FB97 RID: 64407 RVA: 0x00490B9A File Offset: 0x0048ED9A
+		public override string CompInspectStringExtra()
+		{
+			return "ChargesRemaining".Translate(this.Props.ChargeNounArgument) + ": " + this.LabelRemaining;
+		}
+
+		// Token: 0x0600FB98 RID: 64408 RVA: 0x00490BCB File Offset: 0x0048EDCB
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
+		{
+			IEnumerable<StatDrawEntry> enumerable = base.SpecialDisplayStats();
+			if (enumerable != null)
+			{
+				foreach (StatDrawEntry statDrawEntry in enumerable)
+				{
+					yield return statDrawEntry;
+				}
+				IEnumerator<StatDrawEntry> enumerator = null;
+			}
+			yield return new StatDrawEntry(StatCategoryDefOf.Apparel, "Stat_Thing_ReloadChargesRemaining_Name".Translate(this.Props.ChargeNounArgument), this.LabelRemaining, "Stat_Thing_ReloadChargesRemaining_Desc".Translate(this.Props.ChargeNounArgument), 2749, null, null, false, false);
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0600FB99 RID: 64409 RVA: 0x00490BDB File Offset: 0x0048EDDB
+		public override void PostExposeData()
+		{
+			base.PostExposeData();
+			Scribe_Values.Look<int>(ref this.remainingCharges, "remainingCharges", -999, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit && this.remainingCharges == -999)
+			{
+				this.remainingCharges = this.MaxCharges;
+			}
+		}
+
+		// Token: 0x0600FB9A RID: 64410 RVA: 0x00490C1A File Offset: 0x0048EE1A
+		public override IEnumerable<Gizmo> CompGetWornGizmosExtra()
+		{
+			foreach (Gizmo gizmo in base.CompGetWornGizmosExtra())
+			{
+				yield return gizmo;
+			}
+			IEnumerator<Gizmo> enumerator = null;
+			if (DebugSettings.ShowDevGizmos)
+			{
+				yield return new Command_Action
+				{
+					defaultLabel = "DEV: Reload to full",
+					action = delegate()
+					{
+						this.remainingCharges = this.MaxCharges;
+					}
+				};
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0600FB9B RID: 64411 RVA: 0x00490C2C File Offset: 0x0048EE2C
+		public override string CompTipStringExtra()
+		{
+			TaggedString taggedString = "Stat_Thing_ReloadChargesRemaining_Name".Translate(this.Props.ChargeNounArgument).CapitalizeFirst();
+			return string.Format("\n\n{0}: {1} / {2}", taggedString, this.RemainingCharges, this.MaxCharges);
+		}
+
+		// Token: 0x0600FB9C RID: 64412 RVA: 0x00490C80 File Offset: 0x0048EE80
+		public override void UsedOnce()
+		{
+			base.UsedOnce();
+			if (this.remainingCharges > 0)
+			{
+				this.remainingCharges--;
+			}
+			if (this.Props.destroyOnEmpty && this.remainingCharges == 0 && !this.parent.Destroyed)
+			{
+				this.parent.Destroy(DestroyMode.Vanish);
+			}
+		}
+
+		// Token: 0x0400A511 RID: 42257
+		protected int remainingCharges;
 	}
 }

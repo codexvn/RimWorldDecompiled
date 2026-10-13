@@ -1,63 +1,47 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class WorkGiver_ConstructDeliverResourcesToFrames : WorkGiver_ConstructDeliverResources
+namespace RimWorld
 {
-	public override ThingRequest PotentialWorkThingRequest => ThingRequest.ForGroup(ThingRequestGroup.BuildingFrame);
-
-	public override bool HasJobOnThing(Pawn pawn, Thing t, bool forced = false)
+	// Token: 0x02001566 RID: 5478
+	public class WorkGiver_ConstructDeliverResourcesToFrames : WorkGiver_ConstructDeliverResources
 	{
-		if (t.Faction != pawn.Faction)
+		// Token: 0x170013D9 RID: 5081
+		// (get) Token: 0x060081F0 RID: 33264 RVA: 0x00271CB0 File Offset: 0x0026FEB0
+		public override ThingRequest PotentialWorkThingRequest
 		{
-			return false;
+			get
+			{
+				return ThingRequest.ForGroup(ThingRequestGroup.BuildingFrame);
+			}
 		}
-		if (!(t is Frame frame))
-		{
-			return false;
-		}
-		if (!GenConstruct.CanTouchTargetFromValidCell(frame, pawn))
-		{
-			return false;
-		}
-		if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
-		{
-			return GenConstruct.HandleBlockingThingJob(frame, pawn, forced) != null;
-		}
-		if (!GenConstruct.CanConstruct(frame, pawn, def.workType, forced, JobDefOf.HaulToContainer))
-		{
-			return false;
-		}
-		if (!GenConstruct.CanGetResources_NewTemp(frame, pawn, forced))
-		{
-			return false;
-		}
-		return ResourceDeliverJobFor(pawn, frame, canRemoveExistingFloorUnderNearbyNeeders: true, forced) != null;
-	}
 
-	public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
-	{
-		if (t.Faction != pawn.Faction)
+		// Token: 0x060081F1 RID: 33265 RVA: 0x00271CBC File Offset: 0x0026FEBC
+		public override Job JobOnThing(Pawn pawn, Thing t, bool forced = false)
 		{
-			return null;
+			if (t.Faction != pawn.Faction)
+			{
+				return null;
+			}
+			Frame frame = t as Frame;
+			if (frame == null)
+			{
+				return null;
+			}
+			if (!GenConstruct.CanTouchTargetFromValidCell(frame, pawn))
+			{
+				return null;
+			}
+			if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
+			{
+				return GenConstruct.HandleBlockingThingJob(frame, pawn, forced);
+			}
+			if (!GenConstruct.CanConstruct(frame, pawn, this.def.workType, forced, JobDefOf.HaulToContainer))
+			{
+				return null;
+			}
+			return base.ResourceDeliverJobFor(pawn, frame, true, forced);
 		}
-		if (!(t is Frame frame))
-		{
-			return null;
-		}
-		if (!GenConstruct.CanTouchTargetFromValidCell(frame, pawn))
-		{
-			return null;
-		}
-		if (GenConstruct.FirstBlockingThing(frame, pawn) != null)
-		{
-			return GenConstruct.HandleBlockingThingJob(frame, pawn, forced);
-		}
-		if (!GenConstruct.CanConstruct(frame, pawn, def.workType, forced, JobDefOf.HaulToContainer))
-		{
-			return null;
-		}
-		return ResourceDeliverJobFor(pawn, frame, canRemoveExistingFloorUnderNearbyNeeders: true, forced);
 	}
 }

@@ -1,126 +1,110 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_TradeRequest_GetRequestedThing : QuestNode
+namespace RimWorld.QuestGen
 {
-	private static readonly IntRange BaseValueWantedRange = new IntRange(500, 2500);
-
-	private static readonly SimpleCurve ValueWantedFactorFromWealthCurve = new SimpleCurve
+	// Token: 0x02003BDB RID: 15323
+	public class QuestNode_TradeRequest_GetRequestedThing : QuestNode
 	{
-		new CurvePoint(0f, 0.3f),
-		new CurvePoint(50000f, 1f),
-		new CurvePoint(300000f, 2f)
-	};
-
-	private static Dictionary<ThingDef, int> requestCountDict = new Dictionary<ThingDef, int>();
-
-	[NoTranslate]
-	public SlateRef<string> storeThingAs;
-
-	[NoTranslate]
-	public SlateRef<string> storeThingCountAs;
-
-	[NoTranslate]
-	public SlateRef<string> storeMarketValueAs;
-
-	[NoTranslate]
-	public SlateRef<string> storeHasQualityAs;
-
-	public SlateRef<List<ThingDef>> dontRequest;
-
-	private static int RandomRequestCount(ThingDef thingDef, Map map)
-	{
-		Rand.PushState(Find.TickManager.TicksGame ^ thingDef.GetHashCode() ^ 0x343820DB);
-		float num = BaseValueWantedRange.RandomInRange;
-		Rand.PopState();
-		num *= ValueWantedFactorFromWealthCurve.Evaluate(map.wealthWatcher.WealthTotal);
-		return ThingUtility.RoundedResourceStackCount(Mathf.Max(1, Mathf.RoundToInt(num / thingDef.BaseMarketValue)));
-	}
-
-	private static bool TryFindRandomRequestedThingDef(Map map, out ThingDef thingDef, out int count, List<ThingDef> dontRequest)
-	{
-		requestCountDict.Clear();
-		if (ThingSetMakerUtility.allGeneratableItems.Where(GlobalValidator).TryRandomElement(out thingDef))
+		// Token: 0x06014CD4 RID: 85204 RVA: 0x0063B464 File Offset: 0x00639664
+		private static int RandomRequestCount(ThingDef thingDef, Map map)
 		{
-			count = requestCountDict[thingDef];
-			return true;
+			Rand.PushState(Find.TickManager.TicksGame ^ thingDef.GetHashCode() ^ 876093659);
+			float num = (float)QuestNode_TradeRequest_GetRequestedThing.BaseValueWantedRange.RandomInRange;
+			Rand.PopState();
+			num *= QuestNode_TradeRequest_GetRequestedThing.ValueWantedFactorFromWealthCurve.Evaluate(map.wealthWatcher.WealthTotal);
+			return ThingUtility.RoundedResourceStackCount(Mathf.Max(1, Mathf.RoundToInt(num / thingDef.BaseMarketValue)));
 		}
-		count = 0;
-		return false;
-		bool GlobalValidator(ThingDef td)
-		{
-			if (td.BaseMarketValue / td.BaseMass < 5f)
-			{
-				return false;
-			}
-			if (!td.alwaysHaulable)
-			{
-				return false;
-			}
-			CompProperties_Rottable compProperties = td.GetCompProperties<CompProperties_Rottable>();
-			if (compProperties != null && compProperties.daysToRotStart < 10f)
-			{
-				return false;
-			}
-			if (td.ingestible != null && td.ingestible.HumanEdible)
-			{
-				return false;
-			}
-			if (td == ThingDefOf.Silver)
-			{
-				return false;
-			}
-			if (!td.PlayerAcquirable)
-			{
-				return false;
-			}
-			int num = RandomRequestCount(td, map);
-			requestCountDict.Add(td, num);
-			if (!PlayerItemAccessibilityUtility.PossiblyAccessible(td, num, map))
-			{
-				return false;
-			}
-			if (!PlayerItemAccessibilityUtility.PlayerCanMake(td, map))
-			{
-				return false;
-			}
-			if (td.thingSetMakerTags != null && td.thingSetMakerTags.Contains("RewardStandardHighFreq"))
-			{
-				return false;
-			}
-			if (!dontRequest.NullOrEmpty() && dontRequest.Contains(td))
-			{
-				return false;
-			}
-			return true;
-		}
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		if (TryFindRandomRequestedThingDef(slate.Get<Map>("map"), out var thingDef, out var count, dontRequest.GetValue(slate)))
+		// Token: 0x06014CD5 RID: 85205 RVA: 0x0063B4D4 File Offset: 0x006396D4
+		private static bool TryFindRandomRequestedThingDef(Map map, out ThingDef thingDef, out int count, List<ThingDef> dontRequest)
 		{
-			slate.Set(storeThingAs.GetValue(slate), thingDef);
-			slate.Set(storeThingCountAs.GetValue(slate), count);
-			slate.Set(storeMarketValueAs.GetValue(slate), thingDef.GetStatValueAbstract(StatDefOf.MarketValue) * (float)count);
-			slate.Set(storeHasQualityAs.GetValue(slate), thingDef.HasComp(typeof(CompQuality)));
+			QuestNode_TradeRequest_GetRequestedThing.<>c__DisplayClass4_0 CS$<>8__locals1 = new QuestNode_TradeRequest_GetRequestedThing.<>c__DisplayClass4_0();
+			CS$<>8__locals1.map = map;
+			CS$<>8__locals1.dontRequest = dontRequest;
+			QuestNode_TradeRequest_GetRequestedThing.requestCountDict.Clear();
+			if (ThingSetMakerUtility.allGeneratableItems.Where(new Func<ThingDef, bool>(CS$<>8__locals1.<TryFindRandomRequestedThingDef>g__GlobalValidator|0)).TryRandomElement(out thingDef))
+			{
+				count = QuestNode_TradeRequest_GetRequestedThing.requestCountDict[thingDef];
+				return true;
+			}
+			count = 0;
+			return false;
 		}
-	}
 
-	protected override bool TestRunInt(Slate slate)
-	{
-		if (TryFindRandomRequestedThingDef(slate.Get<Map>("map"), out var thingDef, out var count, dontRequest.GetValue(slate)))
+		// Token: 0x06014CD6 RID: 85206 RVA: 0x0063B534 File Offset: 0x00639734
+		protected override void RunInt()
 		{
-			slate.Set(storeThingAs.GetValue(slate), thingDef);
-			slate.Set(storeThingCountAs.GetValue(slate), count);
-			slate.Set(storeMarketValueAs.GetValue(slate), thingDef.GetStatValueAbstract(StatDefOf.MarketValue) * (float)count);
-			return true;
+			Slate slate = QuestGen.slate;
+			ThingDef thingDef;
+			int num;
+			if (QuestNode_TradeRequest_GetRequestedThing.TryFindRandomRequestedThingDef(slate.Get<Map>("map", null, false), out thingDef, out num, this.dontRequest.GetValue(slate)))
+			{
+				slate.Set<ThingDef>(this.storeThingAs.GetValue(slate), thingDef, false);
+				slate.Set<int>(this.storeThingCountAs.GetValue(slate), num, false);
+				slate.Set<float>(this.storeMarketValueAs.GetValue(slate), thingDef.GetStatValueAbstract(StatDefOf.MarketValue, null) * (float)num, false);
+				slate.Set<bool>(this.storeHasQualityAs.GetValue(slate), thingDef.HasComp(typeof(CompQuality)), false);
+			}
 		}
-		return false;
+
+		// Token: 0x06014CD7 RID: 85207 RVA: 0x0063B5D8 File Offset: 0x006397D8
+		protected override bool TestRunInt(Slate slate)
+		{
+			ThingDef thingDef;
+			int num;
+			if (QuestNode_TradeRequest_GetRequestedThing.TryFindRandomRequestedThingDef(slate.Get<Map>("map", null, false), out thingDef, out num, this.dontRequest.GetValue(slate)))
+			{
+				slate.Set<ThingDef>(this.storeThingAs.GetValue(slate), thingDef, false);
+				slate.Set<int>(this.storeThingCountAs.GetValue(slate), num, false);
+				slate.Set<float>(this.storeMarketValueAs.GetValue(slate), thingDef.GetStatValueAbstract(StatDefOf.MarketValue, null) * (float)num, false);
+				return true;
+			}
+			return false;
+		}
+
+		// Token: 0x0400E78B RID: 59275
+		private static readonly IntRange BaseValueWantedRange = new IntRange(500, 2500);
+
+		// Token: 0x0400E78C RID: 59276
+		private static readonly SimpleCurve ValueWantedFactorFromWealthCurve = new SimpleCurve
+		{
+			{
+				new CurvePoint(0f, 0.3f),
+				true
+			},
+			{
+				new CurvePoint(50000f, 1f),
+				true
+			},
+			{
+				new CurvePoint(300000f, 2f),
+				true
+			}
+		};
+
+		// Token: 0x0400E78D RID: 59277
+		private static Dictionary<ThingDef, int> requestCountDict = new Dictionary<ThingDef, int>();
+
+		// Token: 0x0400E78E RID: 59278
+		[NoTranslate]
+		public SlateRef<string> storeThingAs;
+
+		// Token: 0x0400E78F RID: 59279
+		[NoTranslate]
+		public SlateRef<string> storeThingCountAs;
+
+		// Token: 0x0400E790 RID: 59280
+		[NoTranslate]
+		public SlateRef<string> storeMarketValueAs;
+
+		// Token: 0x0400E791 RID: 59281
+		[NoTranslate]
+		public SlateRef<string> storeHasQualityAs;
+
+		// Token: 0x0400E792 RID: 59282
+		public SlateRef<List<ThingDef>> dontRequest;
 	}
 }

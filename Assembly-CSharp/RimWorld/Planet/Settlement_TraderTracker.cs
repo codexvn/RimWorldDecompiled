@@ -1,302 +1,366 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class Settlement_TraderTracker : IThingHolderTickable, IThingHolder, IExposable
+namespace RimWorld.Planet
 {
-	public Settlement settlement;
-
-	private ThingOwner<Thing> stock;
-
-	private int lastStockGenerationTicks = -1;
-
-	private bool everGeneratedStock;
-
-	private const float DefaultTradePriceImprovement = 0.02f;
-
-	private List<Pawn> tmpSavedPawns = new List<Pawn>();
-
-	protected virtual int RegenerateStockEveryDays => 30;
-
-	public IThingHolder ParentHolder => settlement;
-
-	public bool ShouldTickContents => false;
-
-	public List<Thing> StockListForReading
+	// Token: 0x02003DD4 RID: 15828
+	public class Settlement_TraderTracker : IThingHolder, IExposable
 	{
-		get
+		// Token: 0x170035BC RID: 13756
+		// (get) Token: 0x0601595B RID: 88411 RVA: 0x002C8DD2 File Offset: 0x002C6FD2
+		protected virtual int RegenerateStockEveryDays
 		{
-			if (stock == null || stock.InnerListForReading.Empty())
+			get
 			{
-				RegenerateStock();
+				return 30;
 			}
-			return stock.InnerListForReading;
 		}
-	}
 
-	public TraderKindDef TraderKind
-	{
-		get
+		// Token: 0x170035BD RID: 13757
+		// (get) Token: 0x0601595C RID: 88412 RVA: 0x00676637 File Offset: 0x00674837
+		public IThingHolder ParentHolder
 		{
-			List<TraderKindDef> baseTraderKinds = settlement.Faction.def.baseTraderKinds;
-			if (baseTraderKinds.NullOrEmpty())
+			get
 			{
-				return null;
+				return this.settlement;
 			}
-			int index = Mathf.Abs(settlement.HashOffset()) % baseTraderKinds.Count;
-			return baseTraderKinds[index];
 		}
-	}
 
-	public int RandomPriceFactorSeed => Gen.HashCombineInt(settlement.ID, 1933327354);
-
-	public bool EverVisited => everGeneratedStock;
-
-	public bool RestockedSinceLastVisit
-	{
-		get
+		// Token: 0x170035BE RID: 13758
+		// (get) Token: 0x0601595D RID: 88413 RVA: 0x0067663F File Offset: 0x0067483F
+		public List<Thing> StockListForReading
 		{
-			if (everGeneratedStock)
+			get
 			{
-				return stock == null;
-			}
-			return false;
-		}
-	}
-
-	public int NextRestockTick
-	{
-		get
-		{
-			if (stock == null || !everGeneratedStock)
-			{
-				return -1;
-			}
-			return ((lastStockGenerationTicks != -1) ? lastStockGenerationTicks : 0) + RegenerateStockEveryDays * 60000;
-		}
-	}
-
-	public virtual string TraderName
-	{
-		get
-		{
-			if (settlement.Faction == null)
-			{
-				return settlement.LabelCap;
-			}
-			return "SettlementTrader".Translate(settlement.LabelCap, settlement.Faction.Name);
-		}
-	}
-
-	public virtual bool CanTradeNow
-	{
-		get
-		{
-			if (TraderKind != null)
-			{
-				if (stock != null && !stock.InnerListForReading.Empty())
+				if (this.stock == null || this.stock.InnerListForReading.Empty<Thing>())
 				{
-					return stock.InnerListForReading.Any((Thing x) => TraderKind.WillTrade(x.def));
+					this.RegenerateStock();
 				}
-				return true;
+				return this.stock.InnerListForReading;
 			}
-			return false;
 		}
-	}
 
-	public virtual float TradePriceImprovementOffsetForPlayer => 0.02f;
-
-	public Settlement_TraderTracker(Settlement settlement)
-	{
-		this.settlement = settlement;
-	}
-
-	public virtual void ExposeData()
-	{
-		if (Scribe.mode == LoadSaveMode.Saving)
+		// Token: 0x170035BF RID: 13759
+		// (get) Token: 0x0601595E RID: 88414 RVA: 0x0067666C File Offset: 0x0067486C
+		public TraderKindDef TraderKind
 		{
-			tmpSavedPawns.Clear();
-			if (stock != null)
+			get
 			{
-				for (int num = stock.Count - 1; num >= 0; num--)
+				List<TraderKindDef> baseTraderKinds = this.settlement.Faction.def.baseTraderKinds;
+				if (baseTraderKinds.NullOrEmpty<TraderKindDef>())
 				{
-					if (stock[num] is Pawn item)
+					return null;
+				}
+				int index = Mathf.Abs(this.settlement.HashOffset()) % baseTraderKinds.Count;
+				return baseTraderKinds[index];
+			}
+		}
+
+		// Token: 0x170035C0 RID: 13760
+		// (get) Token: 0x0601595F RID: 88415 RVA: 0x006766B8 File Offset: 0x006748B8
+		public int RandomPriceFactorSeed
+		{
+			get
+			{
+				return Gen.HashCombineInt(this.settlement.ID, 1933327354);
+			}
+		}
+
+		// Token: 0x170035C1 RID: 13761
+		// (get) Token: 0x06015960 RID: 88416 RVA: 0x006766CF File Offset: 0x006748CF
+		public bool EverVisited
+		{
+			get
+			{
+				return this.everGeneratedStock;
+			}
+		}
+
+		// Token: 0x170035C2 RID: 13762
+		// (get) Token: 0x06015961 RID: 88417 RVA: 0x006766D7 File Offset: 0x006748D7
+		public bool RestockedSinceLastVisit
+		{
+			get
+			{
+				return this.everGeneratedStock && this.stock == null;
+			}
+		}
+
+		// Token: 0x170035C3 RID: 13763
+		// (get) Token: 0x06015962 RID: 88418 RVA: 0x006766EC File Offset: 0x006748EC
+		public int NextRestockTick
+		{
+			get
+			{
+				if (this.stock == null || !this.everGeneratedStock)
+				{
+					return -1;
+				}
+				return ((this.lastStockGenerationTicks == -1) ? 0 : this.lastStockGenerationTicks) + this.RegenerateStockEveryDays * 60000;
+			}
+		}
+
+		// Token: 0x170035C4 RID: 13764
+		// (get) Token: 0x06015963 RID: 88419 RVA: 0x00676720 File Offset: 0x00674920
+		public virtual string TraderName
+		{
+			get
+			{
+				if (this.settlement.Faction == null)
+				{
+					return this.settlement.LabelCap;
+				}
+				return "SettlementTrader".Translate(this.settlement.LabelCap, this.settlement.Faction.Name);
+			}
+		}
+
+		// Token: 0x170035C5 RID: 13765
+		// (get) Token: 0x06015964 RID: 88420 RVA: 0x0067677C File Offset: 0x0067497C
+		public virtual bool CanTradeNow
+		{
+			get
+			{
+				return this.TraderKind != null && (this.stock == null || this.stock.InnerListForReading.Empty<Thing>() || this.stock.InnerListForReading.Any((Thing x) => this.TraderKind.WillTrade(x.def)));
+			}
+		}
+
+		// Token: 0x170035C6 RID: 13766
+		// (get) Token: 0x06015965 RID: 88421 RVA: 0x0034EE1A File Offset: 0x0034D01A
+		public virtual float TradePriceImprovementOffsetForPlayer
+		{
+			get
+			{
+				return 0.02f;
+			}
+		}
+
+		// Token: 0x06015966 RID: 88422 RVA: 0x006767CB File Offset: 0x006749CB
+		public Settlement_TraderTracker(Settlement settlement)
+		{
+			this.settlement = settlement;
+		}
+
+		// Token: 0x06015967 RID: 88423 RVA: 0x006767EC File Offset: 0x006749EC
+		public virtual void ExposeData()
+		{
+			if (Scribe.mode == LoadSaveMode.Saving)
+			{
+				this.tmpSavedPawns.Clear();
+				if (this.stock != null)
+				{
+					for (int i = this.stock.Count - 1; i >= 0; i--)
 					{
-						stock.Remove(item);
-						tmpSavedPawns.Add(item);
+						Pawn pawn = this.stock[i] as Pawn;
+						if (pawn != null)
+						{
+							this.stock.Remove(pawn);
+							this.tmpSavedPawns.Add(pawn);
+						}
+					}
+				}
+			}
+			Scribe_Collections.Look<Pawn>(ref this.tmpSavedPawns, "tmpSavedPawns", LookMode.Reference, Array.Empty<object>());
+			Scribe_Deep.Look<ThingOwner<Thing>>(ref this.stock, "stock", Array.Empty<object>());
+			Scribe_Values.Look<int>(ref this.lastStockGenerationTicks, "lastStockGenerationTicks", 0, false);
+			Scribe_Values.Look<bool>(ref this.everGeneratedStock, "wasStockGeneratedYet", false, false);
+			if (Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
+			{
+				for (int j = 0; j < this.tmpSavedPawns.Count; j++)
+				{
+					this.stock.TryAdd(this.tmpSavedPawns[j], false);
+				}
+				this.tmpSavedPawns.Clear();
+			}
+		}
+
+		// Token: 0x06015968 RID: 88424 RVA: 0x006768F3 File Offset: 0x00674AF3
+		public virtual IEnumerable<Thing> ColonyThingsWillingToBuy(Pawn playerNegotiator)
+		{
+			Caravan caravan = playerNegotiator.GetCaravan();
+			foreach (Thing thing in CaravanInventoryUtility.AllInventoryItems(caravan))
+			{
+				yield return thing;
+			}
+			List<Thing>.Enumerator enumerator = default(List<Thing>.Enumerator);
+			List<Pawn> pawns = caravan.PawnsListForReading;
+			int num;
+			for (int i = 0; i < pawns.Count; i = num + 1)
+			{
+				if (!caravan.IsOwner(pawns[i]))
+				{
+					yield return pawns[i];
+				}
+				num = i;
+			}
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06015969 RID: 88425 RVA: 0x00676904 File Offset: 0x00674B04
+		public virtual void GiveSoldThingToTrader(Thing toGive, int countToGive, Pawn playerNegotiator)
+		{
+			if (this.stock == null)
+			{
+				this.RegenerateStock();
+			}
+			Caravan caravan = playerNegotiator.GetCaravan();
+			Thing thing = toGive.SplitOff(countToGive);
+			thing.PreTraded(TradeAction.PlayerSells, playerNegotiator, this.settlement);
+			Pawn pawn = toGive as Pawn;
+			if (pawn != null)
+			{
+				CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn, caravan.PawnsListForReading, null);
+				if (pawn.RaceProps.Humanlike)
+				{
+					return;
+				}
+				if (!this.stock.TryAdd(pawn, false))
+				{
+					pawn.Destroy(DestroyMode.Vanish);
+					return;
+				}
+			}
+			else if (!this.stock.TryAdd(thing, false))
+			{
+				thing.Destroy(DestroyMode.Vanish);
+			}
+		}
+
+		// Token: 0x0601596A RID: 88426 RVA: 0x00676990 File Offset: 0x00674B90
+		public virtual void GiveSoldThingToPlayer(Thing toGive, int countToGive, Pawn playerNegotiator)
+		{
+			Caravan caravan = playerNegotiator.GetCaravan();
+			Thing thing = toGive.SplitOff(countToGive);
+			thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, this.settlement);
+			Pawn pawn = thing as Pawn;
+			if (pawn != null)
+			{
+				caravan.AddPawn(pawn, true);
+				return;
+			}
+			Pawn pawn2 = CaravanInventoryUtility.FindPawnToMoveInventoryTo(thing, caravan.PawnsListForReading, null, null);
+			if (pawn2 == null)
+			{
+				Log.Error("Could not find any pawn to give sold thing to.");
+				thing.Destroy(DestroyMode.Vanish);
+				return;
+			}
+			if (!pawn2.inventory.innerContainer.TryAdd(thing, true))
+			{
+				Log.Error("Could not add sold thing to inventory.");
+				thing.Destroy(DestroyMode.Vanish);
+			}
+		}
+
+		// Token: 0x0601596B RID: 88427 RVA: 0x00676A18 File Offset: 0x00674C18
+		public virtual void TraderTrackerTick()
+		{
+			if (this.stock != null)
+			{
+				if (Find.TickManager.TicksGame - this.lastStockGenerationTicks > this.RegenerateStockEveryDays * 60000)
+				{
+					this.TryDestroyStock();
+					return;
+				}
+				for (int i = this.stock.Count - 1; i >= 0; i--)
+				{
+					Pawn pawn = this.stock[i] as Pawn;
+					if (pawn != null && pawn.Destroyed)
+					{
+						this.stock.Remove(pawn);
+					}
+				}
+				for (int j = this.stock.Count - 1; j >= 0; j--)
+				{
+					Pawn pawn2 = this.stock[j] as Pawn;
+					if (pawn2 != null && !pawn2.IsWorldPawn())
+					{
+						Log.Error("Faction base has non-world-pawns in its stock. Removing...");
+						this.stock.Remove(pawn2);
 					}
 				}
 			}
 		}
-		Scribe_Collections.Look(ref tmpSavedPawns, "tmpSavedPawns", LookMode.Reference);
-		Scribe_Deep.Look(ref stock, "stock");
-		Scribe_Values.Look(ref lastStockGenerationTicks, "lastStockGenerationTicks", 0);
-		Scribe_Values.Look(ref everGeneratedStock, "wasStockGeneratedYet", defaultValue: false);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit || Scribe.mode == LoadSaveMode.Saving)
-		{
-			for (int i = 0; i < tmpSavedPawns.Count; i++)
-			{
-				stock.TryAdd(tmpSavedPawns[i], canMergeWithExistingStacks: false);
-			}
-			tmpSavedPawns.Clear();
-		}
-	}
 
-	public virtual IEnumerable<Thing> ColonyThingsWillingToBuy(Pawn playerNegotiator)
-	{
-		Caravan caravan = playerNegotiator.GetCaravan();
-		foreach (Thing item in CaravanInventoryUtility.AllInventoryItems(caravan))
+		// Token: 0x0601596C RID: 88428 RVA: 0x00676AE4 File Offset: 0x00674CE4
+		public void TryDestroyStock()
 		{
-			yield return item;
-		}
-		List<Pawn> pawns = caravan.PawnsListForReading;
-		for (int i = 0; i < pawns.Count; i++)
-		{
-			if (!caravan.IsOwner(pawns[i]))
+			if (this.stock != null)
 			{
-				yield return pawns[i];
+				for (int i = this.stock.Count - 1; i >= 0; i--)
+				{
+					Thing thing = this.stock[i];
+					this.stock.Remove(thing);
+					if (!(thing is Pawn) && !thing.Destroyed)
+					{
+						thing.Destroy(DestroyMode.Vanish);
+					}
+				}
+				this.stock = null;
 			}
 		}
-	}
 
-	public virtual void GiveSoldThingToTrader(Thing toGive, int countToGive, Pawn playerNegotiator)
-	{
-		if (stock == null)
+		// Token: 0x0601596D RID: 88429 RVA: 0x00676B49 File Offset: 0x00674D49
+		public bool ContainsPawn(Pawn p)
 		{
-			RegenerateStock();
+			return this.stock != null && this.stock.Contains(p);
 		}
-		Caravan caravan = playerNegotiator.GetCaravan();
-		Thing thing = toGive.SplitOff(countToGive);
-		thing.PreTraded(TradeAction.PlayerSells, playerNegotiator, settlement);
-		if (toGive is Pawn pawn)
+
+		// Token: 0x0601596E RID: 88430 RVA: 0x00676B64 File Offset: 0x00674D64
+		protected virtual void RegenerateStock()
 		{
-			CaravanInventoryUtility.MoveAllInventoryToSomeoneElse(pawn, caravan.PawnsListForReading);
-			if (!pawn.RaceProps.Humanlike && !stock.TryAdd(pawn, canMergeWithExistingStacks: false))
+			this.TryDestroyStock();
+			this.stock = new ThingOwner<Thing>(this);
+			this.everGeneratedStock = true;
+			if (this.settlement.Faction == null || !this.settlement.Faction.IsPlayer)
 			{
-				pawn.Destroy();
+				ThingSetMakerParams parms = default(ThingSetMakerParams);
+				parms.traderDef = this.TraderKind;
+				parms.tile = new PlanetTile?(this.settlement.Tile);
+				parms.makingFaction = this.settlement.Faction;
+				this.stock.TryAddRangeOrTransfer(ThingSetMakerDefOf.TraderStock.root.Generate(parms), true, false);
 			}
-		}
-		else if (!stock.TryAdd(thing, canMergeWithExistingStacks: false))
-		{
-			thing.Destroy();
-		}
-	}
-
-	public virtual void GiveSoldThingToPlayer(Thing toGive, int countToGive, Pawn playerNegotiator)
-	{
-		Caravan caravan = playerNegotiator.GetCaravan();
-		Thing thing = toGive.SplitOff(countToGive);
-		thing.PreTraded(TradeAction.PlayerBuys, playerNegotiator, settlement);
-		if (thing is Pawn p)
-		{
-			caravan.AddPawn(p, addCarriedPawnToWorldPawnsIfAny: true);
-			return;
-		}
-		Pawn pawn = CaravanInventoryUtility.FindPawnToMoveInventoryTo(thing, caravan.PawnsListForReading, null);
-		if (pawn == null)
-		{
-			Log.Error("Could not find any pawn to give sold thing to.");
-			thing.Destroy();
-		}
-		else if (!pawn.inventory.innerContainer.TryAdd(thing))
-		{
-			Log.Error("Could not add sold thing to inventory.");
-			thing.Destroy();
-		}
-	}
-
-	public virtual void TraderTrackerTick()
-	{
-		if (stock == null)
-		{
-			return;
-		}
-		if (Find.TickManager.TicksGame - lastStockGenerationTicks > RegenerateStockEveryDays * 60000)
-		{
-			TryDestroyStock();
-			return;
-		}
-		for (int num = stock.Count - 1; num >= 0; num--)
-		{
-			if (stock[num] is Pawn { Destroyed: not false } pawn)
+			for (int i = 0; i < this.stock.Count; i++)
 			{
-				stock.Remove(pawn);
+				Pawn pawn = this.stock[i] as Pawn;
+				if (pawn != null)
+				{
+					Find.WorldPawns.PassToWorld(pawn, PawnDiscardDecideMode.Decide);
+				}
 			}
+			this.lastStockGenerationTicks = Find.TickManager.TicksGame;
 		}
-		for (int num2 = stock.Count - 1; num2 >= 0; num2--)
-		{
-			if (stock[num2] is Pawn pawn2 && !pawn2.IsWorldPawn())
-			{
-				Log.Error("Faction base has non-world-pawns in its stock. Removing...");
-				stock.Remove(pawn2);
-			}
-		}
-	}
 
-	public void TryDestroyStock()
-	{
-		if (stock == null)
+		// Token: 0x0601596F RID: 88431 RVA: 0x00676C4B File Offset: 0x00674E4B
+		public ThingOwner GetDirectlyHeldThings()
 		{
-			return;
+			return this.stock;
 		}
-		for (int num = stock.Count - 1; num >= 0; num--)
-		{
-			Thing thing = stock[num];
-			stock.Remove(thing);
-			if (!(thing is Pawn) && !thing.Destroyed)
-			{
-				thing.Destroy();
-			}
-		}
-		stock = null;
-	}
 
-	public bool ContainsPawn(Pawn p)
-	{
-		if (stock != null)
+		// Token: 0x06015970 RID: 88432 RVA: 0x00676C53 File Offset: 0x00674E53
+		public void GetChildHolders(List<IThingHolder> outChildren)
 		{
-			return stock.Contains(p);
+			ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, this.GetDirectlyHeldThings());
 		}
-		return false;
-	}
 
-	protected virtual void RegenerateStock()
-	{
-		TryDestroyStock();
-		stock = new ThingOwner<Thing>(this)
-		{
-			dontTickContents = true
-		};
-		everGeneratedStock = true;
-		if (settlement.Faction == null || !settlement.Faction.IsPlayer)
-		{
-			ThingSetMakerParams parms = new ThingSetMakerParams
-			{
-				traderDef = TraderKind,
-				tile = settlement.Tile,
-				makingFaction = settlement.Faction
-			};
-			stock.TryAddRangeOrTransfer(ThingSetMakerDefOf.TraderStock.root.Generate(parms));
-		}
-		for (int i = 0; i < stock.Count; i++)
-		{
-			if (stock[i] is Pawn pawn)
-			{
-				Find.WorldPawns.PassToWorld(pawn);
-			}
-		}
-		lastStockGenerationTicks = Find.TickManager.TicksGame;
-	}
+		// Token: 0x0400EFE4 RID: 61412
+		public Settlement settlement;
 
-	public ThingOwner GetDirectlyHeldThings()
-	{
-		return stock;
-	}
+		// Token: 0x0400EFE5 RID: 61413
+		private ThingOwner<Thing> stock;
 
-	public void GetChildHolders(List<IThingHolder> outChildren)
-	{
-		ThingOwnerUtility.AppendThingHoldersFromThings(outChildren, GetDirectlyHeldThings());
+		// Token: 0x0400EFE6 RID: 61414
+		private int lastStockGenerationTicks = -1;
+
+		// Token: 0x0400EFE7 RID: 61415
+		private bool everGeneratedStock;
+
+		// Token: 0x0400EFE8 RID: 61416
+		private const float DefaultTradePriceImprovement = 0.02f;
+
+		// Token: 0x0400EFE9 RID: 61417
+		private List<Pawn> tmpSavedPawns = new List<Pawn>();
 	}
 }

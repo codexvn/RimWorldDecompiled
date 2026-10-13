@@ -1,17 +1,21 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Interior_BatteryRoom : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003994 RID: 14740
+	public class SymbolResolver_Interior_BatteryRoom : SymbolResolver
 	{
-		BaseGen.symbolStack.Push("indoorLighting", rp);
-		BaseGen.symbolStack.Push("chargeBatteries", rp);
-		ResolveParams resolveParams = rp;
-		resolveParams.singleThingDef = ThingDefOf.Battery;
-		resolveParams.thingRot = (Rand.Bool ? Rot4.North : Rot4.East);
-		resolveParams.fillWithThingsPadding = rp.fillWithThingsPadding ?? 1;
-		BaseGen.symbolStack.Push("fillWithThings", resolveParams);
+		// Token: 0x060143D2 RID: 82898 RVA: 0x0060A8A0 File Offset: 0x00608AA0
+		public override void Resolve(ResolveParams rp)
+		{
+			BaseGen.symbolStack.Push("indoorLighting", rp, null);
+			BaseGen.symbolStack.Push("chargeBatteries", rp, null);
+			ResolveParams resolveParams = rp;
+			resolveParams.singleThingDef = ThingDefOf.Battery;
+			resolveParams.thingRot = new Rot4?(Rand.Bool ? Rot4.North : Rot4.East);
+			resolveParams.fillWithThingsPadding = new int?(rp.fillWithThingsPadding ?? 1);
+			BaseGen.symbolStack.Push("fillWithThings", resolveParams, null);
+		}
 	}
 }

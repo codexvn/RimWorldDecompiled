@@ -1,47 +1,49 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public static class GatherAnimalsAndSlavesForCaravanUtility
+namespace RimWorld
 {
-	public static void CheckArrived(Lord lord, List<Pawn> pawns, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived, Predicate<Pawn> extraValidator = null)
+	// Token: 0x020016DE RID: 5854
+	public static class GatherAnimalsAndSlavesForCaravanUtility
 	{
-		bool flag = true;
-		for (int i = 0; i < pawns.Count; i++)
+		// Token: 0x06008A31 RID: 35377 RVA: 0x00293920 File Offset: 0x00291B20
+		public static void CheckArrived(Lord lord, List<Pawn> pawns, IntVec3 meetingPoint, string memo, Predicate<Pawn> shouldCheckIfArrived, Predicate<Pawn> extraValidator = null)
 		{
-			Pawn pawn = pawns[i];
-			if (shouldCheckIfArrived(pawn) && (!pawn.Spawned || !pawn.Position.InHorDistOf(meetingPoint, 10f) || !pawn.CanReach(meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly) || (extraValidator != null && !extraValidator(pawn))))
+			bool flag = true;
+			for (int i = 0; i < pawns.Count; i++)
 			{
-				flag = false;
-				break;
+				Pawn pawn = pawns[i];
+				if (shouldCheckIfArrived(pawn) && (!pawn.Spawned || !pawn.Position.InHorDistOf(meetingPoint, 10f) || !pawn.CanReach(meetingPoint, PathEndMode.ClosestTouch, Danger.Deadly, false, false, TraverseMode.ByPawn) || (extraValidator != null && !extraValidator(pawn))))
+				{
+					flag = false;
+					break;
+				}
+			}
+			if (flag)
+			{
+				lord.ReceiveMemo(memo);
 			}
 		}
-		if (flag)
-		{
-			lord.ReceiveMemo(memo);
-		}
-	}
 
-	public static bool IsRopedByCaravanPawn(Pawn animal)
-	{
-		Lord lord = animal.GetLord();
-		if (lord != null && animal.roping.IsRopedByPawn)
+		// Token: 0x06008A32 RID: 35378 RVA: 0x002939A0 File Offset: 0x00291BA0
+		public static bool IsRopedByCaravanPawn(Pawn animal)
 		{
-			return animal.roping.RopedByPawn?.GetLord() == lord;
+			Lord lord = animal.GetLord();
+			if (lord != null && animal.roping.IsRopedByPawn)
+			{
+				Pawn ropedByPawn = animal.roping.RopedByPawn;
+				return ((ropedByPawn != null) ? ropedByPawn.GetLord() : null) == lord;
+			}
+			return false;
 		}
-		return false;
-	}
 
-	public static bool CanRoperTakeAnimalToDest(Pawn pawn, Pawn animal, IntVec3 destSpot)
-	{
-		if (pawn.CanReach(animal, PathEndMode.Touch, Danger.Deadly))
+		// Token: 0x06008A33 RID: 35379 RVA: 0x002939E0 File Offset: 0x00291BE0
+		public static bool CanRoperTakeAnimalToDest(Pawn pawn, Pawn animal, IntVec3 destSpot)
 		{
-			return animal.Map.reachability.CanReach(animal.Position, destSpot, PathEndMode.OnCell, TraverseParms.For(pawn).WithFenceblockedOf(animal));
+			return pawn.CanReach(animal, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn) && animal.Map.reachability.CanReach(animal.Position, destSpot, PathEndMode.OnCell, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true).WithFenceblockedOf(animal));
 		}
-		return false;
 	}
 }

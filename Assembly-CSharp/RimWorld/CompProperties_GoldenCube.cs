@@ -1,20 +1,27 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_GoldenCube : CompProperties_Interactable
+namespace RimWorld
 {
-	[MustTranslate]
-	public string letterDeactivatedLabel;
-
-	[MustTranslate]
-	public string letterDeactivatedDesc;
-
-	[MustTranslate]
-	public string letterDeactivatedAppend;
-
-	public CompProperties_GoldenCube()
+	// Token: 0x02002CBB RID: 11451
+	public class CompProperties_GoldenCube : CompProperties_Interactable
 	{
-		compClass = typeof(CompGoldenCube);
+		// Token: 0x06010122 RID: 65826 RVA: 0x004A670C File Offset: 0x004A490C
+		public CompProperties_GoldenCube()
+		{
+			this.compClass = typeof(CompGoldenCube);
+		}
+
+		// Token: 0x0400A7EC RID: 42988
+		[MustTranslate]
+		public string letterDeactivatedLabel;
+
+		// Token: 0x0400A7ED RID: 42989
+		[MustTranslate]
+		public string letterDeactivatedDesc;
+
+		// Token: 0x0400A7EE RID: 42990
+		[MustTranslate]
+		public string letterDeactivatedAppend;
 	}
 }

@@ -1,307 +1,364 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public class Dialog_MapSearch : Dialog_Search<Thing>
+namespace RimWorld
 {
-	private Map map;
-
-	private static readonly Texture2D InventoryIcon = ContentFinder<Texture2D>.Get("UI/Widgets/SearchBar_Inventory");
-
-	private static readonly Texture2D ContainerIcon = ContentFinder<Texture2D>.Get("UI/Widgets/SearchBar_Container");
-
-	private List<Thing> tmpContents = new List<Thing>();
-
-	protected override List<Thing> SearchSet => map.listerThings.AllThings;
-
-	protected override bool ShouldClose
+	// Token: 0x02003193 RID: 12691
+	[StaticConstructorOnStartup]
+	public class Dialog_MapSearch : Dialog_Search<Thing>
 	{
-		get
+		// Token: 0x17002E68 RID: 11880
+		// (get) Token: 0x06011DA3 RID: 73123 RVA: 0x0052ECB4 File Offset: 0x0052CEB4
+		protected override List<Thing> SearchSet
 		{
-			if (!WorldRendererUtility.WorldSelected)
+			get
 			{
-				return Find.CurrentMap != map;
-			}
-			return true;
-		}
-	}
-
-	protected override TaggedString SearchLabel => "SearchTheMap".Translate();
-
-	public Dialog_MapSearch(Map map)
-	{
-		this.map = map;
-	}
-
-	public override void PostOpen()
-	{
-		base.PostOpen();
-		ThingListChangedCallbacks thingListChangedCallbacks = map.thingListChangedCallbacks;
-		thingListChangedCallbacks.onThingAdded = (Action<Thing>)Delegate.Combine(thingListChangedCallbacks.onThingAdded, new Action<Thing>(TryAddElement));
-		ThingListChangedCallbacks thingListChangedCallbacks2 = map.thingListChangedCallbacks;
-		thingListChangedCallbacks2.onThingRemoved = (Action<Thing>)Delegate.Combine(thingListChangedCallbacks2.onThingRemoved, new Action<Thing>(TryRemoveElement));
-	}
-
-	public override void PostClose()
-	{
-		base.PostClose();
-		ThingListChangedCallbacks thingListChangedCallbacks = map.thingListChangedCallbacks;
-		thingListChangedCallbacks.onThingAdded = (Action<Thing>)Delegate.Remove(thingListChangedCallbacks.onThingAdded, new Action<Thing>(TryAddElement));
-		ThingListChangedCallbacks thingListChangedCallbacks2 = map.thingListChangedCallbacks;
-		thingListChangedCallbacks2.onThingRemoved = (Action<Thing>)Delegate.Remove(thingListChangedCallbacks2.onThingRemoved, new Action<Thing>(TryRemoveElement));
-	}
-
-	protected override void CheckAnyElementRemoved()
-	{
-		bool flag = false;
-		for (int num = searchResults.Count - 1; num >= 0; num--)
-		{
-			Thing thing = searchResults.Values[num];
-			if (thing == null || thing.Destroyed || thing.MapHeld != map || !ThingIsVisibleToPlayer(thing))
-			{
-				searchResults.RemoveAt(num);
-				searchResultsSet.Remove(thing);
-				flag = true;
+				return this.map.listerThings.AllThings;
 			}
 		}
-		if (flag)
-		{
-			SetInitialSizeAndPosition();
-		}
-	}
 
-	protected override void DoIcon(Thing element, Rect iconRect)
-	{
-		Widgets.ThingIcon(iconRect, element);
-	}
-
-	protected override void DoLabel(Thing element, Rect labelRect)
-	{
-		Widgets.Label(labelRect, element.LabelCap);
-	}
-
-	protected override void DoExtraIcon(Thing element, Rect iconRect)
-	{
-		if (element.ParentHolder?.ParentHolder is Pawn)
+		// Token: 0x17002E69 RID: 11881
+		// (get) Token: 0x06011DA4 RID: 73124 RVA: 0x0052ECC6 File Offset: 0x0052CEC6
+		protected override bool ShouldClose
 		{
-			GUI.DrawTexture(iconRect.ContractedBy(2f), InventoryIcon);
-		}
-		else if (!(element.ParentHolder is Map))
-		{
-			GUI.DrawTexture(iconRect.ContractedBy(2f), ContainerIcon);
-		}
-	}
-
-	protected override void ClikedOnElement(Thing element)
-	{
-		if (element == null || element.Destroyed || element.MapHeld != map)
-		{
-			return;
-		}
-		CameraJumper.TryJump(element);
-		Find.Selector.ClearSelection();
-		Thing obj = element;
-		IThingHolder parentHolder = element.ParentHolder;
-		if (parentHolder != null)
-		{
-			if (parentHolder.ParentHolder is Pawn { Corpse: var corpse } pawn)
+			get
 			{
-				obj = ((corpse == null) ? ((Thing)pawn) : ((Thing)corpse));
-			}
-			else if (parentHolder is Thing thing)
-			{
-				obj = thing;
+				return WorldRendererUtility.WorldSelected || Find.CurrentMap != this.map;
 			}
 		}
-		Find.Selector.Select(obj);
-	}
 
-	protected override bool ShouldSkipElement(Thing element)
-	{
-		if (element == null)
+		// Token: 0x17002E6A RID: 11882
+		// (get) Token: 0x06011DA5 RID: 73125 RVA: 0x0052ECE1 File Offset: 0x0052CEE1
+		protected override TaggedString SearchLabel
 		{
-			return true;
+			get
+			{
+				return "SearchTheMap".Translate();
+			}
 		}
-		if (element is Corpse { Bugged: not false })
-		{
-			return true;
-		}
-		if (element is MinifiedThing { InnerThing: null })
-		{
-			return true;
-		}
-		return false;
-	}
 
-	protected override void OnHighlightUpdate(Thing element)
-	{
-		GenDraw.DrawArrowPointingAt(element.PositionHeld.ToVector3Shifted());
-	}
-
-	protected override void SetInitialSizeAndPosition()
-	{
-		scrollHeight = (float)searchResults.Count * 26f;
-		Vector2 initialSize = InitialSize;
-		initialSize.y = Mathf.Clamp(initialSize.y + scrollHeight, InitialSize.y, (float)UI.screenHeight / 2f);
-		windowRect = new Rect((float)UI.screenWidth - initialSize.x, (float)UI.screenHeight - initialSize.y - 35f, initialSize.x, initialSize.y).Rounded();
-	}
-
-	private bool CanAddThing(Thing thing)
-	{
-		if (!quickSearchWidget.filter.Text.NullOrEmpty() && thing != null && thing.def.selectable && !thing.Destroyed && thing.def.showInSearch && thing.MapHeld == map && (DebugSettings.searchIgnoresRestrictions || !thing.PositionHeld.Fogged(thing.MapHeld)) && !searchResultsSet.Contains(thing) && !(thing is Corpse { Bugged: not false }) && (TextMatch(thing.LabelNoCount.StripTags()) || TextMatch(thing.def.label.StripTags())))
+		// Token: 0x06011DA6 RID: 73126 RVA: 0x0052ECED File Offset: 0x0052CEED
+		public Dialog_MapSearch(Map map)
 		{
-			return ThingIsVisibleToPlayer(thing);
+			this.map = map;
 		}
-		return false;
-	}
 
-	private bool ThingIsVisibleToPlayer(Thing thing)
-	{
-		if (DebugSettings.searchIgnoresRestrictions)
+		// Token: 0x06011DA7 RID: 73127 RVA: 0x0052ED08 File Offset: 0x0052CF08
+		public override void PostOpen()
 		{
-			return true;
+			base.PostOpen();
+			ThingListChangedCallbacks thingListChangedCallbacks = this.map.thingListChangedCallbacks;
+			thingListChangedCallbacks.onThingAdded = (Action<Thing>)Delegate.Combine(thingListChangedCallbacks.onThingAdded, new Action<Thing>(this.TryAddElement));
+			ThingListChangedCallbacks thingListChangedCallbacks2 = this.map.thingListChangedCallbacks;
+			thingListChangedCallbacks2.onThingRemoved = (Action<Thing>)Delegate.Combine(thingListChangedCallbacks2.onThingRemoved, new Action<Thing>(this.TryRemoveElement));
 		}
-		if (thing is Pawn pawn && pawn.IsHiddenFromPlayer())
+
+		// Token: 0x06011DA8 RID: 73128 RVA: 0x0052ED78 File Offset: 0x0052CF78
+		public override void PostClose()
 		{
+			base.PostClose();
+			ThingListChangedCallbacks thingListChangedCallbacks = this.map.thingListChangedCallbacks;
+			thingListChangedCallbacks.onThingAdded = (Action<Thing>)Delegate.Remove(thingListChangedCallbacks.onThingAdded, new Action<Thing>(this.TryAddElement));
+			ThingListChangedCallbacks thingListChangedCallbacks2 = this.map.thingListChangedCallbacks;
+			thingListChangedCallbacks2.onThingRemoved = (Action<Thing>)Delegate.Remove(thingListChangedCallbacks2.onThingRemoved, new Action<Thing>(this.TryRemoveElement));
+		}
+
+		// Token: 0x06011DA9 RID: 73129 RVA: 0x0052EDE8 File Offset: 0x0052CFE8
+		protected override void CheckAnyElementRemoved()
+		{
+			bool flag = false;
+			for (int i = this.searchResults.Count - 1; i >= 0; i--)
+			{
+				Thing thing = this.searchResults.Values[i];
+				if (thing == null || thing.Destroyed || thing.MapHeld != this.map || !this.ThingIsVisibleToPlayer(thing))
+				{
+					this.searchResults.RemoveAt(i);
+					this.searchResultsSet.Remove(thing);
+					flag = true;
+				}
+			}
+			if (flag)
+			{
+				this.SetInitialSizeAndPosition();
+			}
+		}
+
+		// Token: 0x06011DAA RID: 73130 RVA: 0x0052EE68 File Offset: 0x0052D068
+		protected override void DoIcon(Thing element, Rect iconRect)
+		{
+			Widgets.ThingIcon(iconRect, element, 1f, null, false, 1f, false);
+		}
+
+		// Token: 0x06011DAB RID: 73131 RVA: 0x0052EE91 File Offset: 0x0052D091
+		protected override void DoLabel(Thing element, Rect labelRect)
+		{
+			Widgets.Label(labelRect, element.LabelCap);
+		}
+
+		// Token: 0x06011DAC RID: 73132 RVA: 0x0052EEA0 File Offset: 0x0052D0A0
+		protected override void DoExtraIcon(Thing element, Rect iconRect)
+		{
+			IThingHolder parentHolder = element.ParentHolder;
+			if (((parentHolder != null) ? parentHolder.ParentHolder : null) is Pawn)
+			{
+				GUI.DrawTexture(iconRect.ContractedBy(2f), Dialog_MapSearch.InventoryIcon);
+				return;
+			}
+			if (!(element.ParentHolder is Map))
+			{
+				GUI.DrawTexture(iconRect.ContractedBy(2f), Dialog_MapSearch.ContainerIcon);
+			}
+		}
+
+		// Token: 0x06011DAD RID: 73133 RVA: 0x0052EF00 File Offset: 0x0052D100
+		protected override void ClikedOnElement(Thing element)
+		{
+			if (element == null || element.Destroyed || element.MapHeld != this.map)
+			{
+				return;
+			}
+			CameraJumper.TryJump(element, CameraJumper.MovementMode.Pan);
+			Find.Selector.ClearSelection();
+			Thing obj = element;
+			IThingHolder parentHolder = element.ParentHolder;
+			if (parentHolder != null)
+			{
+				Pawn pawn = parentHolder.ParentHolder as Pawn;
+				if (pawn != null)
+				{
+					obj = pawn;
+				}
+				else
+				{
+					Thing thing = parentHolder as Thing;
+					if (thing != null)
+					{
+						obj = thing;
+					}
+				}
+			}
+			Find.Selector.Select(obj, true, true);
+		}
+
+		// Token: 0x06011DAE RID: 73134 RVA: 0x0052EF78 File Offset: 0x0052D178
+		protected override bool ShouldSkipElement(Thing element)
+		{
+			if (element == null)
+			{
+				return true;
+			}
+			Corpse corpse = element as Corpse;
+			if (corpse != null && corpse.Bugged)
+			{
+				return true;
+			}
+			MinifiedThing minifiedThing = element as MinifiedThing;
+			return minifiedThing != null && minifiedThing.InnerThing == null;
+		}
+
+		// Token: 0x06011DAF RID: 73135 RVA: 0x0052EFB4 File Offset: 0x0052D1B4
+		protected override void OnHighlightUpdate(Thing element)
+		{
+			GenDraw.DrawArrowPointingAt(element.PositionHeld.ToVector3Shifted(), false);
+		}
+
+		// Token: 0x06011DB0 RID: 73136 RVA: 0x0052EFD8 File Offset: 0x0052D1D8
+		protected override void SetInitialSizeAndPosition()
+		{
+			this.scrollHeight = (float)this.searchResults.Count * 26f;
+			Vector2 initialSize = this.InitialSize;
+			initialSize.y = Mathf.Clamp(initialSize.y + this.scrollHeight, this.InitialSize.y, (float)UI.screenHeight / 2f);
+			this.windowRect = new Rect((float)UI.screenWidth - initialSize.x, (float)UI.screenHeight - initialSize.y - 35f, initialSize.x, initialSize.y).Rounded();
+		}
+
+		// Token: 0x06011DB1 RID: 73137 RVA: 0x0052F070 File Offset: 0x0052D270
+		private bool CanAddThing(Thing thing)
+		{
+			if (!this.quickSearchWidget.filter.Text.NullOrEmpty() && thing != null && thing.def.selectable && !thing.Destroyed && thing.def.showInSearch && thing.MapHeld == this.map && (DebugSettings.searchIgnoresRestrictions || !thing.PositionHeld.Fogged(thing.MapHeld)) && !this.searchResultsSet.Contains(thing))
+			{
+				Corpse corpse = thing as Corpse;
+				if ((corpse == null || !corpse.Bugged) && (base.TextMatch(thing.LabelNoCount.StripTags()) || base.TextMatch(thing.def.label.StripTags())))
+				{
+					return this.ThingIsVisibleToPlayer(thing);
+				}
+			}
 			return false;
 		}
-		IThingHolder parentHolder = thing.ParentHolder;
-		if (parentHolder != null)
-		{
-			if (parentHolder is Pawn_InventoryTracker pawn_InventoryTracker && pawn_InventoryTracker.pawn.IsHiddenFromPlayer())
-			{
-				return false;
-			}
-			if (parentHolder is Pawn_EquipmentTracker pawn_EquipmentTracker && pawn_EquipmentTracker.pawn.IsHiddenFromPlayer())
-			{
-				return false;
-			}
-			if (parentHolder is Pawn_ApparelTracker pawn_ApparelTracker && pawn_ApparelTracker.pawn.IsHiddenFromPlayer())
-			{
-				return false;
-			}
-			if (parentHolder is Pawn_CarryTracker pawn_CarryTracker && pawn_CarryTracker.pawn.IsHiddenFromPlayer())
-			{
-				return false;
-			}
-		}
-		return true;
-	}
 
-	protected override void TryAddElement(Thing element)
-	{
-		bool flag = false;
-		foreach (Thing item in ContentsFromThing(element))
+		// Token: 0x06011DB2 RID: 73138 RVA: 0x0052F144 File Offset: 0x0052D344
+		private bool ThingIsVisibleToPlayer(Thing thing)
 		{
-			searchResults.Add(item.LabelNoParenthesis.ToLower(), item);
-			searchResultsSet.Add(item);
-			flag = true;
-		}
-		if (flag)
-		{
-			SetInitialSizeAndPosition();
-		}
-	}
-
-	protected override void TryRemoveElement(Thing thing)
-	{
-		bool flag = false;
-		foreach (Thing item in ContentsFromThing(thing))
-		{
-			int num = searchResults.IndexOfValue(item);
-			if (num >= 0)
+			if (DebugSettings.searchIgnoresRestrictions)
 			{
-				searchResults.RemoveAt(num);
-				searchResultsSet.Remove(item);
+				return true;
+			}
+			Pawn pawn = thing as Pawn;
+			if (pawn != null && pawn.IsHiddenFromPlayer())
+			{
+				return false;
+			}
+			IThingHolder parentHolder = thing.ParentHolder;
+			if (parentHolder != null)
+			{
+				Pawn_InventoryTracker pawn_InventoryTracker = parentHolder as Pawn_InventoryTracker;
+				if (pawn_InventoryTracker != null && pawn_InventoryTracker.pawn.IsHiddenFromPlayer())
+				{
+					return false;
+				}
+				Pawn_EquipmentTracker pawn_EquipmentTracker = parentHolder as Pawn_EquipmentTracker;
+				if (pawn_EquipmentTracker != null && pawn_EquipmentTracker.pawn.IsHiddenFromPlayer())
+				{
+					return false;
+				}
+				Pawn_ApparelTracker pawn_ApparelTracker = parentHolder as Pawn_ApparelTracker;
+				if (pawn_ApparelTracker != null && pawn_ApparelTracker.pawn.IsHiddenFromPlayer())
+				{
+					return false;
+				}
+				Pawn_CarryTracker pawn_CarryTracker = parentHolder as Pawn_CarryTracker;
+				if (pawn_CarryTracker != null && pawn_CarryTracker.pawn.IsHiddenFromPlayer())
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x06011DB3 RID: 73139 RVA: 0x0052F1E4 File Offset: 0x0052D3E4
+		protected override void TryAddElement(Thing element)
+		{
+			bool flag = false;
+			foreach (Thing thing in this.ContentsFromThing(element))
+			{
+				this.searchResults.Add(thing.LabelNoParenthesis.ToLower(), thing);
+				this.searchResultsSet.Add(thing);
 				flag = true;
 			}
+			if (flag)
+			{
+				this.SetInitialSizeAndPosition();
+			}
 		}
-		if (flag)
-		{
-			SetInitialSizeAndPosition();
-		}
-	}
 
-	private List<Thing> ContentsFromThing(Thing thing)
-	{
-		tmpContents.Clear();
-		if (CanAddThing(thing))
+		// Token: 0x06011DB4 RID: 73140 RVA: 0x0052F264 File Offset: 0x0052D464
+		protected override void TryRemoveElement(Thing thing)
 		{
-			tmpContents.Add(thing);
-		}
-		if (!thing.Faction.IsPlayerSafe() && !(thing is Corpse))
-		{
-			return tmpContents;
-		}
-		if (thing is Corpse { Bugged: false } corpse)
-		{
-			thing = corpse.InnerPawn;
-		}
-		if (thing is ISearchableContents { SearchableContents: { } searchableContents2 })
-		{
-			foreach (Thing item in (IEnumerable<Thing>)searchableContents2)
+			bool flag = false;
+			foreach (Thing thing2 in this.ContentsFromThing(thing))
 			{
-				if (CanAddThing(item))
+				int num = this.searchResults.IndexOfValue(thing2);
+				if (num >= 0)
 				{
-					tmpContents.Add(item);
+					this.searchResults.RemoveAt(num);
+					this.searchResultsSet.Remove(thing2);
+					flag = true;
 				}
 			}
-		}
-		if (thing is Pawn pawn && (pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsAnimal || pawn.Corpse != null))
-		{
-			if (pawn.equipment != null)
+			if (flag)
 			{
-				foreach (ThingWithComps item2 in pawn.equipment.AllEquipmentListForReading)
+				this.SetInitialSizeAndPosition();
+			}
+		}
+
+		// Token: 0x06011DB5 RID: 73141 RVA: 0x0052F2E8 File Offset: 0x0052D4E8
+		private List<Thing> ContentsFromThing(Thing thing)
+		{
+			this.tmpContents.Clear();
+			if (this.CanAddThing(thing))
+			{
+				this.tmpContents.Add(thing);
+			}
+			if (!thing.Faction.IsPlayerSafe())
+			{
+				return this.tmpContents;
+			}
+			ISearchableContents searchableContents = thing as ISearchableContents;
+			if (searchableContents != null)
+			{
+				ThingOwner searchableContents2 = searchableContents.SearchableContents;
+				if (searchableContents2 != null)
 				{
-					if (CanAddThing(item2))
+					foreach (Thing thing2 in ((IEnumerable<Thing>)searchableContents2))
 					{
-						tmpContents.Add(item2);
+						if (this.CanAddThing(thing2))
+						{
+							this.tmpContents.Add(thing2);
+						}
 					}
 				}
 			}
-			if (pawn.apparel != null)
+			Pawn pawn = thing as Pawn;
+			if (pawn != null && (pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsAnimal))
 			{
-				foreach (Apparel item3 in pawn.apparel.WornApparel)
+				if (pawn.equipment != null)
 				{
-					if (CanAddThing(item3))
+					foreach (ThingWithComps thingWithComps in pawn.equipment.AllEquipmentListForReading)
 					{
-						tmpContents.Add(item3);
+						if (this.CanAddThing(thingWithComps))
+						{
+							this.tmpContents.Add(thingWithComps);
+						}
+					}
+				}
+				if (pawn.apparel != null)
+				{
+					foreach (Apparel apparel in pawn.apparel.WornApparel)
+					{
+						if (this.CanAddThing(apparel))
+						{
+							this.tmpContents.Add(apparel);
+						}
+					}
+				}
+				if (pawn.inventory != null)
+				{
+					foreach (Thing thing3 in pawn.inventory.innerContainer)
+					{
+						if (this.CanAddThing(thing3))
+						{
+							this.tmpContents.Add(thing3);
+						}
 					}
 				}
 			}
-			if (pawn.inventory != null)
+			ThingWithComps thingWithComps2 = thing as ThingWithComps;
+			if (thingWithComps2 != null)
 			{
-				foreach (Thing item4 in pawn.inventory.innerContainer)
+				foreach (ThingComp thingComp in thingWithComps2.AllComps)
 				{
-					if (CanAddThing(item4))
+					ISearchableContents searchableContents3 = thingComp as ISearchableContents;
+					if (searchableContents3 != null)
 					{
-						tmpContents.Add(item4);
+						ThingOwner searchableContents4 = searchableContents3.SearchableContents;
+						if (searchableContents4 != null)
+						{
+							foreach (Thing thing4 in ((IEnumerable<Thing>)searchableContents4))
+							{
+								if (this.CanAddThing(thing4))
+								{
+									this.tmpContents.Add(thing4);
+								}
+							}
+						}
 					}
 				}
 			}
+			return this.tmpContents;
 		}
-		if (thing is ThingWithComps thingWithComps)
-		{
-			foreach (ThingComp allComp in thingWithComps.AllComps)
-			{
-				if (!(allComp is ISearchableContents { SearchableContents: { } searchableContents4 }))
-				{
-					continue;
-				}
-				foreach (Thing item5 in (IEnumerable<Thing>)searchableContents4)
-				{
-					if (CanAddThing(item5))
-					{
-						tmpContents.Add(item5);
-					}
-				}
-			}
-		}
-		return tmpContents;
+
+		// Token: 0x0400B8AF RID: 47279
+		private Map map;
+
+		// Token: 0x0400B8B0 RID: 47280
+		private static readonly Texture2D InventoryIcon = ContentFinder<Texture2D>.Get("UI/Widgets/SearchBar_Inventory", true);
+
+		// Token: 0x0400B8B1 RID: 47281
+		private static readonly Texture2D ContainerIcon = ContentFinder<Texture2D>.Get("UI/Widgets/SearchBar_Container", true);
+
+		// Token: 0x0400B8B2 RID: 47282
+		private List<Thing> tmpContents = new List<Thing>();
 	}
 }

@@ -1,8 +1,14 @@
-namespace Verse.Glow;
+﻿using System;
 
-public struct GlowCell
+namespace Verse.Glow
 {
-	public int intDist;
+	// Token: 0x02000DF2 RID: 3570
+	public struct GlowCell
+	{
+		// Token: 0x040041C3 RID: 16835
+		public int intDist;
 
-	public GlowCellStatus status;
+		// Token: 0x040041C4 RID: 16836
+		public GlowCellStatus status;
+	}
 }

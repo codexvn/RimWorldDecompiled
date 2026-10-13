@@ -1,34 +1,28 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class ComplexThreatWorker_SleepingMechanoids : ComplexThreatWorker_SleepingThreat
+namespace RimWorld
 {
-	protected override bool CanResolveInt(ComplexResolveParams parms)
+	// Token: 0x02001EB4 RID: 7860
+	public class ComplexThreatWorker_SleepingMechanoids : ComplexThreatWorker_SleepingThreat
 	{
-		if (base.CanResolveInt(parms))
+		// Token: 0x0600AE43 RID: 44611 RVA: 0x0031B684 File Offset: 0x00319884
+		protected override bool CanResolveInt(ComplexResolveParams parms)
 		{
-			if (parms.hostileFaction != null)
-			{
-				return parms.hostileFaction == Faction.OfMechanoids;
-			}
-			return true;
+			return base.CanResolveInt(parms) && (parms.hostileFaction == null || parms.hostileFaction == Faction.OfMechanoids);
 		}
-		return false;
-	}
 
-	private static bool MechKindSuitableForComplex(PawnKindDef def)
-	{
-		if (def.RaceProps.IsMechanoid && !def.isGoodBreacher && def.isFighter)
+		// Token: 0x0600AE44 RID: 44612 RVA: 0x0031B6A8 File Offset: 0x003198A8
+		private static bool MechKindSuitableForComplex(PawnKindDef def)
 		{
-			return def.allowInMechClusters;
+			return def.RaceProps.IsMechanoid && !def.isGoodBreacher && def.isFighter && def.allowInMechClusters;
 		}
-		return false;
-	}
 
-	protected override IEnumerable<PawnKindDef> GetPawnKindsForPoints(float points)
-	{
-		return PawnUtility.GetCombatPawnKindsForPoints(MechKindSuitableForComplex, points);
+		// Token: 0x0600AE45 RID: 44613 RVA: 0x0031B6CF File Offset: 0x003198CF
+		protected override IEnumerable<PawnKindDef> GetPawnKindsForPoints(float points)
+		{
+			return PawnUtility.GetCombatPawnKindsForPoints(new Func<PawnKindDef, bool>(ComplexThreatWorker_SleepingMechanoids.MechKindSuitableForComplex), points, null);
+		}
 	}
 }

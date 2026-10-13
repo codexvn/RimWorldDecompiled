@@ -1,236 +1,273 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Xml;
 
-namespace Verse;
-
-public class ScribeSaver
+namespace Verse
 {
-	public DebugLoadIDsSavingErrorsChecker loadIDsErrorsChecker = new DebugLoadIDsSavingErrorsChecker();
-
-	public bool savingForDebug;
-
-	private Stream saveStream;
-
-	private XmlWriter writer;
-
-	private string curPath;
-
-	private HashSet<string> savedNodes = new HashSet<string>();
-
-	private int nextListElementTemporaryId;
-
-	private bool anyInternalException;
-
-	public string CurPath => curPath;
-
-	public void InitSaving(string filePath, string documentElementName)
+	// Token: 0x0200085C RID: 2140
+	public class ScribeSaver
 	{
-		if (Scribe.mode != LoadSaveMode.Inactive)
+		// Token: 0x170009EC RID: 2540
+		// (get) Token: 0x06003609 RID: 13833 RVA: 0x001206F4 File Offset: 0x0011E8F4
+		public string CurPath
 		{
-			Log.Error("Called InitSaving() but current mode is " + Scribe.mode);
-			Scribe.ForceStop();
-		}
-		if (curPath != null)
-		{
-			Log.Error("Current path is not null in InitSaving");
-			curPath = null;
-			savedNodes.Clear();
-			nextListElementTemporaryId = 0;
-		}
-		try
-		{
-			Scribe.mode = LoadSaveMode.Saving;
-			saveStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
-			XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-			xmlWriterSettings.Indent = true;
-			xmlWriterSettings.IndentChars = "\t";
-			writer = XmlWriter.Create(saveStream, xmlWriterSettings);
-			writer.WriteStartDocument();
-			EnterNode(documentElementName);
-		}
-		catch (Exception ex)
-		{
-			Log.Error("Exception while init saving file: " + filePath + "\n" + ex);
-			ForceStop();
-			throw;
-		}
-	}
-
-	public void FinalizeSaving()
-	{
-		if (Scribe.mode != LoadSaveMode.Saving)
-		{
-			Log.Error("Called FinalizeSaving() but current mode is " + Scribe.mode);
-			return;
-		}
-		if (anyInternalException)
-		{
-			ForceStop();
-			throw new Exception("Can't finalize saving due to internal exception. The whole file would be most likely corrupted anyway.");
-		}
-		try
-		{
-			if (writer != null)
+			get
 			{
-				ExitNode();
-				writer.WriteEndDocument();
-				writer.Flush();
-				writer.Close();
-				writer = null;
+				return this.curPath;
 			}
-			if (saveStream != null)
+		}
+
+		// Token: 0x0600360A RID: 13834 RVA: 0x001206FC File Offset: 0x0011E8FC
+		public void InitSaving(string filePath, string documentElementName)
+		{
+			if (Scribe.mode != LoadSaveMode.Inactive)
 			{
-				saveStream.Flush();
-				saveStream.Close();
-				saveStream = null;
+				Log.Error("Called InitSaving() but current mode is " + Scribe.mode.ToString());
+				Scribe.ForceStop();
 			}
-			Scribe.mode = LoadSaveMode.Inactive;
-			savingForDebug = false;
-			loadIDsErrorsChecker.CheckForErrorsAndClear();
-			curPath = null;
-			savedNodes.Clear();
-			nextListElementTemporaryId = 0;
-			anyInternalException = false;
-		}
-		catch (Exception ex)
-		{
-			Log.Error("Exception in FinalizeLoading(): " + ex);
-			ForceStop();
-			throw;
-		}
-	}
-
-	public void WriteElement(string elementName, string value)
-	{
-		if (writer == null)
-		{
-			Log.Error("Called WriteElemenet(), but writer is null.");
-			return;
-		}
-		try
-		{
-			writer.WriteElementString(elementName, value);
-		}
-		catch (Exception)
-		{
-			anyInternalException = true;
-			throw;
-		}
-	}
-
-	public void WriteAttribute(string attributeName, string value)
-	{
-		if (writer == null)
-		{
-			Log.Error("Called WriteAttribute(), but writer is null.");
-			return;
-		}
-		try
-		{
-			writer.WriteAttributeString(attributeName, value);
-		}
-		catch (Exception)
-		{
-			anyInternalException = true;
-			throw;
-		}
-	}
-
-	public string DebugOutputFor(IExposable saveable)
-	{
-		if (Scribe.mode != LoadSaveMode.Inactive)
-		{
-			Log.Error("DebugOutput needs current mode to be Inactive");
-			return "";
-		}
-		try
-		{
-			using StringWriter stringWriter = new StringWriter();
-			XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
-			xmlWriterSettings.Indent = true;
-			xmlWriterSettings.IndentChars = "  ";
-			xmlWriterSettings.OmitXmlDeclaration = true;
+			if (this.curPath != null)
+			{
+				Log.Error("Current path is not null in InitSaving");
+				this.curPath = null;
+				this.savedNodes.Clear();
+				this.nextListElementTemporaryId = 0;
+			}
 			try
 			{
-				using (writer = XmlWriter.Create(stringWriter, xmlWriterSettings))
-				{
-					Scribe.mode = LoadSaveMode.Saving;
-					savingForDebug = true;
-					Scribe_Deep.Look(ref saveable, "saveable");
-				}
-				return stringWriter.ToString();
+				Scribe.mode = LoadSaveMode.Saving;
+				this.saveStream = new FileStream(filePath, FileMode.Create, FileAccess.Write, FileShare.None);
+				XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
+				xmlWriterSettings.Indent = true;
+				xmlWriterSettings.IndentChars = "\t";
+				this.writer = XmlWriter.Create(this.saveStream, xmlWriterSettings);
+				this.writer.WriteStartDocument();
+				this.EnterNode(documentElementName);
 			}
-			finally
+			catch (Exception ex)
 			{
-				ForceStop();
+				string str = "Exception while init saving file: ";
+				string str2 = "\n";
+				Exception ex2 = ex;
+				Log.Error(str + filePath + str2 + ((ex2 != null) ? ex2.ToString() : null));
+				this.ForceStop();
+				throw;
 			}
 		}
-		catch (Exception ex)
-		{
-			Log.Error("Exception while getting debug output: " + ex);
-			ForceStop();
-			return "";
-		}
-	}
 
-	public bool EnterNode(string nodeName)
-	{
-		if (writer == null)
+		// Token: 0x0600360B RID: 13835 RVA: 0x001207F4 File Offset: 0x0011E9F4
+		public void FinalizeSaving()
 		{
-			return false;
+			if (Scribe.mode != LoadSaveMode.Saving)
+			{
+				Log.Error("Called FinalizeSaving() but current mode is " + Scribe.mode.ToString());
+				return;
+			}
+			if (this.anyInternalException)
+			{
+				this.ForceStop();
+				throw new Exception("Can't finalize saving due to internal exception. The whole file would be most likely corrupted anyway.");
+			}
+			try
+			{
+				if (this.writer != null)
+				{
+					this.ExitNode();
+					this.writer.WriteEndDocument();
+					this.writer.Flush();
+					this.writer.Close();
+					this.writer = null;
+				}
+				if (this.saveStream != null)
+				{
+					this.saveStream.Flush();
+					this.saveStream.Close();
+					this.saveStream = null;
+				}
+				Scribe.mode = LoadSaveMode.Inactive;
+				this.savingForDebug = false;
+				this.loadIDsErrorsChecker.CheckForErrorsAndClear();
+				this.curPath = null;
+				this.savedNodes.Clear();
+				this.nextListElementTemporaryId = 0;
+				this.anyInternalException = false;
+			}
+			catch (Exception ex)
+			{
+				string str = "Exception in FinalizeLoading(): ";
+				Exception ex2 = ex;
+				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
+				this.ForceStop();
+				throw;
+			}
 		}
-		try
-		{
-			writer.WriteStartElement(nodeName);
-		}
-		catch (Exception)
-		{
-			anyInternalException = true;
-			throw;
-		}
-		return true;
-	}
 
-	public void ExitNode()
-	{
-		if (writer == null)
+		// Token: 0x0600360C RID: 13836 RVA: 0x00120910 File Offset: 0x0011EB10
+		public void WriteElement(string elementName, string value)
 		{
-			return;
+			if (this.writer == null)
+			{
+				Log.Error("Called WriteElemenet(), but writer is null.");
+				return;
+			}
+			try
+			{
+				this.writer.WriteElementString(elementName, value);
+			}
+			catch (Exception)
+			{
+				this.anyInternalException = true;
+				throw;
+			}
 		}
-		try
-		{
-			writer.WriteEndElement();
-		}
-		catch (Exception)
-		{
-			anyInternalException = true;
-			throw;
-		}
-	}
 
-	public void ForceStop()
-	{
-		if (writer != null)
+		// Token: 0x0600360D RID: 13837 RVA: 0x0012095C File Offset: 0x0011EB5C
+		public void WriteAttribute(string attributeName, string value)
 		{
-			writer.Close();
-			writer = null;
+			if (this.writer == null)
+			{
+				Log.Error("Called WriteAttribute(), but writer is null.");
+				return;
+			}
+			try
+			{
+				this.writer.WriteAttributeString(attributeName, value);
+			}
+			catch (Exception)
+			{
+				this.anyInternalException = true;
+				throw;
+			}
 		}
-		if (saveStream != null)
+
+		// Token: 0x0600360E RID: 13838 RVA: 0x001209A8 File Offset: 0x0011EBA8
+		public string DebugOutputFor(IExposable saveable)
 		{
-			saveStream.Close();
-			saveStream = null;
+			if (Scribe.mode != LoadSaveMode.Inactive)
+			{
+				Log.Error("DebugOutput needs current mode to be Inactive");
+				return "";
+			}
+			string result;
+			try
+			{
+				using (StringWriter stringWriter = new StringWriter())
+				{
+					XmlWriterSettings xmlWriterSettings = new XmlWriterSettings();
+					xmlWriterSettings.Indent = true;
+					xmlWriterSettings.IndentChars = "  ";
+					xmlWriterSettings.OmitXmlDeclaration = true;
+					try
+					{
+						using (this.writer = XmlWriter.Create(stringWriter, xmlWriterSettings))
+						{
+							Scribe.mode = LoadSaveMode.Saving;
+							this.savingForDebug = true;
+							Scribe_Deep.Look<IExposable>(ref saveable, "saveable", Array.Empty<object>());
+						}
+						result = stringWriter.ToString();
+					}
+					finally
+					{
+						this.ForceStop();
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				string str = "Exception while getting debug output: ";
+				Exception ex2 = ex;
+				Log.Error(str + ((ex2 != null) ? ex2.ToString() : null));
+				this.ForceStop();
+				result = "";
+			}
+			return result;
 		}
-		savingForDebug = false;
-		loadIDsErrorsChecker.Clear();
-		curPath = null;
-		savedNodes.Clear();
-		nextListElementTemporaryId = 0;
-		anyInternalException = false;
-		if (Scribe.mode == LoadSaveMode.Saving)
+
+		// Token: 0x0600360F RID: 13839 RVA: 0x00120AAC File Offset: 0x0011ECAC
+		public bool EnterNode(string nodeName)
 		{
-			Scribe.mode = LoadSaveMode.Inactive;
+			if (this.writer == null)
+			{
+				return false;
+			}
+			try
+			{
+				this.writer.WriteStartElement(nodeName);
+			}
+			catch (Exception)
+			{
+				this.anyInternalException = true;
+				throw;
+			}
+			return true;
 		}
+
+		// Token: 0x06003610 RID: 13840 RVA: 0x00120AF0 File Offset: 0x0011ECF0
+		public void ExitNode()
+		{
+			if (this.writer == null)
+			{
+				return;
+			}
+			try
+			{
+				this.writer.WriteEndElement();
+			}
+			catch (Exception)
+			{
+				this.anyInternalException = true;
+				throw;
+			}
+		}
+
+		// Token: 0x06003611 RID: 13841 RVA: 0x00120B30 File Offset: 0x0011ED30
+		public void ForceStop()
+		{
+			if (this.writer != null)
+			{
+				this.writer.Close();
+				this.writer = null;
+			}
+			if (this.saveStream != null)
+			{
+				this.saveStream.Close();
+				this.saveStream = null;
+			}
+			this.savingForDebug = false;
+			this.loadIDsErrorsChecker.Clear();
+			this.curPath = null;
+			this.savedNodes.Clear();
+			this.nextListElementTemporaryId = 0;
+			this.anyInternalException = false;
+			if (Scribe.mode == LoadSaveMode.Saving)
+			{
+				Scribe.mode = LoadSaveMode.Inactive;
+			}
+		}
+
+		// Token: 0x040028B9 RID: 10425
+		public DebugLoadIDsSavingErrorsChecker loadIDsErrorsChecker = new DebugLoadIDsSavingErrorsChecker();
+
+		// Token: 0x040028BA RID: 10426
+		public bool savingForDebug;
+
+		// Token: 0x040028BB RID: 10427
+		private Stream saveStream;
+
+		// Token: 0x040028BC RID: 10428
+		private XmlWriter writer;
+
+		// Token: 0x040028BD RID: 10429
+		private string curPath;
+
+		// Token: 0x040028BE RID: 10430
+		private HashSet<string> savedNodes = new HashSet<string>();
+
+		// Token: 0x040028BF RID: 10431
+		private int nextListElementTemporaryId;
+
+		// Token: 0x040028C0 RID: 10432
+		private bool anyInternalException;
 	}
 }

@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompUseEffect_AddHediffAndEnableDisappearsComp : CompUseEffect_AddHediff
+namespace RimWorld
 {
-	public override void DoEffect(Pawn user)
+	// Token: 0x02002F54 RID: 12116
+	public class CompUseEffect_AddHediffAndEnableDisappearsComp : CompUseEffect_AddHediff
 	{
-		user.health.AddHediff(base.Props.hediffDef).TryGetComp<HediffComp_DisappearsDisableable>().disabled = false;
+		// Token: 0x06011150 RID: 69968 RVA: 0x004E7D58 File Offset: 0x004E5F58
+		public override void DoEffect(Pawn user)
+		{
+			user.health.AddHediff(base.Props.hediffDef, null, null, null).TryGetComp<HediffComp_DisappearsDisableable>().disabled = false;
+		}
 	}
 }

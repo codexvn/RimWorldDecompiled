@@ -1,23 +1,30 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetPawnKindCombatPower : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<PawnKindDef> kindDef;
-
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003AC6 RID: 15046
+	public class QuestNode_GetPawnKindCombatPower : QuestNode
 	{
-		slate.Set(storeAs.GetValue(slate), kindDef.GetValue(slate).combatPower);
-		return true;
-	}
+		// Token: 0x06014840 RID: 84032 RVA: 0x0061F5E9 File Offset: 0x0061D7E9
+		protected override bool TestRunInt(Slate slate)
+		{
+			slate.Set<float>(this.storeAs.GetValue(slate), this.kindDef.GetValue(slate).combatPower, false);
+			return true;
+		}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		slate.Set(storeAs.GetValue(slate), kindDef.GetValue(slate).combatPower);
+		// Token: 0x06014841 RID: 84033 RVA: 0x0061F610 File Offset: 0x0061D810
+		protected override void RunInt()
+		{
+			Slate slate = QuestGen.slate;
+			slate.Set<float>(this.storeAs.GetValue(slate), this.kindDef.GetValue(slate).combatPower, false);
+		}
+
+		// Token: 0x0400E35C RID: 58204
+		public SlateRef<PawnKindDef> kindDef;
+
+		// Token: 0x0400E35D RID: 58205
+		[NoTranslate]
+		public SlateRef<string> storeAs;
 	}
 }

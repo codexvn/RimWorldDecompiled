@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,332 +6,331 @@ using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-[StaticConstructorOnStartup]
-public class Pawn_RoyaltyTracker : IExposable
+namespace RimWorld
 {
-	public Pawn pawn;
-
-	private List<RoyalTitle> titles = new List<RoyalTitle>();
-
-	private Dictionary<Faction, int> favor = new Dictionary<Faction, int>();
-
-	private Dictionary<Faction, RoyalTitleDef> highestTitles = new Dictionary<Faction, RoyalTitleDef>();
-
-	private Dictionary<Faction, Pawn> heirs = new Dictionary<Faction, Pawn>();
-
-	private List<FactionPermit> factionPermits = new List<FactionPermit>();
-
-	private List<Ability> abilities = new List<Ability>();
-
-	public int lastDecreeTicks = -999999;
-
-	public bool allowRoomRequirements = true;
-
-	public bool allowApparelRequirements = true;
-
-	private static List<RoyalTitle> EmptyTitles = new List<RoyalTitle>();
-
-	private const int BestowingCeremonyCheckInterval = 37500;
-
-	private List<string> tmpDecreeTags = new List<string>();
-
-	private static List<FactionPermit> tmpPermits = new List<FactionPermit>();
-
-	private List<Faction> factionHeirsToClearTmp = new List<Faction>();
-
-	private static List<Action> tmpInheritedTitles = new List<Action>();
-
-	public static readonly Texture2D CommandTex = ContentFinder<Texture2D>.Get("UI/Commands/CallAid");
-
-	private List<Faction> tmpFavorFactions;
-
-	private List<Faction> tmpHighestTitleFactions;
-
-	private List<Faction> tmpHeirFactions;
-
-	private List<int> tmpAmounts;
-
-	private List<Pawn> tmpPawns;
-
-	private List<RoyalTitleDef> tmpTitleDefs;
-
-	public List<RoyalTitle> AllTitlesForReading => titles;
-
-	public List<RoyalTitle> AllTitlesInEffectForReading
+	// Token: 0x020024D4 RID: 9428
+	[StaticConstructorOnStartup]
+	public class Pawn_RoyaltyTracker : IExposable
 	{
-		get
+		// Token: 0x17001F87 RID: 8071
+		// (get) Token: 0x0600CDA4 RID: 52644 RVA: 0x003C5114 File Offset: 0x003C3314
+		public List<RoyalTitle> AllTitlesForReading
 		{
-			if (!pawn.IsWildMan() && (!pawn.IsMutant || !pawn.mutant.Def.disableTitles))
+			get
 			{
-				return titles;
+				return this.titles;
 			}
-			return EmptyTitles;
 		}
-	}
 
-	public RoyalTitle MostSeniorTitle
-	{
-		get
+		// Token: 0x17001F88 RID: 8072
+		// (get) Token: 0x0600CDA5 RID: 52645 RVA: 0x003C511C File Offset: 0x003C331C
+		public List<RoyalTitle> AllTitlesInEffectForReading
 		{
-			List<RoyalTitle> allTitlesInEffectForReading = AllTitlesInEffectForReading;
-			int num = -1;
-			RoyalTitle royalTitle = null;
-			for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+			get
 			{
-				if (allTitlesInEffectForReading[i].def.seniority > num)
+				if (!this.pawn.IsWildMan() && (!this.pawn.IsMutant || !this.pawn.mutant.Def.disableTitles))
 				{
-					num = allTitlesInEffectForReading[i].def.seniority;
-					royalTitle = allTitlesInEffectForReading[i];
+					return this.titles;
 				}
+				return Pawn_RoyaltyTracker.EmptyTitles;
 			}
-			return royalTitle ?? null;
 		}
-	}
 
-	public List<Ability> AllAbilitiesForReading => abilities;
-
-	public IEnumerable<QuestScriptDef> PossibleDecreeQuests
-	{
-		get
+		// Token: 0x17001F89 RID: 8073
+		// (get) Token: 0x0600CDA6 RID: 52646 RVA: 0x003C515C File Offset: 0x003C335C
+		public RoyalTitle MostSeniorTitle
 		{
-			tmpDecreeTags.Clear();
-			List<RoyalTitle> allTitlesInEffectForReading = AllTitlesInEffectForReading;
-			for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+			get
 			{
-				if (allTitlesInEffectForReading[i].def.decreeTags != null)
+				List<RoyalTitle> allTitlesInEffectForReading = this.AllTitlesInEffectForReading;
+				int num = -1;
+				RoyalTitle royalTitle = null;
+				for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
 				{
-					tmpDecreeTags.AddRange(allTitlesInEffectForReading[i].def.decreeTags);
-				}
-			}
-			foreach (QuestScriptDef allDef in DefDatabase<QuestScriptDef>.AllDefs)
-			{
-				if (allDef.decreeTags != null && allDef.decreeTags.Any((string x) => tmpDecreeTags.Contains(x)))
-				{
-					Slate slate = new Slate();
-					IIncidentTarget mapHeld = pawn.MapHeld;
-					slate.Set("points", StorytellerUtility.DefaultThreatPointsNow(mapHeld ?? Find.World));
-					slate.Set("asker", pawn);
-					mapHeld = pawn.MapHeld;
-					if (allDef.CanRun(slate, mapHeld ?? Find.World))
+					if (allTitlesInEffectForReading[i].def.seniority > num)
 					{
-						yield return allDef;
+						num = allTitlesInEffectForReading[i].def.seniority;
+						royalTitle = allTitlesInEffectForReading[i];
+					}
+				}
+				return royalTitle ?? null;
+			}
+		}
+
+		// Token: 0x17001F8A RID: 8074
+		// (get) Token: 0x0600CDA7 RID: 52647 RVA: 0x003C51B9 File Offset: 0x003C33B9
+		public List<Ability> AllAbilitiesForReading
+		{
+			get
+			{
+				return this.abilities;
+			}
+		}
+
+		// Token: 0x17001F8B RID: 8075
+		// (get) Token: 0x0600CDA8 RID: 52648 RVA: 0x003C51C1 File Offset: 0x003C33C1
+		public IEnumerable<QuestScriptDef> PossibleDecreeQuests
+		{
+			get
+			{
+				this.tmpDecreeTags.Clear();
+				List<RoyalTitle> allTitlesInEffectForReading = this.AllTitlesInEffectForReading;
+				for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+				{
+					if (allTitlesInEffectForReading[i].def.decreeTags != null)
+					{
+						this.tmpDecreeTags.AddRange(allTitlesInEffectForReading[i].def.decreeTags);
+					}
+				}
+				foreach (QuestScriptDef questScriptDef in DefDatabase<QuestScriptDef>.AllDefs)
+				{
+					if (questScriptDef.decreeTags != null && questScriptDef.decreeTags.Any((string x) => this.tmpDecreeTags.Contains(x)))
+					{
+						Slate slate = new Slate();
+						Slate slate2 = slate;
+						string name = "points";
+						IIncidentTarget mapHeld = this.pawn.MapHeld;
+						slate2.Set<float>(name, StorytellerUtility.DefaultThreatPointsNow(mapHeld ?? Find.World), false);
+						slate.Set<Pawn>("asker", this.pawn, false);
+						QuestScriptDef questScriptDef2 = questScriptDef;
+						Slate slate3 = slate;
+						mapHeld = this.pawn.MapHeld;
+						if (questScriptDef2.CanRun(slate3, mapHeld ?? Find.World))
+						{
+							yield return questScriptDef;
+						}
+					}
+				}
+				IEnumerator<QuestScriptDef> enumerator = null;
+				yield break;
+				yield break;
+			}
+		}
+
+		// Token: 0x17001F8C RID: 8076
+		// (get) Token: 0x0600CDA9 RID: 52649 RVA: 0x003C51D4 File Offset: 0x003C33D4
+		public bool PermitPointsAvailable
+		{
+			get
+			{
+				foreach (Faction faction in Find.FactionManager.AllFactionsVisible)
+				{
+					if (this.GetPermitPoints(faction) > 0)
+					{
+						return true;
+					}
+				}
+				return false;
+			}
+		}
+
+		// Token: 0x17001F8D RID: 8077
+		// (get) Token: 0x0600CDAA RID: 52650 RVA: 0x003C5230 File Offset: 0x003C3430
+		public List<FactionPermit> AllFactionPermits
+		{
+			get
+			{
+				return this.factionPermits;
+			}
+		}
+
+		// Token: 0x0600CDAB RID: 52651 RVA: 0x003C5238 File Offset: 0x003C3438
+		public Pawn_RoyaltyTracker(Pawn pawn)
+		{
+			this.pawn = pawn;
+		}
+
+		// Token: 0x0600CDAC RID: 52652 RVA: 0x003C52C4 File Offset: 0x003C34C4
+		private int FindFactionTitleIndex(Faction faction, bool createIfNotExisting = false)
+		{
+			for (int i = 0; i < this.titles.Count; i++)
+			{
+				if (this.titles[i].faction == faction)
+				{
+					return i;
+				}
+			}
+			if (createIfNotExisting)
+			{
+				this.titles.Add(new RoyalTitle
+				{
+					faction = faction,
+					receivedTick = GenTicks.TicksGame,
+					conceited = RoyalTitleUtility.ShouldBecomeConceitedOnNewTitle(this.pawn),
+					pawn = this.pawn
+				});
+				return this.titles.Count - 1;
+			}
+			return -1;
+		}
+
+		// Token: 0x0600CDAD RID: 52653 RVA: 0x003C5350 File Offset: 0x003C3550
+		public bool HasAnyTitleIn(Faction faction)
+		{
+			using (List<RoyalTitle>.Enumerator enumerator = this.titles.GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.faction == faction)
+					{
+						return true;
 					}
 				}
 			}
+			return false;
 		}
-	}
 
-	public bool PermitPointsAvailable
-	{
-		get
+		// Token: 0x0600CDAE RID: 52654 RVA: 0x003C53AC File Offset: 0x003C35AC
+		public bool HasTitle(RoyalTitleDef title)
 		{
-			foreach (Faction item in Find.FactionManager.AllFactionsVisible)
+			using (List<RoyalTitle>.Enumerator enumerator = this.titles.GetEnumerator())
 			{
-				if (GetPermitPoints(item) > 0)
+				while (enumerator.MoveNext())
+				{
+					if (enumerator.Current.def == title)
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x0600CDAF RID: 52655 RVA: 0x003C5408 File Offset: 0x003C3608
+		public List<FactionPermit> PermitsFromFaction(Faction faction)
+		{
+			Pawn_RoyaltyTracker.tmpPermits.Clear();
+			foreach (FactionPermit factionPermit in this.factionPermits)
+			{
+				if (factionPermit.Faction == faction)
+				{
+					Pawn_RoyaltyTracker.tmpPermits.Add(factionPermit);
+				}
+			}
+			return Pawn_RoyaltyTracker.tmpPermits;
+		}
+
+		// Token: 0x0600CDB0 RID: 52656 RVA: 0x003C5478 File Offset: 0x003C3678
+		public void AddPermit(RoyalTitlePermitDef permit, Faction faction)
+		{
+			if (!ModLister.CheckRoyalty("Permit"))
+			{
+				return;
+			}
+			if (this.HasPermit(permit, faction))
+			{
+				return;
+			}
+			if (permit.prerequisite != null && this.HasPermit(permit.prerequisite, faction))
+			{
+				FactionPermit item = this.factionPermits.Find((FactionPermit x) => x.Permit == permit.prerequisite && x.Faction == faction);
+				this.factionPermits.Remove(item);
+			}
+			this.factionPermits.Add(new FactionPermit(faction, this.GetCurrentTitle(faction), permit));
+		}
+
+		// Token: 0x0600CDB1 RID: 52657 RVA: 0x003C5530 File Offset: 0x003C3730
+		public void RefundPermits(int favorCost, Faction faction)
+		{
+			if (this.favor[faction] < favorCost)
+			{
+				Log.Error("Not enough favor to refund permits.");
+				return;
+			}
+			bool flag = false;
+			for (int i = this.factionPermits.Count - 1; i >= 0; i--)
+			{
+				if (this.factionPermits[i].Faction == faction)
+				{
+					this.factionPermits.RemoveAt(i);
+					flag = true;
+				}
+			}
+			if (flag)
+			{
+				int num = this.GetFavor(faction);
+				Dictionary<Faction, int> dictionary = this.favor;
+				dictionary[faction] -= favorCost;
+				this.OnFavorChanged(faction, num, num - favorCost);
+			}
+		}
+
+		// Token: 0x0600CDB2 RID: 52658 RVA: 0x003C55C8 File Offset: 0x003C37C8
+		public bool HasPermit(RoyalTitlePermitDef permit, Faction faction)
+		{
+			foreach (FactionPermit factionPermit in this.factionPermits)
+			{
+				if (factionPermit.Permit == permit && factionPermit.Faction == faction)
 				{
 					return true;
 				}
 			}
-			return false;
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			return currentTitle != null && currentTitle.permits != null && currentTitle.permits.Contains(permit);
 		}
-	}
 
-	public List<FactionPermit> AllFactionPermits => factionPermits;
-
-	public bool HasAidPermit => factionPermits.Any();
-
-	public Pawn_RoyaltyTracker(Pawn pawn)
-	{
-		this.pawn = pawn;
-	}
-
-	private int FindFactionTitleIndex(Faction faction, bool createIfNotExisting = false)
-	{
-		for (int i = 0; i < titles.Count; i++)
+		// Token: 0x17001F8E RID: 8078
+		// (get) Token: 0x0600CDB3 RID: 52659 RVA: 0x003C5650 File Offset: 0x003C3850
+		public bool HasAidPermit
 		{
-			if (titles[i].faction == faction)
+			get
 			{
-				return i;
+				return this.factionPermits.Any<FactionPermit>();
 			}
 		}
-		if (createIfNotExisting)
-		{
-			titles.Add(new RoyalTitle
-			{
-				faction = faction,
-				receivedTick = GenTicks.TicksGame,
-				conceited = RoyalTitleUtility.ShouldBecomeConceitedOnNewTitle(pawn),
-				pawn = pawn
-			});
-			return titles.Count - 1;
-		}
-		return -1;
-	}
 
-	public bool HasAnyTitleIn(Faction faction)
-	{
-		foreach (RoyalTitle title in titles)
+		// Token: 0x0600CDB4 RID: 52660 RVA: 0x003C5660 File Offset: 0x003C3860
+		public RoyalTitleDef MainTitle()
 		{
-			if (title.faction == faction)
+			if (this.titles.Count == 0)
 			{
-				return true;
+				return null;
 			}
-		}
-		return false;
-	}
-
-	public bool HasTitle(RoyalTitleDef title)
-	{
-		foreach (RoyalTitle title2 in titles)
-		{
-			if (title2.def == title)
+			RoyalTitleDef royalTitleDef = null;
+			foreach (RoyalTitle royalTitle in this.titles)
 			{
-				return true;
+				if (royalTitleDef == null || royalTitle.def.seniority > royalTitleDef.seniority)
+				{
+					royalTitleDef = royalTitle.def;
+				}
 			}
+			return royalTitleDef;
 		}
-		return false;
-	}
 
-	public List<FactionPermit> PermitsFromFaction(Faction faction)
-	{
-		tmpPermits.Clear();
-		foreach (FactionPermit factionPermit in factionPermits)
+		// Token: 0x0600CDB5 RID: 52661 RVA: 0x003C56DC File Offset: 0x003C38DC
+		public int GetFavor(Faction faction)
 		{
-			if (factionPermit.Faction == faction)
+			int result;
+			if (!this.favor.TryGetValue(faction, out result))
 			{
-				tmpPermits.Add(factionPermit);
+				return 0;
 			}
+			return result;
 		}
-		return tmpPermits;
-	}
 
-	public void AddPermit(RoyalTitlePermitDef permit, Faction faction)
-	{
-		if (!ModLister.CheckRoyalty("Permit") || HasPermit(permit, faction))
+		// Token: 0x0600CDB6 RID: 52662 RVA: 0x003C56FC File Offset: 0x003C38FC
+		public FactionPermit GetPermit(RoyalTitlePermitDef permit, Faction faction)
 		{
-			return;
-		}
-		if (permit.prerequisite != null && HasPermit(permit.prerequisite, faction))
-		{
-			FactionPermit item = factionPermits.Find((FactionPermit x) => x.Permit == permit.prerequisite && x.Faction == faction);
-			factionPermits.Remove(item);
-		}
-		factionPermits.Add(new FactionPermit(faction, GetCurrentTitle(faction), permit));
-	}
-
-	public void RefundPermits(int favorCost, Faction faction)
-	{
-		if (favor[faction] < favorCost)
-		{
-			Log.Error("Not enough favor to refund permits.");
-			return;
-		}
-		bool flag = false;
-		for (int num = factionPermits.Count - 1; num >= 0; num--)
-		{
-			if (factionPermits[num].Faction == faction)
+			foreach (FactionPermit factionPermit in this.factionPermits)
 			{
-				factionPermits.RemoveAt(num);
-				flag = true;
+				if (factionPermit.Permit == permit && factionPermit.Faction == faction)
+				{
+					return factionPermit;
+				}
 			}
-		}
-		if (flag)
-		{
-			int num2 = GetFavor(faction);
-			favor[faction] -= favorCost;
-			OnFavorChanged(faction, num2, num2 - favorCost);
-		}
-	}
-
-	public bool HasPermit(RoyalTitlePermitDef permit, Faction faction)
-	{
-		foreach (FactionPermit factionPermit in factionPermits)
-		{
-			if (factionPermit.Permit == permit && factionPermit.Faction == faction)
-			{
-				return true;
-			}
-		}
-		RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-		if (currentTitle != null)
-		{
-			if (currentTitle.permits != null)
-			{
-				return currentTitle.permits.Contains(permit);
-			}
-			return false;
-		}
-		return false;
-	}
-
-	public RoyalTitleDef MainTitle()
-	{
-		if (titles.Count == 0)
-		{
 			return null;
 		}
-		RoyalTitleDef royalTitleDef = null;
-		foreach (RoyalTitle title in titles)
-		{
-			if (royalTitleDef == null || title.def.seniority > royalTitleDef.seniority)
-			{
-				royalTitleDef = title.def;
-			}
-		}
-		return royalTitleDef;
-	}
 
-	public int GetFavor(Faction faction)
-	{
-		if (!favor.TryGetValue(faction, out var value))
+		// Token: 0x0600CDB7 RID: 52663 RVA: 0x003C5764 File Offset: 0x003C3964
+		public int GetPermitPoints(Faction faction)
 		{
-			return 0;
-		}
-		return value;
-	}
-
-	public FactionPermit GetPermit(RoyalTitlePermitDef permit, Faction faction)
-	{
-		foreach (FactionPermit factionPermit in factionPermits)
-		{
-			if (factionPermit.Permit == permit && factionPermit.Faction == faction)
+			int num = 0;
+			RoyalTitleDef royalTitleDef = this.GetCurrentTitle(faction);
+			int num2 = 200;
+			while (royalTitleDef != null)
 			{
-				return factionPermit;
-			}
-		}
-		return null;
-	}
-
-	public int GetPermitPoints(Faction faction)
-	{
-		int num = 0;
-		RoyalTitleDef royalTitleDef = GetCurrentTitle(faction);
-		int num2 = 200;
-		while (royalTitleDef != null)
-		{
-			num += royalTitleDef.permitPointsAwarded;
-			royalTitleDef = royalTitleDef.GetPreviousTitle_IncludeNonRewardable(faction);
-			num2--;
-			if (num2 <= 0)
-			{
-				Log.ErrorOnce("GetPermitPoints exceeded iterations limit.", 1837503);
-				break;
-			}
-		}
-		for (int i = 0; i < factionPermits.Count; i++)
-		{
-			if (factionPermits[i].Faction != faction)
-			{
-				continue;
-			}
-			RoyalTitlePermitDef royalTitlePermitDef = factionPermits[i].Permit;
-			num2 = 200;
-			while (royalTitlePermitDef != null)
-			{
-				num -= royalTitlePermitDef.permitPointCost;
-				royalTitlePermitDef = royalTitlePermitDef.prerequisite;
+				num += royalTitleDef.permitPointsAwarded;
+				royalTitleDef = royalTitleDef.GetPreviousTitle_IncludeNonRewardable(faction);
 				num2--;
 				if (num2 <= 0)
 				{
@@ -339,1041 +338,1241 @@ public class Pawn_RoyaltyTracker : IExposable
 					break;
 				}
 			}
-		}
-		return num;
-	}
-
-	public void GainFavor(Faction faction, int amount)
-	{
-		if (ModLister.CheckRoyalty("Honor"))
-		{
-			int oldAmount = GetFavor(faction);
-			if (!favor.TryGetValue(faction, out var value))
+			for (int i = 0; i < this.factionPermits.Count; i++)
 			{
-				value = 0;
-				favor.Add(faction, 0);
+				if (this.factionPermits[i].Faction == faction)
+				{
+					RoyalTitlePermitDef royalTitlePermitDef = this.factionPermits[i].Permit;
+					num2 = 200;
+					while (royalTitlePermitDef != null)
+					{
+						num -= royalTitlePermitDef.permitPointCost;
+						royalTitlePermitDef = royalTitlePermitDef.prerequisite;
+						num2--;
+						if (num2 <= 0)
+						{
+							Log.ErrorOnce("GetPermitPoints exceeded iterations limit.", 1837503);
+							break;
+						}
+					}
+				}
 			}
-			value += amount;
-			favor[faction] = value;
+			return num;
+		}
+
+		// Token: 0x0600CDB8 RID: 52664 RVA: 0x003C5828 File Offset: 0x003C3A28
+		public void GainFavor(Faction faction, int amount)
+		{
+			if (!ModLister.CheckRoyalty("Honor"))
+			{
+				return;
+			}
+			int oldAmount = this.GetFavor(faction);
+			int num;
+			if (!this.favor.TryGetValue(faction, out num))
+			{
+				num = 0;
+				this.favor.Add(faction, 0);
+			}
+			num += amount;
+			this.favor[faction] = num;
 			if (amount < 0)
 			{
-				TryUpdateTitle(faction);
+				this.TryUpdateTitle(faction, true, null);
 			}
-			OnFavorChanged(faction, oldAmount, value);
+			this.OnFavorChanged(faction, oldAmount, num);
 		}
-	}
 
-	public RoyalTitleDef GetTitleAwardedWhenUpdating(Faction faction, int favor)
-	{
-		RoyalTitleDef royalTitleDef = GetCurrentTitle(faction);
-		RoyalTitleDef result = null;
-		while (favor > 0 && royalTitleDef.GetNextTitle(faction) != null)
+		// Token: 0x0600CDB9 RID: 52665 RVA: 0x003C5894 File Offset: 0x003C3A94
+		public RoyalTitleDef GetTitleAwardedWhenUpdating(Faction faction, int favor)
 		{
-			royalTitleDef = ((royalTitleDef != null) ? royalTitleDef.GetNextTitle(faction) : faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.First());
-			favor -= royalTitleDef.favorCost;
-			if (favor >= 0)
+			RoyalTitleDef royalTitleDef = this.GetCurrentTitle(faction);
+			RoyalTitleDef result = null;
+			while (favor > 0 && royalTitleDef.GetNextTitle(faction) != null)
 			{
-				result = royalTitleDef;
+				if (royalTitleDef == null)
+				{
+					royalTitleDef = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.First<RoyalTitleDef>();
+				}
+				else
+				{
+					royalTitleDef = royalTitleDef.GetNextTitle(faction);
+				}
+				favor -= royalTitleDef.favorCost;
+				if (favor >= 0)
+				{
+					result = royalTitleDef;
+				}
 			}
+			return result;
 		}
-		return result;
-	}
 
-	public bool CanUpdateTitleOfAnyFaction(out Faction faction)
-	{
-		foreach (Faction allFaction in Find.FactionManager.AllFactions)
+		// Token: 0x0600CDBA RID: 52666 RVA: 0x003C58EC File Offset: 0x003C3AEC
+		public bool CanUpdateTitleOfAnyFaction(out Faction faction)
 		{
-			if (CanUpdateTitle(allFaction))
+			foreach (Faction faction2 in Find.FactionManager.AllFactions)
 			{
-				faction = allFaction;
-				return true;
+				if (this.CanUpdateTitle(faction2))
+				{
+					faction = faction2;
+					return true;
+				}
 			}
-		}
-		faction = null;
-		return false;
-	}
-
-	public bool CanUpdateTitle(Faction faction)
-	{
-		RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-		int num = GetFavor(faction);
-		RoyalTitleDef nextTitle = currentTitle.GetNextTitle(faction);
-		if (nextTitle == null)
-		{
+			faction = null;
 			return false;
 		}
-		return num >= nextTitle.favorCost;
-	}
 
-	public bool TryUpdateTitle(Faction faction, bool sendLetter = true, RoyalTitleDef updateTo = null)
-	{
-		RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-		UpdateRoyalTitle(faction, sendLetter, updateTo);
-		RoyalTitleDef currentTitle2 = GetCurrentTitle(faction);
-		if (currentTitle2 != currentTitle)
+		// Token: 0x0600CDBB RID: 52667 RVA: 0x003C594C File Offset: 0x003C3B4C
+		public bool CanUpdateTitle(Faction faction)
 		{
-			ApplyRewardsForTitle(faction, currentTitle, currentTitle2);
-			OnPostTitleChanged(faction, currentTitle, currentTitle2);
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			int num = this.GetFavor(faction);
+			RoyalTitleDef nextTitle = currentTitle.GetNextTitle(faction);
+			return nextTitle != null && num >= nextTitle.favorCost;
 		}
-		return currentTitle2 != currentTitle;
-	}
 
-	public bool TryRemoveFavor(Faction faction, int amount)
-	{
-		int num = GetFavor(faction);
-		if (num < amount)
+		// Token: 0x0600CDBC RID: 52668 RVA: 0x003C5980 File Offset: 0x003C3B80
+		public bool TryUpdateTitle(Faction faction, bool sendLetter = true, RoyalTitleDef updateTo = null)
 		{
-			return false;
-		}
-		SetFavor(faction, num - amount);
-		return true;
-	}
-
-	public void SetFavor(Faction faction, int amount, bool notifyOnFavorChanged = true)
-	{
-		if (ModLister.CheckRoyalty("Honor"))
-		{
-			int oldAmount = GetFavor(faction);
-			if (amount == 0 && favor.ContainsKey(faction) && FindFactionTitleIndex(faction) == -1)
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			this.UpdateRoyalTitle(faction, sendLetter, updateTo);
+			RoyalTitleDef currentTitle2 = this.GetCurrentTitle(faction);
+			if (currentTitle2 != currentTitle)
 			{
-				favor.Remove(faction);
+				this.ApplyRewardsForTitle(faction, currentTitle, currentTitle2, false);
+				this.OnPostTitleChanged(faction, currentTitle, currentTitle2);
+			}
+			return currentTitle2 != currentTitle;
+		}
+
+		// Token: 0x0600CDBD RID: 52669 RVA: 0x003C59C8 File Offset: 0x003C3BC8
+		public bool TryRemoveFavor(Faction faction, int amount)
+		{
+			int num = this.GetFavor(faction);
+			if (num < amount)
+			{
+				return false;
+			}
+			this.SetFavor(faction, num - amount, true);
+			return true;
+		}
+
+		// Token: 0x0600CDBE RID: 52670 RVA: 0x003C59F0 File Offset: 0x003C3BF0
+		public void SetFavor(Faction faction, int amount, bool notifyOnFavorChanged = true)
+		{
+			if (!ModLister.CheckRoyalty("Honor"))
+			{
+				return;
+			}
+			int oldAmount = this.GetFavor(faction);
+			if (amount == 0 && this.favor.ContainsKey(faction) && this.FindFactionTitleIndex(faction, false) == -1)
+			{
+				this.favor.Remove(faction);
 			}
 			else
 			{
-				favor.SetOrAdd(faction, amount);
+				this.favor.SetOrAdd(faction, amount);
 			}
 			if (notifyOnFavorChanged)
 			{
-				OnFavorChanged(faction, oldAmount, amount);
+				this.OnFavorChanged(faction, oldAmount, amount);
 			}
 		}
-	}
 
-	private void OnFavorChanged(Faction faction, int oldAmount, int newAmount)
-	{
-		RoyalTitleDef titleAwardedWhenUpdating = GetTitleAwardedWhenUpdating(faction, oldAmount);
-		RoyalTitleDef titleAwardedWhenUpdating2 = GetTitleAwardedWhenUpdating(faction, newAmount);
-		RoyalTitle currentTitleInFaction = GetCurrentTitleInFaction(faction);
-		RoyalTitleDef royalTitleDef = null;
-		if (currentTitleInFaction != null && titleAwardedWhenUpdating != null)
+		// Token: 0x0600CDBF RID: 52671 RVA: 0x003C5A58 File Offset: 0x003C3C58
+		private void OnFavorChanged(Faction faction, int oldAmount, int newAmount)
 		{
-			royalTitleDef = ((currentTitleInFaction.def.seniority >= titleAwardedWhenUpdating.seniority) ? currentTitleInFaction.def : titleAwardedWhenUpdating);
-		}
-		else if (currentTitleInFaction != null)
-		{
-			royalTitleDef = currentTitleInFaction.def;
-		}
-		else if (titleAwardedWhenUpdating != null)
-		{
-			royalTitleDef = titleAwardedWhenUpdating;
-		}
-		if (royalTitleDef == titleAwardedWhenUpdating2)
-		{
-			return;
-		}
-		List<RoyalTitleDef> list = new List<RoyalTitleDef>();
-		int previousTitleSeniority = royalTitleDef?.seniority ?? (-1);
-		int newAwardedSeniority = titleAwardedWhenUpdating2?.seniority ?? (-1);
-		if (previousTitleSeniority < newAwardedSeniority)
-		{
-			list.AddRange(faction.def.RoyalTitlesAllInSeniorityOrderForReading.Where((RoyalTitleDef t) => t.seniority > previousTitleSeniority && t.seniority <= newAwardedSeniority));
-		}
-		else
-		{
-			list.Add(titleAwardedWhenUpdating2);
-		}
-		foreach (RoyalTitleDef item in list)
-		{
-			if (item != null && pawn.Faction != null && pawn.Faction.IsPlayer)
+			RoyalTitleDef titleAwardedWhenUpdating = this.GetTitleAwardedWhenUpdating(faction, oldAmount);
+			RoyalTitleDef titleAwardedWhenUpdating2 = this.GetTitleAwardedWhenUpdating(faction, newAmount);
+			RoyalTitle currentTitleInFaction = this.GetCurrentTitleInFaction(faction);
+			RoyalTitleDef royalTitleDef = null;
+			if (currentTitleInFaction != null && titleAwardedWhenUpdating != null)
 			{
-				item.AwardWorker.OnPreAward(pawn, faction, royalTitleDef, item);
+				royalTitleDef = ((currentTitleInFaction.def.seniority >= titleAwardedWhenUpdating.seniority) ? currentTitleInFaction.def : titleAwardedWhenUpdating);
 			}
-			QuestUtility.SendQuestTargetSignals(pawn.questTags, "TitleAwardedWhenUpdatingChanged");
-			if (item != null && pawn.Faction != null && pawn.Faction.IsPlayer)
+			else if (currentTitleInFaction != null)
 			{
-				item.AwardWorker.DoAward(pawn, faction, royalTitleDef, item);
+				royalTitleDef = currentTitleInFaction.def;
 			}
-			royalTitleDef = item;
+			else if (titleAwardedWhenUpdating != null)
+			{
+				royalTitleDef = titleAwardedWhenUpdating;
+			}
+			if (royalTitleDef != titleAwardedWhenUpdating2)
+			{
+				List<RoyalTitleDef> list = new List<RoyalTitleDef>();
+				int previousTitleSeniority = (royalTitleDef == null) ? -1 : royalTitleDef.seniority;
+				int newAwardedSeniority = (titleAwardedWhenUpdating2 == null) ? -1 : titleAwardedWhenUpdating2.seniority;
+				if (previousTitleSeniority < newAwardedSeniority)
+				{
+					list.AddRange(from t in faction.def.RoyalTitlesAllInSeniorityOrderForReading
+					where t.seniority > previousTitleSeniority && t.seniority <= newAwardedSeniority
+					select t);
+				}
+				else
+				{
+					list.Add(titleAwardedWhenUpdating2);
+				}
+				foreach (RoyalTitleDef royalTitleDef2 in list)
+				{
+					if (royalTitleDef2 != null && this.pawn.Faction != null && this.pawn.Faction.IsPlayer)
+					{
+						royalTitleDef2.AwardWorker.OnPreAward(this.pawn, faction, royalTitleDef, royalTitleDef2);
+					}
+					QuestUtility.SendQuestTargetSignals(this.pawn.questTags, "TitleAwardedWhenUpdatingChanged");
+					if (royalTitleDef2 != null && this.pawn.Faction != null && this.pawn.Faction.IsPlayer)
+					{
+						royalTitleDef2.AwardWorker.DoAward(this.pawn, faction, royalTitleDef, royalTitleDef2);
+					}
+					royalTitleDef = royalTitleDef2;
+				}
+				if (previousTitleSeniority < newAwardedSeniority)
+				{
+					RoyalTitleUtility.EndExistingBestowingCeremonyQuest(this.pawn, faction);
+					RoyalTitleUtility.GenerateBestowingCeremonyQuest(this.pawn, faction);
+				}
+			}
 		}
-		if (previousTitleSeniority < newAwardedSeniority)
-		{
-			RoyalTitleUtility.EndExistingBestowingCeremonyQuest(pawn, faction);
-			RoyalTitleUtility.GenerateBestowingCeremonyQuest(pawn, faction);
-		}
-	}
 
-	public RoyalTitleDef GetCurrentTitle(Faction faction)
-	{
-		RoyalTitle currentTitleInFaction = GetCurrentTitleInFaction(faction);
-		if (AllTitlesInEffectForReading.Contains(currentTitleInFaction))
+		// Token: 0x0600CDC0 RID: 52672 RVA: 0x003C5C28 File Offset: 0x003C3E28
+		public RoyalTitleDef GetCurrentTitle(Faction faction)
 		{
-			return currentTitleInFaction?.def;
+			RoyalTitle currentTitleInFaction = this.GetCurrentTitleInFaction(faction);
+			if (!this.AllTitlesInEffectForReading.Contains(currentTitleInFaction))
+			{
+				return null;
+			}
+			if (currentTitleInFaction == null)
+			{
+				return null;
+			}
+			return currentTitleInFaction.def;
 		}
-		return null;
-	}
 
-	public RoyalTitle GetCurrentTitleInFaction(Faction faction)
-	{
-		if (faction == null)
+		// Token: 0x0600CDC1 RID: 52673 RVA: 0x003C5C58 File Offset: 0x003C3E58
+		public RoyalTitle GetCurrentTitleInFaction(Faction faction)
 		{
-			Log.Error("Cannot get current title for null faction.");
+			if (faction == null)
+			{
+				Log.Error("Cannot get current title for null faction.");
+			}
+			int num = this.FindFactionTitleIndex(faction, false);
+			if (num == -1)
+			{
+				return null;
+			}
+			return this.titles[num];
 		}
-		int num = FindFactionTitleIndex(faction);
-		if (num == -1)
-		{
-			return null;
-		}
-		return titles[num];
-	}
 
-	public void SetTitle(Faction faction, RoyalTitleDef title, bool grantRewards, bool rewardsOnlyForNewestTitle = false, bool sendLetter = true)
-	{
-		if (ModLister.CheckRoyalty("Honor"))
+		// Token: 0x0600CDC2 RID: 52674 RVA: 0x003C5C90 File Offset: 0x003C3E90
+		public void SetTitle(Faction faction, RoyalTitleDef title, bool grantRewards, bool rewardsOnlyForNewestTitle = false, bool sendLetter = true)
 		{
-			RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-			OnPreTitleChanged(faction, currentTitle, title, sendLetter);
+			if (!ModLister.CheckRoyalty("Honor"))
+			{
+				return;
+			}
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			this.OnPreTitleChanged(faction, currentTitle, title, sendLetter);
 			if (grantRewards)
 			{
-				ApplyRewardsForTitle(faction, currentTitle, title, rewardsOnlyForNewestTitle);
+				this.ApplyRewardsForTitle(faction, currentTitle, title, rewardsOnlyForNewestTitle);
 			}
-			int index = FindFactionTitleIndex(faction, createIfNotExisting: true);
+			int index = this.FindFactionTitleIndex(faction, true);
 			if (title != null)
 			{
-				titles[index].def = title;
-				titles[index].receivedTick = GenTicks.TicksGame;
+				this.titles[index].def = title;
+				this.titles[index].receivedTick = GenTicks.TicksGame;
 			}
 			else
 			{
-				titles.RemoveAt(index);
+				this.titles.RemoveAt(index);
 			}
-			SetFavor(faction, 0);
-			OnPostTitleChanged(faction, currentTitle, title);
+			this.SetFavor(faction, 0, true);
+			this.OnPostTitleChanged(faction, currentTitle, title);
 		}
-	}
 
-	public void ReduceTitle(Faction faction)
-	{
-		RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-		if (currentTitle == null || !currentTitle.Awardable)
+		// Token: 0x0600CDC3 RID: 52675 RVA: 0x003C5D20 File Offset: 0x003C3F20
+		public void ReduceTitle(Faction faction)
 		{
-			return;
-		}
-		for (int num = factionPermits.Count - 1; num >= 0; num--)
-		{
-			if (factionPermits[num].Title == currentTitle)
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			if (currentTitle == null || !currentTitle.Awardable)
 			{
-				factionPermits.RemoveAt(num);
+				return;
 			}
-		}
-		RoyalTitleDef previousTitle = currentTitle.GetPreviousTitle(faction);
-		OnPreTitleChanged(faction, currentTitle, previousTitle);
-		CleanupThoughts(currentTitle);
-		CleanupThoughts(previousTitle);
-		if (currentTitle.awardThought != null && pawn.needs.mood != null)
-		{
-			Thought_MemoryRoyalTitle thought_MemoryRoyalTitle = (Thought_MemoryRoyalTitle)ThoughtMaker.MakeThought(currentTitle.lostThought);
-			thought_MemoryRoyalTitle.titleDef = currentTitle;
-			pawn.needs.mood.thoughts.memories.TryGainMemory(thought_MemoryRoyalTitle);
-		}
-		int index = FindFactionTitleIndex(faction);
-		if (previousTitle == null)
-		{
-			titles.RemoveAt(index);
-		}
-		else
-		{
-			titles[index].def = previousTitle;
-		}
-		SetFavor(faction, 0);
-		OnPostTitleChanged(faction, currentTitle, previousTitle);
-	}
-
-	public Pawn GetHeir(Faction faction)
-	{
-		if (heirs != null && heirs.ContainsKey(faction))
-		{
-			return heirs[faction];
-		}
-		return null;
-	}
-
-	public void SetHeir(Pawn heir, Faction faction)
-	{
-		if (heirs != null)
-		{
-			heirs[faction] = heir;
-		}
-	}
-
-	public void AssignHeirIfNone(RoyalTitleDef t, Faction faction)
-	{
-		if (!heirs.ContainsKey(faction) && t.Awardable && (Faction.OfEmpire == null || pawn.HomeFaction != Faction.OfEmpire))
-		{
-			SetHeir(t.GetInheritanceWorker(faction).FindHeir(faction, pawn, t), faction);
-		}
-	}
-
-	public void RoyaltyTrackerTickInterval(int delta)
-	{
-		if (pawn.IsHashIntervalTick(37500, delta) && RoyalTitleUtility.ShouldGetBestowingCeremonyQuest(pawn, out var faction))
-		{
-			RoyalTitleUtility.GenerateBestowingCeremonyQuest(pawn, faction);
-		}
-		List<RoyalTitle> allTitlesInEffectForReading = AllTitlesInEffectForReading;
-		for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
-		{
-			allTitlesInEffectForReading[i].RoyalTitleTick(delta);
-		}
-		if (!pawn.Spawned || pawn.RaceProps.Animal)
-		{
-			return;
-		}
-		factionHeirsToClearTmp.Clear();
-		foreach (KeyValuePair<Faction, Pawn> heir in heirs)
-		{
-			RoyalTitleDef currentTitle = GetCurrentTitle(heir.Key);
-			if (currentTitle != null && currentTitle.canBeInherited)
+			for (int i = this.factionPermits.Count - 1; i >= 0; i--)
 			{
-				Pawn value = heir.Value;
-				if (value != null && value.Dead)
+				if (this.factionPermits[i].Title == currentTitle)
 				{
-					Find.LetterStack.ReceiveLetter("LetterTitleHeirLostLabel".Translate(), "LetterTitleHeirLost".Translate(pawn.Named("HOLDER"), value.Named("HEIR"), heir.Key.Named("FACTION")), LetterDefOf.NegativeEvent, pawn);
-					factionHeirsToClearTmp.Add(heir.Key);
+					this.factionPermits.RemoveAt(i);
 				}
 			}
-		}
-		foreach (Faction item in factionHeirsToClearTmp)
-		{
-			heirs[item] = null;
-		}
-		foreach (FactionPermit factionPermit in factionPermits)
-		{
-			if (factionPermit.LastUsedTick > 0 && Find.TickManager.TicksGame == factionPermit.LastUsedTick + factionPermit.Permit.CooldownTicks)
+			RoyalTitleDef previousTitle = currentTitle.GetPreviousTitle(faction);
+			this.OnPreTitleChanged(faction, currentTitle, previousTitle, true);
+			this.CleanupThoughts(currentTitle);
+			this.CleanupThoughts(previousTitle);
+			if (currentTitle.awardThought != null && this.pawn.needs.mood != null)
 			{
-				Messages.Message("MessagePermitCooldownFinished".Translate(pawn, factionPermit.Permit.LabelCap), pawn, MessageTypeDefOf.PositiveEvent);
+				Thought_MemoryRoyalTitle thought_MemoryRoyalTitle = (Thought_MemoryRoyalTitle)ThoughtMaker.MakeThought(currentTitle.lostThought);
+				thought_MemoryRoyalTitle.titleDef = currentTitle;
+				this.pawn.needs.mood.thoughts.memories.TryGainMemory(thought_MemoryRoyalTitle, null);
+			}
+			int index = this.FindFactionTitleIndex(faction, false);
+			if (previousTitle == null)
+			{
+				this.titles.RemoveAt(index);
+			}
+			else
+			{
+				this.titles[index].def = previousTitle;
+			}
+			this.SetFavor(faction, 0, true);
+			this.OnPostTitleChanged(faction, currentTitle, previousTitle);
+		}
+
+		// Token: 0x0600CDC4 RID: 52676 RVA: 0x003C5E2D File Offset: 0x003C402D
+		public Pawn GetHeir(Faction faction)
+		{
+			if (this.heirs != null && this.heirs.ContainsKey(faction))
+			{
+				return this.heirs[faction];
+			}
+			return null;
+		}
+
+		// Token: 0x0600CDC5 RID: 52677 RVA: 0x003C5E53 File Offset: 0x003C4053
+		public void SetHeir(Pawn heir, Faction faction)
+		{
+			if (this.heirs != null)
+			{
+				this.heirs[faction] = heir;
 			}
 		}
-	}
 
-	public void IssueDecree(bool causedByMentalBreak, string mentalBreakReason = null)
-	{
-		if (!ModLister.CheckRoyalty("Decree"))
+		// Token: 0x0600CDC6 RID: 52678 RVA: 0x003C5E6C File Offset: 0x003C406C
+		public void AssignHeirIfNone(RoyalTitleDef t, Faction faction)
 		{
-			return;
-		}
-		IIncidentTarget mapHeld = pawn.MapHeld;
-		IIncidentTarget target = mapHeld ?? Find.World;
-		if (PossibleDecreeQuests.TryRandomElementByWeight((QuestScriptDef x) => NaturalRandomQuestChooser.GetNaturalDecreeSelectionWeight(x, target.StoryState), out var result))
-		{
-			lastDecreeTicks = Find.TickManager.TicksGame;
-			Slate slate = new Slate();
-			slate.Set("points", StorytellerUtility.DefaultThreatPointsNow(target));
-			slate.Set("asker", pawn);
-			Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(result, slate);
-			target.StoryState.RecordDecreeFired(result);
-			string text = ((!causedByMentalBreak) ? ((string)"LetterLabelRandomDecree".Translate(pawn)) : ((string)("WildDecree".Translate() + ": " + pawn.LabelShortCap)));
-			string text2 = ((!causedByMentalBreak) ? ((string)"LetterRandomDecree".Translate(pawn)) : ((string)"LetterDecreeMentalBreak".Translate(pawn)));
-			if (mentalBreakReason != null)
+			if (!this.heirs.ContainsKey(faction) && t.Awardable && (Faction.OfEmpire == null || this.pawn.HomeFaction != Faction.OfEmpire))
 			{
-				text2 = text2 + "\n\n" + mentalBreakReason;
-			}
-			text2 += "\n\n" + "LetterDecree_Quest".Translate(quest.name);
-			ChoiceLetter choiceLetter = LetterMaker.MakeLetter(text, text2, IncidentDefOf.GiveQuest_Random.letterDef, LookTargets.Invalid, null, quest);
-			Find.LetterStack.ReceiveLetter(choiceLetter);
-		}
-	}
-
-	private void CleanupThoughts(RoyalTitleDef title)
-	{
-		if (title != null)
-		{
-			if (title.awardThought != null && pawn.needs != null && pawn.needs.mood != null)
-			{
-				pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(title.awardThought);
-			}
-			if (title.lostThought != null && pawn.needs != null && pawn.needs.mood != null)
-			{
-				pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(title.lostThought);
+				this.SetHeir(t.GetInheritanceWorker(faction).FindHeir(faction, this.pawn, t), faction);
 			}
 		}
-	}
 
-	public static void MakeLetterTextForTitleChange(Pawn pawn, Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, out string headline, out string body)
-	{
-		if (currentTitle == null || faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) < faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle))
+		// Token: 0x0600CDC7 RID: 52679 RVA: 0x003C5EC4 File Offset: 0x003C40C4
+		public void RoyaltyTrackerTickInterval(int delta)
 		{
-			headline = "LetterGainedRoyalTitle".Translate(pawn.Named("PAWN"), faction.Named("FACTION"), newTitle.GetLabelCapFor(pawn).Named("TITLE")).Resolve();
-		}
-		else
-		{
-			headline = "LetterLostRoyalTitle".Translate(pawn.Named("PAWN"), faction.Named("FACTION"), currentTitle.GetLabelCapFor(pawn).Named("TITLE")).Resolve();
-		}
-		body = RoyalTitleUtility.BuildDifferenceExplanationText(currentTitle, newTitle, faction, pawn);
-		body = ((TaggedString)body).Resolve().TrimEndNewlines();
-	}
-
-	public static string MakeLetterTextForTitleChange(Pawn pawn, Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle)
-	{
-		MakeLetterTextForTitleChange(pawn, faction, currentTitle, newTitle, out var headline, out var body);
-		if (body.Length > 0)
-		{
-			body = "\n\n" + body;
-		}
-		return headline + body;
-	}
-
-	public void ResetPermitsAndPoints(Faction faction, RoyalTitleDef currentTitle)
-	{
-		if (currentTitle == null)
-		{
-			return;
-		}
-		for (int num = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) + 1 - 1; num >= 0; num--)
-		{
-			RoyalTitleDef royalTitleDef = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading[num];
-			List<FactionPermit> list = PermitsFromFaction(faction);
-			for (int i = 0; i < list.Count; i++)
+			Faction faction;
+			if (this.pawn.IsHashIntervalTick(37500, delta) && RoyalTitleUtility.ShouldGetBestowingCeremonyQuest(this.pawn, out faction))
 			{
-				if (list[i].Title == royalTitleDef)
+				RoyalTitleUtility.GenerateBestowingCeremonyQuest(this.pawn, faction);
+			}
+			List<RoyalTitle> allTitlesInEffectForReading = this.AllTitlesInEffectForReading;
+			for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+			{
+				allTitlesInEffectForReading[i].RoyalTitleTick(delta);
+			}
+			if (!this.pawn.Spawned || this.pawn.RaceProps.Animal)
+			{
+				return;
+			}
+			this.factionHeirsToClearTmp.Clear();
+			foreach (KeyValuePair<Faction, Pawn> keyValuePair in this.heirs)
+			{
+				RoyalTitleDef currentTitle = this.GetCurrentTitle(keyValuePair.Key);
+				if (currentTitle != null && currentTitle.canBeInherited)
 				{
-					factionPermits.Remove(list[i]);
-				}
-			}
-		}
-	}
-
-	private void OnPreTitleChanged(Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, bool sendLetter = true)
-	{
-		if (newTitle != null)
-		{
-			AssignHeirIfNone(newTitle, faction);
-		}
-		if (Current.ProgramState == ProgramState.Playing && sendLetter && pawn.IsColonist)
-		{
-			TaggedString taggedString = null;
-			taggedString = ((currentTitle != null && faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) >= faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle)) ? "LetterLabelLostRoyalTitle".Translate(pawn.Named("PAWN"), currentTitle.GetLabelCapFor(pawn).Named("TITLE")) : "LetterLabelGainedRoyalTitle".Translate(pawn.Named("PAWN"), newTitle.GetLabelCapFor(pawn).Named("TITLE")));
-			Find.LetterStack.ReceiveLetter(taggedString, MakeLetterTextForTitleChange(pawn, faction, currentTitle, newTitle), LetterDefOf.PositiveEvent, pawn);
-		}
-		if (currentTitle != null)
-		{
-			for (int i = 0; i < currentTitle.grantedAbilities.Count; i++)
-			{
-				pawn.abilities.RemoveAbility(currentTitle.grantedAbilities[i]);
-			}
-		}
-	}
-
-	private void OnPostTitleChanged(Faction faction, RoyalTitleDef prevTitle, RoyalTitleDef newTitle)
-	{
-		pawn.Notify_DisabledWorkTypesChanged();
-		pawn.needs?.AddOrRemoveNeedsAsAppropriate();
-		if (newTitle != null)
-		{
-			if (newTitle.disabledJoyKinds != null && pawn.jobs != null && RoyalTitleUtility.ShouldBecomeConceitedOnNewTitle(pawn))
-			{
-				foreach (JoyKindDef disabledJoyKind in newTitle.disabledJoyKinds)
-				{
-					pawn.jobs.Notify_JoyKindDisabled(disabledJoyKind);
-				}
-			}
-			UpdateAvailableAbilities();
-			pawn.abilities.Notify_TemporaryAbilitiesChanged();
-			UpdateHighestTitleAchieved(faction, newTitle);
-		}
-		QuestUtility.SendQuestTargetSignals(pawn.questTags, "TitleChanged", pawn.Named("SUBJECT"));
-		MeditationFocusTypeAvailabilityCache.ClearFor(pawn);
-		pawn.apparel?.Notify_TitleChanged();
-	}
-
-	private void UpdateRoyalTitle(Faction faction, bool sendLetter = true, RoyalTitleDef updateTo = null)
-	{
-		RoyalTitleDef currentTitle = GetCurrentTitle(faction);
-		if (currentTitle != null && !currentTitle.Awardable)
-		{
-			return;
-		}
-		RoyalTitleDef nextTitle = currentTitle.GetNextTitle(faction);
-		if (nextTitle == null)
-		{
-			return;
-		}
-		int num = GetFavor(faction);
-		if (num >= nextTitle.favorCost)
-		{
-			OnPreTitleChanged(faction, currentTitle, nextTitle, sendLetter);
-			SetFavor(faction, num - nextTitle.favorCost, notifyOnFavorChanged: false);
-			int index = FindFactionTitleIndex(faction, createIfNotExisting: true);
-			titles[index].def = nextTitle;
-			CleanupThoughts(currentTitle);
-			CleanupThoughts(nextTitle);
-			if (nextTitle.awardThought != null && pawn.needs != null && pawn.needs.mood != null)
-			{
-				Thought_MemoryRoyalTitle thought_MemoryRoyalTitle = (Thought_MemoryRoyalTitle)ThoughtMaker.MakeThought(nextTitle.awardThought);
-				thought_MemoryRoyalTitle.titleDef = nextTitle;
-				pawn.needs.mood.thoughts.memories.TryGainMemory(thought_MemoryRoyalTitle);
-			}
-			if (nextTitle != updateTo)
-			{
-				UpdateRoyalTitle(faction, sendLetter);
-			}
-		}
-	}
-
-	public List<Thing> ApplyRewardsForTitle(Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, bool onlyForNewestTitle = false)
-	{
-		List<Thing> list = new List<Thing>();
-		List<ThingCount> list2 = new List<ThingCount>();
-		if (newTitle != null && newTitle.Awardable && pawn.IsColonist && NewHighestTitle(faction, newTitle))
-		{
-			int num = ((currentTitle != null) ? faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) : 0) + 1;
-			int num2 = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle);
-			if (onlyForNewestTitle)
-			{
-				num = num2;
-			}
-			IntVec3 result = IntVec3.Invalid;
-			Map mapHeld = pawn.MapHeld;
-			if (mapHeld != null)
-			{
-				if (mapHeld.IsPlayerHome)
-				{
-					result = DropCellFinder.TradeDropSpot(mapHeld);
-				}
-				else if (!DropCellFinder.TryFindDropSpotNear(pawn.Position, mapHeld, out result, allowFogged: false, canRoofPunch: false))
-				{
-					result = DropCellFinder.RandomDropSpot(mapHeld);
-				}
-			}
-			for (int i = num; i <= num2; i++)
-			{
-				RoyalTitleDef royalTitleDef = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading[i];
-				if (royalTitleDef.rewards == null)
-				{
-					continue;
-				}
-				List<Thing> list3 = royalTitleDef.rewards.Select(delegate(ThingDefCountClass r)
-				{
-					Thing thing = ThingMaker.MakeThing(r.thingDef);
-					thing.stackCount = r.count;
-					return thing;
-				}).ToList();
-				for (int num3 = 0; num3 < list3.Count; num3++)
-				{
-					if (list3[num3].def == ThingDefOf.PsychicAmplifier)
+					Pawn value = keyValuePair.Value;
+					if (value != null && value.Dead)
 					{
-						Find.History.Notify_PsylinkAvailable();
-						break;
+						Find.LetterStack.ReceiveLetter("LetterTitleHeirLostLabel".Translate(), "LetterTitleHeirLost".Translate(this.pawn.Named("HOLDER"), value.Named("HEIR"), keyValuePair.Key.Named("FACTION")), LetterDefOf.NegativeEvent, this.pawn, null, null, null, null, 0, true);
+						this.factionHeirsToClearTmp.Add(keyValuePair.Key);
 					}
 				}
-				if (pawn.Spawned)
+			}
+			foreach (Faction key in this.factionHeirsToClearTmp)
+			{
+				this.heirs[key] = null;
+			}
+			foreach (FactionPermit factionPermit in this.factionPermits)
+			{
+				if (factionPermit.LastUsedTick > 0 && Find.TickManager.TicksGame == factionPermit.LastUsedTick + factionPermit.Permit.CooldownTicks)
 				{
-					DropPodUtility.DropThingsNear(result, mapHeld, list3, 110, canInstaDropDuringInit: false, leaveSlag: false, canRoofPunch: false, forbid: false);
+					Messages.Message("MessagePermitCooldownFinished".Translate(this.pawn, factionPermit.Permit.LabelCap), this.pawn, MessageTypeDefOf.PositiveEvent, true);
+				}
+			}
+		}
+
+		// Token: 0x0600CDC8 RID: 52680 RVA: 0x003C6134 File Offset: 0x003C4334
+		public void IssueDecree(bool causedByMentalBreak, string mentalBreakReason = null)
+		{
+			Pawn_RoyaltyTracker.<>c__DisplayClass59_0 CS$<>8__locals1 = new Pawn_RoyaltyTracker.<>c__DisplayClass59_0();
+			if (!ModLister.CheckRoyalty("Decree"))
+			{
+				return;
+			}
+			Pawn_RoyaltyTracker.<>c__DisplayClass59_0 CS$<>8__locals2 = CS$<>8__locals1;
+			IIncidentTarget mapHeld = this.pawn.MapHeld;
+			CS$<>8__locals2.target = (mapHeld ?? Find.World);
+			QuestScriptDef questScriptDef;
+			if (this.PossibleDecreeQuests.TryRandomElementByWeight((QuestScriptDef x) => NaturalRandomQuestChooser.GetNaturalDecreeSelectionWeight(x, CS$<>8__locals1.target.StoryState), out questScriptDef))
+			{
+				this.lastDecreeTicks = Find.TickManager.TicksGame;
+				Slate slate = new Slate();
+				slate.Set<float>("points", StorytellerUtility.DefaultThreatPointsNow(CS$<>8__locals1.target), false);
+				slate.Set<Pawn>("asker", this.pawn, false);
+				Quest quest = QuestUtility.GenerateQuestAndMakeAvailable(questScriptDef, slate);
+				CS$<>8__locals1.target.StoryState.RecordDecreeFired(questScriptDef);
+				string str;
+				if (causedByMentalBreak)
+				{
+					str = "WildDecree".Translate() + ": " + this.pawn.LabelShortCap;
 				}
 				else
 				{
-					foreach (Thing item in list3)
-					{
-						pawn.inventory.TryAddItemNotForSale(item);
-					}
+					str = "LetterLabelRandomDecree".Translate(this.pawn);
 				}
-				for (int num4 = 0; num4 < list3.Count; num4++)
+				string text;
+				if (causedByMentalBreak)
 				{
-					list2.Add(new ThingCount(list3[num4], list3[num4].stackCount));
+					text = "LetterDecreeMentalBreak".Translate(this.pawn);
 				}
-				list.AddRange(list3);
-			}
-			if (list.Count > 0)
-			{
-				TaggedString text = "LetterRewardsForNewTitle".Translate(pawn.Named("PAWN"), faction.Named("FACTION"), newTitle.GetLabelCapFor(pawn).Named("TITLE")) + "\n\n" + GenLabel.ThingsLabel(list2, "  - ", ignoreStackLimit: true) + "\n\n" + (pawn.Spawned ? "LetterRewardsForNewTitleDeliveryBase" : "LetterRewardsForNewTitleDeliveryDirect").Translate(pawn.Named("PAWN"));
-				Find.LetterStack.ReceiveLetter("LetterLabelRewardsForNewTitle".Translate(), text, LetterDefOf.PositiveEvent, list);
-			}
-		}
-		return list;
-	}
-
-	private void UpdateHighestTitleAchieved(Faction faction, RoyalTitleDef title)
-	{
-		if (!highestTitles.ContainsKey(faction))
-		{
-			highestTitles.Add(faction, title);
-		}
-		else if (NewHighestTitle(faction, title))
-		{
-			highestTitles[faction] = title;
-		}
-	}
-
-	public bool NewHighestTitle(Faction faction, RoyalTitleDef newTitle)
-	{
-		if (highestTitles == null)
-		{
-			highestTitles = new Dictionary<Faction, RoyalTitleDef>();
-		}
-		if (!highestTitles.ContainsKey(faction))
-		{
-			return true;
-		}
-		int num = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(highestTitles[faction]);
-		return faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle) > num;
-	}
-
-	public IEnumerable<Gizmo> GetGizmos()
-	{
-		if (!PermitPointsAvailable || pawn.Faction != Faction.OfPlayer)
-		{
-			yield break;
-		}
-		Faction faction = null;
-		foreach (Faction item in Find.FactionManager.AllFactionsVisibleInViewOrder)
-		{
-			if (GetPermitPoints(item) > 0)
-			{
-				faction = item;
-				break;
+				else
+				{
+					text = "LetterRandomDecree".Translate(this.pawn);
+				}
+				if (mentalBreakReason != null)
+				{
+					text = text + "\n\n" + mentalBreakReason;
+				}
+				text += "\n\n" + "LetterDecree_Quest".Translate(quest.name);
+				ChoiceLetter let = LetterMaker.MakeLetter(str, text, IncidentDefOf.GiveQuest_Random.letterDef, LookTargets.Invalid, null, quest, null);
+				Find.LetterStack.ReceiveLetter(let, null, 0, true);
 			}
 		}
-		if (faction != null)
-		{
-			Command_Action command_Action = new Command_Action();
-			command_Action.defaultLabel = "ChooseRoyalPermit".Translate();
-			command_Action.defaultDesc = "ChooseRoyalPermit_Desc".Translate();
-			command_Action.icon = faction.def.FactionIcon;
-			command_Action.defaultIconColor = faction.Color;
-			command_Action.action = delegate
-			{
-				OpenPermitWindow();
-			};
-			command_Action.Order = -100f;
-			yield return command_Action;
-		}
-	}
 
-	public void OpenPermitWindow()
-	{
-		Dialog_InfoCard dialog_InfoCard = new Dialog_InfoCard(pawn);
-		dialog_InfoCard.SetTab(Dialog_InfoCard.InfoCardTab.Permits);
-		Find.WindowStack.Add(dialog_InfoCard);
-	}
-
-	public void Notify_PawnKilled()
-	{
-		if (PawnGenerator.IsBeingGenerated(pawn) || AllTitlesForReading.Count == 0 || (pawn.IsMutant && pawn.mutant.Def.disableTitles))
+		// Token: 0x0600CDC9 RID: 52681 RVA: 0x003C62E8 File Offset: 0x003C44E8
+		private void CleanupThoughts(RoyalTitleDef title)
 		{
-			return;
-		}
-		bool flag = false;
-		StringBuilder stringBuilder = new StringBuilder();
-		try
-		{
-			stringBuilder.AppendLine("LetterTitleInheritance_Base".Translate(pawn.Named("PAWN")));
-			stringBuilder.AppendLine();
-			foreach (RoyalTitle item in AllTitlesForReading)
+			if (title == null)
 			{
-				if (!item.def.canBeInherited)
+				return;
+			}
+			if (title.awardThought != null && this.pawn.needs != null && this.pawn.needs.mood != null)
+			{
+				this.pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(title.awardThought);
+			}
+			if (title.lostThought != null && this.pawn.needs != null && this.pawn.needs.mood != null)
+			{
+				this.pawn.needs.mood.thoughts.memories.RemoveMemoriesOfDef(title.lostThought);
+			}
+		}
+
+		// Token: 0x0600CDCA RID: 52682 RVA: 0x003C6394 File Offset: 0x003C4594
+		public static void MakeLetterTextForTitleChange(Pawn pawn, Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, out string headline, out string body)
+		{
+			if (currentTitle == null || faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) < faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle))
+			{
+				headline = "LetterGainedRoyalTitle".Translate(pawn.Named("PAWN"), faction.Named("FACTION"), newTitle.GetLabelCapFor(pawn).Named("TITLE")).Resolve();
+			}
+			else
+			{
+				headline = "LetterLostRoyalTitle".Translate(pawn.Named("PAWN"), faction.Named("FACTION"), currentTitle.GetLabelCapFor(pawn).Named("TITLE")).Resolve();
+			}
+			body = RoyalTitleUtility.BuildDifferenceExplanationText(currentTitle, newTitle, faction, pawn);
+			body = body.Resolve().TrimEndNewlines();
+		}
+
+		// Token: 0x0600CDCB RID: 52683 RVA: 0x003C6468 File Offset: 0x003C4668
+		public static string MakeLetterTextForTitleChange(Pawn pawn, Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle)
+		{
+			string str;
+			string text;
+			Pawn_RoyaltyTracker.MakeLetterTextForTitleChange(pawn, faction, currentTitle, newTitle, out str, out text);
+			if (text.Length > 0)
+			{
+				text = "\n\n" + text;
+			}
+			return str + text;
+		}
+
+		// Token: 0x0600CDCC RID: 52684 RVA: 0x003C64A0 File Offset: 0x003C46A0
+		public void ResetPermitsAndPoints(Faction faction, RoyalTitleDef currentTitle)
+		{
+			if (currentTitle == null)
+			{
+				return;
+			}
+			for (int i = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) + 1 - 1; i >= 0; i--)
+			{
+				RoyalTitleDef royalTitleDef = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading[i];
+				List<FactionPermit> list = this.PermitsFromFaction(faction);
+				for (int j = 0; j < list.Count; j++)
 				{
-					continue;
+					if (list[j].Title == royalTitleDef)
+					{
+						this.factionPermits.Remove(list[j]);
+					}
 				}
-				if (pawn.IsFreeColonist && !pawn.IsQuestLodger())
+			}
+		}
+
+		// Token: 0x0600CDCD RID: 52685 RVA: 0x003C6520 File Offset: 0x003C4720
+		private void OnPreTitleChanged(Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, bool sendLetter = true)
+		{
+			if (newTitle != null)
+			{
+				this.AssignHeirIfNone(newTitle, faction);
+			}
+			if (Current.ProgramState == ProgramState.Playing && sendLetter && this.pawn.IsColonist)
+			{
+				TaggedString label = null;
+				if (currentTitle == null || faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) < faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle))
 				{
-					flag = true;
+					label = "LetterLabelGainedRoyalTitle".Translate(this.pawn.Named("PAWN"), newTitle.GetLabelCapFor(this.pawn).Named("TITLE"));
 				}
-				if (item.def.TryInherit(pawn, item.faction, out var outcome))
+				else
 				{
-					if (outcome.HeirHasTitle && !outcome.heirTitleHigher)
+					label = "LetterLabelLostRoyalTitle".Translate(this.pawn.Named("PAWN"), currentTitle.GetLabelCapFor(this.pawn).Named("TITLE"));
+				}
+				Find.LetterStack.ReceiveLetter(label, Pawn_RoyaltyTracker.MakeLetterTextForTitleChange(this.pawn, faction, currentTitle, newTitle), LetterDefOf.PositiveEvent, this.pawn, null, null, null, null, 0, true);
+			}
+			if (currentTitle != null)
+			{
+				for (int i = 0; i < currentTitle.grantedAbilities.Count; i++)
+				{
+					this.pawn.abilities.RemoveAbility(currentTitle.grantedAbilities[i]);
+				}
+			}
+		}
+
+		// Token: 0x0600CDCE RID: 52686 RVA: 0x003C6654 File Offset: 0x003C4854
+		private void OnPostTitleChanged(Faction faction, RoyalTitleDef prevTitle, RoyalTitleDef newTitle)
+		{
+			this.pawn.Notify_DisabledWorkTypesChanged();
+			Pawn_NeedsTracker needs = this.pawn.needs;
+			if (needs != null)
+			{
+				needs.AddOrRemoveNeedsAsAppropriate();
+			}
+			if (newTitle != null)
+			{
+				if (newTitle.disabledJoyKinds != null && this.pawn.jobs != null && RoyalTitleUtility.ShouldBecomeConceitedOnNewTitle(this.pawn))
+				{
+					foreach (JoyKindDef joyKind in newTitle.disabledJoyKinds)
 					{
-						stringBuilder.AppendLineTagged("LetterTitleInheritance_AsReplacement".Translate(pawn.Named("PAWN"), item.faction.Named("FACTION"), outcome.heir.Named("HEIR"), item.def.GetLabelFor(pawn).Named("TITLE"), outcome.heirCurrentTitle.GetLabelFor(outcome.heir).Named("REPLACEDTITLE")).CapitalizeFirst());
-						stringBuilder.AppendLine();
+						this.pawn.jobs.Notify_JoyKindDisabled(joyKind);
 					}
-					else if (outcome.heirTitleHigher)
+				}
+				this.UpdateAvailableAbilities();
+				this.pawn.abilities.Notify_TemporaryAbilitiesChanged();
+				this.UpdateHighestTitleAchieved(faction, newTitle);
+			}
+			QuestUtility.SendQuestTargetSignals(this.pawn.questTags, "TitleChanged", this.pawn.Named("SUBJECT"));
+			MeditationFocusTypeAvailabilityCache.ClearFor(this.pawn);
+			Pawn_ApparelTracker apparel = this.pawn.apparel;
+			if (apparel == null)
+			{
+				return;
+			}
+			apparel.Notify_TitleChanged();
+		}
+
+		// Token: 0x0600CDCF RID: 52687 RVA: 0x003C6760 File Offset: 0x003C4960
+		private void UpdateRoyalTitle(Faction faction, bool sendLetter = true, RoyalTitleDef updateTo = null)
+		{
+			RoyalTitleDef currentTitle = this.GetCurrentTitle(faction);
+			if (currentTitle != null && !currentTitle.Awardable)
+			{
+				return;
+			}
+			RoyalTitleDef nextTitle = currentTitle.GetNextTitle(faction);
+			if (nextTitle == null)
+			{
+				return;
+			}
+			int num = this.GetFavor(faction);
+			if (num >= nextTitle.favorCost)
+			{
+				this.OnPreTitleChanged(faction, currentTitle, nextTitle, sendLetter);
+				this.SetFavor(faction, num - nextTitle.favorCost, false);
+				int index = this.FindFactionTitleIndex(faction, true);
+				this.titles[index].def = nextTitle;
+				this.CleanupThoughts(currentTitle);
+				this.CleanupThoughts(nextTitle);
+				if (nextTitle.awardThought != null && this.pawn.needs != null && this.pawn.needs.mood != null)
+				{
+					Thought_MemoryRoyalTitle thought_MemoryRoyalTitle = (Thought_MemoryRoyalTitle)ThoughtMaker.MakeThought(nextTitle.awardThought);
+					thought_MemoryRoyalTitle.titleDef = nextTitle;
+					this.pawn.needs.mood.thoughts.memories.TryGainMemory(thought_MemoryRoyalTitle, null);
+				}
+				if (nextTitle == updateTo)
+				{
+					return;
+				}
+				this.UpdateRoyalTitle(faction, sendLetter, null);
+			}
+		}
+
+		// Token: 0x0600CDD0 RID: 52688 RVA: 0x003C6858 File Offset: 0x003C4A58
+		public List<Thing> ApplyRewardsForTitle(Faction faction, RoyalTitleDef currentTitle, RoyalTitleDef newTitle, bool onlyForNewestTitle = false)
+		{
+			List<Thing> list = new List<Thing>();
+			List<ThingCount> list2 = new List<ThingCount>();
+			if (newTitle != null && newTitle.Awardable && this.pawn.IsColonist && this.NewHighestTitle(faction, newTitle))
+			{
+				int num = ((currentTitle != null) ? faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(currentTitle) : 0) + 1;
+				int num2 = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle);
+				if (onlyForNewestTitle)
+				{
+					num = num2;
+				}
+				IntVec3 dropCenter = IntVec3.Invalid;
+				Map mapHeld = this.pawn.MapHeld;
+				if (mapHeld != null)
+				{
+					if (mapHeld.IsPlayerHome)
 					{
-						stringBuilder.AppendLineTagged("LetterTitleInheritance_NoEffectHigherTitle".Translate(pawn.Named("PAWN"), item.faction.Named("FACTION"), outcome.heir.Named("HEIR"), item.def.GetLabelFor(pawn).Named("TITLE"), outcome.heirCurrentTitle.GetLabelFor(outcome.heir).Named("HIGHERTITLE")).CapitalizeFirst());
-						stringBuilder.AppendLine();
+						dropCenter = DropCellFinder.TradeDropSpot(mapHeld);
 					}
-					else
+					else if (!DropCellFinder.TryFindDropSpotNear(this.pawn.Position, mapHeld, out dropCenter, false, false, true, null, true))
 					{
-						stringBuilder.AppendLineTagged("LetterTitleInheritance_WasInherited".Translate(pawn.Named("PAWN"), item.faction.Named("FACTION"), outcome.heir.Named("HEIR"), item.def.GetLabelFor(pawn).Named("TITLE")).CapitalizeFirst());
-						stringBuilder.AppendLine();
+						dropCenter = DropCellFinder.RandomDropSpot(mapHeld, true);
 					}
-					if (outcome.heirTitleHigher)
+				}
+				for (int i = num; i <= num2; i++)
+				{
+					RoyalTitleDef royalTitleDef = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading[i];
+					if (royalTitleDef.rewards != null)
 					{
-						continue;
-					}
-					RoyalTitle titleLocal = item;
-					tmpInheritedTitles.Add(delegate
-					{
-						int num = titleLocal.def.favorCost;
-						RoyalTitleDef previousTitle_IncludeNonRewardable = titleLocal.def.GetPreviousTitle_IncludeNonRewardable(titleLocal.faction);
-						int num2 = 1000;
-						while (previousTitle_IncludeNonRewardable != null)
+						List<Thing> list3 = royalTitleDef.rewards.Select(delegate(ThingDefCountClass r)
 						{
-							num += previousTitle_IncludeNonRewardable.favorCost;
-							previousTitle_IncludeNonRewardable = previousTitle_IncludeNonRewardable.GetPreviousTitle_IncludeNonRewardable(titleLocal.faction);
-							num2--;
-							if (num2 <= 0)
+							Thing thing = ThingMaker.MakeThing(r.thingDef, null);
+							thing.stackCount = r.count;
+							return thing;
+						}).ToList<Thing>();
+						for (int j = 0; j < list3.Count; j++)
+						{
+							if (list3[j].def == ThingDefOf.PsychicAmplifier)
 							{
-								Log.ErrorOnce("Iterations limit exceeded while getting favor for inheritance.", 91727191);
+								Find.History.Notify_PsylinkAvailable();
 								break;
 							}
 						}
-						outcome.heir.royalty.GainFavor(titleLocal.faction, num);
-						titleLocal.wasInherited = true;
-					});
-					if (outcome.heir.IsFreeColonist && !outcome.heir.IsQuestLodger())
-					{
-						flag = true;
+						if (this.pawn.Spawned)
+						{
+							DropPodUtility.DropThingsNear(dropCenter, mapHeld, list3, 110, false, false, false, false, true, null);
+						}
+						else
+						{
+							foreach (Thing item in list3)
+							{
+								this.pawn.inventory.TryAddItemNotForSale(item);
+							}
+						}
+						for (int k = 0; k < list3.Count; k++)
+						{
+							list2.Add(new ThingCount(list3[k], list3[k].stackCount, false));
+						}
+						list.AddRange(list3);
 					}
 				}
-				else
+				if (list.Count > 0)
 				{
-					stringBuilder.AppendLineTagged("LetterTitleInheritance_NoHeirFound".Translate(pawn.Named("PAWN"), item.def.GetLabelFor(pawn).Named("TITLE"), item.faction.Named("FACTION")).CapitalizeFirst());
+					TaggedString text = "LetterRewardsForNewTitle".Translate(this.pawn.Named("PAWN"), faction.Named("FACTION"), newTitle.GetLabelCapFor(this.pawn).Named("TITLE")) + "\n\n" + GenLabel.ThingsLabel(list2, "  - ", true) + "\n\n" + (this.pawn.Spawned ? "LetterRewardsForNewTitleDeliveryBase" : "LetterRewardsForNewTitleDeliveryDirect").Translate(this.pawn.Named("PAWN"));
+					Find.LetterStack.ReceiveLetter("LetterLabelRewardsForNewTitle".Translate(), text, LetterDefOf.PositiveEvent, list, null, null, null, null, 0, true);
 				}
 			}
-			if (stringBuilder.Length > 0 && flag)
-			{
-				Find.LetterStack.ReceiveLetter("LetterTitleInheritance".Translate(), stringBuilder.ToString().TrimEndNewlines(), LetterDefOf.PositiveEvent);
-			}
-			foreach (Action tmpInheritedTitle in tmpInheritedTitles)
-			{
-				tmpInheritedTitle();
-			}
+			return list;
 		}
-		finally
-		{
-			tmpInheritedTitles.Clear();
-		}
-	}
 
-	public void Notify_Resurrected()
-	{
-		foreach (Faction item in titles.Select((RoyalTitle t) => t.faction).Distinct().ToList())
+		// Token: 0x0600CDD1 RID: 52689 RVA: 0x003C6B48 File Offset: 0x003C4D48
+		private void UpdateHighestTitleAchieved(Faction faction, RoyalTitleDef title)
 		{
-			int index = FindFactionTitleIndex(item);
-			if (!titles[index].wasInherited)
+			if (!this.highestTitles.ContainsKey(faction))
 			{
-				continue;
+				this.highestTitles.Add(faction, title);
+				return;
 			}
-			List<FactionPermit> list = PermitsFromFaction(item);
-			for (int num = 0; num < list.Count; num++)
+			if (this.NewHighestTitle(faction, title))
 			{
-				if (list[num].Title == titles[index].def)
-				{
-					factionPermits.Remove(list[num]);
-				}
-			}
-			SetTitle(item, null, grantRewards: false, rewardsOnlyForNewestTitle: false, sendLetter: false);
-		}
-		UpdateAvailableAbilities();
-	}
-
-	public Gizmo RoyalAidGizmo()
-	{
-		Command_Action command_Action = new Command_Action();
-		command_Action.defaultLabel = "CommandCallRoyalAid".Translate();
-		command_Action.defaultDesc = "CommandCallRoyalAidDesc".Translate();
-		command_Action.icon = CommandTex;
-		if (Find.Selector.NumSelected > 1)
-		{
-			command_Action.defaultLabel = command_Action.defaultLabel + " (" + pawn.LabelShort + ")";
-		}
-		if (pawn.Spawned && pawn.Map.weatherManager.CurWeatherMaxRangeCap >= 0f)
-		{
-			command_Action.defaultDescPostfix = "\n\n" + ("WeatherMaxRangeCap".Translate() + ": " + pawn.Map.weatherManager.curWeather.LabelCap).Colorize(ColoredText.WarningColor);
-		}
-		if (pawn.Downed)
-		{
-			command_Action.Disable("CommandDisabledUnconscious".TranslateWithBackup("CommandCallRoyalAidUnconscious").Formatted(pawn));
-		}
-		if (pawn.IsSlave)
-		{
-			command_Action.Disable("CommandCallRoyalAidSlave".Translate());
-		}
-		if (pawn.IsQuestLodger())
-		{
-			command_Action.Disable("CommandCallRoyalAidLodger".Translate());
-		}
-		Map mapHeld = pawn.MapHeld;
-		if (mapHeld != null && mapHeld.IsPocketMap && mapHeld.generatorDef.disableCallAid)
-		{
-			command_Action.Disable("CommandCallRoyalAidInvalidMap".Translate());
-		}
-		command_Action.action = delegate
-		{
-			List<FloatMenuOption> list = new List<FloatMenuOption>();
-			foreach (FactionPermit factionPermit in factionPermits)
-			{
-				IEnumerable<FloatMenuOption> royalAidOptions = factionPermit.Permit.Worker.GetRoyalAidOptions(pawn.MapHeld, pawn, factionPermit.Faction);
-				if (royalAidOptions != null)
-				{
-					list.AddRange(royalAidOptions);
-				}
-			}
-			Find.WindowStack.Add(new FloatMenu(list));
-		};
-		return command_Action;
-	}
-
-	public bool CanRequireThroneroom()
-	{
-		if (pawn.IsFreeColonist && allowRoomRequirements)
-		{
-			return !pawn.IsQuestLodger();
-		}
-		return false;
-	}
-
-	public RoyalTitle HighestTitleWithThroneRoomRequirements()
-	{
-		if (!CanRequireThroneroom())
-		{
-			return null;
-		}
-		RoyalTitle royalTitle = null;
-		List<RoyalTitle> allTitlesInEffectForReading = AllTitlesInEffectForReading;
-		for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
-		{
-			if (!allTitlesInEffectForReading[i].def.throneRoomRequirements.EnumerableNullOrEmpty() && (royalTitle == null || allTitlesInEffectForReading[i].def.seniority > royalTitle.def.seniority))
-			{
-				royalTitle = allTitlesInEffectForReading[i];
+				this.highestTitles[faction] = title;
 			}
 		}
-		return royalTitle;
-	}
 
-	public IEnumerable<string> GetUnmetThroneroomRequirements(bool includeOnGracePeriod = true, bool onlyOnGracePeriod = false)
-	{
-		Building_Throne assignedThrone = pawn.ownership.AssignedThrone;
-		if (assignedThrone == null || !assignedThrone.SpawnedOrAnyParentSpawned || GenTicks.TicksGame - assignedThrone.MapHeld.generationTick < 10)
+		// Token: 0x0600CDD2 RID: 52690 RVA: 0x003C6B80 File Offset: 0x003C4D80
+		public bool NewHighestTitle(Faction faction, RoyalTitleDef newTitle)
 		{
-			yield break;
-		}
-		RoyalTitle royalTitle = HighestTitleWithThroneRoomRequirements();
-		if (royalTitle == null)
-		{
-			yield break;
-		}
-		Room throneRoom = assignedThrone.GetRoom();
-		if (throneRoom == null)
-		{
-			yield break;
-		}
-		bool roomValid = RoomRoleWorker_ThroneRoom.Validate(throneRoom) == null;
-		bool gracePeriodActive = royalTitle.RoomRequirementGracePeriodActive(pawn);
-		RoyalTitleDef prevTitle = royalTitle.def.GetPreviousTitle(royalTitle.faction);
-		foreach (RoomRequirement throneRoomRequirement in royalTitle.def.throneRoomRequirements)
-		{
-			if (!roomValid || !throneRoomRequirement.MetOrDisabled(throneRoom, pawn))
+			if (this.highestTitles == null)
 			{
-				bool flag = (prevTitle != null && !prevTitle.HasSameThroneroomRequirement(throneRoomRequirement)) || MoveColonyUtility.TitleAndRoleRequirementsGracePeriodActive;
-				if ((!onlyOnGracePeriod || (flag && gracePeriodActive)) && (!(gracePeriodActive && flag) || includeOnGracePeriod))
-				{
-					yield return throneRoomRequirement.LabelCap(throneRoom);
-				}
+				this.highestTitles = new Dictionary<Faction, RoyalTitleDef>();
 			}
-		}
-	}
-
-	public bool AnyUnmetThroneroomRequirements()
-	{
-		if (pawn.ownership.AssignedThrone == null)
-		{
-			return false;
-		}
-		RoyalTitle royalTitle = HighestTitleWithThroneRoomRequirements();
-		if (royalTitle == null)
-		{
-			return false;
-		}
-		Room room = pawn.ownership.AssignedThrone.GetRoom();
-		if (room == null)
-		{
-			return false;
-		}
-		if (RoomRoleWorker_ThroneRoom.Validate(room) != null)
-		{
-			return true;
-		}
-		foreach (RoomRequirement throneRoomRequirement in royalTitle.def.throneRoomRequirements)
-		{
-			if (!throneRoomRequirement.MetOrDisabled(room, pawn))
+			if (!this.highestTitles.ContainsKey(faction))
 			{
 				return true;
 			}
+			int num = faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(this.highestTitles[faction]);
+			return faction.def.RoyalTitlesAwardableInSeniorityOrderForReading.IndexOf(newTitle) > num;
 		}
-		return false;
-	}
 
-	public bool CanRequireBedroom()
-	{
-		if (allowRoomRequirements)
+		// Token: 0x0600CDD3 RID: 52691 RVA: 0x003C6BE1 File Offset: 0x003C4DE1
+		public IEnumerable<Gizmo> GetGizmos()
 		{
-			return !pawn.IsPrisoner;
-		}
-		return false;
-	}
-
-	public RoyalTitle HighestTitleWithBedroomRequirements()
-	{
-		if (!CanRequireBedroom())
-		{
-			return null;
-		}
-		RoyalTitle royalTitle = null;
-		List<RoyalTitle> allTitlesInEffectForReading = AllTitlesInEffectForReading;
-		for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
-		{
-			if (!allTitlesInEffectForReading[i].def.GetBedroomRequirements(pawn).EnumerableNullOrEmpty() && (royalTitle == null || allTitlesInEffectForReading[i].def.seniority > royalTitle.def.seniority))
+			if (this.PermitPointsAvailable && this.pawn.Faction == Faction.OfPlayer)
 			{
-				royalTitle = allTitlesInEffectForReading[i];
-			}
-		}
-		return royalTitle;
-	}
-
-	public void UpdateAvailableAbilities()
-	{
-		abilities.RemoveAll(delegate(Ability a)
-		{
-			for (int i = 0; i < AllTitlesInEffectForReading.Count; i++)
-			{
-				if (AllTitlesInEffectForReading[i].def.grantedAbilities.Contains(a.def))
+				Faction faction = null;
+				foreach (Faction faction2 in Find.FactionManager.AllFactionsVisibleInViewOrder)
 				{
-					return false;
+					if (this.GetPermitPoints(faction2) > 0)
+					{
+						faction = faction2;
+						break;
+					}
 				}
-			}
-			return true;
-		});
-		for (int num = 0; num < AllTitlesInEffectForReading.Count; num++)
-		{
-			RoyalTitle royalTitle = AllTitlesInEffectForReading[num];
-			for (int num2 = 0; num2 < royalTitle.def.grantedAbilities.Count; num2++)
-			{
-				AbilityDef def = royalTitle.def.grantedAbilities[num2];
-				if (!abilities.Any((Ability a) => a.def == def))
+				if (faction == null)
 				{
-					abilities.Add(AbilityUtility.MakeAbility(royalTitle.def.grantedAbilities[num2], pawn));
+					yield break;
 				}
+				yield return new Command_Action
+				{
+					defaultLabel = "ChooseRoyalPermit".Translate(),
+					defaultDesc = "ChooseRoyalPermit_Desc".Translate(),
+					icon = faction.def.FactionIcon,
+					defaultIconColor = faction.Color,
+					action = delegate()
+					{
+						this.OpenPermitWindow();
+					},
+					Order = -100f
+				};
 			}
-		}
-	}
-
-	public IEnumerable<string> GetUnmetBedroomRequirements(bool includeOnGracePeriod = true, bool onlyOnGracePeriod = false)
-	{
-		RoyalTitle royalTitle = HighestTitleWithBedroomRequirements();
-		if (royalTitle == null)
-		{
 			yield break;
 		}
-		bool gracePeriodActive = royalTitle.RoomRequirementGracePeriodActive(pawn);
-		RoyalTitleDef prevTitle = royalTitle.def.GetPreviousTitle(royalTitle.faction);
-		if (!HasPersonalBedroom())
+
+		// Token: 0x0600CDD4 RID: 52692 RVA: 0x003C6BF4 File Offset: 0x003C4DF4
+		public void OpenPermitWindow()
 		{
-			yield break;
+			Dialog_InfoCard dialog_InfoCard = new Dialog_InfoCard(this.pawn, null);
+			dialog_InfoCard.SetTab(Dialog_InfoCard.InfoCardTab.Permits);
+			Find.WindowStack.Add(dialog_InfoCard);
 		}
-		Room bedroom = pawn.ownership.OwnedRoom;
-		foreach (RoomRequirement bedroomRequirement in royalTitle.def.GetBedroomRequirements(pawn))
+
+		// Token: 0x0600CDD5 RID: 52693 RVA: 0x003C6C20 File Offset: 0x003C4E20
+		public void Notify_PawnKilled()
 		{
-			if (!bedroomRequirement.MetOrDisabled(bedroom, pawn))
+			if (PawnGenerator.IsBeingGenerated(this.pawn) || this.AllTitlesForReading.Count == 0)
 			{
-				bool flag = (prevTitle != null && !prevTitle.HasSameBedroomRequirement(bedroomRequirement)) || MoveColonyUtility.TitleAndRoleRequirementsGracePeriodActive;
-				if ((!onlyOnGracePeriod || (flag && gracePeriodActive)) && (!(gracePeriodActive && flag) || includeOnGracePeriod))
+				return;
+			}
+			if (this.pawn.IsMutant && this.pawn.mutant.Def.disableTitles)
+			{
+				return;
+			}
+			bool flag = false;
+			StringBuilder stringBuilder = new StringBuilder();
+			try
+			{
+				stringBuilder.AppendLine("LetterTitleInheritance_Base".Translate(this.pawn.Named("PAWN")));
+				stringBuilder.AppendLine();
+				foreach (RoyalTitle royalTitle in this.AllTitlesForReading)
 				{
-					yield return bedroomRequirement.LabelCap(bedroom);
+					if (royalTitle.def.canBeInherited)
+					{
+						if (this.pawn.IsFreeColonist && !this.pawn.IsQuestLodger())
+						{
+							flag = true;
+						}
+						RoyalTitleInheritanceOutcome outcome;
+						if (royalTitle.def.TryInherit(this.pawn, royalTitle.faction, out outcome))
+						{
+							if (outcome.HeirHasTitle && !outcome.heirTitleHigher)
+							{
+								stringBuilder.AppendLineTagged("LetterTitleInheritance_AsReplacement".Translate(this.pawn.Named("PAWN"), royalTitle.faction.Named("FACTION"), outcome.heir.Named("HEIR"), royalTitle.def.GetLabelFor(this.pawn).Named("TITLE"), outcome.heirCurrentTitle.GetLabelFor(outcome.heir).Named("REPLACEDTITLE")).CapitalizeFirst());
+								stringBuilder.AppendLine();
+							}
+							else if (outcome.heirTitleHigher)
+							{
+								stringBuilder.AppendLineTagged("LetterTitleInheritance_NoEffectHigherTitle".Translate(this.pawn.Named("PAWN"), royalTitle.faction.Named("FACTION"), outcome.heir.Named("HEIR"), royalTitle.def.GetLabelFor(this.pawn).Named("TITLE"), outcome.heirCurrentTitle.GetLabelFor(outcome.heir).Named("HIGHERTITLE")).CapitalizeFirst());
+								stringBuilder.AppendLine();
+							}
+							else
+							{
+								stringBuilder.AppendLineTagged("LetterTitleInheritance_WasInherited".Translate(this.pawn.Named("PAWN"), royalTitle.faction.Named("FACTION"), outcome.heir.Named("HEIR"), royalTitle.def.GetLabelFor(this.pawn).Named("TITLE")).CapitalizeFirst());
+								stringBuilder.AppendLine();
+							}
+							if (!outcome.heirTitleHigher)
+							{
+								RoyalTitle titleLocal = royalTitle;
+								Pawn_RoyaltyTracker.tmpInheritedTitles.Add(delegate
+								{
+									int num = titleLocal.def.favorCost;
+									RoyalTitleDef previousTitle_IncludeNonRewardable = titleLocal.def.GetPreviousTitle_IncludeNonRewardable(titleLocal.faction);
+									int num2 = 1000;
+									while (previousTitle_IncludeNonRewardable != null)
+									{
+										num += previousTitle_IncludeNonRewardable.favorCost;
+										previousTitle_IncludeNonRewardable = previousTitle_IncludeNonRewardable.GetPreviousTitle_IncludeNonRewardable(titleLocal.faction);
+										num2--;
+										if (num2 <= 0)
+										{
+											Log.ErrorOnce("Iterations limit exceeded while getting favor for inheritance.", 91727191);
+											break;
+										}
+									}
+									outcome.heir.royalty.GainFavor(titleLocal.faction, num);
+									titleLocal.wasInherited = true;
+								});
+								if (outcome.heir.IsFreeColonist && !outcome.heir.IsQuestLodger())
+								{
+									flag = true;
+								}
+							}
+						}
+						else
+						{
+							stringBuilder.AppendLineTagged("LetterTitleInheritance_NoHeirFound".Translate(this.pawn.Named("PAWN"), royalTitle.def.GetLabelFor(this.pawn).Named("TITLE"), royalTitle.faction.Named("FACTION")).CapitalizeFirst());
+						}
+					}
+				}
+				if (stringBuilder.Length > 0 && flag)
+				{
+					Find.LetterStack.ReceiveLetter("LetterTitleInheritance".Translate(), stringBuilder.ToString().TrimEndNewlines(), LetterDefOf.PositiveEvent, null, 0, true);
+				}
+				foreach (Action action in Pawn_RoyaltyTracker.tmpInheritedTitles)
+				{
+					action();
 				}
 			}
+			finally
+			{
+				Pawn_RoyaltyTracker.tmpInheritedTitles.Clear();
+			}
 		}
-	}
 
-	public bool AnyUnmetBedroomRequirements()
-	{
-		RoyalTitle royalTitle = HighestTitleWithBedroomRequirements();
-		if (royalTitle == null)
+		// Token: 0x0600CDD6 RID: 52694 RVA: 0x003C7080 File Offset: 0x003C5280
+		public void Notify_Resurrected()
 		{
-			return false;
+			foreach (Faction faction in (from t in this.titles
+			select t.faction).Distinct<Faction>().ToList<Faction>())
+			{
+				int index = this.FindFactionTitleIndex(faction, false);
+				if (this.titles[index].wasInherited)
+				{
+					List<FactionPermit> list = this.PermitsFromFaction(faction);
+					for (int i = 0; i < list.Count; i++)
+					{
+						if (list[i].Title == this.titles[index].def)
+						{
+							this.factionPermits.Remove(list[i]);
+						}
+					}
+					this.SetTitle(faction, null, false, false, false);
+				}
+			}
+			this.UpdateAvailableAbilities();
 		}
-		if (!HasPersonalBedroom())
+
+		// Token: 0x0600CDD7 RID: 52695 RVA: 0x003C7180 File Offset: 0x003C5380
+		public Gizmo RoyalAidGizmo()
 		{
-			return false;
+			Command_Action command_Action = new Command_Action();
+			command_Action.defaultLabel = "CommandCallRoyalAid".Translate();
+			command_Action.defaultDesc = "CommandCallRoyalAidDesc".Translate();
+			command_Action.icon = Pawn_RoyaltyTracker.CommandTex;
+			if (Find.Selector.NumSelected > 1)
+			{
+				Command_Action command_Action2 = command_Action;
+				command_Action2.defaultLabel = command_Action2.defaultLabel + " (" + this.pawn.LabelShort + ")";
+			}
+			if (this.pawn.Spawned && this.pawn.Map.weatherManager.CurWeatherMaxRangeCap >= 0f)
+			{
+				command_Action.defaultDescPostfix = "\n\n" + ("WeatherMaxRangeCap".Translate() + ": " + this.pawn.Map.weatherManager.curWeather.LabelCap).Colorize(ColoredText.WarningColor);
+			}
+			if (this.pawn.Downed)
+			{
+				command_Action.Disable("CommandDisabledUnconscious".TranslateWithBackup("CommandCallRoyalAidUnconscious").Formatted(this.pawn));
+			}
+			if (this.pawn.IsSlave)
+			{
+				command_Action.Disable("CommandCallRoyalAidSlave".Translate());
+			}
+			if (this.pawn.IsQuestLodger())
+			{
+				command_Action.Disable("CommandCallRoyalAidLodger".Translate());
+			}
+			Map mapHeld = this.pawn.MapHeld;
+			if (mapHeld != null && mapHeld.IsPocketMap && mapHeld.generatorDef.disableCallAid)
+			{
+				command_Action.Disable("CommandCallRoyalAidInvalidMap".Translate());
+			}
+			command_Action.action = delegate()
+			{
+				List<FloatMenuOption> list = new List<FloatMenuOption>();
+				foreach (FactionPermit factionPermit in this.factionPermits)
+				{
+					IEnumerable<FloatMenuOption> royalAidOptions = factionPermit.Permit.Worker.GetRoyalAidOptions(this.pawn.MapHeld, this.pawn, factionPermit.Faction);
+					if (royalAidOptions != null)
+					{
+						list.AddRange(royalAidOptions);
+					}
+				}
+				Find.WindowStack.Add(new FloatMenu(list));
+			};
+			return command_Action;
 		}
-		Room ownedRoom = pawn.ownership.OwnedRoom;
-		foreach (RoomRequirement bedroomRequirement in royalTitle.def.GetBedroomRequirements(pawn))
+
+		// Token: 0x0600CDD8 RID: 52696 RVA: 0x003C733D File Offset: 0x003C553D
+		public bool CanRequireThroneroom()
 		{
-			if (!bedroomRequirement.MetOrDisabled(ownedRoom, pawn))
+			return this.pawn.IsFreeColonist && this.allowRoomRequirements && !this.pawn.IsQuestLodger();
+		}
+
+		// Token: 0x0600CDD9 RID: 52697 RVA: 0x003C7364 File Offset: 0x003C5564
+		public RoyalTitle HighestTitleWithThroneRoomRequirements()
+		{
+			if (!this.CanRequireThroneroom())
+			{
+				return null;
+			}
+			RoyalTitle royalTitle = null;
+			List<RoyalTitle> allTitlesInEffectForReading = this.AllTitlesInEffectForReading;
+			for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+			{
+				if (!allTitlesInEffectForReading[i].def.throneRoomRequirements.EnumerableNullOrEmpty<RoomRequirement>() && (royalTitle == null || allTitlesInEffectForReading[i].def.seniority > royalTitle.def.seniority))
+				{
+					royalTitle = allTitlesInEffectForReading[i];
+				}
+			}
+			return royalTitle;
+		}
+
+		// Token: 0x0600CDDA RID: 52698 RVA: 0x003C73D7 File Offset: 0x003C55D7
+		public IEnumerable<string> GetUnmetThroneroomRequirements(bool includeOnGracePeriod = true, bool onlyOnGracePeriod = false)
+		{
+			Building_Throne assignedThrone = this.pawn.ownership.AssignedThrone;
+			if (assignedThrone == null || !assignedThrone.SpawnedOrAnyParentSpawned)
+			{
+				yield break;
+			}
+			if (GenTicks.TicksGame - assignedThrone.MapHeld.generationTick < 10)
+			{
+				yield break;
+			}
+			RoyalTitle royalTitle = this.HighestTitleWithThroneRoomRequirements();
+			if (royalTitle == null)
+			{
+				yield break;
+			}
+			Room throneRoom = assignedThrone.GetRoom(RegionType.Set_All);
+			if (throneRoom == null)
+			{
+				yield break;
+			}
+			bool roomValid = RoomRoleWorker_ThroneRoom.Validate(throneRoom) == null;
+			bool gracePeriodActive = royalTitle.RoomRequirementGracePeriodActive(this.pawn);
+			RoyalTitleDef prevTitle = royalTitle.def.GetPreviousTitle(royalTitle.faction);
+			foreach (RoomRequirement roomRequirement in royalTitle.def.throneRoomRequirements)
+			{
+				if (!roomValid || !roomRequirement.MetOrDisabled(throneRoom, this.pawn))
+				{
+					bool flag = (prevTitle != null && !prevTitle.HasSameThroneroomRequirement(roomRequirement)) || MoveColonyUtility.TitleAndRoleRequirementsGracePeriodActive;
+					if ((!onlyOnGracePeriod || (flag && gracePeriodActive)) && (!gracePeriodActive || !flag || includeOnGracePeriod))
+					{
+						yield return roomRequirement.LabelCap(throneRoom);
+					}
+				}
+			}
+			List<RoomRequirement>.Enumerator enumerator = default(List<RoomRequirement>.Enumerator);
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x0600CDDB RID: 52699 RVA: 0x003C73F8 File Offset: 0x003C55F8
+		public bool AnyUnmetThroneroomRequirements()
+		{
+			if (this.pawn.ownership.AssignedThrone == null)
+			{
+				return false;
+			}
+			RoyalTitle royalTitle = this.HighestTitleWithThroneRoomRequirements();
+			if (royalTitle == null)
+			{
+				return false;
+			}
+			Room room = this.pawn.ownership.AssignedThrone.GetRoom(RegionType.Set_All);
+			if (room == null)
+			{
+				return false;
+			}
+			if (RoomRoleWorker_ThroneRoom.Validate(room) != null)
 			{
 				return true;
 			}
-		}
-		return false;
-	}
-
-	public bool HasPersonalBedroom()
-	{
-		Building_Bed ownedBed = pawn.ownership.OwnedBed;
-		if (ownedBed == null)
-		{
-			return false;
-		}
-		Room ownedRoom = pawn.ownership.OwnedRoom;
-		if (ownedRoom == null)
-		{
-			return false;
-		}
-		foreach (Building_Bed containedBed in ownedRoom.ContainedBeds)
-		{
-			if (containedBed != ownedBed)
+			using (List<RoomRequirement>.Enumerator enumerator = royalTitle.def.throneRoomRequirements.GetEnumerator())
 			{
-				List<Pawn> loveCluster = pawn.GetLoveCluster();
-				if (containedBed.OwnersForReading.Any((Pawn p) => p != pawn && !p.RaceProps.Animal && !loveCluster.Contains(p)))
+				while (enumerator.MoveNext())
 				{
-					return false;
+					if (!enumerator.Current.MetOrDisabled(room, this.pawn))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x0600CDDC RID: 52700 RVA: 0x003C74A4 File Offset: 0x003C56A4
+		public bool CanRequireBedroom()
+		{
+			return this.allowRoomRequirements && !this.pawn.IsPrisoner;
+		}
+
+		// Token: 0x0600CDDD RID: 52701 RVA: 0x003C74C0 File Offset: 0x003C56C0
+		public RoyalTitle HighestTitleWithBedroomRequirements()
+		{
+			if (!this.CanRequireBedroom())
+			{
+				return null;
+			}
+			RoyalTitle royalTitle = null;
+			List<RoyalTitle> allTitlesInEffectForReading = this.AllTitlesInEffectForReading;
+			for (int i = 0; i < allTitlesInEffectForReading.Count; i++)
+			{
+				if (!allTitlesInEffectForReading[i].def.GetBedroomRequirements(this.pawn).EnumerableNullOrEmpty<RoomRequirement>() && (royalTitle == null || allTitlesInEffectForReading[i].def.seniority > royalTitle.def.seniority))
+				{
+					royalTitle = allTitlesInEffectForReading[i];
+				}
+			}
+			return royalTitle;
+		}
+
+		// Token: 0x0600CDDE RID: 52702 RVA: 0x003C753C File Offset: 0x003C573C
+		public void UpdateAvailableAbilities()
+		{
+			this.abilities.RemoveAll(delegate(Ability a)
+			{
+				for (int k = 0; k < this.AllTitlesInEffectForReading.Count; k++)
+				{
+					if (this.AllTitlesInEffectForReading[k].def.grantedAbilities.Contains(a.def))
+					{
+						return false;
+					}
+				}
+				return true;
+			});
+			for (int i = 0; i < this.AllTitlesInEffectForReading.Count; i++)
+			{
+				RoyalTitle royalTitle = this.AllTitlesInEffectForReading[i];
+				for (int j = 0; j < royalTitle.def.grantedAbilities.Count; j++)
+				{
+					AbilityDef def = royalTitle.def.grantedAbilities[j];
+					if (!this.abilities.Any((Ability a) => a.def == def))
+					{
+						this.abilities.Add(AbilityUtility.MakeAbility(royalTitle.def.grantedAbilities[j], this.pawn));
+					}
 				}
 			}
 		}
-		return true;
-	}
 
-	public void ExposeData()
-	{
-		Scribe_Collections.Look(ref titles, "titles", LookMode.Deep);
-		Scribe_Collections.Look(ref favor, "favor", LookMode.Reference, LookMode.Value, ref tmpFavorFactions, ref tmpAmounts);
-		Scribe_Values.Look(ref lastDecreeTicks, "lastDecreeTicks", -999999);
-		Scribe_Collections.Look(ref highestTitles, "highestTitles", LookMode.Reference, LookMode.Def, ref tmpHighestTitleFactions, ref tmpTitleDefs);
-		Scribe_Collections.Look(ref heirs, "heirs", LookMode.Reference, LookMode.Reference, ref tmpHeirFactions, ref tmpPawns);
-		Scribe_Values.Look(ref allowRoomRequirements, "allowRoomRequirements", defaultValue: true);
-		Scribe_Values.Look(ref allowApparelRequirements, "allowApparelRequirements", defaultValue: true);
-		Scribe_Collections.Look(ref factionPermits, "permits", LookMode.Deep);
-		Scribe_Collections.Look(ref abilities, "abilities", LookMode.Deep, pawn);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x0600CDDF RID: 52703 RVA: 0x003C7602 File Offset: 0x003C5802
+		public IEnumerable<string> GetUnmetBedroomRequirements(bool includeOnGracePeriod = true, bool onlyOnGracePeriod = false)
 		{
-			if (titles.RemoveAll((RoyalTitle x) => x.def == null) != 0)
+			RoyalTitle royalTitle = this.HighestTitleWithBedroomRequirements();
+			if (royalTitle == null)
 			{
-				Log.Error("Some RoyalTitles had null defs after loading.");
+				yield break;
 			}
-			foreach (RoyalTitle title in titles)
+			bool gracePeriodActive = royalTitle.RoomRequirementGracePeriodActive(this.pawn);
+			RoyalTitleDef prevTitle = royalTitle.def.GetPreviousTitle(royalTitle.faction);
+			if (!this.HasPersonalBedroom())
 			{
-				title.pawn = pawn;
+				yield break;
 			}
-			if (heirs == null)
+			Room bedroom = this.pawn.ownership.OwnedRoom;
+			foreach (RoomRequirement roomRequirement in royalTitle.def.GetBedroomRequirements(this.pawn))
 			{
-				heirs = new Dictionary<Faction, Pawn>();
+				if (!roomRequirement.MetOrDisabled(bedroom, this.pawn))
+				{
+					bool flag = (prevTitle != null && !prevTitle.HasSameBedroomRequirement(roomRequirement)) || MoveColonyUtility.TitleAndRoleRequirementsGracePeriodActive;
+					if ((!onlyOnGracePeriod || (flag && gracePeriodActive)) && (!gracePeriodActive || !flag || includeOnGracePeriod))
+					{
+						yield return roomRequirement.LabelCap(bedroom);
+					}
+				}
 			}
-			if (factionPermits == null)
-			{
-				factionPermits = new List<FactionPermit>();
-			}
-			if (factionPermits.RemoveAll((FactionPermit x) => DefDatabase<RoyalTitlePermitDef>.AllDefs.Any((RoyalTitlePermitDef y) => y.prerequisite == x.Permit && HasPermit(y, x.Faction) && HasPermit(y.prerequisite, x.Faction))) != 0)
-			{
-				Log.Error("Removed some null permits.");
-			}
-			foreach (RoyalTitle title2 in titles)
-			{
-				AssignHeirIfNone(title2.def, title2.faction);
-			}
-			if (abilities == null)
-			{
-				abilities = new List<Ability>();
-			}
-			UpdateAvailableAbilities();
+			IEnumerator<RoomRequirement> enumerator = null;
+			yield break;
+			yield break;
 		}
-		BackCompatibility.PostExposeData(this);
+
+		// Token: 0x0600CDE0 RID: 52704 RVA: 0x003C7620 File Offset: 0x003C5820
+		public bool AnyUnmetBedroomRequirements()
+		{
+			RoyalTitle royalTitle = this.HighestTitleWithBedroomRequirements();
+			if (royalTitle == null)
+			{
+				return false;
+			}
+			if (!this.HasPersonalBedroom())
+			{
+				return false;
+			}
+			Room ownedRoom = this.pawn.ownership.OwnedRoom;
+			using (IEnumerator<RoomRequirement> enumerator = royalTitle.def.GetBedroomRequirements(this.pawn).GetEnumerator())
+			{
+				while (enumerator.MoveNext())
+				{
+					if (!enumerator.Current.MetOrDisabled(ownedRoom, this.pawn))
+					{
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+
+		// Token: 0x0600CDE1 RID: 52705 RVA: 0x003C76AC File Offset: 0x003C58AC
+		public bool HasPersonalBedroom()
+		{
+			Building_Bed ownedBed = this.pawn.ownership.OwnedBed;
+			if (ownedBed == null)
+			{
+				return false;
+			}
+			Room ownedRoom = this.pawn.ownership.OwnedRoom;
+			if (ownedRoom == null)
+			{
+				return false;
+			}
+			foreach (Building_Bed building_Bed in ownedRoom.ContainedBeds)
+			{
+				if (building_Bed != ownedBed)
+				{
+					List<Pawn> loveCluster = this.pawn.GetLoveCluster();
+					if (building_Bed.OwnersForReading.Any((Pawn p) => p != this.pawn && !p.RaceProps.Animal && !loveCluster.Contains(p)))
+					{
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x0600CDE2 RID: 52706 RVA: 0x003C7768 File Offset: 0x003C5968
+		public void ExposeData()
+		{
+			Scribe_Collections.Look<RoyalTitle>(ref this.titles, "titles", LookMode.Deep, Array.Empty<object>());
+			Scribe_Collections.Look<Faction, int>(ref this.favor, "favor", LookMode.Reference, LookMode.Value, ref this.tmpFavorFactions, ref this.tmpAmounts, true, false, false);
+			Scribe_Values.Look<int>(ref this.lastDecreeTicks, "lastDecreeTicks", -999999, false);
+			Scribe_Collections.Look<Faction, RoyalTitleDef>(ref this.highestTitles, "highestTitles", LookMode.Reference, LookMode.Def, ref this.tmpHighestTitleFactions, ref this.tmpTitleDefs, true, false, false);
+			Scribe_Collections.Look<Faction, Pawn>(ref this.heirs, "heirs", LookMode.Reference, LookMode.Reference, ref this.tmpHeirFactions, ref this.tmpPawns, true, false, false);
+			Scribe_Values.Look<bool>(ref this.allowRoomRequirements, "allowRoomRequirements", true, false);
+			Scribe_Values.Look<bool>(ref this.allowApparelRequirements, "allowApparelRequirements", true, false);
+			Scribe_Collections.Look<FactionPermit>(ref this.factionPermits, "permits", LookMode.Deep, Array.Empty<object>());
+			Scribe_Collections.Look<Ability>(ref this.abilities, "abilities", LookMode.Deep, new object[]
+			{
+				this.pawn
+			});
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				if (this.titles.RemoveAll((RoyalTitle x) => x.def == null) != 0)
+				{
+					Log.Error("Some RoyalTitles had null defs after loading.");
+				}
+				foreach (RoyalTitle royalTitle in this.titles)
+				{
+					royalTitle.pawn = this.pawn;
+				}
+				if (this.heirs == null)
+				{
+					this.heirs = new Dictionary<Faction, Pawn>();
+				}
+				if (this.factionPermits == null)
+				{
+					this.factionPermits = new List<FactionPermit>();
+				}
+				if (this.factionPermits.RemoveAll((FactionPermit x) => DefDatabase<RoyalTitlePermitDef>.AllDefs.Any((RoyalTitlePermitDef y) => y.prerequisite == x.Permit && this.HasPermit(y, x.Faction) && this.HasPermit(y.prerequisite, x.Faction))) != 0)
+				{
+					Log.Error("Removed some null permits.");
+				}
+				foreach (RoyalTitle royalTitle2 in this.titles)
+				{
+					this.AssignHeirIfNone(royalTitle2.def, royalTitle2.faction);
+				}
+				if (this.abilities == null)
+				{
+					this.abilities = new List<Ability>();
+				}
+				this.UpdateAvailableAbilities();
+			}
+			BackCompatibility.PostExposeData(this);
+		}
+
+		// Token: 0x04008BFF RID: 35839
+		public Pawn pawn;
+
+		// Token: 0x04008C00 RID: 35840
+		private List<RoyalTitle> titles = new List<RoyalTitle>();
+
+		// Token: 0x04008C01 RID: 35841
+		private Dictionary<Faction, int> favor = new Dictionary<Faction, int>();
+
+		// Token: 0x04008C02 RID: 35842
+		private Dictionary<Faction, RoyalTitleDef> highestTitles = new Dictionary<Faction, RoyalTitleDef>();
+
+		// Token: 0x04008C03 RID: 35843
+		private Dictionary<Faction, Pawn> heirs = new Dictionary<Faction, Pawn>();
+
+		// Token: 0x04008C04 RID: 35844
+		private List<FactionPermit> factionPermits = new List<FactionPermit>();
+
+		// Token: 0x04008C05 RID: 35845
+		private List<Ability> abilities = new List<Ability>();
+
+		// Token: 0x04008C06 RID: 35846
+		public int lastDecreeTicks = -999999;
+
+		// Token: 0x04008C07 RID: 35847
+		public bool allowRoomRequirements = true;
+
+		// Token: 0x04008C08 RID: 35848
+		public bool allowApparelRequirements = true;
+
+		// Token: 0x04008C09 RID: 35849
+		private static List<RoyalTitle> EmptyTitles = new List<RoyalTitle>();
+
+		// Token: 0x04008C0A RID: 35850
+		private const int BestowingCeremonyCheckInterval = 37500;
+
+		// Token: 0x04008C0B RID: 35851
+		private List<string> tmpDecreeTags = new List<string>();
+
+		// Token: 0x04008C0C RID: 35852
+		private static List<FactionPermit> tmpPermits = new List<FactionPermit>();
+
+		// Token: 0x04008C0D RID: 35853
+		private List<Faction> factionHeirsToClearTmp = new List<Faction>();
+
+		// Token: 0x04008C0E RID: 35854
+		private static List<Action> tmpInheritedTitles = new List<Action>();
+
+		// Token: 0x04008C0F RID: 35855
+		public static readonly Texture2D CommandTex = ContentFinder<Texture2D>.Get("UI/Commands/CallAid", true);
+
+		// Token: 0x04008C10 RID: 35856
+		private List<Faction> tmpFavorFactions;
+
+		// Token: 0x04008C11 RID: 35857
+		private List<Faction> tmpHighestTitleFactions;
+
+		// Token: 0x04008C12 RID: 35858
+		private List<Faction> tmpHeirFactions;
+
+		// Token: 0x04008C13 RID: 35859
+		private List<int> tmpAmounts;
+
+		// Token: 0x04008C14 RID: 35860
+		private List<Pawn> tmpPawns;
+
+		// Token: 0x04008C15 RID: 35861
+		private List<RoyalTitleDef> tmpTitleDefs;
 	}
 }

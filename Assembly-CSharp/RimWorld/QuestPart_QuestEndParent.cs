@@ -1,21 +1,27 @@
-namespace RimWorld;
+﻿using System;
 
-public class QuestPart_QuestEndParent : QuestPart_QuestEnd
+namespace RimWorld
 {
-	public override void Notify_QuestSignalReceived(Signal signal)
+	// Token: 0x02001B94 RID: 7060
+	public class QuestPart_QuestEndParent : QuestPart_QuestEnd
 	{
-		if (!(signal.tag != inSignal))
+		// Token: 0x06009D93 RID: 40339 RVA: 0x002DAAC0 File Offset: 0x002D8CC0
+		public override void Notify_QuestSignalReceived(Signal signal)
 		{
-			QuestEndOutcome arg;
-			if (outcome.HasValue)
+			if (signal.tag != this.inSignal)
 			{
-				arg = outcome.Value;
+				return;
 			}
-			else if (!signal.args.TryGetArg("OUTCOME", out arg))
+			QuestEndOutcome outcome;
+			if (this.outcome != null)
 			{
-				arg = QuestEndOutcome.Unknown;
+				outcome = this.outcome.Value;
 			}
-			quest.parent.End(arg, sendLetter, playSound);
+			else if (!signal.args.TryGetArg<QuestEndOutcome>("OUTCOME", out outcome))
+			{
+				outcome = QuestEndOutcome.Unknown;
+			}
+			this.quest.parent.End(outcome, this.sendLetter, this.playSound);
 		}
 	}
 }

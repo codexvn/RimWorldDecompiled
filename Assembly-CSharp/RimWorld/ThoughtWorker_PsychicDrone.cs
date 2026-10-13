@@ -1,60 +1,70 @@
-using System;
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_PsychicDrone : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x0200189A RID: 6298
+	public class ThoughtWorker_PsychicDrone : ThoughtWorker
 	{
-		PsychicDroneLevel psychicDroneLevel = PsychicDroneLevel.None;
-		Map mapHeld = p.MapHeld;
-		if (mapHeld != null)
+		// Token: 0x06009025 RID: 36901 RVA: 0x002A8384 File Offset: 0x002A6584
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			PsychicDroneLevel highestPsychicDroneLevelFor = mapHeld.gameConditionManager.GetHighestPsychicDroneLevelFor(p.gender, mapHeld);
-			if ((int)highestPsychicDroneLevelFor > (int)psychicDroneLevel)
+			PsychicDroneLevel psychicDroneLevel = PsychicDroneLevel.None;
+			Map mapHeld = p.MapHeld;
+			if (mapHeld != null)
 			{
-				psychicDroneLevel = highestPsychicDroneLevelFor;
-			}
-		}
-		else if (p.IsCaravanMember())
-		{
-			foreach (Site site in Find.World.worldObjects.Sites)
-			{
-				foreach (SitePart part in site.parts)
+				PsychicDroneLevel highestPsychicDroneLevelFor = mapHeld.gameConditionManager.GetHighestPsychicDroneLevelFor(p.gender, mapHeld);
+				if (highestPsychicDroneLevelFor > psychicDroneLevel)
 				{
-					if (!part.conditionCauser.DestroyedOrNull() && part.def.Worker is SitePartWorker_ConditionCauser_PsychicDroner)
+					psychicDroneLevel = highestPsychicDroneLevelFor;
+				}
+			}
+			else if (p.IsCaravanMember())
+			{
+				foreach (Site site in Find.World.worldObjects.Sites)
+				{
+					foreach (SitePart sitePart in site.parts)
 					{
-						CompCauseGameCondition_PsychicEmanation compCauseGameCondition_PsychicEmanation = part.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicEmanation>();
-						if (compCauseGameCondition_PsychicEmanation.ConditionDef.conditionClass == typeof(GameCondition_PsychicEmanation) && compCauseGameCondition_PsychicEmanation.InAoE(p.GetCaravan().Tile) && compCauseGameCondition_PsychicEmanation.gender == p.gender && (int)compCauseGameCondition_PsychicEmanation.Level > (int)psychicDroneLevel)
+						if (!sitePart.conditionCauser.DestroyedOrNull() && sitePart.def.Worker is SitePartWorker_ConditionCauser_PsychicDroner)
 						{
-							psychicDroneLevel = compCauseGameCondition_PsychicEmanation.Level;
+							CompCauseGameCondition_PsychicEmanation compCauseGameCondition_PsychicEmanation = sitePart.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicEmanation>();
+							if (compCauseGameCondition_PsychicEmanation.ConditionDef.conditionClass == typeof(GameCondition_PsychicEmanation) && compCauseGameCondition_PsychicEmanation.InAoE(p.GetCaravan().Tile) && compCauseGameCondition_PsychicEmanation.gender == p.gender && compCauseGameCondition_PsychicEmanation.Level > psychicDroneLevel)
+							{
+								psychicDroneLevel = compCauseGameCondition_PsychicEmanation.Level;
+							}
+						}
+					}
+				}
+				foreach (Map map in Find.Maps)
+				{
+					foreach (GameCondition gameCondition in map.gameConditionManager.ActiveConditions)
+					{
+						CompCauseGameCondition_PsychicEmanation compCauseGameCondition_PsychicEmanation2 = gameCondition.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicEmanation>();
+						if (compCauseGameCondition_PsychicEmanation2 != null && compCauseGameCondition_PsychicEmanation2.InAoE(p.GetCaravan().Tile) && compCauseGameCondition_PsychicEmanation2.gender == p.gender && compCauseGameCondition_PsychicEmanation2.Level > psychicDroneLevel)
+						{
+							psychicDroneLevel = compCauseGameCondition_PsychicEmanation2.Level;
 						}
 					}
 				}
 			}
-			foreach (Map map in Find.Maps)
+			switch (psychicDroneLevel)
 			{
-				foreach (GameCondition activeCondition in map.gameConditionManager.ActiveConditions)
-				{
-					CompCauseGameCondition_PsychicEmanation compCauseGameCondition_PsychicEmanation2 = activeCondition.conditionCauser.TryGetComp<CompCauseGameCondition_PsychicEmanation>();
-					if (compCauseGameCondition_PsychicEmanation2 != null && compCauseGameCondition_PsychicEmanation2.InAoE(p.GetCaravan().Tile) && compCauseGameCondition_PsychicEmanation2.gender == p.gender && (int)compCauseGameCondition_PsychicEmanation2.Level > (int)psychicDroneLevel)
-					{
-						psychicDroneLevel = compCauseGameCondition_PsychicEmanation2.Level;
-					}
-				}
+			case PsychicDroneLevel.None:
+				return false;
+			case PsychicDroneLevel.GoodMedium:
+				return ThoughtState.ActiveAtStage(0);
+			case PsychicDroneLevel.BadLow:
+				return ThoughtState.ActiveAtStage(1);
+			case PsychicDroneLevel.BadMedium:
+				return ThoughtState.ActiveAtStage(2);
+			case PsychicDroneLevel.BadHigh:
+				return ThoughtState.ActiveAtStage(3);
+			case PsychicDroneLevel.BadExtreme:
+				return ThoughtState.ActiveAtStage(4);
+			default:
+				throw new NotImplementedException();
 			}
 		}
-		return psychicDroneLevel switch
-		{
-			PsychicDroneLevel.None => false, 
-			PsychicDroneLevel.GoodMedium => ThoughtState.ActiveAtStage(0), 
-			PsychicDroneLevel.BadLow => ThoughtState.ActiveAtStage(1), 
-			PsychicDroneLevel.BadMedium => ThoughtState.ActiveAtStage(2), 
-			PsychicDroneLevel.BadHigh => ThoughtState.ActiveAtStage(3), 
-			PsychicDroneLevel.BadExtreme => ThoughtState.ActiveAtStage(4), 
-			_ => throw new NotImplementedException(), 
-		};
 	}
 }

@@ -1,43 +1,51 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_Biostarvation : Alert
+namespace RimWorld
 {
-	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
-
-	public List<GlobalTargetInfo> Targets
+	// Token: 0x02003005 RID: 12293
+	public class Alert_Biostarvation : Alert
 	{
-		get
+		// Token: 0x17002CD8 RID: 11480
+		// (get) Token: 0x060114DB RID: 70875 RVA: 0x004F5E84 File Offset: 0x004F4084
+		public List<GlobalTargetInfo> Targets
 		{
-			targets.Clear();
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
+			get
 			{
-				foreach (Building_GrowthVat item in maps[i].listerBuildings.AllBuildingsColonistOfClass<Building_GrowthVat>())
+				this.targets.Clear();
+				List<Map> maps = Find.Maps;
+				for (int i = 0; i < maps.Count; i++)
 				{
-					if (item.Working && item.BiostarvationDailyOffset > 0f)
+					foreach (Building_GrowthVat building_GrowthVat in maps[i].listerBuildings.AllBuildingsColonistOfClass<Building_GrowthVat>())
 					{
-						targets.Add(item);
+						if (building_GrowthVat.Working && building_GrowthVat.BiostarvationDailyOffset > 0f)
+						{
+							this.targets.Add(building_GrowthVat);
+						}
 					}
 				}
+				return this.targets;
 			}
-			return targets;
 		}
-	}
 
-	public Alert_Biostarvation()
-	{
-		defaultLabel = "Biostarvation".Translate().CapitalizeFirst();
-		defaultExplanation = "BiostarvationExplanation".Translate();
-		defaultPriority = AlertPriority.High;
-		requireBiotech = true;
-	}
+		// Token: 0x060114DC RID: 70876 RVA: 0x004F5F24 File Offset: 0x004F4124
+		public Alert_Biostarvation()
+		{
+			this.defaultLabel = "Biostarvation".Translate().CapitalizeFirst();
+			this.defaultExplanation = "BiostarvationExplanation".Translate();
+			this.defaultPriority = AlertPriority.High;
+			this.requireBiotech = true;
+		}
 
-	public override AlertReport GetReport()
-	{
-		return AlertReport.CulpritsAre(Targets);
+		// Token: 0x060114DD RID: 70877 RVA: 0x004F5F82 File Offset: 0x004F4182
+		public override AlertReport GetReport()
+		{
+			return AlertReport.CulpritsAre(this.Targets);
+		}
+
+		// Token: 0x0400B359 RID: 45913
+		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
 	}
 }

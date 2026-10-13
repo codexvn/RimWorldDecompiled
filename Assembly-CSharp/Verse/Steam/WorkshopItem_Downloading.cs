@@ -1,5 +1,9 @@
-namespace Verse.Steam;
+﻿using System;
 
-public class WorkshopItem_Downloading : WorkshopItem
+namespace Verse.Steam
 {
+	// Token: 0x02000D90 RID: 3472
+	public class WorkshopItem_Downloading : WorkshopItem
+	{
+	}
 }

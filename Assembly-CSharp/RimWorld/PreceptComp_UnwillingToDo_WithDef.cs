@@ -1,43 +1,52 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class PreceptComp_UnwillingToDo_WithDef : PreceptComp_UnwillingToDo
+namespace RimWorld
 {
-	public ThingDef buildingDef;
-
-	public override bool MemberWillingToDo(HistoryEvent ev)
+	// Token: 0x02002648 RID: 9800
+	public class PreceptComp_UnwillingToDo_WithDef : PreceptComp_UnwillingToDo
 	{
-		if (eventDef != null && ev.def != eventDef)
+		// Token: 0x0600D6B4 RID: 54964 RVA: 0x003FAEB4 File Offset: 0x003F90B4
+		public override bool MemberWillingToDo(HistoryEvent ev)
 		{
-			return true;
-		}
-		ev.args.TryGetArg(HistoryEventArgsNames.Doer, out Pawn arg);
-		ev.args.TryGetArg(HistoryEventArgsNames.Building, out ThingDef arg2);
-		if (arg2 == null)
-		{
-			return true;
-		}
-		if (nullifyingTraits != null && arg != null && arg.story != null)
-		{
-			if (!preceptDef.enabledForNPCFactions && !arg.Faction.IsPlayer)
+			if (this.eventDef != null && ev.def != this.eventDef)
 			{
 				return true;
 			}
-			for (int i = 0; i < nullifyingTraits.Count; i++)
+			Pawn pawn;
+			ev.args.TryGetArg<Pawn>(HistoryEventArgsNames.Doer, out pawn);
+			ThingDef thingDef;
+			ev.args.TryGetArg<ThingDef>(HistoryEventArgsNames.Building, out thingDef);
+			if (thingDef == null)
 			{
-				if (nullifyingTraits[i].HasTrait(arg))
+				return true;
+			}
+			if (this.nullifyingTraits != null && pawn != null && pawn.story != null)
+			{
+				if (!this.preceptDef.enabledForNPCFactions && !pawn.Faction.IsPlayer)
 				{
 					return true;
 				}
+				for (int i = 0; i < this.nullifyingTraits.Count; i++)
+				{
+					if (this.nullifyingTraits[i].HasTrait(pawn))
+					{
+						return true;
+					}
+				}
 			}
+			return thingDef != this.buildingDef;
 		}
-		return arg2 != buildingDef;
-	}
 
-	public override IEnumerable<string> GetDescriptions()
-	{
-		yield return "UnwillingToDoIdeoAction".Translate() + ": " + "BuildThing".Translate(buildingDef);
+		// Token: 0x0600D6B5 RID: 54965 RVA: 0x003FAF6D File Offset: 0x003F916D
+		public override IEnumerable<string> GetDescriptions()
+		{
+			yield return "UnwillingToDoIdeoAction".Translate() + ": " + "BuildThing".Translate(this.buildingDef);
+			yield break;
+		}
+
+		// Token: 0x040091EB RID: 37355
+		public ThingDef buildingDef;
 	}
 }

@@ -1,18 +1,22 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse.AI.Group;
-
-public class TransitionAction_EndAllJobs : TransitionAction
+namespace Verse.AI.Group
 {
-	public override void DoAction(Transition trans)
+	// Token: 0x020010B2 RID: 4274
+	public class TransitionAction_EndAllJobs : TransitionAction
 	{
-		List<Pawn> ownedPawns = trans.target.lord.ownedPawns;
-		for (int i = 0; i < ownedPawns.Count; i++)
+		// Token: 0x060068DD RID: 26845 RVA: 0x00211D1C File Offset: 0x0020FF1C
+		public override void DoAction(Transition trans)
 		{
-			Pawn pawn = ownedPawns[i];
-			if (pawn.jobs != null && pawn.jobs.curJob != null)
+			List<Pawn> ownedPawns = trans.target.lord.ownedPawns;
+			for (int i = 0; i < ownedPawns.Count; i++)
 			{
-				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				Pawn pawn = ownedPawns[i];
+				if (pawn.jobs != null && pawn.jobs.curJob != null)
+				{
+					pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+				}
 			}
 		}
 	}

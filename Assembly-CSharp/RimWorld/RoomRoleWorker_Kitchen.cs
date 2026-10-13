@@ -1,62 +1,61 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomRoleWorker_Kitchen : RoomRoleWorker
+namespace RimWorld
 {
-	public override float GetScore(Room room)
+	// Token: 0x02002165 RID: 8549
+	public class RoomRoleWorker_Kitchen : RoomRoleWorker
 	{
-		int num = 0;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
+		// Token: 0x0600BABE RID: 47806 RVA: 0x0035E8B8 File Offset: 0x0035CAB8
+		public override float GetScore(Room room)
 		{
-			Thing thing = containedAndAdjacentThings[i];
-			if (thing.def.designationCategory != DesignationCategoryDefOf.Production)
+			int num = 0;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				continue;
-			}
-			for (int j = 0; j < thing.def.AllRecipes.Count; j++)
-			{
-				RecipeDef recipeDef = thing.def.AllRecipes[j];
-				int num2 = 0;
-				while (num2 < recipeDef.products.Count)
+				Thing thing = containedAndAdjacentThings[i];
+				if (thing.def.designationCategory == DesignationCategoryDefOf.Production)
 				{
-					ThingDef thingDef = recipeDef.products[num2].thingDef;
-					if (!thingDef.IsNutritionGivingIngestible || !thingDef.ingestible.HumanEdible)
+					for (int j = 0; j < thing.def.AllRecipes.Count; j++)
 					{
-						num2++;
-						continue;
+						RecipeDef recipeDef = thing.def.AllRecipes[j];
+						for (int k = 0; k < recipeDef.products.Count; k++)
+						{
+							ThingDef thingDef = recipeDef.products[k].thingDef;
+							if (thingDef.IsNutritionGivingIngestible && thingDef.ingestible.HumanEdible)
+							{
+								num++;
+								goto IL_AD;
+							}
+						}
 					}
-					goto IL_0077;
 				}
-				continue;
-				IL_0077:
-				num++;
-				break;
+				IL_AD:;
 			}
+			return (float)num * 28f;
 		}
-		return (float)num * 28f;
-	}
 
-	public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
-	{
-		if (buildingDef.designationCategory != DesignationCategoryDefOf.Production)
+		// Token: 0x0600BABF RID: 47807 RVA: 0x0035E98C File Offset: 0x0035CB8C
+		public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
 		{
+			if (buildingDef.designationCategory != DesignationCategoryDefOf.Production)
+			{
+				return 0f;
+			}
+			for (int i = 0; i < buildingDef.AllRecipes.Count; i++)
+			{
+				RecipeDef recipeDef = buildingDef.AllRecipes[i];
+				for (int j = 0; j < recipeDef.products.Count; j++)
+				{
+					ThingDef thingDef = recipeDef.products[j].thingDef;
+					if (thingDef.IsNutritionGivingIngestible && thingDef.ingestible.HumanEdible)
+					{
+						return 28f;
+					}
+				}
+			}
 			return 0f;
 		}
-		for (int i = 0; i < buildingDef.AllRecipes.Count; i++)
-		{
-			RecipeDef recipeDef = buildingDef.AllRecipes[i];
-			for (int j = 0; j < recipeDef.products.Count; j++)
-			{
-				ThingDef thingDef = recipeDef.products[j].thingDef;
-				if (thingDef.IsNutritionGivingIngestible && thingDef.ingestible.HumanEdible)
-				{
-					return 28f;
-				}
-			}
-		}
-		return 0f;
 	}
 }

@@ -1,213 +1,272 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualObligation : IExposable, ILoadReferenceable
+namespace RimWorld
 {
-	public Precept_Ritual precept;
-
-	private int triggeredTick;
-
-	public bool sendLetter = true;
-
-	public bool expires = true;
-
-	public TargetInfo targetA;
-
-	public TargetInfo targetB;
-
-	public TargetInfo targetC;
-
-	public List<Pawn> onlyForPawns;
-
-	public int ID;
-
-	public static readonly int[] StageDays = new int[2] { 3, 9 };
-
-	private StringBuilder sbTemp = new StringBuilder();
-
-	private List<string> unfilledRolesTemp = new List<string>();
-
-	public bool StillValid
+	// Token: 0x020026DE RID: 9950
+	public class RitualObligation : IExposable, ILoadReferenceable
 	{
-		get
+		// Token: 0x17002160 RID: 8544
+		// (get) Token: 0x0600DA0E RID: 55822 RVA: 0x00407FEB File Offset: 0x004061EB
+		public bool StillValid
 		{
-			if (expires)
+			get
 			{
-				return TicksUntilExpiration >= 0;
+				return !this.expires || this.TicksUntilExpiration >= 0;
 			}
-			return true;
 		}
-	}
 
-	public static int DaysToExpire => StageDays[StageDays.Length - 1];
-
-	public int ActiveForTicks => Find.TickManager.TicksGame - triggeredTick;
-
-	public int TicksUntilExpiration => triggeredTick + DaysToExpire * 60000 - Find.TickManager.TicksGame;
-
-	public TargetInfo FirstValidTarget
-	{
-		get
+		// Token: 0x17002161 RID: 8545
+		// (get) Token: 0x0600DA0F RID: 55823 RVA: 0x00408003 File Offset: 0x00406203
+		public static int DaysToExpire
 		{
-			if (targetA.IsValid)
+			get
 			{
-				return targetA;
+				return RitualObligation.StageDays[RitualObligation.StageDays.Length - 1];
 			}
-			if (targetB.IsValid)
-			{
-				return targetB;
-			}
-			if (targetC.IsValid)
-			{
-				return targetC;
-			}
-			return TargetInfo.Invalid;
 		}
-	}
 
-	public string LetterLabel
-	{
-		get
+		// Token: 0x17002162 RID: 8546
+		// (get) Token: 0x0600DA10 RID: 55824 RVA: 0x00408014 File Offset: 0x00406214
+		public int ActiveForTicks
 		{
-			string text = precept.obligationTargetFilter.LabelExtraPart(this);
-			if (text.NullOrEmpty())
+			get
 			{
-				return "RitualOpportunity".Translate(precept.LabelCap);
+				return Find.TickManager.TicksGame - this.triggeredTick;
 			}
-			return "RitualOpportunityFor".Translate(precept.LabelCap, text);
 		}
-	}
 
-	public TaggedString LetterText
-	{
-		get
+		// Token: 0x17002163 RID: 8547
+		// (get) Token: 0x0600DA11 RID: 55825 RVA: 0x00408027 File Offset: 0x00406227
+		public int TicksUntilExpiration
 		{
-			Precept_Ritual precept_Ritual = precept;
-			sbTemp.Clear();
-			Pawn arg = targetA.Thing as Pawn;
-			if (targetA.Thing is Corpse corpse)
+			get
 			{
-				arg = corpse.InnerPawn;
+				return this.triggeredTick + RitualObligation.DaysToExpire * 60000 - Find.TickManager.TicksGame;
 			}
-			RitualObligationTrigger_Date ritualObligationTrigger_Date = precept_Ritual.obligationTriggers.OfType<RitualObligationTrigger_Date>().FirstOrDefault();
-			TaggedString taggedString = ((precept_Ritual.ideo.adjective.NullOrEmpty() && !precept_Ritual.ritualExpectedDescNoAdjective.NullOrEmpty()) ? precept_Ritual.ritualExpectedDescNoAdjective : precept_Ritual.ritualExpectedDesc).Formatted(precept_Ritual.ideo.Named("IDEOLIGION"), precept_Ritual.Named("RITUAL"), arg.Named("PAWN"), precept_Ritual.ideo.memberName.Colorize(precept_Ritual.ideo.TextColor).Named("MEMBER"), precept_Ritual.ideo.MemberNamePlural.Colorize(precept_Ritual.ideo.TextColor).Named("MEMBERS"), (precept_Ritual.ideo.classicMode ? Faction.OfPlayer.Name : precept_Ritual.ideo.name).Colorize(precept_Ritual.ideo.TextColor).Named("IDEO"), ritualObligationTrigger_Date?.DateString.Named("DATE") ?? ((NamedArgument)""));
-			sbTemp.AppendLineTagged(taggedString);
-			sbTemp.AppendLine();
-			IEnumerable<string> targetInfos = precept_Ritual.obligationTargetFilter.GetTargetInfos(this);
-			if (targetInfos.Count() > 1)
+		}
+
+		// Token: 0x17002164 RID: 8548
+		// (get) Token: 0x0600DA12 RID: 55826 RVA: 0x00408048 File Offset: 0x00406248
+		public TargetInfo FirstValidTarget
+		{
+			get
 			{
-				if ("RitualMultiTargetDesc".CanTranslate())
+				if (this.targetA.IsValid)
 				{
-					sbTemp.AppendLine("RitualMultiTargetDesc".Translate(precept_Ritual.Named("RITUAL")) + ":\n" + targetInfos.ToLineList("  - ", capitalizeItems: true));
+					return this.targetA;
+				}
+				if (this.targetB.IsValid)
+				{
+					return this.targetB;
+				}
+				if (this.targetC.IsValid)
+				{
+					return this.targetC;
+				}
+				return TargetInfo.Invalid;
+			}
+		}
+
+		// Token: 0x17002165 RID: 8549
+		// (get) Token: 0x0600DA13 RID: 55827 RVA: 0x00408098 File Offset: 0x00406298
+		public string LetterLabel
+		{
+			get
+			{
+				string text = this.precept.obligationTargetFilter.LabelExtraPart(this);
+				string result;
+				if (text.NullOrEmpty())
+				{
+					result = "RitualOpportunity".Translate(this.precept.LabelCap);
 				}
 				else
 				{
-					sbTemp.AppendLine("RitualTargetsExplanation".Translate(precept_Ritual.Named("RITUAL"), targetInfos.ToLineList("  - ", capitalizeItems: true)).CapitalizeFirst());
+					result = "RitualOpportunityFor".Translate(this.precept.LabelCap, text);
 				}
+				return result;
 			}
-			else if ("RitualSingleTargetDesc".CanTranslate())
-			{
-				sbTemp.AppendLine("RitualSingleTargetDesc".Translate(precept_Ritual.Named("RITUAL"), targetInfos.First().UncapitalizeFirst().Named("FOCUS")));
-			}
-			else
-			{
-				sbTemp.AppendLine("RitualTargetsExplanation".Translate(precept_Ritual.Named("RITUAL"), targetInfos.ToLineList("  - ", capitalizeItems: true)).CapitalizeFirst());
-			}
-			if (expires)
-			{
-				Map map = ((Current.ProgramState == ProgramState.Playing) ? Find.AnyPlayerHomeMap : null);
-				string text = GenDate.QuadrumDateStringAt(Find.TickManager.TicksAbs + StageDays[StageDays.Length - 1] * 60000, (map != null) ? Find.WorldGrid.LongLatOf(map.Tile).x : 0f);
-				sbTemp.AppendLine();
-				sbTemp.AppendLineTagged("RitualExpiresIn".Translate((StageDays[StageDays.Length - 1] * 60000).ToStringTicksToPeriodVague(), text));
-			}
-			unfilledRolesTemp.Clear();
-			foreach (RitualRole item in precept_Ritual.behavior.def.RequiredRoles())
-			{
-				Precept_Role precept_Role = item.FindInstance(precept_Ritual.ideo);
-				if (!item.substitutable && precept_Role != null && precept_Role.Active && precept_Role.ChosenPawnSingle() == null)
-				{
-					unfilledRolesTemp.Add(precept_Role.LabelCap);
-				}
-			}
-			if (unfilledRolesTemp.Any())
-			{
-				sbTemp.AppendLine();
-				sbTemp.AppendLine();
-				sbTemp.AppendLine("RitualUnfilledRoles".Translate(precept_Ritual.LabelCap) + ":");
-				sbTemp.Append(unfilledRolesTemp.ToLineList("  - "));
-			}
-			return sbTemp.ToString().TrimEndNewlines();
 		}
-	}
 
-	public RitualObligation()
-	{
-	}
+		// Token: 0x17002166 RID: 8550
+		// (get) Token: 0x0600DA14 RID: 55828 RVA: 0x00408108 File Offset: 0x00406308
+		public TaggedString LetterText
+		{
+			get
+			{
+				Precept_Ritual precept_Ritual = this.precept;
+				this.sbTemp.Clear();
+				Pawn arg = this.targetA.Thing as Pawn;
+				Corpse corpse = this.targetA.Thing as Corpse;
+				if (corpse != null)
+				{
+					arg = corpse.InnerPawn;
+				}
+				RitualObligationTrigger_Date ritualObligationTrigger_Date = precept_Ritual.obligationTriggers.OfType<RitualObligationTrigger_Date>().FirstOrDefault<RitualObligationTrigger_Date>();
+				TaggedString taggedString = ((precept_Ritual.ideo.adjective.NullOrEmpty() && !precept_Ritual.ritualExpectedDescNoAdjective.NullOrEmpty()) ? precept_Ritual.ritualExpectedDescNoAdjective : precept_Ritual.ritualExpectedDesc).Formatted(precept_Ritual.ideo.Named("IDEOLIGION"), precept_Ritual.Named("RITUAL"), arg.Named("PAWN"), precept_Ritual.ideo.memberName.Colorize(precept_Ritual.ideo.TextColor).Named("MEMBER"), precept_Ritual.ideo.MemberNamePlural.Colorize(precept_Ritual.ideo.TextColor).Named("MEMBERS"), (precept_Ritual.ideo.classicMode ? Faction.OfPlayer.Name : precept_Ritual.ideo.name).Colorize(precept_Ritual.ideo.TextColor).Named("IDEO"), (ritualObligationTrigger_Date != null) ? ritualObligationTrigger_Date.DateString.Named("DATE") : "");
+				this.sbTemp.AppendLineTagged(taggedString);
+				this.sbTemp.AppendLine();
+				IEnumerable<string> targetInfos = precept_Ritual.obligationTargetFilter.GetTargetInfos(this);
+				if (targetInfos.Count<string>() > 1)
+				{
+					if ("RitualMultiTargetDesc".CanTranslate())
+					{
+						this.sbTemp.AppendLine("RitualMultiTargetDesc".Translate(precept_Ritual.Named("RITUAL")) + ":\n" + targetInfos.ToLineList("  - ", true));
+					}
+					else
+					{
+						this.sbTemp.AppendLine("RitualTargetsExplanation".Translate(precept_Ritual.Named("RITUAL"), targetInfos.ToLineList("  - ", true)).CapitalizeFirst());
+					}
+				}
+				else if ("RitualSingleTargetDesc".CanTranslate())
+				{
+					this.sbTemp.AppendLine("RitualSingleTargetDesc".Translate(precept_Ritual.Named("RITUAL"), targetInfos.First<string>().UncapitalizeFirst().Named("FOCUS")));
+				}
+				else
+				{
+					this.sbTemp.AppendLine("RitualTargetsExplanation".Translate(precept_Ritual.Named("RITUAL"), targetInfos.ToLineList("  - ", true)).CapitalizeFirst());
+				}
+				if (this.expires)
+				{
+					Map map = (Current.ProgramState == ProgramState.Playing) ? Find.AnyPlayerHomeMap : null;
+					string value = GenDate.QuadrumDateStringAt((long)(Find.TickManager.TicksAbs + RitualObligation.StageDays[RitualObligation.StageDays.Length - 1] * 60000), (map != null) ? Find.WorldGrid.LongLatOf(map.Tile).x : 0f);
+					this.sbTemp.AppendLine();
+					this.sbTemp.AppendLineTagged("RitualExpiresIn".Translate((RitualObligation.StageDays[RitualObligation.StageDays.Length - 1] * 60000).ToStringTicksToPeriodVague(true, true), value));
+				}
+				this.unfilledRolesTemp.Clear();
+				foreach (RitualRole ritualRole in precept_Ritual.behavior.def.RequiredRoles())
+				{
+					Precept_Role precept_Role = ritualRole.FindInstance(precept_Ritual.ideo);
+					if (!ritualRole.substitutable && precept_Role != null && precept_Role.Active && precept_Role.ChosenPawnSingle() == null)
+					{
+						this.unfilledRolesTemp.Add(precept_Role.LabelCap);
+					}
+				}
+				if (this.unfilledRolesTemp.Any<string>())
+				{
+					this.sbTemp.AppendLine();
+					this.sbTemp.AppendLine();
+					this.sbTemp.AppendLine("RitualUnfilledRoles".Translate(precept_Ritual.LabelCap) + ":");
+					this.sbTemp.Append(this.unfilledRolesTemp.ToLineList("  - "));
+				}
+				return this.sbTemp.ToString().TrimEndNewlines();
+			}
+		}
 
-	public RitualObligation(Precept_Ritual precept, TargetInfo targetA, TargetInfo targetB, TargetInfo targetC)
-	{
-		this.precept = precept;
-		this.targetA = targetA;
-		this.targetB = targetB;
-		this.targetC = targetC;
-		triggeredTick = Find.TickManager.TicksGame;
-		ID = Find.UniqueIDsManager.GetNextRitualObligationID();
-	}
+		// Token: 0x0600DA15 RID: 55829 RVA: 0x00408584 File Offset: 0x00406784
+		public RitualObligation()
+		{
+		}
 
-	public RitualObligation(Precept_Ritual precept, TargetInfo targetA, TargetInfo targetB, bool expires = true)
-		: this(precept, targetA, targetB, TargetInfo.Invalid)
-	{
-		this.expires = expires;
-	}
+		// Token: 0x0600DA16 RID: 55830 RVA: 0x004085B0 File Offset: 0x004067B0
+		public RitualObligation(Precept_Ritual precept, TargetInfo targetA, TargetInfo targetB, TargetInfo targetC)
+		{
+			this.precept = precept;
+			this.targetA = targetA;
+			this.targetB = targetB;
+			this.targetC = targetC;
+			this.triggeredTick = Find.TickManager.TicksGame;
+			this.ID = Find.UniqueIDsManager.GetNextRitualObligationID();
+		}
 
-	public RitualObligation(Precept_Ritual precept, TargetInfo targetA, bool expires = true)
-		: this(precept, targetA, TargetInfo.Invalid, TargetInfo.Invalid)
-	{
-		this.expires = expires;
-	}
+		// Token: 0x0600DA17 RID: 55831 RVA: 0x00408624 File Offset: 0x00406824
+		public RitualObligation(Precept_Ritual precept, TargetInfo targetA, TargetInfo targetB, bool expires = true) : this(precept, targetA, targetB, TargetInfo.Invalid)
+		{
+			this.expires = expires;
+		}
 
-	public RitualObligation(Precept_Ritual precept, bool expires = true)
-		: this(precept, TargetInfo.Invalid, TargetInfo.Invalid, TargetInfo.Invalid)
-	{
-		this.expires = expires;
-	}
+		// Token: 0x0600DA18 RID: 55832 RVA: 0x0040863C File Offset: 0x0040683C
+		public RitualObligation(Precept_Ritual precept, TargetInfo targetA, bool expires = true) : this(precept, targetA, TargetInfo.Invalid, TargetInfo.Invalid)
+		{
+			this.expires = expires;
+		}
 
-	public void DebugOffsetTriggeredTick(int ticks)
-	{
-		triggeredTick += ticks;
-	}
+		// Token: 0x0600DA19 RID: 55833 RVA: 0x00408657 File Offset: 0x00406857
+		public RitualObligation(Precept_Ritual precept, bool expires = true) : this(precept, TargetInfo.Invalid, TargetInfo.Invalid, TargetInfo.Invalid)
+		{
+			this.expires = expires;
+		}
 
-	public void ExposeData()
-	{
-		Scribe_Values.Look(ref triggeredTick, "triggeredTick", 0);
-		Scribe_Values.Look(ref sendLetter, "sendLetter", defaultValue: false);
-		Scribe_Values.Look(ref expires, "expires", defaultValue: false);
-		Scribe_TargetInfo.Look(ref targetA, saveDestroyedThings: true, "targetA");
-		Scribe_TargetInfo.Look(ref targetB, saveDestroyedThings: true, "targetB");
-		Scribe_TargetInfo.Look(ref targetC, saveDestroyedThings: true, "targetC");
-		Scribe_Collections.Look(ref onlyForPawns, "onlyForPawns", LookMode.Reference);
-		Scribe_Values.Look(ref ID, "ID", -1);
-	}
+		// Token: 0x0600DA1A RID: 55834 RVA: 0x00408676 File Offset: 0x00406876
+		public void DebugOffsetTriggeredTick(int ticks)
+		{
+			this.triggeredTick += ticks;
+		}
 
-	public virtual void CopyTo(RitualObligation other)
-	{
-		other.ID = ID;
-		other.precept = precept;
-		other.triggeredTick = triggeredTick;
-		other.sendLetter = sendLetter;
-		other.expires = expires;
-		other.targetA = targetA;
-		other.targetB = targetB;
-		other.targetC = targetC;
-		other.onlyForPawns = onlyForPawns;
-	}
+		// Token: 0x0600DA1B RID: 55835 RVA: 0x00408688 File Offset: 0x00406888
+		public void ExposeData()
+		{
+			Scribe_Values.Look<int>(ref this.triggeredTick, "triggeredTick", 0, false);
+			Scribe_Values.Look<bool>(ref this.sendLetter, "sendLetter", false, false);
+			Scribe_Values.Look<bool>(ref this.expires, "expires", false, false);
+			Scribe_TargetInfo.Look(ref this.targetA, true, "targetA");
+			Scribe_TargetInfo.Look(ref this.targetB, true, "targetB");
+			Scribe_TargetInfo.Look(ref this.targetC, true, "targetC");
+			Scribe_Collections.Look<Pawn>(ref this.onlyForPawns, "onlyForPawns", LookMode.Reference, Array.Empty<object>());
+			Scribe_Values.Look<int>(ref this.ID, "ID", -1, false);
+		}
 
-	public string GetUniqueLoadID()
-	{
-		return "RitualObligation_" + ID;
+		// Token: 0x0600DA1C RID: 55836 RVA: 0x00408728 File Offset: 0x00406928
+		public virtual void CopyTo(RitualObligation other)
+		{
+			other.ID = this.ID;
+			other.precept = this.precept;
+			other.triggeredTick = this.triggeredTick;
+			other.sendLetter = this.sendLetter;
+			other.expires = this.expires;
+			other.targetA = this.targetA;
+			other.targetB = this.targetB;
+			other.targetC = this.targetC;
+			other.onlyForPawns = this.onlyForPawns;
+		}
+
+		// Token: 0x0600DA1D RID: 55837 RVA: 0x004087A1 File Offset: 0x004069A1
+		public string GetUniqueLoadID()
+		{
+			return "RitualObligation_" + this.ID.ToString();
+		}
+
+		// Token: 0x0400939C RID: 37788
+		public Precept_Ritual precept;
+
+		// Token: 0x0400939D RID: 37789
+		private int triggeredTick;
+
+		// Token: 0x0400939E RID: 37790
+		public bool sendLetter = true;
+
+		// Token: 0x0400939F RID: 37791
+		public bool expires = true;
+
+		// Token: 0x040093A0 RID: 37792
+		public TargetInfo targetA;
+
+		// Token: 0x040093A1 RID: 37793
+		public TargetInfo targetB;
+
+		// Token: 0x040093A2 RID: 37794
+		public TargetInfo targetC;
+
+		// Token: 0x040093A3 RID: 37795
+		public List<Pawn> onlyForPawns;
+
+		// Token: 0x040093A4 RID: 37796
+		public int ID;
+
+		// Token: 0x040093A5 RID: 37797
+		public static readonly int[] StageDays = new int[]
+		{
+			3,
+			9
+		};
+
+		// Token: 0x040093A6 RID: 37798
+		private StringBuilder sbTemp = new StringBuilder();
+
+		// Token: 0x040093A7 RID: 37799
+		private List<string> unfilledRolesTemp = new List<string>();
 	}
 }

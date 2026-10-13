@@ -1,16 +1,22 @@
-namespace Verse;
+﻿using System;
 
-public class Hediff_HemogenCraving : HediffWithComps
+namespace Verse
 {
-	public override string SeverityLabel
+	// Token: 0x02000708 RID: 1800
+	public class Hediff_HemogenCraving : HediffWithComps
 	{
-		get
+		// Token: 0x170007C5 RID: 1989
+		// (get) Token: 0x06002C08 RID: 11272 RVA: 0x000E4FF4 File Offset: 0x000E31F4
+		public override string SeverityLabel
 		{
-			if (Severity == 0f)
+			get
 			{
-				return null;
+				if (this.Severity == 0f)
+				{
+					return null;
+				}
+				return this.Severity.ToStringPercent();
 			}
-			return Severity.ToStringPercent();
 		}
 	}
 }

@@ -1,39 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class Recipe_InstallNaturalBodyPart : Recipe_Surgery
+namespace RimWorld
 {
-	public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
+	// Token: 0x02002309 RID: 8969
+	public class Recipe_InstallNaturalBodyPart : Recipe_Surgery
 	{
-		return MedicalRecipesUtility.GetFixedPartsToApplyOn(recipe, pawn, delegate(BodyPartRecord record)
+		// Token: 0x0600C2D5 RID: 49877 RVA: 0x0038805C File Offset: 0x0038625C
+		public override IEnumerable<BodyPartRecord> GetPartsToApplyOn(Pawn pawn, RecipeDef recipe)
 		{
-			if (!pawn.health.hediffSet.hediffs.Any((Hediff x) => x.Part == record))
-			{
-				return false;
-			}
-			if (record.parent != null && !pawn.health.hediffSet.GetNotMissingParts().Contains(record.parent))
-			{
-				return false;
-			}
-			return (!pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(record) || pawn.health.hediffSet.HasDirectlyAddedPartFor(record)) ? true : false;
-		});
-	}
+			return MedicalRecipesUtility.GetFixedPartsToApplyOn(recipe, pawn, (BodyPartRecord record) => pawn.health.hediffSet.hediffs.Any((Hediff x) => x.Part == record) && (record.parent == null || pawn.health.hediffSet.GetNotMissingParts(BodyPartHeight.Undefined, BodyPartDepth.Undefined, null, null).Contains(record.parent)) && (!pawn.health.hediffSet.PartOrAnyAncestorHasDirectlyAddedParts(record) || pawn.health.hediffSet.HasDirectlyAddedPartFor(record)));
+		}
 
-	public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
-	{
-		if (billDoer != null && !CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
+		// Token: 0x0600C2D6 RID: 49878 RVA: 0x00388090 File Offset: 0x00386290
+		public override void ApplyOnPawn(Pawn pawn, BodyPartRecord part, Pawn billDoer, List<Thing> ingredients, Bill bill)
 		{
-			TaleRecorder.RecordTale(TaleDefOf.DidSurgery, billDoer, pawn);
-			Hediff directlyAddedPartFor = pawn.health.hediffSet.GetDirectlyAddedPartFor(part);
-			MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, billDoer.Position, billDoer.Map);
-			if (ModsConfig.IdeologyActive)
+			if (billDoer != null)
 			{
-				Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.InstalledOrgan, billDoer.Named(HistoryEventArgsNames.Doer)));
+				if (base.CheckSurgeryFail(billDoer, pawn, ingredients, part, bill))
+				{
+					return;
+				}
+				TaleRecorder.RecordTale(TaleDefOf.DidSurgery, new object[]
+				{
+					billDoer,
+					pawn
+				});
+				Hediff directlyAddedPartFor = pawn.health.hediffSet.GetDirectlyAddedPartFor(part);
+				MedicalRecipesUtility.RestorePartAndSpawnAllPreviousParts(pawn, part, billDoer.Position, billDoer.Map);
+				if (ModsConfig.IdeologyActive)
+				{
+					Find.HistoryEventsManager.RecordEvent(new HistoryEvent(HistoryEventDefOf.InstalledOrgan, billDoer.Named(HistoryEventArgsNames.Doer)), true);
+				}
+				if (directlyAddedPartFor != null)
+				{
+					directlyAddedPartFor.Notify_SurgicallyReplaced(billDoer);
+				}
 			}
-			directlyAddedPartFor?.Notify_SurgicallyReplaced(billDoer);
 		}
 	}
 }

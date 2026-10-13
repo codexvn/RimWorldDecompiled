@@ -1,36 +1,42 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_OperateScanner : JobDriver
+namespace RimWorld
 {
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x020012CE RID: 4814
+	public class JobDriver_OperateScanner : JobDriver
 	{
-		return pawn.Reserve(job.targetA, job, 1, -1, null, errorOnFailed);
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		CompScanner scannerComp = job.targetA.Thing.TryGetComp<CompScanner>();
-		this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
-		this.FailOnBurningImmobile(TargetIndex.A);
-		this.FailOn(() => !scannerComp.CanUseNow);
-		yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell);
-		Toil work = ToilMaker.MakeToil("MakeNewToils");
-		work.tickAction = delegate
+		// Token: 0x060075E5 RID: 30181 RVA: 0x001E06E3 File Offset: 0x001DE8E3
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			Pawn actor = work.actor;
-			scannerComp.Used(actor);
-			actor.skills.Learn(SkillDefOf.Intellectual, 0.035f);
-			actor.GainComfortFromCellIfPossible(1, chairsOnly: true);
-		};
-		work.PlaySustainerOrSound(scannerComp.Props.soundWorking);
-		work.AddFailCondition(() => !scannerComp.CanUseNow);
-		work.defaultCompleteMode = ToilCompleteMode.Never;
-		work.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
-		work.activeSkill = () => SkillDefOf.Intellectual;
-		yield return work;
+			return this.pawn.Reserve(this.job.targetA, this.job, 1, -1, null, errorOnFailed, false);
+		}
+
+		// Token: 0x060075E6 RID: 30182 RVA: 0x0023F7B7 File Offset: 0x0023D9B7
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			CompScanner scannerComp = this.job.targetA.Thing.TryGetComp<CompScanner>();
+			this.FailOnDespawnedNullOrForbidden(TargetIndex.A);
+			this.FailOnBurningImmobile(TargetIndex.A);
+			this.FailOn(() => !scannerComp.CanUseNow);
+			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.InteractionCell, false);
+			Toil work = ToilMaker.MakeToil("MakeNewToils");
+			work.tickAction = delegate()
+			{
+				Pawn actor = work.actor;
+				scannerComp.Used(actor);
+				actor.skills.Learn(SkillDefOf.Intellectual, 0.035f, false, false);
+				actor.GainComfortFromCellIfPossible(1, true);
+			};
+			work.PlaySustainerOrSound(scannerComp.Props.soundWorking, 1f);
+			work.AddFailCondition(() => !scannerComp.CanUseNow);
+			work.defaultCompleteMode = ToilCompleteMode.Never;
+			work.FailOnCannotTouch(TargetIndex.A, PathEndMode.InteractionCell);
+			work.activeSkill = (() => SkillDefOf.Intellectual);
+			yield return work;
+			yield break;
+		}
 	}
 }

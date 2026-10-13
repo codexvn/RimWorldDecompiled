@@ -1,6 +1,11 @@
-namespace Unity.Collections;
+﻿using System;
 
-public struct NativeHeapIndex
+namespace Unity.Collections
 {
-	internal int TableIndex;
+	// Token: 0x02000061 RID: 97
+	public struct NativeHeapIndex
+	{
+		// Token: 0x04000105 RID: 261
+		internal int TableIndex;
+	}
 }

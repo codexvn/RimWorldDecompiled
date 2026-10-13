@@ -1,15 +1,19 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_Precept_Bloodfeeder_Social : ThoughtWorker_Precept_Social
+namespace RimWorld
 {
-	protected override ThoughtState ShouldHaveThought(Pawn p, Pawn otherPawn)
+	// Token: 0x02001834 RID: 6196
+	public class ThoughtWorker_Precept_Bloodfeeder_Social : ThoughtWorker_Precept_Social
 	{
-		if (!ModsConfig.BiotechActive || !ModsConfig.IdeologyActive)
+		// Token: 0x06008F37 RID: 36663 RVA: 0x002A5373 File Offset: 0x002A3573
+		protected override ThoughtState ShouldHaveThought(Pawn p, Pawn otherPawn)
 		{
-			return ThoughtState.Inactive;
+			if (!ModsConfig.BiotechActive || !ModsConfig.IdeologyActive)
+			{
+				return ThoughtState.Inactive;
+			}
+			return otherPawn.IsBloodfeeder();
 		}
-		return otherPawn.IsBloodfeeder();
 	}
 }

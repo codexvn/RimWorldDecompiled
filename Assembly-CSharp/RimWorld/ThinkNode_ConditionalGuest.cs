@@ -1,16 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalGuest : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x0200178E RID: 6030
+	public class ThinkNode_ConditionalGuest : ThinkNode_Conditional
 	{
-		if (pawn.HostFaction != null)
+		// Token: 0x06008D65 RID: 36197 RVA: 0x002A0ABF File Offset: 0x0029ECBF
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return !pawn.IsPrisoner;
+			return pawn.HostFaction != null && !pawn.IsPrisoner;
 		}
-		return false;
 	}
 }

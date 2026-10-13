@@ -1,157 +1,174 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 
-namespace Verse;
-
-public class AnimalPenManager
+namespace Verse
 {
-	private readonly Map map;
-
-	private readonly Dictionary<CompAnimalPenMarker, PenMarkerState> penMarkers = new Dictionary<CompAnimalPenMarker, PenMarkerState>();
-
-	private bool dirty = true;
-
-	private ThingFilter cachedDefaultAutoCutFilter;
-
-	private ThingFilter cachedFixedAutoCutFilter;
-
-	private HashSet<string> existingPenNames = new HashSet<string>();
-
-	private readonly PenFoodCalculator cached_placingPenFoodCalculator = new PenFoodCalculator();
-
-	private IntVec3? cached_placingPenFoodCalculator_forPosition;
-
-	public AnimalPenManager(Map map)
+	// Token: 0x020003AB RID: 939
+	public class AnimalPenManager
 	{
-		this.map = map;
-		map.events.BuildingSpawned += Notify_BuildingSpawned;
-		map.events.BuildingDespawned += Notify_BuildingDespawned;
-	}
-
-	public void RebuildAllPens()
-	{
-		ForceRebuildPens();
-	}
-
-	public PenMarkerState GetPenMarkerState(CompAnimalPenMarker marker)
-	{
-		RebuildIfDirty();
-		return penMarkers[marker];
-	}
-
-	public CompAnimalPenMarker GetPenNamed(string name)
-	{
-		return penMarkers.Keys.FirstOrDefault((CompAnimalPenMarker marker) => marker.label == name);
-	}
-
-	public ThingFilter GetFixedAutoCutFilter()
-	{
-		if (cachedFixedAutoCutFilter == null)
+		// Token: 0x06001811 RID: 6161 RVA: 0x00079F74 File Offset: 0x00078174
+		public AnimalPenManager(Map map)
 		{
-			cachedFixedAutoCutFilter = new ThingFilter();
-			foreach (ThingDef allWildPlant in map.wildPlantSpawner.AllWildPlants)
+			this.map = map;
+			map.events.BuildingSpawned += this.Notify_BuildingSpawned;
+			map.events.BuildingDespawned += this.Notify_BuildingDespawned;
+		}
+
+		// Token: 0x06001812 RID: 6162 RVA: 0x00079FE4 File Offset: 0x000781E4
+		public void RebuildAllPens()
+		{
+			this.ForceRebuildPens();
+		}
+
+		// Token: 0x06001813 RID: 6163 RVA: 0x00079FEC File Offset: 0x000781EC
+		public PenMarkerState GetPenMarkerState(CompAnimalPenMarker marker)
+		{
+			this.RebuildIfDirty();
+			return this.penMarkers[marker];
+		}
+
+		// Token: 0x06001814 RID: 6164 RVA: 0x0007A000 File Offset: 0x00078200
+		public CompAnimalPenMarker GetPenNamed(string name)
+		{
+			return this.penMarkers.Keys.FirstOrDefault((CompAnimalPenMarker marker) => marker.label == name);
+		}
+
+		// Token: 0x06001815 RID: 6165 RVA: 0x0007A038 File Offset: 0x00078238
+		public ThingFilter GetFixedAutoCutFilter()
+		{
+			if (this.cachedFixedAutoCutFilter == null)
 			{
-				if (allWildPlant.plant.allowAutoCut)
+				this.cachedFixedAutoCutFilter = new ThingFilter();
+				foreach (ThingDef thingDef in this.map.wildPlantSpawner.AllWildPlants)
 				{
-					cachedFixedAutoCutFilter.SetAllow(allWildPlant, allow: true);
+					if (thingDef.plant.allowAutoCut)
+					{
+						this.cachedFixedAutoCutFilter.SetAllow(thingDef, true);
+					}
+				}
+				this.cachedFixedAutoCutFilter.SetAllow(ThingCategoryDefOf.Stumps, true, null, null);
+			}
+			return this.cachedFixedAutoCutFilter;
+		}
+
+		// Token: 0x06001816 RID: 6166 RVA: 0x0007A0D4 File Offset: 0x000782D4
+		public ThingFilter GetDefaultAutoCutFilter()
+		{
+			if (this.cachedDefaultAutoCutFilter == null)
+			{
+				this.cachedDefaultAutoCutFilter = new ThingFilter();
+				ThingDef plant_Grass = ThingDefOf.Plant_Grass;
+				float num = plant_Grass.ingestible.CachedNutrition / plant_Grass.plant.growDays * 0.5f;
+				foreach (ThingDef thingDef in this.GetFixedAutoCutFilter().AllowedThingDefs)
+				{
+					if (!MapPlantGrowthRateCalculator.IsEdibleByPastureAnimals(thingDef) || (thingDef.ingestible.CachedNutrition / thingDef.plant.growDays < num && (thingDef.plant.harvestedThingDef == null || !thingDef.plant.harvestedThingDef.IsIngestible)))
+					{
+						this.cachedDefaultAutoCutFilter.SetAllow(thingDef, true);
+					}
 				}
 			}
-			cachedFixedAutoCutFilter.SetAllow(ThingCategoryDefOf.Stumps, allow: true);
+			return this.cachedDefaultAutoCutFilter;
 		}
-		return cachedFixedAutoCutFilter;
-	}
 
-	public ThingFilter GetDefaultAutoCutFilter()
-	{
-		if (cachedDefaultAutoCutFilter == null)
+		// Token: 0x06001817 RID: 6167 RVA: 0x0007A1B0 File Offset: 0x000783B0
+		private void Notify_BuildingSpawned(Building building)
 		{
-			cachedDefaultAutoCutFilter = new ThingFilter();
-			ThingDef plant_Grass = ThingDefOf.Plant_Grass;
-			float num = plant_Grass.ingestible.CachedNutrition / plant_Grass.plant.growDays * 0.5f - 0.0001f;
-			foreach (ThingDef allowedThingDef in GetFixedAutoCutFilter().AllowedThingDefs)
+			this.dirty = true;
+		}
+
+		// Token: 0x06001818 RID: 6168 RVA: 0x0007A1B0 File Offset: 0x000783B0
+		private void Notify_BuildingDespawned(Building building)
+		{
+			this.dirty = true;
+		}
+
+		// Token: 0x06001819 RID: 6169 RVA: 0x0007A1B9 File Offset: 0x000783B9
+		private void RebuildIfDirty()
+		{
+			if (this.dirty)
 			{
-				if (!MapPlantGrowthRateCalculator.IsEdibleByPastureAnimals(allowedThingDef) || (!(allowedThingDef.ingestible.CachedNutrition / allowedThingDef.plant.growDays >= num) && (allowedThingDef.plant.harvestedThingDef == null || !allowedThingDef.plant.harvestedThingDef.IsIngestible)))
+				this.ForceRebuildPens();
+			}
+		}
+
+		// Token: 0x0600181A RID: 6170 RVA: 0x0007A1CC File Offset: 0x000783CC
+		private void ForceRebuildPens()
+		{
+			this.dirty = false;
+			this.penMarkers.Clear();
+			foreach (Building thing in this.map.listerBuildings.allBuildingsAnimalPenMarkers)
+			{
+				CompAnimalPenMarker compAnimalPenMarker = thing.TryGetComp<CompAnimalPenMarker>();
+				this.penMarkers.Add(compAnimalPenMarker, new PenMarkerState(compAnimalPenMarker));
+			}
+		}
+
+		// Token: 0x0600181B RID: 6171 RVA: 0x0007A24C File Offset: 0x0007844C
+		public string MakeNewAnimalPenName()
+		{
+			this.existingPenNames.Clear();
+			this.existingPenNames.AddRange(from marker in this.penMarkers.Keys
+			select marker.label);
+			int num = 1;
+			string text;
+			for (;;)
+			{
+				text = "AnimalPenMarkerDefaultLabel".Translate(num);
+				if (!this.existingPenNames.Contains(text))
 				{
-					cachedDefaultAutoCutFilter.SetAllow(allowedThingDef, allow: true);
+					break;
 				}
+				num++;
 			}
+			this.existingPenNames.Clear();
+			return text;
 		}
-		return cachedDefaultAutoCutFilter;
-	}
 
-	private void Notify_BuildingSpawned(Building building)
-	{
-		dirty = true;
-	}
-
-	private void Notify_BuildingDespawned(Building building)
-	{
-		dirty = true;
-	}
-
-	private void RebuildIfDirty()
-	{
-		if (dirty)
+		// Token: 0x0600181C RID: 6172 RVA: 0x0007A2D8 File Offset: 0x000784D8
+		public void DrawPlacingMouseAttachments(BuildableDef def)
 		{
-			ForceRebuildPens();
-		}
-	}
-
-	private void ForceRebuildPens()
-	{
-		dirty = false;
-		penMarkers.Clear();
-		foreach (Building allBuildingsAnimalPenMarker in map.listerBuildings.allBuildingsAnimalPenMarkers)
-		{
-			CompAnimalPenMarker compAnimalPenMarker = allBuildingsAnimalPenMarker.TryGetComp<CompAnimalPenMarker>();
-			penMarkers.Add(compAnimalPenMarker, new PenMarkerState(compAnimalPenMarker));
-		}
-	}
-
-	public string MakeNewAnimalPenName()
-	{
-		existingPenNames.Clear();
-		existingPenNames.AddRange(penMarkers.Keys.Select((CompAnimalPenMarker marker) => marker.label));
-		int num = 1;
-		string text;
-		while (true)
-		{
-			text = "AnimalPenMarkerDefaultLabel".Translate(num);
-			if (!existingPenNames.Contains(text))
+			ThingDef thingDef = def as ThingDef;
+			if (((thingDef != null) ? thingDef.CompDefFor<CompAnimalPenMarker>() : null) == null)
 			{
-				break;
+				return;
 			}
-			num++;
-		}
-		existingPenNames.Clear();
-		return text;
-	}
-
-	public void DrawPlacingMouseAttachments(BuildableDef def)
-	{
-		if ((def as ThingDef)?.CompDefFor<CompAnimalPenMarker>() == null)
-		{
-			return;
-		}
-		IntVec3 intVec = UI.MouseCell();
-		if (!intVec.InBounds(map))
-		{
-			return;
-		}
-		if (cached_placingPenFoodCalculator_forPosition.HasValue)
-		{
-			IntVec3 value = intVec;
-			IntVec3? intVec2 = cached_placingPenFoodCalculator_forPosition;
-			if (!(value != intVec2))
+			IntVec3 intVec = UI.MouseCell();
+			if (!intVec.InBounds(this.map))
 			{
-				goto IL_007a;
+				return;
 			}
+			if (this.cached_placingPenFoodCalculator_forPosition == null || intVec != this.cached_placingPenFoodCalculator_forPosition)
+			{
+				this.cached_placingPenFoodCalculator.ResetAndProcessPen(intVec, this.map, true);
+				this.cached_placingPenFoodCalculator_forPosition = new IntVec3?(intVec);
+			}
+			AnimalPenGUI.DrawPlacingMouseAttachments(intVec, this.map, this.cached_placingPenFoodCalculator);
 		}
-		cached_placingPenFoodCalculator.ResetAndProcessPen(intVec, map, considerBlueprints: true);
-		cached_placingPenFoodCalculator_forPosition = intVec;
-		goto IL_007a;
-		IL_007a:
-		AnimalPenGUI.DrawPlacingMouseAttachments(intVec, map, cached_placingPenFoodCalculator);
+
+		// Token: 0x04001587 RID: 5511
+		private readonly Map map;
+
+		// Token: 0x04001588 RID: 5512
+		private readonly Dictionary<CompAnimalPenMarker, PenMarkerState> penMarkers = new Dictionary<CompAnimalPenMarker, PenMarkerState>();
+
+		// Token: 0x04001589 RID: 5513
+		private bool dirty = true;
+
+		// Token: 0x0400158A RID: 5514
+		private ThingFilter cachedDefaultAutoCutFilter;
+
+		// Token: 0x0400158B RID: 5515
+		private ThingFilter cachedFixedAutoCutFilter;
+
+		// Token: 0x0400158C RID: 5516
+		private HashSet<string> existingPenNames = new HashSet<string>();
+
+		// Token: 0x0400158D RID: 5517
+		private readonly PenFoodCalculator cached_placingPenFoodCalculator = new PenFoodCalculator();
+
+		// Token: 0x0400158E RID: 5518
+		private IntVec3? cached_placingPenFoodCalculator_forPosition;
 	}
 }

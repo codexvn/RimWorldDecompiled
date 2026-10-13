@@ -1,14 +1,18 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-public class ThingListChangedCallbacks
+namespace Verse
 {
-	public Action<Thing> onThingAdded = delegate
+	// Token: 0x02000449 RID: 1097
+	public class ThingListChangedCallbacks
 	{
-	};
+		// Token: 0x04001852 RID: 6226
+		public Action<Thing> onThingAdded = delegate(Thing t)
+		{
+		};
 
-	public Action<Thing> onThingRemoved = delegate
-	{
-	};
+		// Token: 0x04001853 RID: 6227
+		public Action<Thing> onThingRemoved = delegate(Thing t)
+		{
+		};
+	}
 }

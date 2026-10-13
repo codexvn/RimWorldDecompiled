@@ -1,28 +1,34 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Sequence : QuestNode
+namespace RimWorld.QuestGen
 {
-	public List<QuestNode> nodes = new List<QuestNode>();
-
-	protected override void RunInt()
+	// Token: 0x02003A07 RID: 14855
+	public class QuestNode_Sequence : QuestNode
 	{
-		for (int i = 0; i < nodes.Count; i++)
+		// Token: 0x060145C0 RID: 83392 RVA: 0x006160BC File Offset: 0x006142BC
+		protected override void RunInt()
 		{
-			nodes[i].Run();
-		}
-	}
-
-	protected override bool TestRunInt(Slate slate)
-	{
-		for (int i = 0; i < nodes.Count; i++)
-		{
-			if (!nodes[i].TestRun(slate))
+			for (int i = 0; i < this.nodes.Count; i++)
 			{
-				return false;
+				this.nodes[i].Run();
 			}
 		}
-		return true;
+
+		// Token: 0x060145C1 RID: 83393 RVA: 0x006160F0 File Offset: 0x006142F0
+		protected override bool TestRunInt(Slate slate)
+		{
+			for (int i = 0; i < this.nodes.Count; i++)
+			{
+				if (!this.nodes[i].TestRun(slate))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x0400E0D3 RID: 57555
+		public List<QuestNode> nodes = new List<QuestNode>();
 	}
 }

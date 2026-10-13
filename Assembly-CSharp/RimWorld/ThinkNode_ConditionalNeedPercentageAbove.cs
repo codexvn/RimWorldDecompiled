@@ -1,32 +1,40 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalNeedPercentageAbove : ThinkNode_Conditional
+namespace RimWorld
 {
-	private NeedDef need;
-
-	private float threshold;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x020017AB RID: 6059
+	public class ThinkNode_ConditionalNeedPercentageAbove : ThinkNode_Conditional
 	{
-		ThinkNode_ConditionalNeedPercentageAbove obj = (ThinkNode_ConditionalNeedPercentageAbove)base.DeepCopy(resolve);
-		obj.need = need;
-		obj.threshold = threshold;
-		return obj;
-	}
+		// Token: 0x06008DA2 RID: 36258 RVA: 0x002A0E91 File Offset: 0x0029F091
+		public override ThinkNode DeepCopy(bool resolve = true)
+		{
+			ThinkNode_ConditionalNeedPercentageAbove thinkNode_ConditionalNeedPercentageAbove = (ThinkNode_ConditionalNeedPercentageAbove)base.DeepCopy(resolve);
+			thinkNode_ConditionalNeedPercentageAbove.need = this.need;
+			thinkNode_ConditionalNeedPercentageAbove.threshold = this.threshold;
+			return thinkNode_ConditionalNeedPercentageAbove;
+		}
 
-	protected override bool Satisfied(Pawn pawn)
-	{
-		if (!pawn.needs.TryGetNeed(this.need, out var need))
+		// Token: 0x06008DA3 RID: 36259 RVA: 0x002A0EB8 File Offset: 0x0029F0B8
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return false;
+			Need need;
+			if (!pawn.needs.TryGetNeed(this.need, out need))
+			{
+				return false;
+			}
+			if (need is Need_Seeker)
+			{
+				return need.CurInstantLevelPercentage > this.threshold;
+			}
+			return need.CurLevelPercentage > this.threshold;
 		}
-		if (need is Need_Seeker)
-		{
-			return need.CurInstantLevelPercentage > threshold;
-		}
-		return need.CurLevelPercentage > threshold;
+
+		// Token: 0x04005BCF RID: 23503
+		private NeedDef need;
+
+		// Token: 0x04005BD0 RID: 23504
+		private float threshold;
 	}
 }

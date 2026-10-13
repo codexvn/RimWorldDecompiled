@@ -1,37 +1,41 @@
+﻿using System;
 using RimWorld.Planet;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class MainButtonWorker_ToggleWorld : MainButtonWorker
+namespace RimWorld
 {
-	public bool resetViewNextTime = true;
-
-	public override void Activate()
+	// Token: 0x020033F1 RID: 13297
+	public class MainButtonWorker_ToggleWorld : MainButtonWorker
 	{
-		if (Find.World.renderer.wantedMode != WorldRenderMode.Planet)
+		// Token: 0x06012B2C RID: 76588 RVA: 0x0058925C File Offset: 0x0058745C
+		public override void Activate()
 		{
-			AmbientSoundManager.EnsureWorldAmbientSoundCreated();
-			Find.World.renderer.wantedMode = WorldRenderMode.Planet;
-			if (resetViewNextTime)
+			if (Find.World.renderer.wantedMode != WorldRenderMode.Planet)
 			{
-				resetViewNextTime = false;
-				Find.World.UI.Reset();
+				AmbientSoundManager.EnsureWorldAmbientSoundCreated();
+				Find.World.renderer.wantedMode = WorldRenderMode.Planet;
+				if (this.resetViewNextTime)
+				{
+					this.resetViewNextTime = false;
+					Find.World.UI.Reset();
+				}
+				LessonAutoActivator.TeachOpportunity(ConceptDefOf.FormCaravan, OpportunityType.Important);
+				Find.MainTabsRoot.EscapeCurrentTab(false);
+				SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+				return;
 			}
-			LessonAutoActivator.TeachOpportunity(ConceptDefOf.FormCaravan, OpportunityType.Important);
-			Find.MainTabsRoot.EscapeCurrentTab(playSound: false);
-			SoundDefOf.TabOpen.PlayOneShotOnCamera();
-		}
-		else if (Find.MainTabsRoot.OpenTab != null && Find.MainTabsRoot.OpenTab != MainButtonDefOf.Inspect)
-		{
-			Find.MainTabsRoot.EscapeCurrentTab(playSound: false);
-			SoundDefOf.TabOpen.PlayOneShotOnCamera();
-		}
-		else
-		{
+			if (Find.MainTabsRoot.OpenTab != null && Find.MainTabsRoot.OpenTab != MainButtonDefOf.Inspect)
+			{
+				Find.MainTabsRoot.EscapeCurrentTab(false);
+				SoundDefOf.TabOpen.PlayOneShotOnCamera(null);
+				return;
+			}
 			Find.World.renderer.wantedMode = WorldRenderMode.None;
-			SoundDefOf.TabClose.PlayOneShotOnCamera();
+			SoundDefOf.TabClose.PlayOneShotOnCamera(null);
 		}
+
+		// Token: 0x0400C22C RID: 49708
+		public bool resetViewNextTime = true;
 	}
 }

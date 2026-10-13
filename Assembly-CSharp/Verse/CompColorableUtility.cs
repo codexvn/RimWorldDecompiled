@@ -1,30 +1,36 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public static class CompColorableUtility
+namespace Verse
 {
-	public static void SetColor(this Thing t, Color newColor, bool reportFailure = true)
+	// Token: 0x020008FB RID: 2299
+	public static class CompColorableUtility
 	{
-		if (!(t is ThingWithComps thingWithComps))
+		// Token: 0x06003B5E RID: 15198 RVA: 0x00139EEC File Offset: 0x001380EC
+		public static void SetColor(this Thing t, Color newColor, bool reportFailure = true)
 		{
-			if (reportFailure)
+			ThingWithComps thingWithComps = t as ThingWithComps;
+			if (thingWithComps == null)
 			{
-				Log.Error("SetColor on non-ThingWithComps " + t);
+				if (reportFailure)
+				{
+					Log.Error("SetColor on non-ThingWithComps " + ((t != null) ? t.ToString() : null));
+				}
+				return;
 			}
-			return;
-		}
-		CompColorable comp = thingWithComps.GetComp<CompColorable>();
-		if (comp == null)
-		{
-			if (reportFailure)
+			CompColorable comp = thingWithComps.GetComp<CompColorable>();
+			if (comp == null)
 			{
-				Log.Error("SetColor on Thing without CompColorable " + t);
+				if (reportFailure)
+				{
+					Log.Error("SetColor on Thing without CompColorable " + ((t != null) ? t.ToString() : null));
+				}
+				return;
 			}
-		}
-		else if (!comp.Color.IndistinguishableFrom(newColor))
-		{
-			comp.SetColor(newColor);
+			if (!comp.Color.IndistinguishableFrom(newColor))
+			{
+				comp.SetColor(newColor);
+			}
 		}
 	}
 }

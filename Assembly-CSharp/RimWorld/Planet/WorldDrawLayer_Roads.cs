@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -5,97 +6,124 @@ using UnityEngine;
 using Verse;
 using Verse.Noise;
 
-namespace RimWorld.Planet;
-
-public class WorldDrawLayer_Roads : WorldDrawLayer_Paths
+namespace RimWorld.Planet
 {
-	private readonly ModuleBase roadDisplacementX = new Perlin(1.0, 2.0, 0.5, 3, 74173887, QualityMode.Medium);
-
-	private readonly ModuleBase roadDisplacementY = new Perlin(1.0, 2.0, 0.5, 3, 67515931, QualityMode.Medium);
-
-	private readonly ModuleBase roadDisplacementZ = new Perlin(1.0, 2.0, 0.5, 3, 87116801, QualityMode.Medium);
-
-	public override bool VisibleWhenLayerNotSelected => false;
-
-	public override bool VisibleInBackground => false;
-
-	public override IEnumerable Regenerate()
+	// Token: 0x02003C90 RID: 15504
+	public class WorldDrawLayer_Roads : WorldDrawLayer_Paths
 	{
-		foreach (object item in base.Regenerate())
+		// Token: 0x17003473 RID: 13427
+		// (get) Token: 0x06015118 RID: 86296 RVA: 0x00002501 File Offset: 0x00000701
+		public override bool VisibleWhenLayerNotSelected
 		{
-			yield return item;
+			get
+			{
+				return false;
+			}
 		}
-		LayerSubMesh subMesh = GetSubMesh(WorldMaterials.Roads);
-		List<RoadWorldLayerDef> roadLayerDefs = DefDatabase<RoadWorldLayerDef>.AllDefs.OrderBy((RoadWorldLayerDef def) => def.order).ToList();
-		int i = 0;
-		while (i < planetLayer.TilesCount)
+
+		// Token: 0x17003474 RID: 13428
+		// (get) Token: 0x06015119 RID: 86297 RVA: 0x00002501 File Offset: 0x00000701
+		public override bool VisibleInBackground
 		{
-			if (i % 1000 == 0)
+			get
 			{
-				yield return null;
+				return false;
 			}
-			if (subMesh.verts.Count > 60000)
+		}
+
+		// Token: 0x0601511A RID: 86298 RVA: 0x0064E4CB File Offset: 0x0064C6CB
+		public override IEnumerable Regenerate()
+		{
+			foreach (object obj in base.Regenerate())
 			{
-				subMesh = GetSubMesh(WorldMaterials.Roads);
+				yield return obj;
 			}
-			SurfaceTile surfaceTile = (SurfaceTile)planetLayer[i];
-			if (!surfaceTile.WaterCovered)
+			IEnumerator enumerator = null;
+			LayerSubMesh subMesh = base.GetSubMesh(WorldMaterials.Roads);
+			List<RoadWorldLayerDef> roadLayerDefs = (from def in DefDatabase<RoadWorldLayerDef>.AllDefs
+			orderby def.order
+			select def).ToList<RoadWorldLayerDef>();
+			int num;
+			for (int i = 0; i < this.planetLayer.TilesCount; i = num)
 			{
-				List<OutputDirection> list = new List<OutputDirection>();
-				if (surfaceTile.potentialRoads != null)
+				if (i % 1000 == 0)
 				{
-					bool allowSmoothTransition = true;
-					for (int num = 0; num < surfaceTile.potentialRoads.Count - 1; num++)
+					yield return null;
+				}
+				if (subMesh.verts.Count > 60000)
+				{
+					subMesh = base.GetSubMesh(WorldMaterials.Roads);
+				}
+				SurfaceTile surfaceTile = (SurfaceTile)this.planetLayer[i];
+				if (!surfaceTile.WaterCovered)
+				{
+					List<WorldDrawLayer_Paths.OutputDirection> list = new List<WorldDrawLayer_Paths.OutputDirection>();
+					if (surfaceTile.potentialRoads != null)
 					{
-						if (surfaceTile.potentialRoads[num].road.worldTransitionGroup != surfaceTile.potentialRoads[num + 1].road.worldTransitionGroup)
+						bool allowSmoothTransition = true;
+						for (int j = 0; j < surfaceTile.potentialRoads.Count - 1; j++)
 						{
-							allowSmoothTransition = false;
-						}
-					}
-					for (int num2 = 0; num2 < roadLayerDefs.Count; num2++)
-					{
-						bool flag = false;
-						list.Clear();
-						for (int num3 = 0; num3 < surfaceTile.potentialRoads.Count; num3++)
-						{
-							RoadDef road = surfaceTile.potentialRoads[num3].road;
-							float layerWidth = road.GetLayerWidth(roadLayerDefs[num2]);
-							if (layerWidth > 0f)
+							if (surfaceTile.potentialRoads[j].road.worldTransitionGroup != surfaceTile.potentialRoads[j + 1].road.worldTransitionGroup)
 							{
-								flag = true;
+								allowSmoothTransition = false;
 							}
-							list.Add(new OutputDirection
-							{
-								neighbor = surfaceTile.potentialRoads[num3].neighbor,
-								width = layerWidth,
-								distortionFrequency = road.distortionFrequency,
-								distortionIntensity = road.distortionIntensity
-							});
 						}
-						if (flag)
+						for (int k = 0; k < roadLayerDefs.Count; k++)
 						{
-							GeneratePaths(subMesh, new PlanetTile(i, planetLayer), list, roadLayerDefs[num2].color, allowSmoothTransition);
+							bool flag = false;
+							list.Clear();
+							for (int l = 0; l < surfaceTile.potentialRoads.Count; l++)
+							{
+								RoadDef road = surfaceTile.potentialRoads[l].road;
+								float layerWidth = road.GetLayerWidth(roadLayerDefs[k]);
+								if (layerWidth > 0f)
+								{
+									flag = true;
+								}
+								list.Add(new WorldDrawLayer_Paths.OutputDirection
+								{
+									neighbor = surfaceTile.potentialRoads[l].neighbor,
+									width = layerWidth,
+									distortionFrequency = road.distortionFrequency,
+									distortionIntensity = road.distortionIntensity
+								});
+							}
+							if (flag)
+							{
+								base.GeneratePaths(subMesh, new PlanetTile(i, this.planetLayer), list, roadLayerDefs[k].color, allowSmoothTransition);
+							}
 						}
 					}
 				}
+				num = i + 1;
 			}
-			int num4 = i + 1;
-			i = num4;
+			base.FinalizeMesh(MeshParts.All);
+			yield break;
+			yield break;
 		}
-		FinalizeMesh(MeshParts.All);
-	}
 
-	public override Vector3 FinalizePoint(Vector3 inp, float distortionFrequency, float distortionIntensity)
-	{
-		Vector3 coordinate = inp * distortionFrequency;
-		float magnitude = inp.magnitude;
-		Vector3 vector = new Vector3(roadDisplacementX.GetValue(coordinate), roadDisplacementY.GetValue(coordinate), roadDisplacementZ.GetValue(coordinate));
-		if ((double)vector.magnitude > 0.0001)
+		// Token: 0x0601511B RID: 86299 RVA: 0x0064E4DC File Offset: 0x0064C6DC
+		public override Vector3 FinalizePoint(Vector3 inp, float distortionFrequency, float distortionIntensity)
 		{
-			float num = (1f / (1f + Mathf.Exp((0f - vector.magnitude) / 1f * 2f)) * 2f - 1f) * 1f;
-			vector = vector.normalized * num;
+			Vector3 coordinate = inp * distortionFrequency;
+			float magnitude = inp.magnitude;
+			Vector3 a = new Vector3(this.roadDisplacementX.GetValue(coordinate), this.roadDisplacementY.GetValue(coordinate), this.roadDisplacementZ.GetValue(coordinate));
+			if ((double)a.magnitude > 0.0001)
+			{
+				float d = (1f / (1f + Mathf.Exp(-a.magnitude / 1f * 2f)) * 2f - 1f) * 1f;
+				a = a.normalized * d;
+			}
+			inp = (inp + a * distortionIntensity).normalized * magnitude;
+			return inp + inp.normalized * 0.02f;
 		}
-		inp = (inp + vector * distortionIntensity).normalized * magnitude;
-		return inp + inp.normalized * 0.02f;
+
+		// Token: 0x0400EB0A RID: 60170
+		private readonly ModuleBase roadDisplacementX = new Perlin(1.0, 2.0, 0.5, 3, 74173887, QualityMode.Medium);
+
+		// Token: 0x0400EB0B RID: 60171
+		private readonly ModuleBase roadDisplacementY = new Perlin(1.0, 2.0, 0.5, 3, 67515931, QualityMode.Medium);
+
+		// Token: 0x0400EB0C RID: 60172
+		private readonly ModuleBase roadDisplacementZ = new Perlin(1.0, 2.0, 0.5, 3, 87116801, QualityMode.Medium);
 	}
 }

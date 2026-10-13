@@ -1,18 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_RemoveDangerousTerrain : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003933 RID: 14643
+	public class SymbolResolver_RemoveDangerousTerrain : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		TerrainGrid terrainGrid = map.terrainGrid;
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x060142AD RID: 82605 RVA: 0x00602350 File Offset: 0x00600550
+		public override void Resolve(ResolveParams rp)
 		{
-			if (terrainGrid.TerrainAt(item).dangerous)
+			Map map = BaseGen.globalSettings.map;
+			TerrainGrid terrainGrid = map.terrainGrid;
+			foreach (IntVec3 c in rp.rect)
 			{
-				terrainGrid.SetTerrain(item, map.BiomeAt(item).TerrainForAffordance(TerrainAffordanceDefOf.Heavy));
+				if (terrainGrid.TerrainAt(c).dangerous)
+				{
+					terrainGrid.SetTerrain(c, map.BiomeAt(c).TerrainForAffordance(TerrainAffordanceDefOf.Heavy));
+				}
 			}
 		}
 	}

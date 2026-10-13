@@ -1,35 +1,42 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_Autofeed : ThinkNode_JobGiver
+namespace RimWorld
 {
-	protected override Job TryGiveJob(Pawn pawn)
+	// Token: 0x0200147A RID: 5242
+	public class JobGiver_Autofeed : ThinkNode_JobGiver
 	{
-		if (!pawn.CanReserve(pawn))
+		// Token: 0x06007E54 RID: 32340 RVA: 0x00260720 File Offset: 0x0025E920
+		protected override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
+			if (!pawn.CanReserve(pawn, 1, -1, null, false))
+			{
+				return null;
+			}
+			Thing thing;
+			Pawn pawn2 = ChildcareUtility.FindAutofeedBaby(pawn, AutofeedMode.Urgent, out thing);
+			if (pawn2 == null || !pawn2.Spawned)
+			{
+				return null;
+			}
+			Pawn pawn3;
+			ChildcareUtility.BreastfeedFailReason? breastfeedFailReason;
+			if (thing != pawn && ChildcareUtility.ImmobileBreastfeederAvailable(pawn, pawn2, false, out pawn3, out breastfeedFailReason))
+			{
+				thing = pawn3;
+			}
+			if (thing == null)
+			{
+				return null;
+			}
+			return ChildcareUtility.MakeAutofeedBabyJob(pawn, pawn2, thing);
 		}
-		Thing food;
-		Pawn pawn2 = ChildcareUtility.FindAutofeedBaby(pawn, AutofeedMode.Urgent, out food);
-		if (pawn2 == null || !pawn2.Spawned)
-		{
-			return null;
-		}
-		if (food != pawn && ChildcareUtility.ImmobileBreastfeederAvailable(pawn, pawn2, forced: false, out var feeder, out var _))
-		{
-			food = feeder;
-		}
-		if (food == null)
-		{
-			return null;
-		}
-		return ChildcareUtility.MakeAutofeedBabyJob(pawn, pawn2, food);
-	}
 
-	public override float GetPriority(Pawn pawn)
-	{
-		return 9.5f;
+		// Token: 0x06007E55 RID: 32341 RVA: 0x00260779 File Offset: 0x0025E979
+		public override float GetPriority(Pawn pawn)
+		{
+			return 9.5f;
+		}
 	}
 }

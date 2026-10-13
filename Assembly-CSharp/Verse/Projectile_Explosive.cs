@@ -1,90 +1,99 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class Projectile_Explosive : Projectile
+namespace Verse
 {
-	private int ticksToDetonation;
-
-	public override void ExposeData()
+	// Token: 0x020008C6 RID: 2246
+	public class Projectile_Explosive : Projectile
 	{
-		base.ExposeData();
-		Scribe_Values.Look(ref ticksToDetonation, "ticksToDetonation", 0);
-	}
-
-	protected override void TickInterval(int delta)
-	{
-		base.TickInterval(delta);
-		if (ticksToDetonation > 0)
+		// Token: 0x060038E3 RID: 14563 RVA: 0x0012F46F File Offset: 0x0012D66F
+		public override void ExposeData()
 		{
-			ticksToDetonation -= delta;
-			if (ticksToDetonation <= 0)
+			base.ExposeData();
+			Scribe_Values.Look<int>(ref this.ticksToDetonation, "ticksToDetonation", 0, false);
+		}
+
+		// Token: 0x060038E4 RID: 14564 RVA: 0x0012F489 File Offset: 0x0012D689
+		protected override void TickInterval(int delta)
+		{
+			base.TickInterval(delta);
+			if (this.ticksToDetonation > 0)
 			{
-				Explode();
+				this.ticksToDetonation -= delta;
+				if (this.ticksToDetonation <= 0)
+				{
+					this.Explode();
+				}
 			}
 		}
-	}
 
-	protected override void Impact(Thing hitThing, bool blockedByShield = false)
-	{
-		if (blockedByShield || def.projectile.explosionDelay == 0)
+		// Token: 0x060038E5 RID: 14565 RVA: 0x0012F4B8 File Offset: 0x0012D6B8
+		protected override void Impact(Thing hitThing, bool blockedByShield = false)
 		{
-			Explode();
-			return;
+			if (blockedByShield || this.def.projectile.explosionDelay == 0)
+			{
+				this.Explode();
+				return;
+			}
+			this.landed = true;
+			this.ticksToDetonation = this.def.projectile.explosionDelay;
+			GenExplosion.NotifyNearbyPawnsOfDangerousExplosive(this, base.DamageDef, this.launcher.Faction, this.launcher);
 		}
-		landed = true;
-		ticksToDetonation = def.projectile.explosionDelay;
-		GenExplosion.NotifyNearbyPawnsOfDangerousExplosive(this, base.DamageDef, launcher.Faction, launcher);
-	}
 
-	protected virtual void Explode()
-	{
-		Map map = base.Map;
-		Destroy();
-		if (def.projectile.explosionEffect != null)
+		// Token: 0x060038E6 RID: 14566 RVA: 0x0012F51C File Offset: 0x0012D71C
+		protected virtual void Explode()
 		{
-			Effecter effecter = def.projectile.explosionEffect.Spawn();
-			if (def.projectile.explosionEffectLifetimeTicks != 0)
+			Map map = base.Map;
+			this.Destroy(DestroyMode.Vanish);
+			if (this.def.projectile.explosionEffect != null)
 			{
-				map.effecterMaintainer.AddEffecterToMaintain(effecter, base.Position.ToVector3().ToIntVec3(), def.projectile.explosionEffectLifetimeTicks);
+				Effecter effecter = this.def.projectile.explosionEffect.Spawn();
+				if (this.def.projectile.explosionEffectLifetimeTicks != 0)
+				{
+					map.effecterMaintainer.AddEffecterToMaintain(effecter, base.Position.ToVector3().ToIntVec3(), this.def.projectile.explosionEffectLifetimeTicks);
+				}
+				else
+				{
+					effecter.Trigger(new TargetInfo(base.Position, map, false), new TargetInfo(base.Position, map, false), -1);
+					effecter.Cleanup();
+				}
 			}
-			else
+			IntVec3 position = base.Position;
+			Map map2 = map;
+			float explosionRadius = this.def.projectile.explosionRadius;
+			DamageDef damageDef = base.DamageDef;
+			Thing launcher = this.launcher;
+			int damageAmount = this.DamageAmount;
+			float armorPenetration = this.ArmorPenetration;
+			SoundDef soundExplode = this.def.projectile.soundExplode;
+			ThingDef equipmentDef = this.equipmentDef;
+			ThingDef def = this.def;
+			Thing thing = this.intendedTarget.Thing;
+			ThingDef postExplosionSpawnThingDef = this.def.projectile.postExplosionSpawnThingDef ?? (this.def.projectile.explosionSpawnsSingleFilth ? null : this.def.projectile.filth);
+			ThingDef postExplosionSpawnThingDefWater = this.def.projectile.postExplosionSpawnThingDefWater;
+			float postExplosionSpawnChance = this.def.projectile.postExplosionSpawnChance;
+			int postExplosionSpawnThingCount = this.def.projectile.postExplosionSpawnThingCount;
+			GasType? postExplosionGasType = this.def.projectile.postExplosionGasType;
+			ThingDef preExplosionSpawnThingDef = this.def.projectile.preExplosionSpawnThingDef;
+			float preExplosionSpawnChance = this.def.projectile.preExplosionSpawnChance;
+			int preExplosionSpawnThingCount = this.def.projectile.preExplosionSpawnThingCount;
+			bool applyDamageToExplosionCellsNeighbors = this.def.projectile.applyDamageToExplosionCellsNeighbors;
+			float explosionChanceToStartFire = this.def.projectile.explosionChanceToStartFire;
+			bool explosionDamageFalloff = this.def.projectile.explosionDamageFalloff;
+			float? direction = new float?(this.origin.AngleToFlat(this.destination));
+			float expolosionPropagationSpeed = base.DamageDef.expolosionPropagationSpeed;
+			float screenShakeFactor = this.def.projectile.screenShakeFactor;
+			bool doExplosionVFX = this.def.projectile.doExplosionVFX;
+			ThingDef preExplosionSpawnSingleThingDef = this.def.projectile.preExplosionSpawnSingleThingDef;
+			ThingDef postExplosionSpawnSingleThingDef = this.def.projectile.postExplosionSpawnSingleThingDef;
+			GenExplosion.DoExplosion(position, map2, explosionRadius, damageDef, launcher, damageAmount, armorPenetration, soundExplode, equipmentDef, def, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount, postExplosionGasType, null, 255, applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, preExplosionSpawnChance, preExplosionSpawnThingCount, explosionChanceToStartFire, explosionDamageFalloff, direction, null, null, doExplosionVFX, expolosionPropagationSpeed, 0f, true, postExplosionSpawnThingDefWater, screenShakeFactor, null, null, postExplosionSpawnSingleThingDef, preExplosionSpawnSingleThingDef);
+			if (this.def.projectile.explosionSpawnsSingleFilth && this.def.projectile.filth != null && this.def.projectile.filthCount.TrueMax > 0 && Rand.Chance(this.def.projectile.filthChance) && !base.Position.Filled(map))
 			{
-				effecter.Trigger(new TargetInfo(base.Position, map), new TargetInfo(base.Position, map));
-				effecter.Cleanup();
+				FilthMaker.TryMakeFilth(base.Position, map, this.def.projectile.filth, this.def.projectile.filthCount.RandomInRange, FilthSourceFlags.None, true);
 			}
 		}
-		IntVec3 position = base.Position;
-		float explosionRadius = def.projectile.explosionRadius;
-		DamageDef damageDef = base.DamageDef;
-		Thing instigator = launcher;
-		int damageAmount = DamageAmount;
-		float armorPenetration = ArmorPenetration;
-		SoundDef soundExplode = def.projectile.soundExplode;
-		ThingDef weapon = equipmentDef;
-		ThingDef projectile = def;
-		Thing thing = intendedTarget.Thing;
-		ThingDef postExplosionSpawnThingDef = def.projectile.postExplosionSpawnThingDef ?? (def.projectile.explosionSpawnsSingleFilth ? null : def.projectile.filth);
-		ThingDef postExplosionSpawnThingDefWater = def.projectile.postExplosionSpawnThingDefWater;
-		float postExplosionSpawnChance = def.projectile.postExplosionSpawnChance;
-		int postExplosionSpawnThingCount = def.projectile.postExplosionSpawnThingCount;
-		GasType? postExplosionGasType = def.projectile.postExplosionGasType;
-		ThingDef preExplosionSpawnThingDef = def.projectile.preExplosionSpawnThingDef;
-		float preExplosionSpawnChance = def.projectile.preExplosionSpawnChance;
-		int preExplosionSpawnThingCount = def.projectile.preExplosionSpawnThingCount;
-		bool applyDamageToExplosionCellsNeighbors = def.projectile.applyDamageToExplosionCellsNeighbors;
-		float explosionChanceToStartFire = def.projectile.explosionChanceToStartFire;
-		bool explosionDamageFalloff = def.projectile.explosionDamageFalloff;
-		float? direction = origin.AngleToFlat(destination);
-		float expolosionPropagationSpeed = base.DamageDef.expolosionPropagationSpeed;
-		float screenShakeFactor = def.projectile.screenShakeFactor;
-		bool doExplosionVFX = def.projectile.doExplosionVFX;
-		ThingDef preExplosionSpawnSingleThingDef = def.projectile.preExplosionSpawnSingleThingDef;
-		ThingDef postExplosionSpawnSingleThingDef = def.projectile.postExplosionSpawnSingleThingDef;
-		GenExplosion.DoExplosion(position, map, explosionRadius, damageDef, instigator, damageAmount, armorPenetration, soundExplode, weapon, projectile, thing, postExplosionSpawnThingDef, postExplosionSpawnChance, postExplosionSpawnThingCount, postExplosionGasType, null, 255, applyDamageToExplosionCellsNeighbors, preExplosionSpawnThingDef, preExplosionSpawnChance, preExplosionSpawnThingCount, explosionChanceToStartFire, explosionDamageFalloff, direction, null, null, doExplosionVFX, expolosionPropagationSpeed, 0f, doSoundEffects: true, postExplosionSpawnThingDefWater, screenShakeFactor, null, null, postExplosionSpawnSingleThingDef, preExplosionSpawnSingleThingDef);
-		if (def.projectile.explosionSpawnsSingleFilth && def.projectile.filth != null && def.projectile.filthCount.TrueMax > 0 && Rand.Chance(def.projectile.filthChance) && !base.Position.Filled(map))
-		{
-			FilthMaker.TryMakeFilth(base.Position, map, def.projectile.filth, def.projectile.filthCount.RandomInRange);
-		}
+
+		// Token: 0x04002A10 RID: 10768
+		private int ticksToDetonation;
 	}
 }

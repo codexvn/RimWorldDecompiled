@@ -1,19 +1,24 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_Filter_Hacked : QuestPart_Filter
+namespace RimWorld
 {
-	protected override bool Pass(SignalArgs args)
+	// Token: 0x02001BB9 RID: 7097
+	public class QuestPart_Filter_Hacked : QuestPart_Filter
 	{
-		if (args.TryGetArg("SUBJECT", out Thing arg))
+		// Token: 0x06009E07 RID: 40455 RVA: 0x002DBCF8 File Offset: 0x002D9EF8
+		protected override bool Pass(SignalArgs args)
 		{
-			CompHackable compHackable = arg.TryGetComp<CompHackable>();
-			if (compHackable != null)
+			Thing thing;
+			if (args.TryGetArg<Thing>("SUBJECT", out thing))
 			{
-				return compHackable.IsHacked;
+				CompHackable compHackable = thing.TryGetComp<CompHackable>();
+				if (compHackable != null)
+				{
+					return compHackable.IsHacked;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

@@ -1,18 +1,27 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RitualTargetFilterDef : Def
+namespace RimWorld
 {
-	public Type workerClass;
-
-	public bool fallBackToGatherSpot;
-
-	public bool fallbackToRitualSpot;
-
-	public RitualTargetFilter GetInstance()
+	// Token: 0x020027D2 RID: 10194
+	public class RitualTargetFilterDef : Def
 	{
-		return (RitualTargetFilter)Activator.CreateInstance(workerClass, this);
+		// Token: 0x0600DF22 RID: 57122 RVA: 0x0041941B File Offset: 0x0041761B
+		public RitualTargetFilter GetInstance()
+		{
+			return (RitualTargetFilter)Activator.CreateInstance(this.workerClass, new object[]
+			{
+				this
+			});
+		}
+
+		// Token: 0x0400963F RID: 38463
+		public Type workerClass;
+
+		// Token: 0x04009640 RID: 38464
+		public bool fallBackToGatherSpot;
+
+		// Token: 0x04009641 RID: 38465
+		public bool fallbackToRitualSpot;
 	}
 }

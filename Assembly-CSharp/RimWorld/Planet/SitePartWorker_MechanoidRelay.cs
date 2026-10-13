@@ -1,17 +1,21 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class SitePartWorker_MechanoidRelay : SitePartWorker
+namespace RimWorld.Planet
 {
-	public override void Init(Site site, SitePart sitePart)
+	// Token: 0x02003DF4 RID: 15860
+	public class SitePartWorker_MechanoidRelay : SitePartWorker
 	{
-		base.Init(site, sitePart);
-		sitePart.things = new ThingOwner<Thing>(sitePart);
-		sitePart.things.TryAdd(ThingMaker.MakeThing(ThingDefOf.MechRelay));
-		for (int i = 0; i < sitePart.parms.stabilizerCount; i++)
+		// Token: 0x06015A2F RID: 88623 RVA: 0x0067A19C File Offset: 0x0067839C
+		public override void Init(Site site, SitePart sitePart)
 		{
-			sitePart.things.TryAdd(ThingMaker.MakeThing(ThingDefOf.MechStabilizer));
+			base.Init(site, sitePart);
+			sitePart.things = new ThingOwner<Thing>(sitePart);
+			sitePart.things.TryAdd(ThingMaker.MakeThing(ThingDefOf.MechRelay, null), true);
+			for (int i = 0; i < sitePart.parms.stabilizerCount; i++)
+			{
+				sitePart.things.TryAdd(ThingMaker.MakeThing(ThingDefOf.MechStabilizer, null), true);
+			}
 		}
 	}
 }

@@ -1,9 +1,12 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class GlobalWorldDrawLayerDef : Def
+namespace RimWorld
 {
-	public Type worldDrawLayer;
+	// Token: 0x02001A41 RID: 6721
+	public class GlobalWorldDrawLayerDef : Def
+	{
+		// Token: 0x0400645C RID: 25692
+		public Type worldDrawLayer;
+	}
 }

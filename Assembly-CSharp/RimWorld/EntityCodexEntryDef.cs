@@ -1,113 +1,171 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class EntityCodexEntryDef : Def
+namespace RimWorld
 {
-	public EntityCategoryDef category;
-
-	public bool startDiscovered;
-
-	public List<ThingDef> linkedThings = new List<ThingDef>();
-
-	private List<IncidentDef> linkedIncidents = new List<IncidentDef>();
-
-	public List<ResearchProjectDef> discoveredResearchProjects = new List<ResearchProjectDef>();
-
-	public List<IncidentDef> provocationIncidents = new List<IncidentDef>();
-
-	public EntityDiscoveryType discoveryType;
-
-	public bool allowDiscoveryWhileMapGenerating;
-
-	public int orderInCategory = 9999999;
-
-	public List<AnomalyPlaystyleDef> hideInPlaystyles = new List<AnomalyPlaystyleDef>();
-
-	private ThingDef useDescriptionFrom;
-
-	[NoTranslate]
-	private string uiIconPath;
-
-	public Texture2D icon;
-
-	public Texture2D silhouette;
-
-	private const string SilhouetteTexPathSuffix = "_Silhouette";
-
-	public string Description
+	// Token: 0x02001A1D RID: 6685
+	public class EntityCodexEntryDef : Def
 	{
-		get
+		// Token: 0x170016F9 RID: 5881
+		// (get) Token: 0x060096A9 RID: 38569 RVA: 0x002C11E2 File Offset: 0x002BF3E2
+		public string Description
 		{
-			if (useDescriptionFrom == null)
+			get
 			{
-				return description;
+				if (this.useDescriptionFrom == null)
+				{
+					return this.description;
+				}
+				return this.useDescriptionFrom.description;
 			}
-			return useDescriptionFrom.description;
 		}
-	}
 
-	public bool Discovered => Find.EntityCodex.Discovered(this);
-
-	public bool Visible
-	{
-		get
+		// Token: 0x170016FA RID: 5882
+		// (get) Token: 0x060096AA RID: 38570 RVA: 0x002C11FE File Offset: 0x002BF3FE
+		public bool Discovered
 		{
-			if (Current.ProgramState == ProgramState.Playing)
+			get
 			{
-				return !hideInPlaystyles.Contains(Find.Storyteller.difficulty.AnomalyPlaystyleDef);
+				return Find.EntityCodex.Discovered(this);
 			}
-			return true;
 		}
-	}
 
-	public override void PostLoad()
-	{
-		LongEventHandler.ExecuteWhenFinished(delegate
+		// Token: 0x170016FB RID: 5883
+		// (get) Token: 0x060096AB RID: 38571 RVA: 0x002C120B File Offset: 0x002BF40B
+		public bool Visible
 		{
-			icon = (uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(uiIconPath));
-			silhouette = (uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(uiIconPath + "_Silhouette"));
-		});
-	}
-
-	public override void ResolveReferences()
-	{
-		base.ResolveReferences();
-		foreach (ThingDef linkedThing in linkedThings)
-		{
-			if (linkedThing.entityCodexEntry == null)
+			get
 			{
-				linkedThing.entityCodexEntry = this;
-				continue;
+				return Current.ProgramState != ProgramState.Playing || !this.hideInPlaystyles.Contains(Find.Storyteller.difficulty.AnomalyPlaystyleDef);
 			}
-			Log.Error("EntityCodexEntryDef " + defName + " is linked to " + linkedThing.defName + " but " + linkedThing.defName + " is already linked to " + linkedThing.entityCodexEntry.defName + ".");
 		}
-		foreach (IncidentDef linkedIncident in linkedIncidents)
-		{
-			if (linkedIncident.codexEntry == null)
-			{
-				linkedIncident.codexEntry = this;
-				continue;
-			}
-			Log.Error("EntityCodexEntryDef " + defName + " is linked to " + linkedIncident.defName + " but " + linkedIncident.defName + " is already linked to " + linkedIncident.codexEntry.defName + ".");
-		}
-	}
 
-	public override IEnumerable<string> ConfigErrors()
-	{
-		foreach (string item in base.ConfigErrors())
+		// Token: 0x060096AC RID: 38572 RVA: 0x002C1234 File Offset: 0x002BF434
+		public override void PostLoad()
 		{
-			yield return item;
+			LongEventHandler.ExecuteWhenFinished(delegate
+			{
+				this.icon = (this.uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(this.uiIconPath, true));
+				this.silhouette = (this.uiIconPath.NullOrEmpty() ? BaseContent.BadTex : ContentFinder<Texture2D>.Get(this.uiIconPath + "_Silhouette", true));
+			});
 		}
-		if (category == null)
+
+		// Token: 0x060096AD RID: 38573 RVA: 0x002C1248 File Offset: 0x002BF448
+		public override void ResolveReferences()
 		{
-			yield return "category is null.";
+			base.ResolveReferences();
+			foreach (ThingDef thingDef in this.linkedThings)
+			{
+				if (thingDef.entityCodexEntry == null)
+				{
+					thingDef.entityCodexEntry = this;
+				}
+				else
+				{
+					Log.Error(string.Concat(new string[]
+					{
+						"EntityCodexEntryDef ",
+						this.defName,
+						" is linked to ",
+						thingDef.defName,
+						" but ",
+						thingDef.defName,
+						" is already linked to ",
+						thingDef.entityCodexEntry.defName,
+						"."
+					}));
+				}
+			}
+			foreach (IncidentDef incidentDef in this.linkedIncidents)
+			{
+				if (incidentDef.codexEntry == null)
+				{
+					incidentDef.codexEntry = this;
+				}
+				else
+				{
+					Log.Error(string.Concat(new string[]
+					{
+						"EntityCodexEntryDef ",
+						this.defName,
+						" is linked to ",
+						incidentDef.defName,
+						" but ",
+						incidentDef.defName,
+						" is already linked to ",
+						incidentDef.codexEntry.defName,
+						"."
+					}));
+				}
+			}
 		}
-		if (uiIconPath.NullOrEmpty())
+
+		// Token: 0x060096AE RID: 38574 RVA: 0x002C13C4 File Offset: 0x002BF5C4
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return "missing icon.";
+			foreach (string text in base.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			if (this.category == null)
+			{
+				yield return "category is null.";
+			}
+			if (this.uiIconPath.NullOrEmpty())
+			{
+				yield return "missing icon.";
+			}
+			yield break;
+			yield break;
 		}
+
+		// Token: 0x0400632F RID: 25391
+		public EntityCategoryDef category;
+
+		// Token: 0x04006330 RID: 25392
+		public bool startDiscovered;
+
+		// Token: 0x04006331 RID: 25393
+		public List<ThingDef> linkedThings = new List<ThingDef>();
+
+		// Token: 0x04006332 RID: 25394
+		private List<IncidentDef> linkedIncidents = new List<IncidentDef>();
+
+		// Token: 0x04006333 RID: 25395
+		public List<ResearchProjectDef> discoveredResearchProjects = new List<ResearchProjectDef>();
+
+		// Token: 0x04006334 RID: 25396
+		public List<IncidentDef> provocationIncidents = new List<IncidentDef>();
+
+		// Token: 0x04006335 RID: 25397
+		public EntityDiscoveryType discoveryType;
+
+		// Token: 0x04006336 RID: 25398
+		public bool allowDiscoveryWhileMapGenerating;
+
+		// Token: 0x04006337 RID: 25399
+		public int orderInCategory = 9999999;
+
+		// Token: 0x04006338 RID: 25400
+		public List<AnomalyPlaystyleDef> hideInPlaystyles = new List<AnomalyPlaystyleDef>();
+
+		// Token: 0x04006339 RID: 25401
+		private ThingDef useDescriptionFrom;
+
+		// Token: 0x0400633A RID: 25402
+		[NoTranslate]
+		private string uiIconPath;
+
+		// Token: 0x0400633B RID: 25403
+		public Texture2D icon;
+
+		// Token: 0x0400633C RID: 25404
+		public Texture2D silhouette;
+
+		// Token: 0x0400633D RID: 25405
+		private const string SilhouetteTexPathSuffix = "_Silhouette";
 	}
 }

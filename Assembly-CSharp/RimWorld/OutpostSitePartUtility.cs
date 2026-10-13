@@ -1,11 +1,15 @@
+﻿using System;
 using RimWorld.Planet;
 
-namespace RimWorld;
-
-public static class OutpostSitePartUtility
+namespace RimWorld
 {
-	public static int GetPawnGroupMakerSeed(SitePartParams parms)
+	// Token: 0x0200284A RID: 10314
+	public static class OutpostSitePartUtility
 	{
-		return parms.randomValue;
+		// Token: 0x0600E194 RID: 57748 RVA: 0x004220E7 File Offset: 0x004202E7
+		public static int GetPawnGroupMakerSeed(SitePartParams parms)
+		{
+			return parms.randomValue;
+		}
 	}
 }

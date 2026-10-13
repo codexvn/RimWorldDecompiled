@@ -1,33 +1,35 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public static class BillRepeatModeUtility
+namespace RimWorld
 {
-	public static void MakeConfigFloatMenu(Bill_Production bill)
+	// Token: 0x02002A76 RID: 10870
+	public static class BillRepeatModeUtility
 	{
-		List<FloatMenuOption> list = new List<FloatMenuOption>();
-		list.Add(new FloatMenuOption(BillRepeatModeDefOf.RepeatCount.LabelCap, delegate
+		// Token: 0x0600F20E RID: 61966 RVA: 0x00463120 File Offset: 0x00461320
+		public static void MakeConfigFloatMenu(Bill_Production bill)
 		{
-			bill.repeatMode = BillRepeatModeDefOf.RepeatCount;
-		}));
-		FloatMenuOption item = new FloatMenuOption(BillRepeatModeDefOf.TargetCount.LabelCap, delegate
-		{
-			if (!bill.recipe.WorkerCounter.CanCountProducts(bill))
+			List<FloatMenuOption> list = new List<FloatMenuOption>();
+			list.Add(new FloatMenuOption(BillRepeatModeDefOf.RepeatCount.LabelCap, delegate()
 			{
-				Messages.Message("RecipeCannotHaveTargetCount".Translate(), MessageTypeDefOf.RejectInput, historical: false);
-			}
-			else
+				bill.repeatMode = BillRepeatModeDefOf.RepeatCount;
+			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+			FloatMenuOption item = new FloatMenuOption(BillRepeatModeDefOf.TargetCount.LabelCap, delegate()
 			{
+				if (!bill.recipe.WorkerCounter.CanCountProducts(bill))
+				{
+					Messages.Message("RecipeCannotHaveTargetCount".Translate(), MessageTypeDefOf.RejectInput, false);
+					return;
+				}
 				bill.repeatMode = BillRepeatModeDefOf.TargetCount;
-			}
-		});
-		list.Add(item);
-		list.Add(new FloatMenuOption(BillRepeatModeDefOf.Forever.LabelCap, delegate
-		{
-			bill.repeatMode = BillRepeatModeDefOf.Forever;
-		}));
-		Find.WindowStack.Add(new FloatMenu(list));
+			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+			list.Add(item);
+			list.Add(new FloatMenuOption(BillRepeatModeDefOf.Forever.LabelCap, delegate()
+			{
+				bill.repeatMode = BillRepeatModeDefOf.Forever;
+			}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+			Find.WindowStack.Add(new FloatMenu(list));
+		}
 	}
 }

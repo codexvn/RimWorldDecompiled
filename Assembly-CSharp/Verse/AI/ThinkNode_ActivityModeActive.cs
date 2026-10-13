@@ -1,15 +1,15 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class ThinkNode_ActivityModeActive : ThinkNode_Conditional
+namespace Verse.AI
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02000FEF RID: 4079
+	public class ThinkNode_ActivityModeActive : ThinkNode_Conditional
 	{
-		if (pawn.GetComp<CompActivity>() != null)
+		// Token: 0x0600646A RID: 25706 RVA: 0x001FD580 File Offset: 0x001FB780
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return pawn.GetComp<CompActivity>().IsActive;
+			return pawn.GetComp<CompActivity>() != null && pawn.GetComp<CompActivity>().IsActive;
 		}
-		return false;
 	}
 }

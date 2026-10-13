@@ -1,43 +1,43 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_RefugeeDelayedReward : QuestNode
+namespace RimWorld.QuestGen
 {
-	protected override void RunInt()
+	// Token: 0x02003B50 RID: 15184
+	public class QuestNode_Root_RefugeeDelayedReward : QuestNode
 	{
-		Quest quest = QuestGen.quest;
-		Slate slate = QuestGen.slate;
-		Map map = QuestGen_Get.GetMap();
-		Faction faction = slate.Get<Faction>("faction");
-		FloatRange marketValueRange = slate.Get<FloatRange>("marketValueRange");
-		Pawn val = slate.Get<Pawn>("rewardGiver");
-		quest.ReservePawns(Gen.YieldSingle(val));
-		quest.ReserveFaction(faction);
-		int num = Rand.Range(5, 20) * 60000;
-		slate.Set("rewardDelayTicks", num);
-		quest.Delay(num, delegate
+		// Token: 0x06014A36 RID: 84534 RVA: 0x0062A0E8 File Offset: 0x006282E8
+		protected override void RunInt()
 		{
-			ThingSetMakerParams parms = new ThingSetMakerParams
+			Quest quest = QuestGen.quest;
+			Slate slate = QuestGen.slate;
+			Map map = QuestGen_Get.GetMap(false, null, false);
+			Faction faction = slate.Get<Faction>("faction", null, false);
+			FloatRange marketValueRange = slate.Get<FloatRange>("marketValueRange", default(FloatRange), false);
+			Pawn val = slate.Get<Pawn>("rewardGiver", null, false);
+			quest.ReservePawns(Gen.YieldSingle<Pawn>(val));
+			quest.ReserveFaction(faction);
+			int num = Rand.Range(5, 20) * 60000;
+			slate.Set<int>("rewardDelayTicks", num, false);
+			quest.Delay(num, delegate
 			{
-				totalMarketValueRange = marketValueRange,
-				qualityGenerator = QualityGenerator.Reward,
-				makingFaction = faction
-			};
-			List<Thing> list = ThingSetMakerDefOf.Reward_ItemsStandard.root.Generate(parms);
-			slate.Set("listOfRewards", GenLabel.ThingsLabel(list));
-			quest.DropPods(map.Parent, list, null, null, "[rewardLetterText]", null, true, useTradeDropSpot: true, joinPlayer: false, makePrisoners: false, null, null, QuestPart.SignalListenMode.OngoingOnly, null, destroyItemsOnCleanup: true, dropAllInSamePod: false, allowFogged: false, canRetargetAnyMap: true);
-			QuestGen_End.End(quest, QuestEndOutcome.Unknown);
-		}, null, null, null, reactivatable: false, null, null, isQuestTimeout: false, null, null, "RewardDelay", tickHistorically: false, QuestPart.SignalListenMode.OngoingOnly, waitUntilPlayerHasHomeMap: true);
-	}
-
-	protected override bool TestRunInt(Slate slate)
-	{
-		if (slate.Get<Pawn>("rewardGiver") != null && slate.TryGet<FloatRange>("marketValueRange", out var _) && slate.Get<Faction>("faction") != null)
-		{
-			return QuestGen_Get.GetMap() != null;
+				ThingSetMakerParams parms = default(ThingSetMakerParams);
+				parms.totalMarketValueRange = new FloatRange?(marketValueRange);
+				parms.qualityGenerator = new QualityGenerator?(QualityGenerator.Reward);
+				parms.makingFaction = faction;
+				List<Thing> list = ThingSetMakerDefOf.Reward_ItemsStandard.root.Generate(parms);
+				slate.Set<string>("listOfRewards", GenLabel.ThingsLabel(list, "  - "), false);
+				quest.DropPods(map.Parent, list, null, null, "[rewardLetterText]", null, new bool?(true), true, false, false, null, null, QuestPart.SignalListenMode.OngoingOnly, null, true, false, false, null);
+				quest.End(QuestEndOutcome.Unknown, 0, null, null, QuestPart.SignalListenMode.OngoingOnly, false, false);
+			}, null, null, null, false, null, null, false, null, null, "RewardDelay", false, QuestPart.SignalListenMode.OngoingOnly, true);
 		}
-		return false;
+
+		// Token: 0x06014A37 RID: 84535 RVA: 0x0062A1E4 File Offset: 0x006283E4
+		protected override bool TestRunInt(Slate slate)
+		{
+			FloatRange floatRange;
+			return slate.Get<Pawn>("rewardGiver", null, false) != null && slate.TryGet<FloatRange>("marketValueRange", out floatRange, false) && slate.Get<Faction>("faction", null, false) != null && QuestGen_Get.GetMap(false, null, false) != null;
+		}
 	}
 }

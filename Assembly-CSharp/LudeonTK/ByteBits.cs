@@ -1,29 +1,32 @@
+﻿using System;
 using System.Runtime.CompilerServices;
 
-namespace LudeonTK;
-
-public struct ByteBits
+namespace LudeonTK
 {
-	private byte intValue;
-
-	public bool this[int index]
+	// Token: 0x020000B2 RID: 178
+	public struct ByteBits
 	{
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		get
+		// Token: 0x170000A4 RID: 164
+		public bool this[int index]
 		{
-			return (intValue & (1 << index)) != 0;
-		}
-		[MethodImpl(MethodImplOptions.AggressiveInlining)]
-		set
-		{
-			if (value)
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			get
 			{
-				intValue = (byte)(intValue | (1 << index));
+				return ((int)this.intValue & 1 << index) != 0;
 			}
-			else
+			[MethodImpl(MethodImplOptions.AggressiveInlining)]
+			set
 			{
-				intValue = (byte)(intValue & ~(1 << index));
+				if (value)
+				{
+					this.intValue = (byte)((int)this.intValue | 1 << index);
+					return;
+				}
+				this.intValue = (byte)((int)this.intValue & ~(1 << index));
 			}
 		}
+
+		// Token: 0x04000263 RID: 611
+		private byte intValue;
 	}
 }

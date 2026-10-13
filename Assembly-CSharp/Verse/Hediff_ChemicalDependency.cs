@@ -1,111 +1,135 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse;
-
-public class Hediff_ChemicalDependency : HediffWithComps
+namespace Verse
 {
-	public ChemicalDef chemical;
-
-	[Unsaved(false)]
-	private Gene_ChemicalDependency cachedDependencyGene;
-
-	public override string LabelBase => "ChemicalDependency".Translate(chemical.Named("CHEMICAL"));
-
-	public override bool ShouldRemove
+	// Token: 0x02000739 RID: 1849
+	public class Hediff_ChemicalDependency : HediffWithComps
 	{
-		get
+		// Token: 0x1700080B RID: 2059
+		// (get) Token: 0x06002D0A RID: 11530 RVA: 0x000E89C4 File Offset: 0x000E6BC4
+		public override string LabelBase
 		{
-			if (LinkedGene != null)
+			get
 			{
-				return !LinkedGene.Active;
+				return "ChemicalDependency".Translate(this.chemical.Named("CHEMICAL"));
 			}
-			return true;
 		}
-	}
 
-	public bool ShouldSatify => Severity >= def.stages[2].minSeverity - 0.1f;
-
-	public Gene_ChemicalDependency LinkedGene
-	{
-		get
+		// Token: 0x1700080C RID: 2060
+		// (get) Token: 0x06002D0B RID: 11531 RVA: 0x000E89E5 File Offset: 0x000E6BE5
+		public override bool ShouldRemove
 		{
-			if (cachedDependencyGene == null && pawn.genes != null)
+			get
 			{
-				List<Gene> genesListForReading = pawn.genes.GenesListForReading;
-				for (int i = 0; i < genesListForReading.Count; i++)
+				return this.LinkedGene == null || !this.LinkedGene.Active;
+			}
+		}
+
+		// Token: 0x1700080D RID: 2061
+		// (get) Token: 0x06002D0C RID: 11532 RVA: 0x000E89FF File Offset: 0x000E6BFF
+		public bool ShouldSatify
+		{
+			get
+			{
+				return this.Severity >= this.def.stages[2].minSeverity - 0.1f;
+			}
+		}
+
+		// Token: 0x1700080E RID: 2062
+		// (get) Token: 0x06002D0D RID: 11533 RVA: 0x000E8A28 File Offset: 0x000E6C28
+		public Gene_ChemicalDependency LinkedGene
+		{
+			get
+			{
+				if (this.cachedDependencyGene == null && this.pawn.genes != null)
 				{
-					if (genesListForReading[i] is Gene_ChemicalDependency gene_ChemicalDependency && gene_ChemicalDependency.def.chemical == chemical)
+					List<Gene> genesListForReading = this.pawn.genes.GenesListForReading;
+					for (int i = 0; i < genesListForReading.Count; i++)
 					{
-						cachedDependencyGene = gene_ChemicalDependency;
-						break;
+						Gene_ChemicalDependency gene_ChemicalDependency = genesListForReading[i] as Gene_ChemicalDependency;
+						if (gene_ChemicalDependency != null && gene_ChemicalDependency.def.chemical == this.chemical)
+						{
+							this.cachedDependencyGene = gene_ChemicalDependency;
+							break;
+						}
 					}
 				}
+				return this.cachedDependencyGene;
 			}
-			return cachedDependencyGene;
 		}
-	}
 
-	public override float Severity
-	{
-		get
+		// Token: 0x1700080F RID: 2063
+		// (get) Token: 0x06002D0E RID: 11534 RVA: 0x000E8A9E File Offset: 0x000E6C9E
+		// (set) Token: 0x06002D0F RID: 11535 RVA: 0x000E8AC7 File Offset: 0x000E6CC7
+		public override float Severity
 		{
-			if (LinkedGene == null || !LinkedGene.Active)
+			get
 			{
-				return def.initialSeverity;
-			}
-			return base.Severity;
-		}
-		set
-		{
-			base.Severity = value;
-		}
-	}
-
-	public override string TipStringExtra
-	{
-		get
-		{
-			string text = base.TipStringExtra;
-			Gene_ChemicalDependency linkedGene = LinkedGene;
-			if (linkedGene != null)
-			{
-				if (!text.NullOrEmpty())
+				if (this.LinkedGene == null || !this.LinkedGene.Active)
 				{
-					text += "\n\n";
+					return this.def.initialSeverity;
 				}
-				text += "GeneDefChemicalNeedDurationDesc".Translate(chemical.label, pawn.Named("PAWN"), "PeriodDays".Translate(5f).Named("DEFICIENCYDURATION"), "PeriodDays".Translate(30f).Named("COMADURATION"), "PeriodDays".Translate(60f).Named("DEATHDURATION")).Resolve();
-				text = text + "\n\n" + "LastIngestedDurationAgo".Translate(chemical.Named("CHEMICAL"), (Find.TickManager.TicksGame - linkedGene.lastIngestedTick).ToStringTicksToPeriod().Named("DURATION")).Resolve();
+				return base.Severity;
 			}
-			return text;
+			set
+			{
+				base.Severity = value;
+			}
 		}
-	}
 
-	public override bool TryMergeWith(Hediff other)
-	{
-		if (!(other is Hediff_ChemicalDependency hediff_ChemicalDependency))
+		// Token: 0x17000810 RID: 2064
+		// (get) Token: 0x06002D10 RID: 11536 RVA: 0x000E8AD0 File Offset: 0x000E6CD0
+		public override string TipStringExtra
 		{
-			return false;
+			get
+			{
+				string text = base.TipStringExtra;
+				Gene_ChemicalDependency linkedGene = this.LinkedGene;
+				if (linkedGene != null)
+				{
+					if (!text.NullOrEmpty())
+					{
+						text += "\n\n";
+					}
+					text += "GeneDefChemicalNeedDurationDesc".Translate(this.chemical.label, this.pawn.Named("PAWN"), "PeriodDays".Translate(5f).Named("DEFICIENCYDURATION"), "PeriodDays".Translate(30f).Named("COMADURATION"), "PeriodDays".Translate(60f).Named("DEATHDURATION")).Resolve();
+					text = text + "\n\n" + "LastIngestedDurationAgo".Translate(this.chemical.Named("CHEMICAL"), (Find.TickManager.TicksGame - linkedGene.lastIngestedTick).ToStringTicksToPeriod(true, false, true, true, false).Named("DURATION")).Resolve();
+				}
+				return text;
+			}
 		}
-		if (hediff_ChemicalDependency.chemical == chemical)
-		{
-			return base.TryMergeWith(other);
-		}
-		return false;
-	}
 
-	public override void CopyFrom(Hediff other)
-	{
-		base.CopyFrom(other);
-		if (other is Hediff_ChemicalDependency hediff_ChemicalDependency)
+		// Token: 0x06002D11 RID: 11537 RVA: 0x000E8BFC File Offset: 0x000E6DFC
+		public override bool TryMergeWith(Hediff other)
 		{
-			chemical = hediff_ChemicalDependency.chemical;
+			Hediff_ChemicalDependency hediff_ChemicalDependency = other as Hediff_ChemicalDependency;
+			return hediff_ChemicalDependency != null && hediff_ChemicalDependency.chemical == this.chemical && base.TryMergeWith(other);
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Defs.Look(ref chemical, "chemical");
+		// Token: 0x06002D12 RID: 11538 RVA: 0x000E8C2C File Offset: 0x000E6E2C
+		public override void CopyFrom(Hediff other)
+		{
+			base.CopyFrom(other);
+			Hediff_ChemicalDependency hediff_ChemicalDependency = other as Hediff_ChemicalDependency;
+			if (hediff_ChemicalDependency != null)
+			{
+				this.chemical = hediff_ChemicalDependency.chemical;
+			}
+		}
+
+		// Token: 0x06002D13 RID: 11539 RVA: 0x000E8C56 File Offset: 0x000E6E56
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Defs.Look<ChemicalDef>(ref this.chemical, "chemical");
+		}
+
+		// Token: 0x040023D4 RID: 9172
+		public ChemicalDef chemical;
+
+		// Token: 0x040023D5 RID: 9173
+		[Unsaved(false)]
+		private Gene_ChemicalDependency cachedDependencyGene;
 	}
 }

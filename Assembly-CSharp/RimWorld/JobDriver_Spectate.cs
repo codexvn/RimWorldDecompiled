@@ -1,41 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_Spectate : JobDriver
+namespace RimWorld
 {
-	private const TargetIndex MySpotOrChairInd = TargetIndex.A;
-
-	private const TargetIndex WatchTargetInd = TargetIndex.B;
-
-	private const TargetIndex ChairInd = TargetIndex.C;
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x020011BB RID: 4539
+	public class JobDriver_Spectate : JobDriver
 	{
-		return pawn.ReserveSittableOrSpot(job.GetTarget(TargetIndex.A).Cell, job, errorOnFailed);
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		if (job.GetTarget(TargetIndex.C).HasThing)
+		// Token: 0x06006EFF RID: 28415 RVA: 0x00229204 File Offset: 0x00227404
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			this.EndOnDespawnedOrNull(TargetIndex.C);
+			return this.pawn.ReserveSittableOrSpot(this.job.GetTarget(TargetIndex.A).Cell, this.job, errorOnFailed);
 		}
-		yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.tickIntervalAction = delegate(int delta)
+
+		// Token: 0x06006F00 RID: 28416 RVA: 0x00229237 File Offset: 0x00227437
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			pawn.rotationTracker.FaceCell(job.GetTarget(TargetIndex.B).Cell);
-			pawn.GainComfortFromCellIfPossible(delta);
-			if (pawn.IsHashIntervalTick(100, delta))
+			if (this.job.GetTarget(TargetIndex.C).HasThing)
 			{
-				pawn.jobs.CheckForJobOverride();
+				this.EndOnDespawnedOrNull(TargetIndex.C, JobCondition.Incompletable);
 			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Never;
-		toil.handlingFacing = true;
-		yield return toil;
+			yield return Toils_Goto.GotoCell(TargetIndex.A, PathEndMode.OnCell);
+			Toil toil = ToilMaker.MakeToil("MakeNewToils");
+			toil.tickIntervalAction = delegate(int delta)
+			{
+				this.pawn.rotationTracker.FaceCell(this.job.GetTarget(TargetIndex.B).Cell);
+				this.pawn.GainComfortFromCellIfPossible(delta, false);
+				if (this.pawn.IsHashIntervalTick(100, delta))
+				{
+					this.pawn.jobs.CheckForJobOverride(0f, true);
+				}
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Never;
+			toil.handlingFacing = true;
+			yield return toil;
+			yield break;
+		}
+
+		// Token: 0x04004D69 RID: 19817
+		private const TargetIndex MySpotOrChairInd = TargetIndex.A;
+
+		// Token: 0x04004D6A RID: 19818
+		private const TargetIndex WatchTargetInd = TargetIndex.B;
+
+		// Token: 0x04004D6B RID: 19819
+		private const TargetIndex ChairInd = TargetIndex.C;
 	}
 }

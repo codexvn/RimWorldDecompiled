@@ -1,30 +1,35 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class RecordWorker
+namespace RimWorld
 {
-	public RecordDef def;
-
-	public virtual bool ShouldMeasureTimeNow(Pawn pawn)
+	// Token: 0x02001AD2 RID: 6866
+	public class RecordWorker
 	{
-		if (def.measuredTimeJobs == null)
+		// Token: 0x060099A5 RID: 39333 RVA: 0x002CBDFC File Offset: 0x002C9FFC
+		public virtual bool ShouldMeasureTimeNow(Pawn pawn)
 		{
-			return false;
-		}
-		Job curJob = pawn.CurJob;
-		if (curJob == null)
-		{
-			return false;
-		}
-		for (int i = 0; i < def.measuredTimeJobs.Count; i++)
-		{
-			if (curJob.def == def.measuredTimeJobs[i])
+			if (this.def.measuredTimeJobs == null)
 			{
-				return true;
+				return false;
 			}
+			Job curJob = pawn.CurJob;
+			if (curJob == null)
+			{
+				return false;
+			}
+			for (int i = 0; i < this.def.measuredTimeJobs.Count; i++)
+			{
+				if (curJob.def == this.def.measuredTimeJobs[i])
+				{
+					return true;
+				}
+			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04006928 RID: 26920
+		public RecordDef def;
 	}
 }

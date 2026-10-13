@@ -1,31 +1,37 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class PreceptRequirement_Altar : PreceptRequirement
+namespace RimWorld
 {
-	public override bool Met(List<Precept> precepts)
+	// Token: 0x0200267B RID: 9851
+	public class PreceptRequirement_Altar : PreceptRequirement
 	{
-		for (int i = 0; i < precepts.Count; i++)
+		// Token: 0x0600D84A RID: 55370 RVA: 0x004010AC File Offset: 0x003FF2AC
+		public override bool Met(List<Precept> precepts)
 		{
-			if (precepts[i] is Precept_Building precept_Building && precept_Building.ThingDef.isAltar)
+			for (int i = 0; i < precepts.Count; i++)
 			{
-				return true;
+				Precept_Building precept_Building = precepts[i] as Precept_Building;
+				if (precept_Building != null && precept_Building.ThingDef.isAltar)
+				{
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
-	}
 
-	public override Precept MakePrecept(Ideo ideo)
-	{
-		PreceptDef ideoBuilding = PreceptDefOf.IdeoBuilding;
-		Precept_Building obj = (Precept_Building)PreceptMaker.MakePrecept(ideoBuilding);
-		obj.ideo = ideo;
-		obj.ThingDef = (from b in ideoBuilding.Worker.ThingDefsForIdeo(ideo, null)
+		// Token: 0x0600D84B RID: 55371 RVA: 0x004010EC File Offset: 0x003FF2EC
+		public override Precept MakePrecept(Ideo ideo)
+		{
+			PreceptDef ideoBuilding = PreceptDefOf.IdeoBuilding;
+			Precept_Building precept_Building = (Precept_Building)PreceptMaker.MakePrecept(ideoBuilding);
+			precept_Building.ideo = ideo;
+			precept_Building.ThingDef = (from b in ideoBuilding.Worker.ThingDefsForIdeo(ideo, null)
 			where b.def.isAltar
-			select b).RandomElement().def;
-		return obj;
+			select b).RandomElement<PreceptThingChance>().def;
+			return precept_Building;
+		}
 	}
 }

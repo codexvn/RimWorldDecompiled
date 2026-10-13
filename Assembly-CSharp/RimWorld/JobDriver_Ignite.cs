@@ -1,34 +1,31 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_Ignite : JobDriver
+namespace RimWorld
 {
-	public const TargetIndex TargetInd = TargetIndex.A;
-
-	public Thing TargetThing => job.GetTarget(TargetIndex.A).Thing;
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02001295 RID: 4757
+	public class JobDriver_Ignite : JobDriver
 	{
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnDespawnedOrNull(TargetIndex.A);
-		Toil toil = Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch).FailOnBurningImmobile(TargetIndex.A);
-		if (job.ensureReachable)
+		// Token: 0x0600747C RID: 29820 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
 		{
-			toil.FailOnCannotReach(TargetIndex.A, PathEndMode.Touch);
+			return true;
 		}
-		yield return toil;
-		Toil toil2 = ToilMaker.MakeToil("MakeNewToils");
-		toil2.initAction = delegate
+
+		// Token: 0x0600747D RID: 29821 RVA: 0x0023B159 File Offset: 0x00239359
+		protected override IEnumerable<Toil> MakeNewToils()
 		{
-			pawn.natives.TryStartIgnite(TargetThing);
-		};
-		yield return toil2;
+			this.FailOnDespawnedOrNull(TargetIndex.A);
+			yield return Toils_Goto.GotoThing(TargetIndex.A, PathEndMode.Touch, false).FailOnBurningImmobile(TargetIndex.A);
+			Toil toil = ToilMaker.MakeToil("MakeNewToils");
+			toil.initAction = delegate()
+			{
+				this.pawn.natives.TryStartIgnite(base.TargetThingA);
+			};
+			yield return toil;
+			yield break;
+		}
 	}
 }

@@ -1,18 +1,23 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Hediff_High : HediffWithComps
+namespace RimWorld
 {
-	public override string SeverityLabel
+	// Token: 0x020022E9 RID: 8937
+	public class Hediff_High : HediffWithComps
 	{
-		get
+		// Token: 0x17001DC0 RID: 7616
+		// (get) Token: 0x0600C24C RID: 49740 RVA: 0x000EF0B7 File Offset: 0x000ED2B7
+		public override string SeverityLabel
 		{
-			if (Severity <= 0f)
+			get
 			{
-				return null;
+				if (this.Severity <= 0f)
+				{
+					return null;
+				}
+				return this.Severity.ToStringPercent("F0");
 			}
-			return Severity.ToStringPercent("F0");
 		}
 	}
 }

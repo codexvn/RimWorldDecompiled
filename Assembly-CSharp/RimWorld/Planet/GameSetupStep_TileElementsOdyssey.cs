@@ -1,13 +1,25 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class GameSetupStep_TileElementsOdyssey : GameSetupStep
+namespace RimWorld.Planet
 {
-	public override int SeedPart => 689393;
-
-	public override void GenerateFresh()
+	// Token: 0x02003C13 RID: 15379
+	public class GameSetupStep_TileElementsOdyssey : GameSetupStep
 	{
-		Find.World.landmarks = new WorldLandmarks();
+		// Token: 0x17003396 RID: 13206
+		// (get) Token: 0x06014DB5 RID: 85429 RVA: 0x0063EE54 File Offset: 0x0063D054
+		public override int SeedPart
+		{
+			get
+			{
+				return 689393;
+			}
+		}
+
+		// Token: 0x06014DB6 RID: 85430 RVA: 0x0063EE5B File Offset: 0x0063D05B
+		public override void GenerateFresh()
+		{
+			Find.World.landmarks = new WorldLandmarks();
+		}
 	}
 }

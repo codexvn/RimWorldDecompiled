@@ -1,76 +1,82 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_AllSignals : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<IEnumerable<string>> inSignals;
-
-	[NoTranslate]
-	public SlateRef<IEnumerable<string>> outSignals;
-
-	public QuestNode node;
-
-	public SlateRef<QuestPart.SignalListenMode?> signalListenMode;
-
-	private const string OuterNodeCompletedSignal = "OuterNodeCompleted";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x020039F7 RID: 14839
+	public class QuestNode_AllSignals : QuestNode
 	{
-		if (node != null)
+		// Token: 0x06014589 RID: 83337 RVA: 0x00614E35 File Offset: 0x00613035
+		protected override bool TestRunInt(Slate slate)
 		{
-			return node.TestRun(slate);
+			return this.node == null || this.node.TestRun(slate);
 		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		switch (((outSignals.GetValue(slate) != null) ? outSignals.GetValue(slate).Count() : 0) + ((node != null) ? 1 : 0))
+		// Token: 0x0601458A RID: 83338 RVA: 0x00614E50 File Offset: 0x00613050
+		protected override void RunInt()
 		{
-		case 0:
-			return;
-		case 1:
-		{
-			QuestPart_PassAll questPart_PassAll = new QuestPart_PassAll();
-			foreach (string item in inSignals.GetValue(slate))
+			Slate slate = QuestGen.slate;
+			int num = ((this.outSignals.GetValue(slate) != null) ? this.outSignals.GetValue(slate).Count<string>() : 0) + ((this.node != null) ? 1 : 0);
+			if (num == 0)
 			{
-				questPart_PassAll.inSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(item));
+				return;
 			}
-			if (node != null)
+			if (num == 1)
 			{
-				questPart_PassAll.outSignal = QuestGen.GenerateNewSignal("OuterNodeCompleted");
-				QuestGenUtility.RunInnerNode(node, questPart_PassAll.outSignal);
+				QuestPart_PassAll questPart_PassAll = new QuestPart_PassAll();
+				foreach (string signal in this.inSignals.GetValue(slate))
+				{
+					questPart_PassAll.inSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(signal));
+				}
+				if (this.node != null)
+				{
+					questPart_PassAll.outSignal = QuestGen.GenerateNewSignal("OuterNodeCompleted", true);
+					QuestGenUtility.RunInnerNode(this.node, questPart_PassAll.outSignal);
+				}
+				else
+				{
+					questPart_PassAll.outSignal = QuestGenUtility.HardcodedSignalWithQuestID(this.outSignals.GetValue(slate).First<string>());
+				}
+				questPart_PassAll.signalListenMode = this.signalListenMode.GetValue(slate).GetValueOrDefault();
+				QuestGen.quest.AddPart(questPart_PassAll);
+				return;
 			}
-			else
+			QuestPart_PassAllOutMany questPart_PassAllOutMany = new QuestPart_PassAllOutMany();
+			foreach (string signal2 in this.inSignals.GetValue(slate))
 			{
-				questPart_PassAll.outSignal = QuestGenUtility.HardcodedSignalWithQuestID(outSignals.GetValue(slate).First());
+				questPart_PassAllOutMany.inSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(signal2));
 			}
-			questPart_PassAll.signalListenMode = signalListenMode.GetValue(slate).GetValueOrDefault();
-			QuestGen.quest.AddPart(questPart_PassAll);
-			return;
+			if (this.node != null)
+			{
+				string text = QuestGen.GenerateNewSignal("OuterNodeCompleted", true);
+				questPart_PassAllOutMany.outSignals.Add(text);
+				QuestGenUtility.RunInnerNode(this.node, text);
+			}
+			foreach (string signal3 in this.outSignals.GetValue(slate))
+			{
+				questPart_PassAllOutMany.outSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(signal3));
+			}
+			questPart_PassAllOutMany.signalListenMode = this.signalListenMode.GetValue(slate).GetValueOrDefault();
+			QuestGen.quest.AddPart(questPart_PassAllOutMany);
 		}
-		}
-		QuestPart_PassAllOutMany questPart_PassAllOutMany = new QuestPart_PassAllOutMany();
-		foreach (string item2 in inSignals.GetValue(slate))
-		{
-			questPart_PassAllOutMany.inSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(item2));
-		}
-		if (node != null)
-		{
-			string text = QuestGen.GenerateNewSignal("OuterNodeCompleted");
-			questPart_PassAllOutMany.outSignals.Add(text);
-			QuestGenUtility.RunInnerNode(node, text);
-		}
-		foreach (string item3 in outSignals.GetValue(slate))
-		{
-			questPart_PassAllOutMany.outSignals.Add(QuestGenUtility.HardcodedSignalWithQuestID(item3));
-		}
-		questPart_PassAllOutMany.signalListenMode = signalListenMode.GetValue(slate).GetValueOrDefault();
-		QuestGen.quest.AddPart(questPart_PassAllOutMany);
+
+		// Token: 0x0400E08A RID: 57482
+		[NoTranslate]
+		public SlateRef<IEnumerable<string>> inSignals;
+
+		// Token: 0x0400E08B RID: 57483
+		[NoTranslate]
+		public SlateRef<IEnumerable<string>> outSignals;
+
+		// Token: 0x0400E08C RID: 57484
+		public QuestNode node;
+
+		// Token: 0x0400E08D RID: 57485
+		public SlateRef<QuestPart.SignalListenMode?> signalListenMode;
+
+		// Token: 0x0400E08E RID: 57486
+		private const string OuterNodeCompletedSignal = "OuterNodeCompleted";
 	}
 }

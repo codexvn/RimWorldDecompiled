@@ -1,167 +1,186 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public class FreezeManager : IExposable
+namespace Verse
 {
-	public const float WaterFreezeThreshold = -7f;
-
-	private const float IceMeltThreshold = 2f;
-
-	private const float BaseWaterFreezeChance = 0.003f;
-
-	private const float BaseIceMeltChance = 0.001f;
-
-	private const float TemperatureFactor = 5f;
-
-	private const float FreezeRadius = 2.9f;
-
-	private const int LakeFrozenPctExp = 10;
-
-	private Map map;
-
-	[Unsaved(false)]
-	private List<IntVec3> tmpCellsToAffect = new List<IntVec3>();
-
-	public FreezeManager()
+	// Token: 0x02000186 RID: 390
+	public class FreezeManager : IExposable
 	{
-	}
-
-	public FreezeManager(Map map)
-	{
-		this.map = map;
-	}
-
-	public void ExposeData()
-	{
-		Scribe_References.Look(ref map, "map");
-	}
-
-	public void DoCellSteadyEffects(IntVec3 c)
-	{
-		if (ModsConfig.OdysseyActive)
+		// Token: 0x06000B0B RID: 2827 RVA: 0x00034EAB File Offset: 0x000330AB
+		public FreezeManager()
 		{
-			DoWaterFreezing(c);
-			DoIceMelting(c);
 		}
-	}
 
-	private void DoIceMelting(IntVec3 c)
-	{
-		float temperature = c.GetTemperature(map);
-		Room room = c.GetRoom(map);
-		if (temperature < 2f || !Rand.Chance(0.001f * ((temperature + 5f) / 5f)))
+		// Token: 0x06000B0C RID: 2828 RVA: 0x00034EBE File Offset: 0x000330BE
+		public FreezeManager(Map map)
 		{
-			return;
+			this.map = map;
 		}
-		tmpCellsToAffect.Clear();
-		foreach (IntVec3 item in GenRadial.RadialCellsAround(c, 2.9f, useCenter: true))
+
+		// Token: 0x06000B0D RID: 2829 RVA: 0x00034ED8 File Offset: 0x000330D8
+		public void ExposeData()
 		{
-			if (item.InBounds(map) && item.GetRoom(map) == room && CanEverMelt(item) && CanMelt(item))
+			Scribe_References.Look<Map>(ref this.map, "map", false);
+		}
+
+		// Token: 0x06000B0E RID: 2830 RVA: 0x00034EEB File Offset: 0x000330EB
+		public void DoCellSteadyEffects(IntVec3 c)
+		{
+			if (!ModsConfig.OdysseyActive)
 			{
-				tmpCellsToAffect.Add(item);
+				return;
+			}
+			this.DoWaterFreezing(c);
+			this.DoIceMelting(c);
+		}
+
+		// Token: 0x06000B0F RID: 2831 RVA: 0x00034F04 File Offset: 0x00033104
+		private void DoIceMelting(IntVec3 c)
+		{
+			float temperature = c.GetTemperature(this.map);
+			Room room = c.GetRoom(this.map);
+			if (temperature < 2f)
+			{
+				return;
+			}
+			if (!Rand.Chance(0.001f * ((temperature + 5f) / 5f)))
+			{
+				return;
+			}
+			this.tmpCellsToAffect.Clear();
+			foreach (IntVec3 intVec in GenRadial.RadialCellsAround(c, 2.9f, true))
+			{
+				if (intVec.InBounds(this.map) && intVec.GetRoom(this.map) == room && this.CanEverMelt(intVec) && this.CanMelt(intVec))
+				{
+					this.tmpCellsToAffect.Add(intVec);
+				}
+			}
+			foreach (IntVec3 c2 in this.tmpCellsToAffect)
+			{
+				this.map.terrainGrid.RemoveTempTerrain(c2, false, false);
 			}
 		}
-		foreach (IntVec3 item2 in tmpCellsToAffect)
-		{
-			map.terrainGrid.RemoveTempTerrain(item2);
-		}
-	}
 
-	private void DoWaterFreezing(IntVec3 c)
-	{
-		float temperature = c.GetTemperature(map);
-		Room room = c.GetRoom(map);
-		if (temperature > -7f || !CanFreeze(c))
+		// Token: 0x06000B10 RID: 2832 RVA: 0x00035028 File Offset: 0x00033228
+		private void DoWaterFreezing(IntVec3 c)
 		{
-			return;
-		}
-		float num = 0.003f * (temperature / -5f);
-		WaterBody waterBody = c.GetWaterBody(map);
-		num += (1f - num) * Mathf.Pow((float)waterBody.numCellsFrozen / (float)waterBody.numCellsCanFreeze, 10f);
-		if (SurroundedByIce(c))
-		{
-			num = 1f;
-		}
-		if (!Rand.Chance(num))
-		{
-			return;
-		}
-		tmpCellsToAffect.Clear();
-		foreach (IntVec3 item in GenRadial.RadialCellsAround(c, 2.9f, useCenter: true))
-		{
-			if (item.InBounds(map) && item.GetRoom(map) == room && CanFreeze(item))
+			float temperature = c.GetTemperature(this.map);
+			Room room = c.GetRoom(this.map);
+			if (temperature > -7f)
 			{
-				tmpCellsToAffect.Add(item);
+				return;
+			}
+			if (!this.CanFreeze(c))
+			{
+				return;
+			}
+			float num = 0.003f * (temperature / -5f);
+			WaterBody waterBody = c.GetWaterBody(this.map);
+			num += (1f - num) * Mathf.Pow((float)waterBody.numCellsFrozen / (float)waterBody.cells.Count, 10f);
+			if (this.SurroundedByIce(c))
+			{
+				num = 1f;
+			}
+			if (!Rand.Chance(num))
+			{
+				return;
+			}
+			this.tmpCellsToAffect.Clear();
+			foreach (IntVec3 intVec in GenRadial.RadialCellsAround(c, 2.9f, true))
+			{
+				if (intVec.InBounds(this.map) && intVec.GetRoom(this.map) == room && this.CanFreeze(intVec))
+				{
+					this.tmpCellsToAffect.Add(intVec);
+				}
+			}
+			foreach (IntVec3 c2 in this.tmpCellsToAffect)
+			{
+				this.map.terrainGrid.SetTempTerrain(c2, TerrainDefOf.ThinIce);
 			}
 		}
-		foreach (IntVec3 item2 in tmpCellsToAffect)
+
+		// Token: 0x06000B11 RID: 2833 RVA: 0x00035198 File Offset: 0x00033398
+		public static bool CanEverFreeze(IntVec3 c, Map map)
 		{
-			map.terrainGrid.SetTempTerrain(item2, TerrainDefOf.ThinIce);
+			return c.GetTerrain(map).canFreeze;
 		}
-	}
 
-	public static bool CanEverFreeze(IntVec3 c, Map map)
-	{
-		if (c.GetTerrain(map).canFreeze)
+		// Token: 0x06000B12 RID: 2834 RVA: 0x000351AB File Offset: 0x000333AB
+		private bool CanFreeze(IntVec3 c)
 		{
-			return true;
+			return FreezeManager.CanEverFreeze(c, this.map) && !this.SurroundedByWater(c);
 		}
-		return false;
-	}
 
-	private bool CanFreeze(IntVec3 c)
-	{
-		if (!CanEverFreeze(c, map))
+		// Token: 0x06000B13 RID: 2835 RVA: 0x000351C7 File Offset: 0x000333C7
+		private bool CanEverMelt(IntVec3 c)
 		{
-			return false;
+			return c.GetTerrain(this.map) == TerrainDefOf.ThinIce;
 		}
-		return !SurroundedByWater(c);
-	}
 
-	private bool CanEverMelt(IntVec3 c)
-	{
-		return c.GetTerrain(map) == TerrainDefOf.ThinIce;
-	}
-
-	private bool CanMelt(IntVec3 c)
-	{
-		if (!CanEverMelt(c))
+		// Token: 0x06000B14 RID: 2836 RVA: 0x000351DC File Offset: 0x000333DC
+		private bool CanMelt(IntVec3 c)
 		{
-			return false;
+			return this.CanEverMelt(c) && !this.SurroundedByIce(c);
 		}
-		return !SurroundedByIce(c);
-	}
 
-	private bool SurroundedByIce(IntVec3 c)
-	{
-		bool result = true;
-		IntVec3[] cardinalDirections = GenAdj.CardinalDirections;
-		foreach (IntVec3 intVec in cardinalDirections)
+		// Token: 0x06000B15 RID: 2837 RVA: 0x000351F4 File Offset: 0x000333F4
+		private bool SurroundedByIce(IntVec3 c)
 		{
-			IntVec3 c2 = c + intVec;
-			if (c2.InBounds(map) && c2.GetTerrain(map) != TerrainDefOf.ThinIce)
+			bool result = true;
+			foreach (IntVec3 b in GenAdj.CardinalDirections)
 			{
-				result = false;
+				IntVec3 c2 = c + b;
+				if (c2.InBounds(this.map) && c2.GetTerrain(this.map) != TerrainDefOf.ThinIce)
+				{
+					result = false;
+				}
 			}
+			return result;
 		}
-		return result;
-	}
 
-	private bool SurroundedByWater(IntVec3 c)
-	{
-		bool result = true;
-		IntVec3[] cardinalDirections = GenAdj.CardinalDirections;
-		foreach (IntVec3 intVec in cardinalDirections)
+		// Token: 0x06000B16 RID: 2838 RVA: 0x00035250 File Offset: 0x00033450
+		private bool SurroundedByWater(IntVec3 c)
 		{
-			IntVec3 c2 = c + intVec;
-			if (c2.InBounds(map) && !c2.GetTerrain(map).IsWater)
+			bool result = true;
+			foreach (IntVec3 b in GenAdj.CardinalDirections)
 			{
-				result = false;
+				IntVec3 c2 = c + b;
+				if (c2.InBounds(this.map) && !c2.GetTerrain(this.map).IsWater)
+				{
+					result = false;
+				}
 			}
+			return result;
 		}
-		return result;
+
+		// Token: 0x0400064F RID: 1615
+		public const float WaterFreezeThreshold = -7f;
+
+		// Token: 0x04000650 RID: 1616
+		private const float IceMeltThreshold = 2f;
+
+		// Token: 0x04000651 RID: 1617
+		private const float BaseWaterFreezeChance = 0.003f;
+
+		// Token: 0x04000652 RID: 1618
+		private const float BaseIceMeltChance = 0.001f;
+
+		// Token: 0x04000653 RID: 1619
+		private const float TemperatureFactor = 5f;
+
+		// Token: 0x04000654 RID: 1620
+		private const float FreezeRadius = 2.9f;
+
+		// Token: 0x04000655 RID: 1621
+		private const int LakeFrozenPctExp = 10;
+
+		// Token: 0x04000656 RID: 1622
+		private Map map;
+
+		// Token: 0x04000657 RID: 1623
+		[Unsaved(false)]
+		private List<IntVec3> tmpCellsToAffect = new List<IntVec3>();
 	}
 }

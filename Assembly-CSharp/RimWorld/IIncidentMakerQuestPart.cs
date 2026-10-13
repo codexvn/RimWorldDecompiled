@@ -1,8 +1,12 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace RimWorld;
-
-public interface IIncidentMakerQuestPart
+namespace RimWorld
 {
-	IEnumerable<FiringIncident> MakeIntervalIncidents();
+	// Token: 0x02001CFB RID: 7419
+	public interface IIncidentMakerQuestPart
+	{
+		// Token: 0x0600A5B3 RID: 42419
+		IEnumerable<FiringIncident> MakeIntervalIncidents();
+	}
 }

@@ -1,38 +1,19 @@
+﻿using System;
 using System.Collections.Generic;
 using DelaunatorSharp;
 using RimWorld;
 using UnityEngine;
 using Verse;
 
+// Token: 0x02000028 RID: 40
 public class LayoutWorker_Labyrinth : LayoutWorker
 {
-	private static readonly IntRange RoomSizeRange = new IntRange(8, 12);
-
-	private static readonly IntRange LShapeRoomRange = new IntRange(6, 12);
-
-	private static readonly IntRange RoomRange = new IntRange(32, 48);
-
-	private const int CorridorInflation = 3;
-
-	private const int ObeliskRoomSize = 19;
-
-	private static readonly PriorityQueue<IntVec3, int> openSet = new PriorityQueue<IntVec3, int>();
-
-	private static readonly Dictionary<IntVec3, IntVec3> cameFrom = new Dictionary<IntVec3, IntVec3>();
-
-	private static readonly Dictionary<IntVec3, int> gScore = new Dictionary<IntVec3, int>();
-
-	private static readonly Dictionary<IntVec3, int> fScore = new Dictionary<IntVec3, int>();
-
-	private static readonly List<IntVec3> toEnqueue = new List<IntVec3>();
-
-	private static readonly List<IntVec3> tmpCells = new List<IntVec3>();
-
-	public LayoutWorker_Labyrinth(LayoutDef def)
-		: base(def)
+	// Token: 0x06000094 RID: 148 RVA: 0x000052FD File Offset: 0x000034FD
+	public LayoutWorker_Labyrinth(LayoutDef def) : base(def)
 	{
 	}
 
+	// Token: 0x06000095 RID: 149 RVA: 0x00005308 File Offset: 0x00003508
 	protected override LayoutSketch GenerateSketch(StructureGenParams parms)
 	{
 		if (!ModLister.CheckAnomaly("Labyrinth"))
@@ -50,91 +31,97 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 		};
 		using (new ProfilerBlock("Generate Labyrinth"))
 		{
-			layoutSketch.structureLayout = GenerateLabyrinth(parms);
-			return layoutSketch;
+			layoutSketch.structureLayout = this.GenerateLabyrinth(parms);
 		}
+		return layoutSketch;
 	}
 
+	// Token: 0x06000096 RID: 150 RVA: 0x000053A8 File Offset: 0x000035A8
 	private StructureLayout GenerateLabyrinth(StructureGenParams parms)
 	{
 		CellRect cellRect = new CellRect(0, 0, parms.size.x, parms.size.z);
 		StructureLayout structureLayout = new StructureLayout(parms.sketch, cellRect);
-		PlaceObeliskRoom(cellRect, structureLayout);
+		LayoutWorker_Labyrinth.PlaceObeliskRoom(cellRect, structureLayout);
 		using (new ProfilerBlock("Scatter L Rooms"))
 		{
-			ScatterLRooms(cellRect, structureLayout);
+			LayoutWorker_Labyrinth.ScatterLRooms(cellRect, structureLayout);
 		}
 		using (new ProfilerBlock("Scatter Square Rooms"))
 		{
-			ScatterSquareRooms(cellRect, structureLayout);
+			LayoutWorker_Labyrinth.ScatterSquareRooms(cellRect, structureLayout);
 		}
 		using (new ProfilerBlock("Generate Graphs"))
 		{
-			GenerateGraphs(structureLayout);
+			LayoutWorker_Labyrinth.GenerateGraphs(structureLayout);
 		}
-		structureLayout.FinalizeRooms(avoidDoubleWalls: false);
+		structureLayout.FinalizeRooms(false);
 		using (new ProfilerBlock("Create Doors"))
 		{
-			CreateDoors(structureLayout);
+			LayoutWorker_Labyrinth.CreateDoors(structureLayout);
 		}
 		using (new ProfilerBlock("Create Corridors"))
 		{
-			CreateCorridorsAStar(structureLayout);
+			LayoutWorker_Labyrinth.CreateCorridorsAStar(structureLayout);
 		}
 		using (new ProfilerBlock("Fill Empty Spaces"))
 		{
-			FillEmptySpaces(structureLayout);
-			return structureLayout;
+			LayoutWorker_Labyrinth.FillEmptySpaces(structureLayout);
 		}
+		return structureLayout;
 	}
 
+	// Token: 0x06000097 RID: 151 RVA: 0x0000550C File Offset: 0x0000370C
 	private static void FillEmptySpaces(StructureLayout layout)
 	{
 		HashSet<IntVec3> hashSet = new HashSet<IntVec3>();
-		foreach (IntVec3 cell in layout.container.Cells)
+		foreach (IntVec3 intVec in layout.container.Cells)
 		{
-			if (!layout.IsEmptyAt(cell) || hashSet.Contains(cell))
+			if (layout.IsEmptyAt(intVec) && !hashSet.Contains(intVec))
 			{
-				continue;
-			}
-			foreach (IntVec3 item in GenAdjFast.AdjacentCells8Way(cell))
-			{
-				if (layout.IsWallAt(item))
+				foreach (IntVec3 position in GenAdjFast.AdjacentCells8Way(intVec))
 				{
-					hashSet.Add(cell);
-					break;
+					if (layout.IsWallAt(position))
+					{
+						hashSet.Add(intVec);
+						break;
+					}
 				}
 			}
 		}
-		foreach (IntVec3 item2 in hashSet)
+		foreach (IntVec3 position2 in hashSet)
 		{
-			layout.Add(item2, RoomLayoutCellType.Wall);
+			layout.Add(position2, RoomLayoutCellType.Wall);
 		}
 	}
 
+	// Token: 0x06000098 RID: 152 RVA: 0x00005600 File Offset: 0x00003800
 	private static void GenerateGraphs(StructureLayout layout)
 	{
 		List<Vector2> list = new List<Vector2>();
-		foreach (LayoutRoom room in layout.Rooms)
+		foreach (LayoutRoom layoutRoom in layout.Rooms)
 		{
-			Vector3 zero = Vector3.zero;
-			foreach (CellRect rect in room.rects)
+			Vector3 vector = Vector3.zero;
+			foreach (CellRect cellRect in layoutRoom.rects)
 			{
-				zero += rect.CenterVector3;
+				vector += cellRect.CenterVector3;
 			}
-			zero /= (float)room.rects.Count;
-			list.Add(new Vector2(zero.x, zero.z));
+			vector /= (float)layoutRoom.rects.Count;
+			list.Add(new Vector2(vector.x, vector.z));
 		}
 		layout.delaunator = new Delaunator(list.ToArray());
 		layout.neighbours = new RelativeNeighborhoodGraph(layout.delaunator);
 	}
 
+	// Token: 0x06000099 RID: 153 RVA: 0x000056F0 File Offset: 0x000038F0
 	private static void PlaceObeliskRoom(CellRect size, StructureLayout layout)
 	{
 		int minX = Rand.Range(0, size.Width - 19);
 		int minZ = Rand.Range(0, size.Height - 19);
 		CellRect item = new CellRect(minX, minZ, 19, 19);
-		LayoutRoom layoutRoom = layout.AddRoom(new List<CellRect> { item });
+		LayoutRoom layoutRoom = layout.AddRoom(new List<CellRect>
+		{
+			item
+		}, null);
 		layoutRoom.requiredDef = LayoutRoomDefOf.LabyrinthObelisk;
 		layoutRoom.entryCells = new List<IntVec3>();
 		layoutRoom.entryCells.AddRange(item.GetCenterCellsOnEdge(Rot4.North, 2));
@@ -143,184 +130,198 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 		layoutRoom.entryCells.AddRange(item.GetCenterCellsOnEdge(Rot4.West, 2));
 	}
 
+	// Token: 0x0600009A RID: 154 RVA: 0x000057B4 File Offset: 0x000039B4
 	private static void ScatterLRooms(CellRect size, StructureLayout layout)
 	{
-		int randomInRange = LShapeRoomRange.RandomInRange;
+		int randomInRange = LayoutWorker_Labyrinth.LShapeRoomRange.RandomInRange;
 		int num = 0;
-		for (int i = 0; i < 100; i++)
+		int num2 = 0;
+		while (num2 < 100 && num < randomInRange)
 		{
-			if (num >= randomInRange)
-			{
-				break;
-			}
-			int randomInRange2 = RoomSizeRange.RandomInRange;
-			int randomInRange3 = RoomSizeRange.RandomInRange;
+			int randomInRange2 = LayoutWorker_Labyrinth.RoomSizeRange.RandomInRange;
+			int randomInRange3 = LayoutWorker_Labyrinth.RoomSizeRange.RandomInRange;
 			int minX = Rand.Range(0, size.Width - randomInRange2);
 			int minZ = Rand.Range(0, size.Height - randomInRange3);
-			int randomInRange4 = LShapeRoomRange.RandomInRange;
-			int randomInRange5 = LShapeRoomRange.RandomInRange;
+			int randomInRange4 = LayoutWorker_Labyrinth.LShapeRoomRange.RandomInRange;
+			int randomInRange5 = LayoutWorker_Labyrinth.LShapeRoomRange.RandomInRange;
 			while (Mathf.Abs(randomInRange4 - randomInRange2) <= 2)
 			{
-				randomInRange4 = LShapeRoomRange.RandomInRange;
+				randomInRange4 = LayoutWorker_Labyrinth.LShapeRoomRange.RandomInRange;
 			}
 			while (Mathf.Abs(randomInRange5 - randomInRange3) <= 2)
 			{
-				randomInRange5 = LShapeRoomRange.RandomInRange;
+				randomInRange5 = LayoutWorker_Labyrinth.LShapeRoomRange.RandomInRange;
 			}
 			CellRect cellRect = new CellRect(minX, minZ, randomInRange2, randomInRange3);
-			CellRect cellRect2 = ((!Rand.Bool) ? new CellRect(cellRect.minX - randomInRange4, cellRect.minZ, randomInRange4 + 1, randomInRange5) : new CellRect(cellRect.maxX, cellRect.maxZ - randomInRange5 + 1, randomInRange4, randomInRange5));
-			if (cellRect2.Width >= 4 && cellRect2.Height >= 4 && size.FullyContainedWithin(cellRect2) && !OverlapsWithAnyRoom(layout, cellRect) && !OverlapsWithAnyRoom(layout, cellRect2))
+			CellRect cellRect2;
+			if (Rand.Bool)
 			{
-				layout.AddRoom(new List<CellRect> { cellRect, cellRect2 });
+				cellRect2 = new CellRect(cellRect.maxX, cellRect.maxZ - randomInRange5 + 1, randomInRange4, randomInRange5);
+			}
+			else
+			{
+				cellRect2 = new CellRect(cellRect.minX - randomInRange4, cellRect.minZ, randomInRange4 + 1, randomInRange5);
+			}
+			if (cellRect2.Width >= 4 && cellRect2.Height >= 4 && size.FullyContainedWithin(cellRect2) && !LayoutWorker_Labyrinth.OverlapsWithAnyRoom(layout, cellRect) && !LayoutWorker_Labyrinth.OverlapsWithAnyRoom(layout, cellRect2))
+			{
+				layout.AddRoom(new List<CellRect>
+				{
+					cellRect,
+					cellRect2
+				}, null);
 				num++;
 			}
+			num2++;
 		}
 	}
 
+	// Token: 0x0600009B RID: 155 RVA: 0x0000592C File Offset: 0x00003B2C
 	private static void ScatterSquareRooms(CellRect size, StructureLayout layout)
 	{
-		int randomInRange = RoomRange.RandomInRange;
+		int randomInRange = LayoutWorker_Labyrinth.RoomRange.RandomInRange;
 		int num = 0;
-		for (int i = 0; i < 300; i++)
+		int num2 = 0;
+		while (num2 < 300 && num < randomInRange)
 		{
-			if (num >= randomInRange)
-			{
-				break;
-			}
-			int randomInRange2 = RoomSizeRange.RandomInRange;
-			int randomInRange3 = RoomSizeRange.RandomInRange;
+			int randomInRange2 = LayoutWorker_Labyrinth.RoomSizeRange.RandomInRange;
+			int randomInRange3 = LayoutWorker_Labyrinth.RoomSizeRange.RandomInRange;
 			int minX = Rand.Range(0, size.Width - randomInRange2);
 			int minZ = Rand.Range(0, size.Height - randomInRange3);
 			CellRect cellRect = new CellRect(minX, minZ, randomInRange2, randomInRange3);
-			if (!OverlapsWithAnyRoom(layout, cellRect))
+			if (!LayoutWorker_Labyrinth.OverlapsWithAnyRoom(layout, cellRect))
 			{
-				layout.AddRoom(new List<CellRect> { cellRect });
+				layout.AddRoom(new List<CellRect>
+				{
+					cellRect
+				}, null);
 				num++;
 			}
+			num2++;
 		}
 	}
 
+	// Token: 0x0600009C RID: 156 RVA: 0x000059D4 File Offset: 0x00003BD4
 	private static void CreateCorridorsAStar(StructureLayout layout)
 	{
-		foreach (LayoutRoom room in layout.Rooms)
+		foreach (LayoutRoom layoutRoom in layout.Rooms)
 		{
-			foreach (var logicalRoomConnection in layout.GetLogicalRoomConnections(room))
+			foreach (ValueTuple<LayoutRoom, CellRect, CellRect> valueTuple in layout.GetLogicalRoomConnections(layoutRoom))
 			{
-				LayoutRoom item = logicalRoomConnection.Item1;
-				if (!room.connections.Contains(item))
+				LayoutRoom item = valueTuple.Item1;
+				if (!layoutRoom.connections.Contains(item))
 				{
-					ConnectRooms(layout, room, item);
+					LayoutWorker_Labyrinth.ConnectRooms(layout, layoutRoom, item);
 				}
 			}
 		}
 	}
 
+	// Token: 0x0600009D RID: 157 RVA: 0x00005A74 File Offset: 0x00003C74
 	private static void ConnectRooms(StructureLayout layout, LayoutRoom a, LayoutRoom b)
 	{
-		PriorityQueue<(IntVec3, IntVec3), int> priorityQueue = new PriorityQueue<(IntVec3, IntVec3), int>();
-		foreach (CellRect rect in a.rects)
+		PriorityQueue<ValueTuple<IntVec3, IntVec3>, int> priorityQueue = new PriorityQueue<ValueTuple<IntVec3, IntVec3>, int>();
+		foreach (CellRect cellRect in a.rects)
 		{
-			foreach (CellRect rect2 in b.rects)
+			foreach (CellRect cellRect2 in b.rects)
 			{
 				IEnumerable<IntVec3> entryCells = a.entryCells;
-				foreach (IntVec3 item in entryCells ?? rect.EdgeCells)
+				foreach (IntVec3 intVec in (entryCells ?? cellRect.EdgeCells))
 				{
-					if (rect.IsCorner(item) || rect2.Contains(item))
+					if (!cellRect.IsCorner(intVec) && !cellRect2.Contains(intVec))
 					{
-						continue;
-					}
-					Rot4 closestEdge = rect.GetClosestEdge(item);
-					entryCells = b.entryCells;
-					foreach (IntVec3 item2 in entryCells ?? rect2.EdgeCells)
-					{
-						if (!rect2.IsCorner(item2) && !rect.Contains(item2))
+						Rot4 closestEdge = cellRect.GetClosestEdge(intVec);
+						entryCells = b.entryCells;
+						foreach (IntVec3 intVec2 in (entryCells ?? cellRect2.EdgeCells))
 						{
-							Rot4 closestEdge2 = rect2.GetClosestEdge(item2);
-							int num = (item2 - item).LengthManhattan;
-							RotationDirection relativeRotation = Rot4.GetRelativeRotation(closestEdge, closestEdge2);
-							if (closestEdge == Rot4.East && item2.x < rect.maxX)
+							if (!cellRect2.IsCorner(intVec2) && !cellRect.Contains(intVec2))
 							{
-								num += 4;
+								Rot4 closestEdge2 = cellRect2.GetClosestEdge(intVec2);
+								int num = (intVec2 - intVec).LengthManhattan;
+								RotationDirection relativeRotation = Rot4.GetRelativeRotation(closestEdge, closestEdge2);
+								if (closestEdge == Rot4.East && intVec2.x < cellRect.maxX)
+								{
+									num += 4;
+								}
+								else if (closestEdge == Rot4.West && intVec2.x > cellRect.minX)
+								{
+									num += 4;
+								}
+								if (closestEdge == Rot4.North && intVec2.z < cellRect.maxZ)
+								{
+									num += 4;
+								}
+								else if (closestEdge == Rot4.South && intVec2.z > cellRect.minZ)
+								{
+									num += 4;
+								}
+								if (relativeRotation == RotationDirection.Clockwise || relativeRotation == RotationDirection.Counterclockwise)
+								{
+									num++;
+								}
+								else if (relativeRotation == RotationDirection.None)
+								{
+									num += 2;
+								}
+								priorityQueue.Enqueue(new ValueTuple<IntVec3, IntVec3>(intVec, intVec2), num);
 							}
-							else if (closestEdge == Rot4.West && item2.x > rect.minX)
-							{
-								num += 4;
-							}
-							if (closestEdge == Rot4.North && item2.z < rect.maxZ)
-							{
-								num += 4;
-							}
-							else if (closestEdge == Rot4.South && item2.z > rect.minZ)
-							{
-								num += 4;
-							}
-							switch (relativeRotation)
-							{
-							case RotationDirection.Clockwise:
-							case RotationDirection.Counterclockwise:
-								num++;
-								break;
-							case RotationDirection.None:
-								num += 2;
-								break;
-							}
-							priorityQueue.Enqueue((item, item2), num);
 						}
 					}
 				}
 			}
 		}
-		(IntVec3, IntVec3) element;
-		int priority;
-		while (priorityQueue.TryDequeue(out element, out priority))
+		ValueTuple<IntVec3, IntVec3> valueTuple;
+		int num2;
+		while (priorityQueue.TryDequeue(out valueTuple, out num2))
 		{
-			var (intVec, intVec2) = element;
-			if (!TryGetPath(layout, intVec, intVec2, priority * 2, out var path))
+			IntVec3 item = valueTuple.Item1;
+			IntVec3 item2 = valueTuple.Item2;
+			List<IntVec3> list;
+			if (LayoutWorker_Labyrinth.TryGetPath(layout, item, item2, num2 * 2, out list))
 			{
-				continue;
-			}
-			IntVec3 intVec3 = intVec2 - intVec;
-			if (Mathf.Max(Mathf.Abs(intVec3.x), Mathf.Abs(intVec3.z)) <= 4)
-			{
-				layout.Add(intVec, RoomLayoutCellType.Floor);
-				layout.Add(intVec2, RoomLayoutCellType.Floor);
-				InflatePath(layout, path, 1);
-				int index = 1;
-				if (path.Count == 1 || !layout.IsGoodForDoor(path[index]))
+				IntVec3 intVec3 = item2 - item;
+				if (Mathf.Max(Mathf.Abs(intVec3.x), Mathf.Abs(intVec3.z)) <= 4)
 				{
-					index = 0;
-				}
-				if (a.requiredDef == LayoutRoomDefOf.LabyrinthObelisk)
-				{
-					layout.Add(intVec, RoomLayoutCellType.Door);
-				}
-				else if (b.requiredDef == LayoutRoomDefOf.LabyrinthObelisk)
-				{
-					layout.Add(intVec2, RoomLayoutCellType.Door);
+					layout.Add(item, RoomLayoutCellType.Floor);
+					layout.Add(item2, RoomLayoutCellType.Floor);
+					LayoutWorker_Labyrinth.InflatePath(layout, list, 1);
+					int index = 1;
+					if (list.Count == 1 || !layout.IsGoodForDoor(list[index]))
+					{
+						index = 0;
+					}
+					if (a.requiredDef == LayoutRoomDefOf.LabyrinthObelisk)
+					{
+						layout.Add(item, RoomLayoutCellType.Door);
+					}
+					else if (b.requiredDef == LayoutRoomDefOf.LabyrinthObelisk)
+					{
+						layout.Add(item2, RoomLayoutCellType.Door);
+					}
+					else
+					{
+						layout.Add(list[index], RoomLayoutCellType.Door);
+					}
 				}
 				else
 				{
-					layout.Add(path[index], RoomLayoutCellType.Door);
+					layout.Add(item, RoomLayoutCellType.Door);
+					layout.Add(item2, RoomLayoutCellType.Door);
+					LayoutWorker_Labyrinth.InflatePath(layout, list, Mathf.Min(Mathf.Max(1, Mathf.CeilToInt((float)list.Count / 3f)), 3));
 				}
+				a.connections.Add(b);
+				b.connections.Add(a);
+				return;
 			}
-			else
-			{
-				layout.Add(intVec, RoomLayoutCellType.Door);
-				layout.Add(intVec2, RoomLayoutCellType.Door);
-				InflatePath(layout, path, Mathf.Min(Mathf.Max(1, Mathf.CeilToInt((float)path.Count / 3f)), 3));
-			}
-			a.connections.Add(b);
-			b.connections.Add(a);
-			break;
 		}
 	}
 
+	// Token: 0x0600009E RID: 158 RVA: 0x00005E38 File Offset: 0x00004038
 	private static void InflatePath(StructureLayout layout, List<IntVec3> cells, int levels)
 	{
 		Queue<IntVec3> queue = new Queue<IntVec3>();
 		HashSet<IntVec3> hashSet = new HashSet<IntVec3>();
 		IntVec3 intVec = cells[0];
-		IntVec3 last = cells.GetLast();
+		IntVec3 last = cells.GetLast<IntVec3>();
 		IntVec3 intVec2 = new IntVec3(Mathf.Min(intVec.x, last.x), 0, Mathf.Min(intVec.z, last.z));
 		IntVec3 intVec3 = new IntVec3(Mathf.Max(intVec.x, last.x), 0, Mathf.Max(intVec.z, last.z));
 		CellRect cellRect = new CellRect
@@ -331,62 +332,72 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 			maxZ = intVec3.z
 		};
 		cellRect = cellRect.ExpandedBy(levels);
-		foreach (IntVec3 cell in cells)
+		using (List<IntVec3>.Enumerator enumerator = cells.GetEnumerator())
 		{
-			if (layout.IsEmptyAt(cell))
+			while (enumerator.MoveNext())
 			{
-				queue.Enqueue(cell);
-				break;
-			}
-		}
-		while (queue.Count != 0)
-		{
-			IntVec3 intVec4 = queue.Dequeue();
-			bool flag = cellRect.IsOnEdge(intVec4) && !cells.Contains(intVec4);
-			layout.Add(intVec4, (!flag) ? RoomLayoutCellType.Floor : RoomLayoutCellType.Wall);
-			if (flag)
-			{
-				continue;
-			}
-			foreach (IntVec3 item in Neighbours8Way(layout, intVec4))
-			{
-				if (layout.IsEmptyAt(item) && cellRect.Contains(item) && !hashSet.Contains(item))
+				IntVec3 intVec4 = enumerator.Current;
+				if (layout.IsEmptyAt(intVec4))
 				{
-					queue.Enqueue(item);
-					hashSet.Add(item);
+					queue.Enqueue(intVec4);
+					break;
+				}
+			}
+			goto IL_19B;
+		}
+		IL_103:
+		IntVec3 intVec5 = queue.Dequeue();
+		bool flag = cellRect.IsOnEdge(intVec5) && !cells.Contains(intVec5);
+		layout.Add(intVec5, (!flag) ? RoomLayoutCellType.Floor : RoomLayoutCellType.Wall);
+		if (!flag)
+		{
+			foreach (IntVec3 intVec6 in LayoutWorker_Labyrinth.Neighbours8Way(layout, intVec5))
+			{
+				if (layout.IsEmptyAt(intVec6) && cellRect.Contains(intVec6) && !hashSet.Contains(intVec6))
+				{
+					queue.Enqueue(intVec6);
+					hashSet.Add(intVec6);
 				}
 			}
 		}
-		bool flag2;
-		do
+		IL_19B:
+		if (queue.Count == 0)
 		{
-			flag2 = false;
-			foreach (IntVec3 item2 in hashSet)
+			bool flag2;
+			do
 			{
-				if (!layout.IsWallAt(item2) && !cells.Contains(item2) && CountAdjacentWalls(layout, item2) == 3)
+				flag2 = false;
+				foreach (IntVec3 intVec7 in hashSet)
 				{
-					layout.Add(item2, RoomLayoutCellType.Wall);
-					flag2 = true;
+					if (!layout.IsWallAt(intVec7) && !cells.Contains(intVec7) && LayoutWorker_Labyrinth.CountAdjacentWalls(layout, intVec7) == 3)
+					{
+						layout.Add(intVec7, RoomLayoutCellType.Wall);
+						flag2 = true;
+					}
 				}
 			}
-		}
-		while (flag2);
-		foreach (IntVec3 edgeCell in cellRect.ExpandedBy(1).EdgeCells)
-		{
-			if (edgeCell.x > 0 && edgeCell.z > 0 && edgeCell.x < layout.Width && edgeCell.z < layout.Height && !layout.TryGetRoom(edgeCell, out var _) && layout.IsEmptyAt(edgeCell))
+			while (flag2);
+			foreach (IntVec3 intVec8 in cellRect.ExpandedBy(1).EdgeCells)
 			{
-				layout.Add(edgeCell, RoomLayoutCellType.Wall);
+				LayoutRoom layoutRoom;
+				if (intVec8.x > 0 && intVec8.z > 0 && intVec8.x < layout.Width && intVec8.z < layout.Height && !layout.TryGetRoom(intVec8, out layoutRoom) && layout.IsEmptyAt(intVec8))
+				{
+					layout.Add(intVec8, RoomLayoutCellType.Wall);
+				}
 			}
+			return;
 		}
+		goto IL_103;
 	}
 
+	// Token: 0x0600009F RID: 159 RVA: 0x00006108 File Offset: 0x00004308
 	private static int CountAdjacentWalls(StructureLayout layout, IntVec3 cell)
 	{
 		int num = 0;
 		for (int i = 0; i < 4; i++)
 		{
-			IntVec3 position = cell + new Rot4(i).FacingCell;
-			if (position.x > 0 && position.z > 0 && position.x < layout.Width && position.z < layout.Height && layout.IsWallAt(position))
+			IntVec3 intVec = cell + new Rot4(i).FacingCell;
+			if (intVec.x > 0 && intVec.z > 0 && intVec.x < layout.Width && intVec.z < layout.Height && layout.IsWallAt(intVec))
 			{
 				num++;
 			}
@@ -394,9 +405,13 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 		return num;
 	}
 
+	// Token: 0x060000A0 RID: 160 RVA: 0x00006174 File Offset: 0x00004374
 	private static List<IntVec3> ReconstructPath(Dictionary<IntVec3, IntVec3> from, IntVec3 current)
 	{
-		List<IntVec3> list = new List<IntVec3> { current };
+		List<IntVec3> list = new List<IntVec3>
+		{
+			current
+		};
 		while (from.ContainsKey(current))
 		{
 			current = from[current];
@@ -406,124 +421,145 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 		return list;
 	}
 
+	// Token: 0x060000A1 RID: 161 RVA: 0x000061B0 File Offset: 0x000043B0
 	private static void ResetPathVars()
 	{
-		openSet.Clear();
-		cameFrom.Clear();
-		gScore.Clear();
-		fScore.Clear();
-		toEnqueue.Clear();
+		LayoutWorker_Labyrinth.openSet.Clear();
+		LayoutWorker_Labyrinth.cameFrom.Clear();
+		LayoutWorker_Labyrinth.gScore.Clear();
+		LayoutWorker_Labyrinth.fScore.Clear();
+		LayoutWorker_Labyrinth.toEnqueue.Clear();
 	}
 
+	// Token: 0x060000A2 RID: 162 RVA: 0x000061E4 File Offset: 0x000043E4
 	private static bool TryGetPath(StructureLayout layout, IntVec3 start, IntVec3 goal, int max, out List<IntVec3> path)
 	{
-		ResetPathVars();
-		gScore.Add(start, 0);
-		fScore.Add(start, Heuristic(start, goal));
-		openSet.Enqueue(start, fScore[start]);
-		while (openSet.Count != 0)
+		LayoutWorker_Labyrinth.ResetPathVars();
+		LayoutWorker_Labyrinth.gScore.Add(start, 0);
+		LayoutWorker_Labyrinth.fScore.Add(start, LayoutWorker_Labyrinth.Heuristic(start, goal));
+		LayoutWorker_Labyrinth.openSet.Enqueue(start, LayoutWorker_Labyrinth.fScore[start]);
+		Comparison<IntVec3> <>9__0;
+		while (LayoutWorker_Labyrinth.openSet.Count != 0)
 		{
-			IntVec3 intVec = openSet.Dequeue();
+			IntVec3 intVec = LayoutWorker_Labyrinth.openSet.Dequeue();
 			if (intVec == goal)
 			{
-				path = ReconstructPath(cameFrom, intVec);
-				ResetPathVars();
+				path = LayoutWorker_Labyrinth.ReconstructPath(LayoutWorker_Labyrinth.cameFrom, intVec);
+				LayoutWorker_Labyrinth.ResetPathVars();
 				return true;
 			}
-			toEnqueue.Clear();
-			foreach (IntVec3 item in Neighbours(layout, intVec, goal))
+			LayoutWorker_Labyrinth.toEnqueue.Clear();
+			foreach (IntVec3 intVec2 in LayoutWorker_Labyrinth.Neighbours(layout, intVec, goal))
 			{
-				if (item == goal)
+				if (intVec2 == goal)
 				{
-					cameFrom[item] = intVec;
-					path = ReconstructPath(cameFrom, item);
-					ResetPathVars();
+					LayoutWorker_Labyrinth.cameFrom[intVec2] = intVec;
+					path = LayoutWorker_Labyrinth.ReconstructPath(LayoutWorker_Labyrinth.cameFrom, intVec2);
+					LayoutWorker_Labyrinth.ResetPathVars();
 					return true;
 				}
-				int num = gScore[intVec] + 1;
+				int num = LayoutWorker_Labyrinth.gScore[intVec] + 1;
 				if (num > max)
 				{
 					break;
 				}
-				if (!gScore.ContainsKey(item) || num < gScore[item])
+				if (!LayoutWorker_Labyrinth.gScore.ContainsKey(intVec2) || num < LayoutWorker_Labyrinth.gScore[intVec2])
 				{
-					cameFrom[item] = intVec;
-					gScore[item] = num;
-					fScore[item] = num + Heuristic(item, goal);
-					toEnqueue.Add(item);
+					LayoutWorker_Labyrinth.cameFrom[intVec2] = intVec;
+					LayoutWorker_Labyrinth.gScore[intVec2] = num;
+					LayoutWorker_Labyrinth.fScore[intVec2] = num + LayoutWorker_Labyrinth.Heuristic(intVec2, goal);
+					LayoutWorker_Labyrinth.toEnqueue.Add(intVec2);
 				}
 			}
-			toEnqueue.Sort(delegate(IntVec3 x, IntVec3 z)
+			List<IntVec3> list = LayoutWorker_Labyrinth.toEnqueue;
+			Comparison<IntVec3> comparison;
+			if ((comparison = <>9__0) == null)
 			{
-				if (x == z)
+				comparison = (<>9__0 = delegate(IntVec3 x, IntVec3 z)
 				{
+					if (x == z)
+					{
+						return 0;
+					}
+					IntVec3 intVec4 = x - start;
+					if (intVec4.x == 0 || intVec4.z == 0)
+					{
+						return -1;
+					}
+					intVec4 = x - goal;
+					if (intVec4.x == 0 || intVec4.z == 0)
+					{
+						return -1;
+					}
+					intVec4 = z - start;
+					if (intVec4.x == 0 || intVec4.z == 0)
+					{
+						return 1;
+					}
+					intVec4 = z - goal;
+					if (intVec4.x == 0 || intVec4.z == 0)
+					{
+						return 1;
+					}
 					return 0;
-				}
-				IntVec3 intVec2 = x - start;
-				if (intVec2.x == 0 || intVec2.z == 0)
-				{
-					return -1;
-				}
-				intVec2 = x - goal;
-				if (intVec2.x == 0 || intVec2.z == 0)
-				{
-					return -1;
-				}
-				intVec2 = z - start;
-				if (intVec2.x == 0 || intVec2.z == 0)
-				{
-					return 1;
-				}
-				intVec2 = z - goal;
-				return (intVec2.x == 0 || intVec2.z == 0) ? 1 : 0;
-			});
-			foreach (IntVec3 item2 in toEnqueue)
+				});
+			}
+			list.Sort(comparison);
+			foreach (IntVec3 intVec3 in LayoutWorker_Labyrinth.toEnqueue)
 			{
-				openSet.Enqueue(item2, fScore[item2]);
+				LayoutWorker_Labyrinth.openSet.Enqueue(intVec3, LayoutWorker_Labyrinth.fScore[intVec3]);
 			}
 		}
-		ResetPathVars();
+		LayoutWorker_Labyrinth.ResetPathVars();
 		path = null;
 		return false;
 	}
 
+	// Token: 0x060000A3 RID: 163 RVA: 0x00006420 File Offset: 0x00004620
 	private static IEnumerable<IntVec3> Neighbours8Way(StructureLayout layout, IntVec3 cell)
 	{
-		IntVec3[] adjacentCellsAround = GenAdj.AdjacentCellsAround;
-		foreach (IntVec3 intVec in adjacentCellsAround)
+		foreach (IntVec3 b in GenAdj.AdjacentCellsAround)
 		{
-			IntVec3 intVec2 = cell + intVec;
-			if (intVec2.x > 0 && intVec2.z > 0 && intVec2.x < layout.Width && intVec2.z < layout.Height && layout.IsEmptyAt(intVec2))
+			IntVec3 intVec = cell + b;
+			if (intVec.x > 0 && intVec.z > 0 && intVec.x < layout.Width && intVec.z < layout.Height && layout.IsEmptyAt(intVec))
 			{
-				yield return intVec2;
+				yield return intVec;
 			}
 		}
+		IntVec3[] array = null;
+		yield break;
 	}
 
+	// Token: 0x060000A4 RID: 164 RVA: 0x00006437 File Offset: 0x00004637
 	private static IEnumerable<IntVec3> Neighbours(StructureLayout layout, IntVec3 cell, IntVec3 goal)
 	{
-		for (int i = 0; i < 4; i++)
+		int num;
+		for (int i = 0; i < 4; i = num + 1)
 		{
 			IntVec3 intVec = cell + new Rot4(i).FacingCell;
 			if (intVec.x > 0 && intVec.z > 0 && intVec.x < layout.Width && intVec.z < layout.Height && (!(intVec != goal) || layout.IsEmptyAt(intVec)))
 			{
 				yield return intVec;
 			}
+			num = i;
 		}
+		yield break;
 	}
 
+	// Token: 0x060000A5 RID: 165 RVA: 0x00006458 File Offset: 0x00004658
 	private static int Heuristic(IntVec3 pos, IntVec3 goal)
 	{
 		return (goal - pos).LengthManhattan;
 	}
 
+	// Token: 0x060000A6 RID: 166 RVA: 0x00006474 File Offset: 0x00004674
 	private static bool OverlapsWithAnyRoom(StructureLayout layout, CellRect rect)
 	{
-		foreach (LayoutRoom room in layout.Rooms)
+		foreach (LayoutRoom layoutRoom in layout.Rooms)
 		{
-			foreach (CellRect rect2 in room.rects)
+			foreach (CellRect cellRect in layoutRoom.rects)
 			{
-				if (rect2.Overlaps(rect.ContractedBy(1)))
+				if (cellRect.Overlaps(rect.ContractedBy(1)))
 				{
 					return true;
 				}
@@ -532,48 +568,105 @@ public class LayoutWorker_Labyrinth : LayoutWorker
 		return false;
 	}
 
+	// Token: 0x060000A7 RID: 167 RVA: 0x00006514 File Offset: 0x00004714
 	private static void CreateDoors(StructureLayout layout)
 	{
-		tmpCells.Clear();
-		tmpCells.AddRange(layout.container.Cells.InRandomOrder());
-		for (int i = 0; i < tmpCells.Count; i++)
+		LayoutWorker_Labyrinth.tmpCells.Clear();
+		LayoutWorker_Labyrinth.tmpCells.AddRange(layout.container.Cells.InRandomOrder(null));
+		for (int i = 0; i < LayoutWorker_Labyrinth.tmpCells.Count; i++)
 		{
-			IntVec3 intVec = tmpCells[i];
+			IntVec3 intVec = LayoutWorker_Labyrinth.tmpCells[i];
 			if (layout.IsWallAt(intVec))
 			{
 				if (layout.IsGoodForHorizontalDoor(intVec))
 				{
-					TryConnectAdjacentRooms(layout, intVec, IntVec3.North);
+					LayoutWorker_Labyrinth.TryConnectAdjacentRooms(layout, intVec, IntVec3.North);
 				}
 				if (layout.IsGoodForVerticalDoor(intVec))
 				{
-					TryConnectAdjacentRooms(layout, intVec, IntVec3.East);
+					LayoutWorker_Labyrinth.TryConnectAdjacentRooms(layout, intVec, IntVec3.East);
 				}
 			}
 		}
-		tmpCells.Clear();
+		LayoutWorker_Labyrinth.tmpCells.Clear();
 	}
 
+	// Token: 0x060000A8 RID: 168 RVA: 0x000065A4 File Offset: 0x000047A4
 	private static void TryConnectAdjacentRooms(StructureLayout layout, IntVec3 p, IntVec3 dir)
 	{
-		if (!layout.TryGetRoom(p + dir, out var room) || !layout.TryGetRoom(p - dir, out var room2) || room.connections.Contains(room2))
+		LayoutRoom layoutRoom;
+		if (!layout.TryGetRoom(p + dir, out layoutRoom))
+		{
+			return;
+		}
+		LayoutRoom layoutRoom2;
+		if (!layout.TryGetRoom(p - dir, out layoutRoom2))
+		{
+			return;
+		}
+		if (layoutRoom.connections.Contains(layoutRoom2))
 		{
 			return;
 		}
 		bool flag = false;
-		foreach (var logicalRoomConnection in layout.GetLogicalRoomConnections(room))
+		using (IEnumerator<ValueTuple<LayoutRoom, CellRect, CellRect>> enumerator = layout.GetLogicalRoomConnections(layoutRoom).GetEnumerator())
 		{
-			if (logicalRoomConnection.Item1 == room2)
+			while (enumerator.MoveNext())
 			{
-				flag = true;
-				break;
+				if (enumerator.Current.Item1 == layoutRoom2)
+				{
+					flag = true;
+					break;
+				}
 			}
 		}
-		if (flag && (room.entryCells == null || room.entryCells.Contains(p)) && (room2.entryCells == null || room2.entryCells.Contains(p)))
+		if (!flag)
 		{
-			layout.Add(p, RoomLayoutCellType.Door);
-			room.connections.Add(room2);
-			room2.connections.Add(room);
+			return;
 		}
+		if (layoutRoom.entryCells != null && !layoutRoom.entryCells.Contains(p))
+		{
+			return;
+		}
+		if (layoutRoom2.entryCells != null && !layoutRoom2.entryCells.Contains(p))
+		{
+			return;
+		}
+		layout.Add(p, RoomLayoutCellType.Door);
+		layoutRoom.connections.Add(layoutRoom2);
+		layoutRoom2.connections.Add(layoutRoom);
 	}
+
+	// Token: 0x04000043 RID: 67
+	private static readonly IntRange RoomSizeRange = new IntRange(8, 12);
+
+	// Token: 0x04000044 RID: 68
+	private static readonly IntRange LShapeRoomRange = new IntRange(6, 12);
+
+	// Token: 0x04000045 RID: 69
+	private static readonly IntRange RoomRange = new IntRange(32, 48);
+
+	// Token: 0x04000046 RID: 70
+	private const int CorridorInflation = 3;
+
+	// Token: 0x04000047 RID: 71
+	private const int ObeliskRoomSize = 19;
+
+	// Token: 0x04000048 RID: 72
+	private static readonly PriorityQueue<IntVec3, int> openSet = new PriorityQueue<IntVec3, int>();
+
+	// Token: 0x04000049 RID: 73
+	private static readonly Dictionary<IntVec3, IntVec3> cameFrom = new Dictionary<IntVec3, IntVec3>();
+
+	// Token: 0x0400004A RID: 74
+	private static readonly Dictionary<IntVec3, int> gScore = new Dictionary<IntVec3, int>();
+
+	// Token: 0x0400004B RID: 75
+	private static readonly Dictionary<IntVec3, int> fScore = new Dictionary<IntVec3, int>();
+
+	// Token: 0x0400004C RID: 76
+	private static readonly List<IntVec3> toEnqueue = new List<IntVec3>();
+
+	// Token: 0x0400004D RID: 77
+	private static readonly List<IntVec3> tmpCells = new List<IntVec3>();
 }

@@ -1,98 +1,110 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class DirectedAcyclicGraph
+namespace Verse
 {
-	private int numVertices;
-
-	private List<List<int>> adjacencyList = new List<List<int>>();
-
-	public DirectedAcyclicGraph(int numVertices)
+	// Token: 0x02000CB3 RID: 3251
+	public class DirectedAcyclicGraph
 	{
-		this.numVertices = numVertices;
-		for (int i = 0; i < numVertices; i++)
+		// Token: 0x06005348 RID: 21320 RVA: 0x001AD490 File Offset: 0x001AB690
+		public DirectedAcyclicGraph(int numVertices)
 		{
-			adjacencyList.Add(new List<int>());
-		}
-	}
-
-	public void AddEdge(int from, int to)
-	{
-		adjacencyList[from].Add(to);
-	}
-
-	public List<int> TopologicalSort()
-	{
-		bool[] array = new bool[numVertices];
-		for (int i = 0; i < numVertices; i++)
-		{
-			array[i] = false;
-		}
-		List<int> result = new List<int>();
-		for (int j = 0; j < numVertices; j++)
-		{
-			if (!array[j])
+			this.numVertices = numVertices;
+			for (int i = 0; i < numVertices; i++)
 			{
-				TopologicalSortInner(j, array, result);
+				this.adjacencyList.Add(new List<int>());
 			}
 		}
-		return result;
-	}
 
-	private void TopologicalSortInner(int v, bool[] visited, List<int> result)
-	{
-		visited[v] = true;
-		foreach (int item in adjacencyList[v])
+		// Token: 0x06005349 RID: 21321 RVA: 0x001AD4D1 File Offset: 0x001AB6D1
+		public void AddEdge(int from, int to)
 		{
-			if (!visited[item])
-			{
-				TopologicalSortInner(item, visited, result);
-			}
+			this.adjacencyList[from].Add(to);
 		}
-		result.Add(v);
-	}
 
-	public bool IsCyclic()
-	{
-		return FindCycle() != -1;
-	}
+		// Token: 0x0600534A RID: 21322 RVA: 0x001AD4E8 File Offset: 0x001AB6E8
+		public List<int> TopologicalSort()
+		{
+			bool[] array = new bool[this.numVertices];
+			for (int i = 0; i < this.numVertices; i++)
+			{
+				array[i] = false;
+			}
+			List<int> result = new List<int>();
+			for (int j = 0; j < this.numVertices; j++)
+			{
+				if (!array[j])
+				{
+					this.TopologicalSortInner(j, array, result);
+				}
+			}
+			return result;
+		}
 
-	public int FindCycle()
-	{
-		bool[] array = new bool[numVertices];
-		bool[] array2 = new bool[numVertices];
-		for (int i = 0; i < numVertices; i++)
+		// Token: 0x0600534B RID: 21323 RVA: 0x001AD53C File Offset: 0x001AB73C
+		private void TopologicalSortInner(int v, bool[] visited, List<int> result)
 		{
-			array[i] = false;
-			array2[i] = false;
-		}
-		for (int j = 0; j < numVertices; j++)
-		{
-			if (IsCyclicInner(j, array, array2))
+			visited[v] = true;
+			foreach (int num in this.adjacencyList[v])
 			{
-				return j;
+				if (!visited[num])
+				{
+					this.TopologicalSortInner(num, visited, result);
+				}
 			}
+			result.Add(v);
 		}
-		return -1;
-	}
 
-	private bool IsCyclicInner(int v, bool[] visited, bool[] history)
-	{
-		visited[v] = true;
-		history[v] = true;
-		foreach (int item in adjacencyList[v])
+		// Token: 0x0600534C RID: 21324 RVA: 0x001AD5A8 File Offset: 0x001AB7A8
+		public bool IsCyclic()
 		{
-			if (!visited[item] && IsCyclicInner(item, visited, history))
-			{
-				return true;
-			}
-			if (history[item])
-			{
-				return true;
-			}
+			return this.FindCycle() != -1;
 		}
-		history[v] = false;
-		return false;
+
+		// Token: 0x0600534D RID: 21325 RVA: 0x001AD5B8 File Offset: 0x001AB7B8
+		public int FindCycle()
+		{
+			bool[] array = new bool[this.numVertices];
+			bool[] array2 = new bool[this.numVertices];
+			for (int i = 0; i < this.numVertices; i++)
+			{
+				array[i] = false;
+				array2[i] = false;
+			}
+			for (int j = 0; j < this.numVertices; j++)
+			{
+				if (this.IsCyclicInner(j, array, array2))
+				{
+					return j;
+				}
+			}
+			return -1;
+		}
+
+		// Token: 0x0600534E RID: 21326 RVA: 0x001AD618 File Offset: 0x001AB818
+		private bool IsCyclicInner(int v, bool[] visited, bool[] history)
+		{
+			visited[v] = true;
+			history[v] = true;
+			foreach (int num in this.adjacencyList[v])
+			{
+				if (!visited[num] && this.IsCyclicInner(num, visited, history))
+				{
+					return true;
+				}
+				if (history[num])
+				{
+					return true;
+				}
+			}
+			history[v] = false;
+			return false;
+		}
+
+		// Token: 0x04003C22 RID: 15394
+		private int numVertices;
+
+		// Token: 0x04003C23 RID: 15395
+		private List<List<int>> adjacencyList = new List<List<int>>();
 	}
 }

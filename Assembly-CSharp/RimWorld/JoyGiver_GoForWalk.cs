@@ -1,57 +1,49 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_GoForWalk : JoyGiver
+namespace RimWorld
 {
-	public override Job TryGiveJob(Pawn pawn)
+	// Token: 0x020014E8 RID: 5352
+	public class JoyGiver_GoForWalk : JoyGiver
 	{
-		if (!JoyUtility.EnjoyableOutsideNow(pawn))
+		// Token: 0x06007FCA RID: 32714 RVA: 0x0026736C File Offset: 0x0026556C
+		public override Job TryGiveJob(Pawn pawn)
 		{
-			return null;
-		}
-		if (PawnUtility.WillSoonHaveBasicNeed(pawn))
-		{
-			return null;
-		}
-		if (!CellFinder.TryFindClosestRegionWith(pawn.GetRegion(), TraverseParms.For(pawn), RegionValidator, 100, out var result))
-		{
-			return null;
-		}
-		if (!result.TryFindRandomCellInRegionUnforbidden(pawn, CellValidator, out var result2))
-		{
-			return null;
-		}
-		if (!WalkPathFinder.TryFindWalkPath(pawn, result2, out var result3))
-		{
-			return null;
-		}
-		Job job = JobMaker.MakeJob(def.jobDef, result3[0]);
-		job.targetQueueA = new List<LocalTargetInfo>();
-		for (int i = 1; i < result3.Count; i++)
-		{
-			job.targetQueueA.Add(result3[i]);
-		}
-		job.locomotionUrgency = LocomotionUrgency.Walk;
-		return job;
-		bool CellValidator(IntVec3 x)
-		{
-			if (!PawnUtility.KnownDangerAt(x, pawn.Map, pawn) && !x.Fogged(pawn.Map) && !x.GetTerrain(pawn.Map).avoidWander && x.Standable(pawn.Map))
+			JoyGiver_GoForWalk.<>c__DisplayClass0_0 CS$<>8__locals1 = new JoyGiver_GoForWalk.<>c__DisplayClass0_0();
+			CS$<>8__locals1.pawn = pawn;
+			if (!JoyUtility.EnjoyableOutsideNow(CS$<>8__locals1.pawn, null))
 			{
-				return !x.Roofed(pawn.Map);
+				return null;
 			}
-			return false;
-		}
-		bool RegionValidator(Region x)
-		{
-			IntVec3 result4;
-			if (x.Room.PsychologicallyOutdoors && !x.IsForbiddenEntirely(pawn))
+			if (PawnUtility.WillSoonHaveBasicNeed(CS$<>8__locals1.pawn, 0.05f))
 			{
-				return x.TryFindRandomCellInRegionUnforbidden(pawn, CellValidator, out result4);
+				return null;
 			}
-			return false;
+			Region reg;
+			if (!CellFinder.TryFindClosestRegionWith(CS$<>8__locals1.pawn.GetRegion(RegionType.Set_Passable), TraverseParms.For(CS$<>8__locals1.pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), new Predicate<Region>(CS$<>8__locals1.<TryGiveJob>g__RegionValidator|1), 100, out reg, RegionType.Set_Passable))
+			{
+				return null;
+			}
+			IntVec3 root;
+			if (!reg.TryFindRandomCellInRegionUnforbidden(CS$<>8__locals1.pawn, new Predicate<IntVec3>(CS$<>8__locals1.<TryGiveJob>g__CellValidator|0), out root))
+			{
+				return null;
+			}
+			List<IntVec3> list;
+			if (!WalkPathFinder.TryFindWalkPath(CS$<>8__locals1.pawn, root, out list))
+			{
+				return null;
+			}
+			Job job = JobMaker.MakeJob(this.def.jobDef, list[0]);
+			job.targetQueueA = new List<LocalTargetInfo>();
+			for (int i = 1; i < list.Count; i++)
+			{
+				job.targetQueueA.Add(list[i]);
+			}
+			job.locomotionUrgency = LocomotionUrgency.Walk;
+			return job;
 		}
 	}
 }

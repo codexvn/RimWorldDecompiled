@@ -1,61 +1,60 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_IsFactionHostileToPlayer : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<Faction> faction;
-
-	public SlateRef<Thing> factionOf;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A99 RID: 15001
+	public class QuestNode_IsFactionHostileToPlayer : QuestNode
 	{
-		if (IsHostile(slate))
+		// Token: 0x060147B1 RID: 83889 RVA: 0x0061DBA8 File Offset: 0x0061BDA8
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.IsHostile(slate))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		if (IsHostile(QuestGen.slate))
+		// Token: 0x060147B2 RID: 83890 RVA: 0x0061DBE0 File Offset: 0x0061BDE0
+		protected override void RunInt()
 		{
-			if (node != null)
+			if (this.IsHostile(QuestGen.slate))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
-	}
 
-	private bool IsHostile(Slate slate)
-	{
-		Faction value = faction.GetValue(slate);
-		if (value != null)
+		// Token: 0x060147B3 RID: 83891 RVA: 0x0061DC18 File Offset: 0x0061BE18
+		private bool IsHostile(Slate slate)
 		{
-			return value.HostileTo(Faction.OfPlayer);
+			Faction value = this.faction.GetValue(slate);
+			if (value != null)
+			{
+				return value.HostileTo(Faction.OfPlayer);
+			}
+			Thing value2 = this.factionOf.GetValue(slate);
+			return value2 != null && value2.Faction != null && value2.Faction.HostileTo(Faction.OfPlayer);
 		}
-		Thing value2 = factionOf.GetValue(slate);
-		if (value2 != null && value2.Faction != null)
-		{
-			return value2.Faction.HostileTo(Faction.OfPlayer);
-		}
-		return false;
+
+		// Token: 0x0400E2CF RID: 58063
+		public SlateRef<Faction> faction;
+
+		// Token: 0x0400E2D0 RID: 58064
+		public SlateRef<Thing> factionOf;
+
+		// Token: 0x0400E2D1 RID: 58065
+		public QuestNode node;
+
+		// Token: 0x0400E2D2 RID: 58066
+		public QuestNode elseNode;
 	}
 }

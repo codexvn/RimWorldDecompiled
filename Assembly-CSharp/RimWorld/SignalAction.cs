@@ -1,29 +1,36 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public abstract class SignalAction : Thing
+namespace RimWorld
 {
-	public string signalTag;
-
-	public override void Notify_SignalReceived(Signal signal)
+	// Token: 0x02002AB8 RID: 10936
+	public abstract class SignalAction : Thing
 	{
-		base.Notify_SignalReceived(signal);
-		if (signal.tag == signalTag)
+		// Token: 0x0600F3B4 RID: 62388 RVA: 0x0046CD83 File Offset: 0x0046AF83
+		public override void Notify_SignalReceived(Signal signal)
 		{
-			DoAction(signal.args);
-			if (!base.Destroyed)
+			base.Notify_SignalReceived(signal);
+			if (signal.tag == this.signalTag)
 			{
-				Destroy();
+				this.DoAction(signal.args);
+				if (!base.Destroyed)
+				{
+					this.Destroy(DestroyMode.Vanish);
+				}
 			}
 		}
-	}
 
-	protected abstract void DoAction(SignalArgs args);
+		// Token: 0x0600F3B5 RID: 62389
+		protected abstract void DoAction(SignalArgs args);
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref signalTag, "signalTag");
+		// Token: 0x0600F3B6 RID: 62390 RVA: 0x0046CDBA File Offset: 0x0046AFBA
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.signalTag, "signalTag", null, false);
+		}
+
+		// Token: 0x0400A087 RID: 41095
+		public string signalTag;
 	}
 }

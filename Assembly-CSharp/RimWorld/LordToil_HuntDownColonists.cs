@@ -1,19 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class LordToil_HuntDownColonists : LordToil
+namespace RimWorld
 {
-	public override void UpdateAllDuties()
+	// Token: 0x02001706 RID: 5894
+	public class LordToil_HuntDownColonists : LordToil
 	{
-		for (int i = 0; i < lord.ownedPawns.Count; i++)
+		// Token: 0x06008AE2 RID: 35554 RVA: 0x00296A08 File Offset: 0x00294C08
+		public override void UpdateAllDuties()
 		{
-			if (lord.ownedPawns[i].mindState != null)
+			for (int i = 0; i < this.lord.ownedPawns.Count; i++)
 			{
-				lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.HuntDownColonists);
-				lord.ownedPawns[i].TryGetComp<CompCanBeDormant>()?.WakeUp();
+				if (this.lord.ownedPawns[i].mindState != null)
+				{
+					this.lord.ownedPawns[i].mindState.duty = new PawnDuty(DutyDefOf.HuntDownColonists);
+					CompCanBeDormant compCanBeDormant = this.lord.ownedPawns[i].TryGetComp<CompCanBeDormant>();
+					if (compCanBeDormant != null)
+					{
+						compCanBeDormant.WakeUp();
+					}
+				}
 			}
 		}
 	}

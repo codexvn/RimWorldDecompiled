@@ -1,66 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class PawnsArrivalModeWorker_EdgeWalkInHateChanters : PawnsArrivalModeWorker
+namespace RimWorld
 {
-	private static readonly HashSet<IntVec3> EntryCells = new HashSet<IntVec3>();
-
-	public override void Arrive(List<Pawn> pawns, IncidentParms parms)
+	// Token: 0x0200239C RID: 9116
+	public class PawnsArrivalModeWorker_EdgeWalkInHateChanters : PawnsArrivalModeWorker
 	{
-		EntryCells.Clear();
-		Map map = (Map)parms.target;
-		int i;
-		for (i = 0; i < pawns.Count; i++)
+		// Token: 0x0600C56E RID: 50542 RVA: 0x0039708C File Offset: 0x0039528C
+		public override void Arrive(List<Pawn> pawns, IncidentParms parms)
 		{
-			bool flag = false;
-			for (int j = 0; j < 100; j++)
+			PawnsArrivalModeWorker_EdgeWalkInHateChanters.<>c__DisplayClass1_0 CS$<>8__locals1 = new PawnsArrivalModeWorker_EdgeWalkInHateChanters.<>c__DisplayClass1_0();
+			CS$<>8__locals1.pawns = pawns;
+			PawnsArrivalModeWorker_EdgeWalkInHateChanters.EntryCells.Clear();
+			Map map = (Map)parms.target;
+			int i;
+			for (i = 0; i < CS$<>8__locals1.pawns.Count; i++)
 			{
-				if (RCellFinder.TryFindRandomPawnEntryCell(out var result, map, CellFinder.EdgeRoadChance_Ignore, allowFogged: false, SmallGroupValidator))
+				bool flag = false;
+				for (int j = 0; j < 100; j++)
 				{
-					pawns[i].Position = result;
-					EntryCells.Add(result);
-					flag = true;
-					break;
-				}
-			}
-			if (!flag)
-			{
-				break;
-			}
-		}
-		pawns.RemoveRange(i, pawns.Count - i);
-		bool SmallGroupValidator(IntVec3 cell)
-		{
-			if (EntryCells.Count == 0)
-			{
-				return true;
-			}
-			if (pawns.Count < 20)
-			{
-				bool flag2 = false;
-				foreach (IntVec3 entryCell in EntryCells)
-				{
-					if (cell.DistanceToSquared(entryCell) < 200)
+					IntVec3 intVec;
+					if (RCellFinder.TryFindRandomPawnEntryCell(out intVec, map, CellFinder.EdgeRoadChance_Ignore, false, new Predicate<IntVec3>(CS$<>8__locals1.<Arrive>g__SmallGroupValidator|0)))
 					{
-						flag2 = true;
+						CS$<>8__locals1.pawns[i].Position = intVec;
+						PawnsArrivalModeWorker_EdgeWalkInHateChanters.EntryCells.Add(intVec);
+						flag = true;
 						break;
 					}
 				}
-				if (flag2)
+				if (!flag)
 				{
-					return !EntryCells.Contains(cell);
+					break;
 				}
-				return false;
 			}
-			return !EntryCells.Contains(cell);
+			CS$<>8__locals1.pawns.RemoveRange(i, CS$<>8__locals1.pawns.Count - i);
 		}
-	}
 
-	public override bool TryResolveRaidSpawnCenter(IncidentParms parms)
-	{
-		parms.spawnRotation = Rot4.Random;
-		return true;
+		// Token: 0x0600C56F RID: 50543 RVA: 0x00396A22 File Offset: 0x00394C22
+		public override bool TryResolveRaidSpawnCenter(IncidentParms parms)
+		{
+			parms.spawnRotation = Rot4.Random;
+			return true;
+		}
+
+		// Token: 0x040086AA RID: 34474
+		private static readonly HashSet<IntVec3> EntryCells = new HashSet<IntVec3>();
 	}
 }

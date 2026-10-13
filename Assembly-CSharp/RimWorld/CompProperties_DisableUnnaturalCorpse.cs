@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class CompProperties_DisableUnnaturalCorpse : CompProperties_Interactable
+namespace RimWorld
 {
-	public CompProperties_DisableUnnaturalCorpse()
+	// Token: 0x02002C5C RID: 11356
+	public class CompProperties_DisableUnnaturalCorpse : CompProperties_Interactable
 	{
-		compClass = typeof(CompDisableUnnaturalCorpse);
+		// Token: 0x0600FEAA RID: 65194 RVA: 0x0049D366 File Offset: 0x0049B566
+		public CompProperties_DisableUnnaturalCorpse()
+		{
+			this.compClass = typeof(CompDisableUnnaturalCorpse);
+		}
 	}
 }

@@ -1,35 +1,38 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_HasRelic : StatPart
+namespace RimWorld
 {
-	public float offset;
-
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x02003704 RID: 14084
+	public class StatPart_HasRelic : StatPart
 	{
-		if (req.HasThing && ActiveFor(req.Thing))
+		// Token: 0x0601387F RID: 79999 RVA: 0x005CB860 File Offset: 0x005C9A60
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val += offset;
+			if (req.HasThing && this.ActiveFor(req.Thing))
+			{
+				val += this.offset;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
+		// Token: 0x06013880 RID: 80000 RVA: 0x005CB888 File Offset: 0x005C9A88
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReports_HasRelic".Translate() + ": " + offset.ToStringWithSign();
+			if (req.HasThing && this.ActiveFor(req.Thing))
+			{
+				return "StatsReports_HasRelic".Translate() + ": " + this.offset.ToStringWithSign("0.##");
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool ActiveFor(Thing thing)
-	{
-		CompRelicContainer compRelicContainer = thing.TryGetComp<CompRelicContainer>();
-		if (compRelicContainer != null)
+		// Token: 0x06013881 RID: 80001 RVA: 0x005CB8E0 File Offset: 0x005C9AE0
+		private bool ActiveFor(Thing thing)
 		{
-			return compRelicContainer.ContainedThing != null;
+			CompRelicContainer compRelicContainer = thing.TryGetComp<CompRelicContainer>();
+			return compRelicContainer != null && compRelicContainer.ContainedThing != null;
 		}
-		return false;
+
+		// Token: 0x0400D8C5 RID: 55493
+		public float offset;
 	}
 }

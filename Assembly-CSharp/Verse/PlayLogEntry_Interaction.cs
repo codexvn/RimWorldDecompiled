@@ -1,208 +1,230 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 using UnityEngine;
 using Verse.Grammar;
 
-namespace Verse;
-
-public class PlayLogEntry_Interaction : LogEntry
+namespace Verse
 {
-	protected InteractionDef intDef;
-
-	protected Pawn initiator;
-
-	protected Pawn recipient;
-
-	protected List<RulePackDef> extraSentencePacks;
-
-	public Faction initiatorFaction;
-
-	public Ideo initiatorIdeo;
-
-	protected string InitiatorName
+	// Token: 0x02000345 RID: 837
+	public class PlayLogEntry_Interaction : LogEntry
 	{
-		get
+		// Token: 0x17000419 RID: 1049
+		// (get) Token: 0x06001551 RID: 5457 RVA: 0x00064E77 File Offset: 0x00063077
+		protected string InitiatorName
 		{
-			if (initiator == null)
+			get
 			{
-				return "null";
+				if (this.initiator == null)
+				{
+					return "null";
+				}
+				return this.initiator.LabelShort;
 			}
-			return initiator.LabelShort;
 		}
-	}
 
-	private string RecipientName
-	{
-		get
+		// Token: 0x1700041A RID: 1050
+		// (get) Token: 0x06001552 RID: 5458 RVA: 0x00064E92 File Offset: 0x00063092
+		private string RecipientName
 		{
-			if (recipient == null)
+			get
 			{
-				return "null";
+				if (this.recipient == null)
+				{
+					return "null";
+				}
+				return this.recipient.LabelShort;
 			}
-			return recipient.LabelShort;
 		}
-	}
 
-	public PlayLogEntry_Interaction()
-	{
-	}
-
-	public PlayLogEntry_Interaction(InteractionDef intDef, Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks)
-	{
-		this.intDef = intDef;
-		this.initiator = initiator;
-		this.recipient = recipient;
-		this.extraSentencePacks = extraSentencePacks;
-		initiatorFaction = initiator.Faction;
-		initiatorIdeo = initiator.Ideo;
-	}
-
-	public override bool Concerns(Thing t)
-	{
-		if (t != initiator)
+		// Token: 0x06001553 RID: 5459 RVA: 0x0005EA3A File Offset: 0x0005CC3A
+		public PlayLogEntry_Interaction() : base(null)
 		{
-			return t == recipient;
 		}
-		return true;
-	}
 
-	public override IEnumerable<Thing> GetConcerns()
-	{
-		if (initiator != null)
+		// Token: 0x06001554 RID: 5460 RVA: 0x00064EAD File Offset: 0x000630AD
+		public PlayLogEntry_Interaction(InteractionDef intDef, Pawn initiator, Pawn recipient, List<RulePackDef> extraSentencePacks) : base(null)
 		{
-			yield return initiator;
+			this.intDef = intDef;
+			this.initiator = initiator;
+			this.recipient = recipient;
+			this.extraSentencePacks = extraSentencePacks;
+			this.initiatorFaction = initiator.Faction;
+			this.initiatorIdeo = initiator.Ideo;
 		}
-		if (recipient != null)
-		{
-			yield return recipient;
-		}
-	}
 
-	public override bool CanBeClickedFromPOV(Thing pov)
-	{
-		if (pov != recipient || !CameraJumper.CanJump(initiator))
+		// Token: 0x06001555 RID: 5461 RVA: 0x00064EEB File Offset: 0x000630EB
+		public override bool Concerns(Thing t)
 		{
-			if (pov == initiator)
+			return t == this.initiator || t == this.recipient;
+		}
+
+		// Token: 0x06001556 RID: 5462 RVA: 0x00064F01 File Offset: 0x00063101
+		public override IEnumerable<Thing> GetConcerns()
+		{
+			if (this.initiator != null)
 			{
-				return CameraJumper.CanJump(recipient);
+				yield return this.initiator;
 			}
-			return false;
-		}
-		return true;
-	}
-
-	public override void ClickedFromPOV(Thing pov)
-	{
-		if (pov == initiator)
-		{
-			CameraJumper.TryJumpAndSelect(recipient);
-			return;
-		}
-		if (pov == recipient)
-		{
-			CameraJumper.TryJumpAndSelect(initiator);
-			return;
-		}
-		throw new NotImplementedException();
-	}
-
-	public override Texture2D IconFromPOV(Thing pov)
-	{
-		return intDef.GetSymbol(initiatorFaction, initiatorIdeo);
-	}
-
-	public override Color? IconColorFromPOV(Thing pov)
-	{
-		return intDef.GetSymbolColor(initiatorFaction);
-	}
-
-	public override void Notify_FactionRemoved(Faction faction)
-	{
-		if (initiatorFaction == faction)
-		{
-			initiatorFaction = null;
-		}
-	}
-
-	public override void Notify_IdeoRemoved(Ideo ideo)
-	{
-		if (initiatorIdeo == ideo)
-		{
-			initiatorIdeo = null;
-		}
-	}
-
-	public override string GetTipString()
-	{
-		return intDef.LabelCap + "\n" + base.GetTipString();
-	}
-
-	protected override string ToGameStringFromPOV_Worker(Thing pov, bool forceLog)
-	{
-		if (initiator == null || recipient == null)
-		{
-			Log.ErrorOnce("PlayLogEntry_Interaction has a null pawn reference.", 34422);
-			return "[" + intDef.label + " error: null pawn reference]";
-		}
-		Rand.PushState();
-		Rand.Seed = logID;
-		GrammarRequest request = base.GenerateGrammarRequest();
-		string text;
-		if (pov == initiator)
-		{
-			request.IncludesBare.Add(intDef.logRulesInitiator);
-			request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, request.Constants));
-			request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipient, request.Constants));
-			text = GrammarResolver.Resolve("r_logentry", request, "interaction from initiator", forceLog);
-		}
-		else if (pov == recipient)
-		{
-			if (intDef.logRulesRecipient != null)
+			if (this.recipient != null)
 			{
-				request.IncludesBare.Add(intDef.logRulesRecipient);
+				yield return this.recipient;
+			}
+			yield break;
+		}
+
+		// Token: 0x06001557 RID: 5463 RVA: 0x00064F11 File Offset: 0x00063111
+		public override bool CanBeClickedFromPOV(Thing pov)
+		{
+			return (pov == this.recipient && CameraJumper.CanJump(this.initiator)) || (pov == this.initiator && CameraJumper.CanJump(this.recipient));
+		}
+
+		// Token: 0x06001558 RID: 5464 RVA: 0x00064F4B File Offset: 0x0006314B
+		public override void ClickedFromPOV(Thing pov)
+		{
+			if (pov == this.initiator)
+			{
+				CameraJumper.TryJumpAndSelect(this.recipient, CameraJumper.MovementMode.Pan);
+				return;
+			}
+			if (pov == this.recipient)
+			{
+				CameraJumper.TryJumpAndSelect(this.initiator, CameraJumper.MovementMode.Pan);
+				return;
+			}
+			throw new NotImplementedException();
+		}
+
+		// Token: 0x06001559 RID: 5465 RVA: 0x00064F88 File Offset: 0x00063188
+		public override Texture2D IconFromPOV(Thing pov)
+		{
+			return this.intDef.GetSymbol(this.initiatorFaction, this.initiatorIdeo);
+		}
+
+		// Token: 0x0600155A RID: 5466 RVA: 0x00064FA1 File Offset: 0x000631A1
+		public override Color? IconColorFromPOV(Thing pov)
+		{
+			return this.intDef.GetSymbolColor(this.initiatorFaction);
+		}
+
+		// Token: 0x0600155B RID: 5467 RVA: 0x00064FB4 File Offset: 0x000631B4
+		public override void Notify_FactionRemoved(Faction faction)
+		{
+			if (this.initiatorFaction == faction)
+			{
+				this.initiatorFaction = null;
+			}
+		}
+
+		// Token: 0x0600155C RID: 5468 RVA: 0x00064FC6 File Offset: 0x000631C6
+		public override void Notify_IdeoRemoved(Ideo ideo)
+		{
+			if (this.initiatorIdeo == ideo)
+			{
+				this.initiatorIdeo = null;
+			}
+		}
+
+		// Token: 0x0600155D RID: 5469 RVA: 0x00064FD8 File Offset: 0x000631D8
+		public override string GetTipString()
+		{
+			return this.intDef.LabelCap + "\n" + base.GetTipString();
+		}
+
+		// Token: 0x0600155E RID: 5470 RVA: 0x00065000 File Offset: 0x00063200
+		protected override string ToGameStringFromPOV_Worker(Thing pov, bool forceLog)
+		{
+			if (this.initiator == null || this.recipient == null)
+			{
+				Log.ErrorOnce("PlayLogEntry_Interaction has a null pawn reference.", 34422);
+				return "[" + this.intDef.label + " error: null pawn reference]";
+			}
+			Rand.PushState();
+			Rand.Seed = this.logID;
+			GrammarRequest request = base.GenerateGrammarRequest();
+			string text;
+			if (pov == this.initiator)
+			{
+				request.IncludesBare.Add(this.intDef.logRulesInitiator);
+				request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, request.Constants, true, true));
+				request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", this.recipient, request.Constants, true, true));
+				text = GrammarResolver.Resolve("r_logentry", request, "interaction from initiator", forceLog, null, null, null, true);
+			}
+			else if (pov == this.recipient)
+			{
+				if (this.intDef.logRulesRecipient != null)
+				{
+					request.IncludesBare.Add(this.intDef.logRulesRecipient);
+				}
+				else
+				{
+					request.IncludesBare.Add(this.intDef.logRulesInitiator);
+				}
+				request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, request.Constants, true, true));
+				request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", this.recipient, request.Constants, true, true));
+				text = GrammarResolver.Resolve("r_logentry", request, "interaction from recipient", forceLog, null, null, null, true);
 			}
 			else
 			{
-				request.IncludesBare.Add(intDef.logRulesInitiator);
+				Log.ErrorOnce("Cannot display PlayLogEntry_Interaction from POV who isn't initiator or recipient.", 51251);
+				text = this.ToString();
 			}
-			request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, request.Constants));
-			request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipient, request.Constants));
-			text = GrammarResolver.Resolve("r_logentry", request, "interaction from recipient", forceLog);
-		}
-		else
-		{
-			Log.ErrorOnce("Cannot display PlayLogEntry_Interaction from POV who isn't initiator or recipient.", 51251);
-			text = ToString();
-		}
-		if (extraSentencePacks != null)
-		{
-			for (int i = 0; i < extraSentencePacks.Count; i++)
+			if (this.extraSentencePacks != null)
 			{
-				request.Clear();
-				request.Includes.Add(extraSentencePacks[i]);
-				request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", initiator, request.Constants));
-				request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", recipient, request.Constants));
-				text = text + " " + GrammarResolver.Resolve(extraSentencePacks[i].FirstRuleKeyword, request, "extraSentencePack", forceLog, extraSentencePacks[i].FirstUntranslatedRuleKeyword);
+				for (int i = 0; i < this.extraSentencePacks.Count; i++)
+				{
+					request.Clear();
+					request.Includes.Add(this.extraSentencePacks[i]);
+					request.Rules.AddRange(GrammarUtility.RulesForPawn("INITIATOR", this.initiator, request.Constants, true, true));
+					request.Rules.AddRange(GrammarUtility.RulesForPawn("RECIPIENT", this.recipient, request.Constants, true, true));
+					text = text + " " + GrammarResolver.Resolve(this.extraSentencePacks[i].FirstRuleKeyword, request, "extraSentencePack", forceLog, this.extraSentencePacks[i].FirstUntranslatedRuleKeyword, null, null, true);
+				}
 			}
+			Rand.PopState();
+			return text;
 		}
-		Rand.PopState();
-		return text;
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Defs.Look(ref intDef, "intDef");
-		Scribe_References.Look(ref initiator, "initiator", saveDestroyedThings: true);
-		Scribe_References.Look(ref recipient, "recipient", saveDestroyedThings: true);
-		Scribe_Collections.Look(ref extraSentencePacks, "extras", LookMode.Undefined);
-		Scribe_References.Look(ref initiatorFaction, "initiatorFaction");
-		Scribe_References.Look(ref initiatorIdeo, "initiatorIdeo");
-	}
+		// Token: 0x0600155F RID: 5471 RVA: 0x00065278 File Offset: 0x00063478
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Defs.Look<InteractionDef>(ref this.intDef, "intDef");
+			Scribe_References.Look<Pawn>(ref this.initiator, "initiator", true);
+			Scribe_References.Look<Pawn>(ref this.recipient, "recipient", true);
+			Scribe_Collections.Look<RulePackDef>(ref this.extraSentencePacks, "extras", LookMode.Undefined, Array.Empty<object>());
+			Scribe_References.Look<Faction>(ref this.initiatorFaction, "initiatorFaction", false);
+			Scribe_References.Look<Ideo>(ref this.initiatorIdeo, "initiatorIdeo", false);
+		}
 
-	public override string ToString()
-	{
-		return intDef.label + ": " + InitiatorName + "->" + RecipientName;
+		// Token: 0x06001560 RID: 5472 RVA: 0x000652F5 File Offset: 0x000634F5
+		public override string ToString()
+		{
+			return string.Concat(new string[]
+			{
+				this.intDef.label,
+				": ",
+				this.InitiatorName,
+				"->",
+				this.RecipientName
+			});
+		}
+
+		// Token: 0x040013E7 RID: 5095
+		protected InteractionDef intDef;
+
+		// Token: 0x040013E8 RID: 5096
+		protected Pawn initiator;
+
+		// Token: 0x040013E9 RID: 5097
+		protected Pawn recipient;
+
+		// Token: 0x040013EA RID: 5098
+		protected List<RulePackDef> extraSentencePacks;
+
+		// Token: 0x040013EB RID: 5099
+		public Faction initiatorFaction;
+
+		// Token: 0x040013EC RID: 5100
+		public Ideo initiatorIdeo;
 	}
 }

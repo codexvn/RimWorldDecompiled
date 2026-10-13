@@ -1,229 +1,335 @@
-using System;
+﻿using System;
 using System.Reflection;
 using UnityEngine;
 using Verse;
 using Verse.Steam;
 
-namespace RimWorld;
-
-public static class VersionControl
+namespace RimWorld
 {
-	private static Version version;
-
-	private static string versionStringWithoutBuild;
-
-	private static string versionString;
-
-	private static string versionStringWithRev;
-
-	private static DateTime buildDate;
-
-	public static Version CurrentVersion => version;
-
-	public static string CurrentVersionString => versionString;
-
-	public static string CurrentVersionStringWithoutBuild => versionStringWithoutBuild;
-
-	public static string CurrentVersionStringWithRev => versionStringWithRev;
-
-	public static int CurrentMajor => version.Major;
-
-	public static int CurrentMinor => version.Minor;
-
-	public static int CurrentBuild => version.Build;
-
-	public static int CurrentRevision => version.Revision;
-
-	public static DateTime CurrentBuildDate => buildDate;
-
-	static VersionControl()
+	// Token: 0x020010F3 RID: 4339
+	public static class VersionControl
 	{
-		Version version = Assembly.GetExecutingAssembly().GetName().Version;
-		buildDate = new DateTime(2000, 1, 1).AddDays(version.Build);
-		int build = version.Build - 4805;
-		int revision = version.Revision * 2 / 60;
-		VersionControl.version = new Version(version.Major, version.Minor, build, revision);
-		versionStringWithRev = VersionControl.version.Major + "." + VersionControl.version.Minor + "." + VersionControl.version.Build + " rev" + VersionControl.version.Revision;
-		versionString = VersionControl.version.Major + "." + VersionControl.version.Minor + "." + VersionControl.version.Build;
-		versionStringWithoutBuild = VersionControl.version.Major + "." + VersionControl.version.Minor;
-	}
+		// Token: 0x17001041 RID: 4161
+		// (get) Token: 0x06006970 RID: 26992 RVA: 0x00213665 File Offset: 0x00211865
+		public static Version CurrentVersion
+		{
+			get
+			{
+				return VersionControl.version;
+			}
+		}
 
-	public static void DrawInfoInCorner()
-	{
-		Text.Font = GameFont.Small;
-		GUI.color = new Color(1f, 1f, 1f, 0.5f);
-		string text = "VersionIndicator".Translate(versionString);
-		string versionExtraInfo = GetVersionExtraInfo();
-		if (!versionExtraInfo.NullOrEmpty())
+		// Token: 0x17001042 RID: 4162
+		// (get) Token: 0x06006971 RID: 26993 RVA: 0x0021366C File Offset: 0x0021186C
+		public static string CurrentVersionString
 		{
-			text = text + " (" + versionExtraInfo + ")";
+			get
+			{
+				return VersionControl.versionString;
+			}
 		}
-		text += "\n" + "CompiledOn".Translate(buildDate.ToString("MMM d yyyy"));
-		if (SteamManager.Initialized)
-		{
-			text += "\n" + "LoggedIntoSteamAs".Translate(SteamUtility.SteamPersonaName);
-		}
-		Rect rect = new Rect(10f, 10f, 330f, Text.CalcHeight(text, 330f));
-		Widgets.Label(rect, text);
-		GUI.color = Color.white;
-		LatestVersionGetter component = Current.Root.gameObject.GetComponent<LatestVersionGetter>();
-		Rect rect2 = new Rect(10f, rect.yMax - 5f, 330f, 999f);
-		component.DrawAt(rect2);
-	}
 
-	private static string GetVersionExtraInfo()
-	{
-		string text = "";
-		if (UnityData.Is32BitBuild)
+		// Token: 0x17001043 RID: 4163
+		// (get) Token: 0x06006972 RID: 26994 RVA: 0x00213673 File Offset: 0x00211873
+		public static string CurrentVersionStringWithoutBuild
 		{
-			text += "32-bit";
+			get
+			{
+				return VersionControl.versionStringWithoutBuild;
+			}
 		}
-		else if (UnityData.Is64BitBuild)
-		{
-			text += "64-bit";
-		}
-		return text;
-	}
 
-	public static void LogVersionNumber()
-	{
-		Log.Message("RimWorld " + versionStringWithRev);
-	}
+		// Token: 0x17001044 RID: 4164
+		// (get) Token: 0x06006973 RID: 26995 RVA: 0x0021367A File Offset: 0x0021187A
+		public static string CurrentVersionStringWithRev
+		{
+			get
+			{
+				return VersionControl.versionStringWithRev;
+			}
+		}
 
-	public static bool IsCompatible(Version v)
-	{
-		if (v.Major == CurrentMajor)
+		// Token: 0x17001045 RID: 4165
+		// (get) Token: 0x06006974 RID: 26996 RVA: 0x00213681 File Offset: 0x00211881
+		public static int CurrentMajor
 		{
-			return v.Minor == CurrentMinor;
+			get
+			{
+				return VersionControl.version.Major;
+			}
 		}
-		return false;
-	}
 
-	public static bool TryParseVersionString(string str, out Version version)
-	{
-		version = null;
-		if (str == null)
+		// Token: 0x17001046 RID: 4166
+		// (get) Token: 0x06006975 RID: 26997 RVA: 0x0021368D File Offset: 0x0021188D
+		public static int CurrentMinor
 		{
-			return false;
+			get
+			{
+				return VersionControl.version.Minor;
+			}
 		}
-		string[] array = str.Split('.');
-		if (array.Length < 2)
+
+		// Token: 0x17001047 RID: 4167
+		// (get) Token: 0x06006976 RID: 26998 RVA: 0x00213699 File Offset: 0x00211899
+		public static int CurrentBuild
 		{
-			return false;
+			get
+			{
+				return VersionControl.version.Build;
+			}
 		}
-		for (int i = 0; i < 2; i++)
+
+		// Token: 0x17001048 RID: 4168
+		// (get) Token: 0x06006977 RID: 26999 RVA: 0x002136A5 File Offset: 0x002118A5
+		public static int CurrentRevision
 		{
-			if (!int.TryParse(array[i], out var result))
+			get
+			{
+				return VersionControl.version.Revision;
+			}
+		}
+
+		// Token: 0x17001049 RID: 4169
+		// (get) Token: 0x06006978 RID: 27000 RVA: 0x002136B1 File Offset: 0x002118B1
+		public static DateTime CurrentBuildDate
+		{
+			get
+			{
+				return VersionControl.buildDate;
+			}
+		}
+
+		// Token: 0x06006979 RID: 27001 RVA: 0x002136B8 File Offset: 0x002118B8
+		static VersionControl()
+		{
+			Version version = Assembly.GetExecutingAssembly().GetName().Version;
+			VersionControl.buildDate = new DateTime(2000, 1, 1).AddDays((double)version.Build);
+			int build = version.Build - 4805;
+			int revision = version.Revision * 2 / 60;
+			VersionControl.version = new Version(version.Major, version.Minor, build, revision);
+			VersionControl.versionStringWithRev = string.Concat(new string[]
+			{
+				VersionControl.version.Major.ToString(),
+				".",
+				VersionControl.version.Minor.ToString(),
+				".",
+				VersionControl.version.Build.ToString(),
+				" rev",
+				VersionControl.version.Revision.ToString()
+			});
+			VersionControl.versionString = string.Concat(new string[]
+			{
+				VersionControl.version.Major.ToString(),
+				".",
+				VersionControl.version.Minor.ToString(),
+				".",
+				VersionControl.version.Build.ToString()
+			});
+			VersionControl.versionStringWithoutBuild = VersionControl.version.Major.ToString() + "." + VersionControl.version.Minor.ToString();
+		}
+
+		// Token: 0x0600697A RID: 27002 RVA: 0x00213840 File Offset: 0x00211A40
+		public static void DrawInfoInCorner()
+		{
+			Text.Font = GameFont.Small;
+			GUI.color = new Color(1f, 1f, 1f, 0.5f);
+			string text = "VersionIndicator".Translate(VersionControl.versionString);
+			string versionExtraInfo = VersionControl.GetVersionExtraInfo();
+			if (!versionExtraInfo.NullOrEmpty())
+			{
+				text = text + " (" + versionExtraInfo + ")";
+			}
+			text += "\n" + "CompiledOn".Translate(VersionControl.buildDate.ToString("MMM d yyyy"));
+			if (SteamManager.Initialized)
+			{
+				text += "\n" + "LoggedIntoSteamAs".Translate(SteamUtility.SteamPersonaName);
+			}
+			Rect rect = new Rect(10f, 10f, 330f, Text.CalcHeight(text, 330f));
+			Widgets.Label(rect, text);
+			GUI.color = Color.white;
+			LatestVersionGetter component = Current.Root.gameObject.GetComponent<LatestVersionGetter>();
+			Rect rect2 = new Rect(10f, rect.yMax - 5f, 330f, 999f);
+			component.DrawAt(rect2);
+		}
+
+		// Token: 0x0600697B RID: 27003 RVA: 0x0021397C File Offset: 0x00211B7C
+		private static string GetVersionExtraInfo()
+		{
+			string text = "";
+			if (UnityData.Is32BitBuild)
+			{
+				text += "32-bit";
+			}
+			else if (UnityData.Is64BitBuild)
+			{
+				text += "64-bit";
+			}
+			return text;
+		}
+
+		// Token: 0x0600697C RID: 27004 RVA: 0x002139B8 File Offset: 0x00211BB8
+		public static void LogVersionNumber()
+		{
+			Log.Message("RimWorld " + VersionControl.versionStringWithRev);
+		}
+
+		// Token: 0x0600697D RID: 27005 RVA: 0x002139CE File Offset: 0x00211BCE
+		public static bool IsCompatible(Version v)
+		{
+			return v.Major == VersionControl.CurrentMajor && v.Minor == VersionControl.CurrentMinor;
+		}
+
+		// Token: 0x0600697E RID: 27006 RVA: 0x002139EC File Offset: 0x00211BEC
+		public static bool TryParseVersionString(string str, out Version version)
+		{
+			version = null;
+			if (str == null)
 			{
 				return false;
 			}
-			if (result < 0)
+			string[] array = str.Split('.', StringSplitOptions.None);
+			if (array.Length < 2)
 			{
 				return false;
 			}
+			for (int i = 0; i < 2; i++)
+			{
+				int num;
+				if (!int.TryParse(array[i], out num))
+				{
+					return false;
+				}
+				if (num < 0)
+				{
+					return false;
+				}
+			}
+			version = new Version(int.Parse(array[0]), int.Parse(array[1]));
+			return true;
 		}
-		version = new Version(int.Parse(array[0]), int.Parse(array[1]));
-		return true;
-	}
 
-	public static int BuildFromVersionString(string str)
-	{
-		str = VersionStringWithoutRev(str);
-		int result = 0;
-		string[] array = str.Split('.');
-		if (array.Length < 3 || !int.TryParse(array[2], out result))
+		// Token: 0x0600697F RID: 27007 RVA: 0x00213A4C File Offset: 0x00211C4C
+		public static int BuildFromVersionString(string str)
 		{
-			Log.Warning("Could not get build from version string " + str);
+			str = VersionControl.VersionStringWithoutRev(str);
+			int result = 0;
+			string[] array = str.Split('.', StringSplitOptions.None);
+			if (array.Length < 3 || !int.TryParse(array[2], out result))
+			{
+				Log.Warning("Could not get build from version string " + str);
+			}
+			return result;
 		}
-		return result;
-	}
 
-	public static int MinorFromVersionString(string str)
-	{
-		str = VersionStringWithoutRev(str);
-		int result = 0;
-		string[] array = str.Split('.');
-		if (array.Length < 2 || !int.TryParse(array[1], out result))
+		// Token: 0x06006980 RID: 27008 RVA: 0x00213A90 File Offset: 0x00211C90
+		public static int MinorFromVersionString(string str)
 		{
-			Log.Warning("Could not get minor version from version string " + str);
+			str = VersionControl.VersionStringWithoutRev(str);
+			int result = 0;
+			string[] array = str.Split('.', StringSplitOptions.None);
+			if (array.Length < 2 || !int.TryParse(array[1], out result))
+			{
+				Log.Warning("Could not get minor version from version string " + str);
+			}
+			return result;
 		}
-		return result;
-	}
 
-	public static int MajorFromVersionString(string str)
-	{
-		str = VersionStringWithoutRev(str);
-		int result = 0;
-		if (!int.TryParse(str.Split('.')[0], out result))
+		// Token: 0x06006981 RID: 27009 RVA: 0x00213AD4 File Offset: 0x00211CD4
+		public static int MajorFromVersionString(string str)
 		{
-			Log.Warning("Could not get major version from version string " + str);
+			str = VersionControl.VersionStringWithoutRev(str);
+			int result = 0;
+			if (!int.TryParse(str.Split('.', StringSplitOptions.None)[0], out result))
+			{
+				Log.Warning("Could not get major version from version string " + str);
+			}
+			return result;
 		}
-		return result;
-	}
 
-	public static string VersionStringWithoutRev(string str)
-	{
-		return str.Split(' ')[0];
-	}
+		// Token: 0x06006982 RID: 27010 RVA: 0x00213B10 File Offset: 0x00211D10
+		public static string VersionStringWithoutRev(string str)
+		{
+			return str.Split(' ', StringSplitOptions.None)[0];
+		}
 
-	public static Version VersionFromString(string str)
-	{
-		if (str.NullOrEmpty())
+		// Token: 0x06006983 RID: 27011 RVA: 0x00213B20 File Offset: 0x00211D20
+		public static Version VersionFromString(string str)
 		{
-			throw new ArgumentException("str");
-		}
-		string[] array = str.Split('.');
-		if (array.Length > 3)
-		{
-			throw new ArgumentException("str");
-		}
-		int major = 0;
-		int minor = 0;
-		int build = 0;
-		for (int i = 0; i < array.Length; i++)
-		{
-			if (!int.TryParse(array[i], out var result))
+			if (str.NullOrEmpty())
 			{
 				throw new ArgumentException("str");
 			}
-			if (result < 0)
+			string[] array = str.Split('.', StringSplitOptions.None);
+			if (array.Length > 3)
 			{
 				throw new ArgumentException("str");
 			}
-			switch (i)
+			int major = 0;
+			int minor = 0;
+			int build = 0;
+			for (int i = 0; i < array.Length; i++)
 			{
-			case 0:
-				major = result;
-				break;
-			case 1:
-				minor = result;
-				break;
-			case 2:
-				build = result;
-				break;
+				int num;
+				if (!int.TryParse(array[i], out num))
+				{
+					throw new ArgumentException("str");
+				}
+				if (num < 0)
+				{
+					throw new ArgumentException("str");
+				}
+				switch (i)
+				{
+				case 0:
+					major = num;
+					break;
+				case 1:
+					minor = num;
+					break;
+				case 2:
+					build = num;
+					break;
+				}
 			}
+			return new Version(major, minor, build);
 		}
-		return new Version(major, minor, build);
-	}
 
-	public static bool IsWellFormattedVersionString(string str)
-	{
-		string[] array = str.Split('.');
-		if (array.Length != 2)
+		// Token: 0x06006984 RID: 27012 RVA: 0x00213BC8 File Offset: 0x00211DC8
+		public static bool IsWellFormattedVersionString(string str)
 		{
-			return false;
-		}
-		for (int i = 0; i < 2; i++)
-		{
-			if (!int.TryParse(array[i], out var result))
+			string[] array = str.Split('.', StringSplitOptions.None);
+			if (array.Length != 2)
 			{
 				return false;
 			}
-			if (result < 0)
+			for (int i = 0; i < 2; i++)
 			{
-				return false;
+				int num;
+				if (!int.TryParse(array[i], out num))
+				{
+					return false;
+				}
+				if (num < 0)
+				{
+					return false;
+				}
 			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x04004AA6 RID: 19110
+		private static Version version;
+
+		// Token: 0x04004AA7 RID: 19111
+		private static string versionStringWithoutBuild;
+
+		// Token: 0x04004AA8 RID: 19112
+		private static string versionString;
+
+		// Token: 0x04004AA9 RID: 19113
+		private static string versionStringWithRev;
+
+		// Token: 0x04004AAA RID: 19114
+		private static DateTime buildDate;
 	}
 }

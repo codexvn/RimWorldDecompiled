@@ -1,36 +1,42 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-internal class MoteThrownAttached : MoteThrown
+namespace Verse
 {
-	private Vector3 attacheeLastPosition = new Vector3(-1000f, -1000f, -1000f);
-
-	public override void SpawnSetup(Map map, bool respawningAfterLoad)
+	// Token: 0x020008C3 RID: 2243
+	internal class MoteThrownAttached : MoteThrown
 	{
-		base.SpawnSetup(map, respawningAfterLoad);
-		if (link1.Linked)
+		// Token: 0x060038BE RID: 14526 RVA: 0x0012E31C File Offset: 0x0012C51C
+		public override void SpawnSetup(Map map, bool respawningAfterLoad)
 		{
-			attacheeLastPosition = link1.LastDrawPos;
-		}
-		exactPosition += def.mote.attachedDrawOffset;
-	}
-
-	protected override Vector3 NextExactPosition(float deltaTime)
-	{
-		Vector3 result = base.NextExactPosition(deltaTime);
-		if (link1.Linked)
-		{
-			bool flag = detachAfterTicks == -1 || Find.TickManager.TicksGame - spawnTick < detachAfterTicks;
-			if (!link1.Target.ThingDestroyed && flag)
+			base.SpawnSetup(map, respawningAfterLoad);
+			if (this.link1.Linked)
 			{
-				link1.UpdateDrawPos();
+				this.attacheeLastPosition = this.link1.LastDrawPos;
 			}
-			Vector3 vector = link1.LastDrawPos - attacheeLastPosition;
-			result += vector;
-			result.y = AltitudeLayer.MoteOverhead.AltitudeFor();
-			attacheeLastPosition = link1.LastDrawPos;
+			this.exactPosition += this.def.mote.attachedDrawOffset;
 		}
-		return result;
+
+		// Token: 0x060038BF RID: 14527 RVA: 0x0012E370 File Offset: 0x0012C570
+		protected override Vector3 NextExactPosition(float deltaTime)
+		{
+			Vector3 vector = base.NextExactPosition(deltaTime);
+			if (this.link1.Linked)
+			{
+				bool flag = this.detachAfterTicks == -1 || Find.TickManager.TicksGame - this.spawnTick < this.detachAfterTicks;
+				if (!this.link1.Target.ThingDestroyed && flag)
+				{
+					this.link1.UpdateDrawPos();
+				}
+				Vector3 b = this.link1.LastDrawPos - this.attacheeLastPosition;
+				vector += b;
+				vector.y = AltitudeLayer.MoteOverhead.AltitudeFor();
+				this.attacheeLastPosition = this.link1.LastDrawPos;
+			}
+			return vector;
+		}
+
+		// Token: 0x040029F5 RID: 10741
+		private Vector3 attacheeLastPosition = new Vector3(-1000f, -1000f, -1000f);
 	}
 }

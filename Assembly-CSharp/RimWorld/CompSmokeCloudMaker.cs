@@ -1,63 +1,90 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class CompSmokeCloudMaker : ThingComp
+namespace RimWorld
 {
-	private Effecter effecter;
-
-	private static List<IntVec3> tmpValidCells = new List<IntVec3>();
-
-	private CompProperties_SmokeCloudMaker Props => (CompProperties_SmokeCloudMaker)props;
-
-	public override void CompTick()
+	// Token: 0x02002E1E RID: 11806
+	public class CompSmokeCloudMaker : ThingComp
 	{
-		if (!ModLister.CheckIdeology("Smoke cloud maker") || !parent.Spawned)
+		// Token: 0x17002A9A RID: 10906
+		// (get) Token: 0x06010A0B RID: 68107 RVA: 0x004CBA82 File Offset: 0x004C9C82
+		private CompProperties_SmokeCloudMaker Props
 		{
-			return;
-		}
-		CompRefuelable compRefuelable = parent.TryGetComp<CompRefuelable>();
-		CompPowerTrader compPowerTrader = parent.TryGetComp<CompPowerTrader>();
-		if ((compRefuelable?.HasFuel ?? true) & (compPowerTrader?.PowerOn ?? true))
-		{
-			if (effecter == null)
+			get
 			{
-				effecter = Props.sourceStreamEffect.Spawn();
-				effecter.Trigger(parent, parent);
+				return (CompProperties_SmokeCloudMaker)this.props;
 			}
-			effecter.EffectTick(parent, parent);
-			if (!Rand.MTBEventOccurs(Props.fleckSpawnMTB, 1f, 1f))
+		}
+
+		// Token: 0x06010A0C RID: 68108 RVA: 0x004CBA90 File Offset: 0x004C9C90
+		public override void CompTick()
+		{
+			if (!ModLister.CheckIdeology("Smoke cloud maker"))
 			{
 				return;
 			}
-			tmpValidCells.Clear();
-			Room room = parent.GetRoom();
-			CellRect cellRect = parent.OccupiedRect();
-			foreach (IntVec3 item in cellRect.ExpandedBy(Mathf.FloorToInt(Props.cloudRadius + 1f)))
+			if (!this.parent.Spawned)
 			{
-				if (cellRect.ClosestCellTo(item).DistanceTo(item) <= Props.cloudRadius && item.GetRoom(parent.Map) == room)
+				return;
+			}
+			CompRefuelable compRefuelable = this.parent.TryGetComp<CompRefuelable>();
+			CompPowerTrader compPowerTrader = this.parent.TryGetComp<CompPowerTrader>();
+			if ((compRefuelable == null || compRefuelable.HasFuel) & (compPowerTrader == null || compPowerTrader.PowerOn))
+			{
+				if (this.effecter == null)
 				{
-					tmpValidCells.Add(item);
+					this.effecter = this.Props.sourceStreamEffect.Spawn();
+					this.effecter.Trigger(this.parent, this.parent, -1);
+				}
+				this.effecter.EffectTick(this.parent, this.parent);
+				if (Rand.MTBEventOccurs(this.Props.fleckSpawnMTB, 1f, 1f))
+				{
+					CompSmokeCloudMaker.tmpValidCells.Clear();
+					Room room = this.parent.GetRoom(RegionType.Set_All);
+					CellRect cellRect = this.parent.OccupiedRect();
+					foreach (IntVec3 intVec in cellRect.ExpandedBy(Mathf.FloorToInt(this.Props.cloudRadius + 1f)))
+					{
+						if (cellRect.ClosestCellTo(intVec).DistanceTo(intVec) <= this.Props.cloudRadius && intVec.GetRoom(this.parent.Map) == room)
+						{
+							CompSmokeCloudMaker.tmpValidCells.Add(intVec);
+						}
+					}
+					if (CompSmokeCloudMaker.tmpValidCells.Count > 0)
+					{
+						Vector3 loc = CompSmokeCloudMaker.tmpValidCells.RandomElement<IntVec3>().ToVector3ShiftedWithAltitude(AltitudeLayer.MoteOverhead);
+						this.parent.Map.flecks.CreateFleck(FleckMaker.GetDataStatic(loc, this.parent.Map, this.Props.cloudFleck, this.Props.fleckScale));
+						return;
+					}
 				}
 			}
-			if (tmpValidCells.Count > 0)
+			else
 			{
-				Vector3 loc = tmpValidCells.RandomElement().ToVector3ShiftedWithAltitude(AltitudeLayer.MoteOverhead);
-				parent.Map.flecks.CreateFleck(FleckMaker.GetDataStatic(loc, parent.Map, Props.cloudFleck, Props.fleckScale));
+				Effecter effecter = this.effecter;
+				if (effecter != null)
+				{
+					effecter.Cleanup();
+				}
+				this.effecter = null;
 			}
 		}
-		else
-		{
-			effecter?.Cleanup();
-			effecter = null;
-		}
-	}
 
-	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-	{
-		effecter?.Cleanup();
-		effecter = null;
+		// Token: 0x06010A0D RID: 68109 RVA: 0x004CBCA8 File Offset: 0x004C9EA8
+		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
+		{
+			Effecter effecter = this.effecter;
+			if (effecter != null)
+			{
+				effecter.Cleanup();
+			}
+			this.effecter = null;
+		}
+
+		// Token: 0x0400AD4C RID: 44364
+		private Effecter effecter;
+
+		// Token: 0x0400AD4D RID: 44365
+		private static List<IntVec3> tmpValidCells = new List<IntVec3>();
 	}
 }

@@ -1,21 +1,25 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class HistoryAutoRecorderWorker_WealthBuildings : HistoryAutoRecorderWorker
+namespace RimWorld
 {
-	public override float PullRecord()
+	// Token: 0x02001B6E RID: 7022
+	public class HistoryAutoRecorderWorker_WealthBuildings : HistoryAutoRecorderWorker
 	{
-		float num = 0f;
-		List<Map> maps = Find.Maps;
-		for (int i = 0; i < maps.Count; i++)
+		// Token: 0x06009CB6 RID: 40118 RVA: 0x002D7384 File Offset: 0x002D5584
+		public override float PullRecord()
 		{
-			if (maps[i].IsPlayerHome)
+			float num = 0f;
+			List<Map> maps = Find.Maps;
+			for (int i = 0; i < maps.Count; i++)
 			{
-				num += maps[i].wealthWatcher.WealthBuildings;
+				if (maps[i].IsPlayerHome)
+				{
+					num += maps[i].wealthWatcher.WealthBuildings;
+				}
 			}
+			return num;
 		}
-		return num;
 	}
 }

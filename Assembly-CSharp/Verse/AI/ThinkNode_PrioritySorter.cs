@@ -1,69 +1,79 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse.AI;
-
-public class ThinkNode_PrioritySorter : ThinkNode
+namespace Verse.AI
 {
-	public float minPriority;
-
-	private static List<ThinkNode> workingNodes = new List<ThinkNode>();
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x02000FFB RID: 4091
+	public class ThinkNode_PrioritySorter : ThinkNode
 	{
-		ThinkNode_PrioritySorter obj = (ThinkNode_PrioritySorter)base.DeepCopy(resolve);
-		obj.minPriority = minPriority;
-		return obj;
-	}
-
-	public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
-	{
-		workingNodes.Clear();
-		int count = subNodes.Count;
-		for (int i = 0; i < count; i++)
+		// Token: 0x06006484 RID: 25732 RVA: 0x001FD807 File Offset: 0x001FBA07
+		public override ThinkNode DeepCopy(bool resolve = true)
 		{
-			workingNodes.Insert(Rand.Range(0, workingNodes.Count - 1), subNodes[i]);
+			ThinkNode_PrioritySorter thinkNode_PrioritySorter = (ThinkNode_PrioritySorter)base.DeepCopy(resolve);
+			thinkNode_PrioritySorter.minPriority = this.minPriority;
+			return thinkNode_PrioritySorter;
 		}
-		while (workingNodes.Count > 0)
+
+		// Token: 0x06006485 RID: 25733 RVA: 0x001FD824 File Offset: 0x001FBA24
+		public override ThinkResult TryIssueJobPackage(Pawn pawn, JobIssueParams jobParams)
 		{
-			float num = 0f;
-			int num2 = -1;
-			for (int j = 0; j < workingNodes.Count; j++)
+			ThinkNode_PrioritySorter.workingNodes.Clear();
+			int count = this.subNodes.Count;
+			for (int i = 0; i < count; i++)
 			{
-				float num3 = 0f;
+				ThinkNode_PrioritySorter.workingNodes.Insert(Rand.Range(0, ThinkNode_PrioritySorter.workingNodes.Count - 1), this.subNodes[i]);
+			}
+			while (ThinkNode_PrioritySorter.workingNodes.Count > 0)
+			{
+				float num = 0f;
+				int num2 = -1;
+				for (int j = 0; j < ThinkNode_PrioritySorter.workingNodes.Count; j++)
+				{
+					float num3 = 0f;
+					try
+					{
+						num3 = ThinkNode_PrioritySorter.workingNodes[j].GetPriority(pawn);
+					}
+					catch (Exception ex)
+					{
+						string str = "Exception in ";
+						Type type = base.GetType();
+						Log.Error(str + ((type != null) ? type.ToString() : null) + " GetPriority: " + ex.ToString());
+					}
+					if (num3 > 0f && num3 >= this.minPriority && num3 > num)
+					{
+						num = num3;
+						num2 = j;
+					}
+				}
+				if (num2 == -1)
+				{
+					break;
+				}
+				ThinkResult result = ThinkResult.NoJob;
 				try
 				{
-					num3 = workingNodes[j].GetPriority(pawn);
+					result = ThinkNode_PrioritySorter.workingNodes[num2].TryIssueJobPackage(pawn, jobParams);
 				}
-				catch (Exception ex)
+				catch (Exception ex2)
 				{
-					Log.Error("Exception in " + GetType()?.ToString() + " GetPriority: " + ex.ToString());
+					string str2 = "Exception in ";
+					Type type2 = base.GetType();
+					Log.Error(str2 + ((type2 != null) ? type2.ToString() : null) + " TryIssueJobPackage: " + ex2.ToString());
 				}
-				if (!(num3 <= 0f) && !(num3 < minPriority) && num3 > num)
+				if (result.IsValid)
 				{
-					num = num3;
-					num2 = j;
+					return result;
 				}
+				ThinkNode_PrioritySorter.workingNodes.RemoveAt(num2);
 			}
-			if (num2 == -1)
-			{
-				break;
-			}
-			ThinkResult result = ThinkResult.NoJob;
-			try
-			{
-				result = workingNodes[num2].TryIssueJobPackage(pawn, jobParams);
-			}
-			catch (Exception ex2)
-			{
-				Log.Error("Exception in " + GetType()?.ToString() + " TryIssueJobPackage: " + ex2.ToString());
-			}
-			if (result.IsValid)
-			{
-				return result;
-			}
-			workingNodes.RemoveAt(num2);
+			return ThinkResult.NoJob;
 		}
-		return ThinkResult.NoJob;
+
+		// Token: 0x040047E8 RID: 18408
+		public float minPriority;
+
+		// Token: 0x040047E9 RID: 18409
+		private static List<ThinkNode> workingNodes = new List<ThinkNode>();
 	}
 }

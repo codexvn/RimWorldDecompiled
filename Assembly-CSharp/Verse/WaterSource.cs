@@ -1,37 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class WaterSource : SimpleBoolPathFinderDataSource
+namespace Verse
 {
-	public WaterSource(Map map)
-		: base(map)
+	// Token: 0x020005D7 RID: 1495
+	public class WaterSource : SimpleBoolPathFinderDataSource
 	{
-	}
-
-	public override void ComputeAll(IEnumerable<PathRequest> _)
-	{
-		data.Clear();
-		TerrainGrid terrainGrid = map.terrainGrid;
-		for (int i = 0; i < cellCount; i++)
+		// Token: 0x0600265B RID: 9819 RVA: 0x000CA662 File Offset: 0x000C8862
+		public WaterSource(Map map) : base(map)
 		{
-			TerrainDef terrainDef = terrainGrid.TerrainAt(i);
-			if (terrainDef != null && terrainDef.IsWater)
+		}
+
+		// Token: 0x0600265C RID: 9820 RVA: 0x000CABA8 File Offset: 0x000C8DA8
+		public override void ComputeAll(IEnumerable<PathRequest> _)
+		{
+			this.data.Clear();
+			TerrainGrid terrainGrid = this.map.terrainGrid;
+			for (int i = 0; i < this.cellCount; i++)
 			{
-				data.Set(i, value: true);
+				TerrainDef terrainDef = terrainGrid.TerrainAt(i);
+				if (terrainDef != null && terrainDef.IsWater)
+				{
+					this.data.Set(i, true);
+				}
 			}
 		}
-	}
 
-	public override bool UpdateIncrementally(IEnumerable<PathRequest> _, List<IntVec3> cellDeltas)
-	{
-		CellIndices cellIndices = map.cellIndices;
-		TerrainGrid terrainGrid = map.terrainGrid;
-		foreach (IntVec3 cellDelta in cellDeltas)
+		// Token: 0x0600265D RID: 9821 RVA: 0x000CAC00 File Offset: 0x000C8E00
+		public override bool UpdateIncrementally(IEnumerable<PathRequest> _, List<IntVec3> cellDeltas)
 		{
-			int num = cellIndices.CellToIndex(cellDelta);
-			data.Set(num, terrainGrid.TerrainAt(num)?.IsWater ?? false);
+			CellIndices cellIndices = this.map.cellIndices;
+			TerrainGrid terrainGrid = this.map.terrainGrid;
+			foreach (IntVec3 c in cellDeltas)
+			{
+				int num = cellIndices.CellToIndex(c);
+				int pos = num;
+				TerrainDef terrainDef = terrainGrid.TerrainAt(num);
+				this.data.Set(pos, terrainDef != null && terrainDef.IsWater);
+			}
+			return false;
 		}
-		return false;
 	}
 }

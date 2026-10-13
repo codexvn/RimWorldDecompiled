@@ -1,6 +1,11 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public abstract class TriggerData : IExposable
+namespace Verse.AI.Group
 {
-	public abstract void ExposeData();
+	// Token: 0x020010BE RID: 4286
+	public abstract class TriggerData : IExposable
+	{
+		// Token: 0x060068F9 RID: 26873
+		public abstract void ExposeData();
+	}
 }

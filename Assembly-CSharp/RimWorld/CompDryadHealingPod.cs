@@ -1,91 +1,102 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public class CompDryadHealingPod : CompDryadHolder
+namespace RimWorld
 {
-	private int tickExpire = -1;
-
-	public override void PostSpawnSetup(bool respawningAfterLoad)
+	// Token: 0x02002C6C RID: 11372
+	public class CompDryadHealingPod : CompDryadHolder
 	{
-		if (!respawningAfterLoad)
+		// Token: 0x0600FEFC RID: 65276 RVA: 0x0049E8AF File Offset: 0x0049CAAF
+		public override void PostSpawnSetup(bool respawningAfterLoad)
 		{
-			innerContainer = new ThingOwner<Thing>(this, oneStackOnly: false);
-			tickExpire = Find.TickManager.TicksGame + 600;
-		}
-	}
-
-	public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
-	{
-		if (mode == DestroyMode.WillReplace)
-		{
-			return;
-		}
-		innerContainer.TryDropAll(parent.Position, map, ThingPlaceMode.Near, delegate(Thing t, int c)
-		{
-			if (t is Pawn { mindState: not null } pawn)
+			if (!respawningAfterLoad)
 			{
-				pawn.mindState.returnToHealingPod = false;
-			}
-			t.Rotation = Rot4.South;
-			SoundDefOf.Pawn_Dryad_Spawn.PlayOneShot(parent);
-		}, null, playDropSound: false);
-	}
-
-	public override void CompTick()
-	{
-		base.CompTick();
-		if (!parent.Destroyed)
-		{
-			if (innerContainer.Count > 0 && base.TreeComp.ShouldReturnToTree((Pawn)innerContainer[0]))
-			{
-				parent.Destroy();
-			}
-			else if (tickExpire >= 0 && Find.TickManager.TicksGame >= tickExpire)
-			{
-				tickExpire = -1;
-				parent.Destroy();
+				this.innerContainer = new ThingOwner<Thing>(this, false, LookMode.Deep, true);
+				this.tickExpire = Find.TickManager.TicksGame + 600;
 			}
 		}
-	}
 
-	public override void TryAcceptPawn(Pawn p)
-	{
-		base.TryAcceptPawn(p);
-		p.Rotation = Rot4.South;
-		tickComplete = Find.TickManager.TicksGame + (int)(60000f * base.Props.daysToComplete);
-		tickExpire = -1;
-	}
-
-	protected override void Complete()
-	{
-		tickComplete = Find.TickManager.TicksGame;
-		EffecterDefOf.DryadEmergeFromCocoon.Spawn(parent.Position, parent.Map).Cleanup();
-		foreach (Thing item in (IEnumerable<Thing>)innerContainer)
+		// Token: 0x0600FEFD RID: 65277 RVA: 0x0049E8D9 File Offset: 0x0049CAD9
+		public override void PostDeSpawn(Map map, DestroyMode mode = DestroyMode.Vanish)
 		{
-			if (!(item is Pawn pawn))
+			if (mode != DestroyMode.WillReplace)
 			{
-				continue;
-			}
-			pawn.mindState.returnToHealingPod = false;
-			int num = 1000;
-			Hediff hediff;
-			BodyPartRecord part;
-			while (num > 0 && HealthUtility.TryGetWorstHealthCondition(pawn, out hediff, out part))
-			{
-				if (hediff != null)
+				this.innerContainer.TryDropAll(this.parent.Position, map, ThingPlaceMode.Near, delegate(Thing t, int c)
 				{
-					pawn.health.RemoveHediff(hediff);
-				}
-				else if (part != null)
-				{
-					pawn.health.RestorePart(part);
-				}
-				num--;
+					Pawn pawn = t as Pawn;
+					if (pawn != null && pawn.mindState != null)
+					{
+						pawn.mindState.returnToHealingPod = false;
+					}
+					t.Rotation = Rot4.South;
+					SoundDefOf.Pawn_Dryad_Spawn.PlayOneShot(this.parent);
+				}, null, false);
 			}
 		}
-		parent.Destroy();
+
+		// Token: 0x0600FEFE RID: 65278 RVA: 0x0049E908 File Offset: 0x0049CB08
+		public override void CompTick()
+		{
+			base.CompTick();
+			if (this.parent.Destroyed)
+			{
+				return;
+			}
+			if (this.innerContainer.Count > 0 && base.TreeComp.ShouldReturnToTree((Pawn)this.innerContainer[0]))
+			{
+				this.parent.Destroy(DestroyMode.Vanish);
+				return;
+			}
+			if (this.tickExpire >= 0 && Find.TickManager.TicksGame >= this.tickExpire)
+			{
+				this.tickExpire = -1;
+				this.parent.Destroy(DestroyMode.Vanish);
+			}
+		}
+
+		// Token: 0x0600FEFF RID: 65279 RVA: 0x0049E990 File Offset: 0x0049CB90
+		public override void TryAcceptPawn(Pawn p)
+		{
+			base.TryAcceptPawn(p);
+			p.Rotation = Rot4.South;
+			this.tickComplete = Find.TickManager.TicksGame + (int)(60000f * base.Props.daysToComplete);
+			this.tickExpire = -1;
+		}
+
+		// Token: 0x0600FF00 RID: 65280 RVA: 0x0049E9D0 File Offset: 0x0049CBD0
+		protected override void Complete()
+		{
+			this.tickComplete = Find.TickManager.TicksGame;
+			EffecterDefOf.DryadEmergeFromCocoon.Spawn(this.parent.Position, this.parent.Map, 1f).Cleanup();
+			foreach (Thing thing in ((IEnumerable<Thing>)this.innerContainer))
+			{
+				Pawn pawn = thing as Pawn;
+				if (pawn != null)
+				{
+					pawn.mindState.returnToHealingPod = false;
+					int num = 1000;
+					Hediff hediff;
+					BodyPartRecord bodyPartRecord;
+					while (num > 0 && HealthUtility.TryGetWorstHealthCondition(pawn, out hediff, out bodyPartRecord, Array.Empty<HediffDef>()))
+					{
+						if (hediff != null)
+						{
+							pawn.health.RemoveHediff(hediff);
+						}
+						else if (bodyPartRecord != null)
+						{
+							pawn.health.RestorePart(bodyPartRecord, null, true);
+						}
+						num--;
+					}
+				}
+			}
+			this.parent.Destroy(DestroyMode.Vanish);
+		}
+
+		// Token: 0x0400A6FF RID: 42751
+		private int tickExpire = -1;
 	}
 }

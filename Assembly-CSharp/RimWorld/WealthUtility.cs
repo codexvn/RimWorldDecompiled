@@ -1,24 +1,29 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class WealthUtility
+namespace RimWorld
 {
-	public static float PlayerWealth
+	// Token: 0x02003777 RID: 14199
+	public class WealthUtility
 	{
-		get
+		// Token: 0x17003251 RID: 12881
+		// (get) Token: 0x06013ACD RID: 80589 RVA: 0x005D8908 File Offset: 0x005D6B08
+		public static float PlayerWealth
 		{
-			List<Map> maps = Find.Maps;
-			float num = 0f;
-			for (int i = 0; i < maps.Count; i++)
+			get
 			{
-				if (maps[i].IsPlayerHome)
+				List<Map> maps = Find.Maps;
+				float num = 0f;
+				for (int i = 0; i < maps.Count; i++)
 				{
-					num += maps[i].wealthWatcher.WealthTotal;
+					if (maps[i].IsPlayerHome)
+					{
+						num += maps[i].wealthWatcher.WealthTotal;
+					}
 				}
+				return num;
 			}
-			return num;
 		}
 	}
 }

@@ -1,113 +1,96 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public static class MechRepairUtility
+namespace RimWorld
 {
-	private static Hediff GetHediffToHeal(Pawn mech)
+	// Token: 0x020012FD RID: 4861
+	public static class MechRepairUtility
 	{
-		Hediff hediff = null;
-		float num = float.PositiveInfinity;
-		foreach (Hediff hediff2 in mech.health.hediffSet.hediffs)
+		// Token: 0x06007744 RID: 30532 RVA: 0x00243EA0 File Offset: 0x002420A0
+		private static Hediff GetHediffToHeal(Pawn mech)
 		{
-			if (hediff2 is Hediff_Injury && hediff2.Severity < num)
+			Hediff hediff = null;
+			float num = float.PositiveInfinity;
+			foreach (Hediff hediff2 in mech.health.hediffSet.hediffs)
 			{
-				num = hediff2.Severity;
-				hediff = hediff2;
+				if (hediff2 is Hediff_Injury && hediff2.Severity < num)
+				{
+					num = hediff2.Severity;
+					hediff = hediff2;
+				}
 			}
-		}
-		if (hediff != null)
-		{
-			return hediff;
-		}
-		foreach (Hediff hediff3 in mech.health.hediffSet.hediffs)
-		{
-			if (hediff3 is Hediff_MissingPart)
+			if (hediff != null)
 			{
-				return hediff3;
+				return hediff;
 			}
+			foreach (Hediff hediff3 in mech.health.hediffSet.hediffs)
+			{
+				if (hediff3 is Hediff_MissingPart)
+				{
+					return hediff3;
+				}
+			}
+			return null;
 		}
-		return null;
-	}
 
-	public static bool CanRepair(Pawn mech)
-	{
-		if (mech.TryGetComp<CompMechRepairable>() == null)
+		// Token: 0x06007745 RID: 30533 RVA: 0x00243F78 File Offset: 0x00242178
+		public static bool CanRepair(Pawn mech)
 		{
-			return false;
+			return mech.TryGetComp<CompMechRepairable>() != null && (MechRepairUtility.GetHediffToHeal(mech) != null || MechRepairUtility.IsMissingWeapon(mech));
 		}
-		if (GetHediffToHeal(mech) == null)
-		{
-			return IsMissingWeapon(mech);
-		}
-		return true;
-	}
 
-	public static void RepairTick(Pawn mech)
-	{
-		Hediff hediffToHeal = GetHediffToHeal(mech);
-		if (hediffToHeal != null)
+		// Token: 0x06007746 RID: 30534 RVA: 0x00243F94 File Offset: 0x00242194
+		public static void RepairTick(Pawn mech, int delta)
 		{
-			if (hediffToHeal is Hediff_MissingPart hediff)
+			Hediff hediffToHeal = MechRepairUtility.GetHediffToHeal(mech);
+			if (hediffToHeal == null)
 			{
-				mech.health.RemoveHediff(hediff);
+				MechRepairUtility.GenerateWeapon(mech);
+				return;
 			}
-			else
+			Hediff_MissingPart hediff_MissingPart = hediffToHeal as Hediff_MissingPart;
+			if (hediff_MissingPart != null)
 			{
-				hediffToHeal.Heal(1f);
+				mech.health.RemoveHediff(hediff_MissingPart);
+				return;
 			}
+			hediffToHeal.Heal((float)delta);
 		}
-		else
-		{
-			GenerateWeapon(mech);
-		}
-	}
 
-	[Obsolete]
-	public static void RepairTick(Pawn mech, int delta)
-	{
-		Hediff hediffToHeal = GetHediffToHeal(mech);
-		if (hediffToHeal != null)
+		// Token: 0x06007747 RID: 30535 RVA: 0x00243FD4 File Offset: 0x002421D4
+		public static bool IsMissingWeapon(Pawn mech)
 		{
-			if (hediffToHeal is Hediff_MissingPart hediff)
-			{
-				mech.health.RemoveHediff(hediff);
-			}
-			else
-			{
-				hediffToHeal.Heal(delta);
-			}
-		}
-		else
-		{
-			GenerateWeapon(mech);
-		}
-	}
-
-	public static bool IsMissingWeapon(Pawn mech)
-	{
-		List<string> weaponTags = mech.kindDef.weaponTags;
-		if (weaponTags.NullOrEmpty())
-		{
-			return false;
-		}
-		List<ThingWithComps> allEquipmentListForReading = mech.equipment.AllEquipmentListForReading;
-		for (int i = 0; i < allEquipmentListForReading.Count; i++)
-		{
-			if (allEquipmentListForReading[i].def.weaponTags.Any((string t) => weaponTags.Contains(t)))
+			List<string> weaponTags = mech.kindDef.weaponTags;
+			if (weaponTags.NullOrEmpty<string>())
 			{
 				return false;
 			}
+			List<ThingWithComps> allEquipmentListForReading = mech.equipment.AllEquipmentListForReading;
+			Predicate<string> <>9__0;
+			for (int i = 0; i < allEquipmentListForReading.Count; i++)
+			{
+				List<string> weaponTags2 = allEquipmentListForReading[i].def.weaponTags;
+				Predicate<string> predicate;
+				if ((predicate = <>9__0) == null)
+				{
+					predicate = (<>9__0 = ((string t) => weaponTags.Contains(t)));
+				}
+				if (weaponTags2.Any(predicate))
+				{
+					return false;
+				}
+			}
+			return true;
 		}
-		return true;
-	}
 
-	public static void GenerateWeapon(Pawn mech)
-	{
-		if (IsMissingWeapon(mech))
+		// Token: 0x06007748 RID: 30536 RVA: 0x00244060 File Offset: 0x00242260
+		public static void GenerateWeapon(Pawn mech)
 		{
+			if (!MechRepairUtility.IsMissingWeapon(mech))
+			{
+				return;
+			}
 			PawnWeaponGenerator.TryGenerateWeaponFor(mech, default(PawnGenerationRequest));
 		}
 	}

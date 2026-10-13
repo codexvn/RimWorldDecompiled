@@ -1,151 +1,180 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class QuestPart_GiveToCaravan : QuestPart
+namespace RimWorld
 {
-	public string inSignal;
-
-	public Caravan caravan;
-
-	private List<Thing> items = new List<Thing>();
-
-	private List<Pawn> pawns = new List<Pawn>();
-
-	public IEnumerable<Thing> Things
+	// Token: 0x02001CED RID: 7405
+	public class QuestPart_GiveToCaravan : QuestPart
 	{
-		get
+		// Token: 0x17001980 RID: 6528
+		// (get) Token: 0x0600A54F RID: 42319 RVA: 0x002F57B9 File Offset: 0x002F39B9
+		// (set) Token: 0x0600A550 RID: 42320 RVA: 0x002F57D4 File Offset: 0x002F39D4
+		public IEnumerable<Thing> Things
 		{
-			return items.Concat(pawns.Cast<Thing>());
-		}
-		set
-		{
-			items.Clear();
-			pawns.Clear();
-			if (value == null)
+			get
 			{
-				return;
+				return this.items.Concat(this.pawns.Cast<Thing>());
 			}
-			foreach (Thing item2 in value)
+			set
 			{
-				if (item2 is Pawn item)
+				this.items.Clear();
+				this.pawns.Clear();
+				if (value != null)
 				{
-					pawns.Add(item);
+					foreach (Thing thing in value)
+					{
+						Pawn pawn = thing as Pawn;
+						if (pawn != null)
+						{
+							this.pawns.Add(pawn);
+						}
+						else
+						{
+							this.items.Add(thing);
+						}
+					}
 				}
-				else
+			}
+		}
+
+		// Token: 0x17001981 RID: 6529
+		// (get) Token: 0x0600A551 RID: 42321 RVA: 0x002F5854 File Offset: 0x002F3A54
+		public override IEnumerable<GlobalTargetInfo> QuestLookTargets
+		{
+			get
+			{
+				foreach (GlobalTargetInfo globalTargetInfo in base.QuestLookTargets)
 				{
-					items.Add(item2);
+					yield return globalTargetInfo;
+				}
+				IEnumerator<GlobalTargetInfo> enumerator = null;
+				if (this.caravan != null)
+				{
+					yield return this.caravan;
+				}
+				foreach (Pawn t in PawnsArriveQuestPartUtility.GetQuestLookTargets(this.pawns))
+				{
+					yield return t;
+				}
+				IEnumerator<Pawn> enumerator2 = null;
+				yield break;
+				yield break;
+			}
+		}
+
+		// Token: 0x17001982 RID: 6530
+		// (get) Token: 0x0600A552 RID: 42322 RVA: 0x002F5864 File Offset: 0x002F3A64
+		public override bool IncreasesPopulation
+		{
+			get
+			{
+				return PawnsArriveQuestPartUtility.IncreasesPopulation(this.pawns, true, false);
+			}
+		}
+
+		// Token: 0x0600A553 RID: 42323 RVA: 0x002F5874 File Offset: 0x002F3A74
+		public override void Notify_QuestSignalReceived(Signal signal)
+		{
+			base.Notify_QuestSignalReceived(signal);
+			if (signal.tag == this.inSignal)
+			{
+				this.pawns.RemoveAll((Pawn x) => x.Destroyed);
+				Caravan caravan = this.caravan;
+				if (caravan == null)
+				{
+					signal.args.TryGetArg<Caravan>("CARAVAN", out caravan);
+				}
+				if (caravan != null && this.Things.Any<Thing>())
+				{
+					for (int i = 0; i < this.pawns.Count; i++)
+					{
+						if (this.pawns[i].Faction != Faction.OfPlayer)
+						{
+							this.pawns[i].SetFaction(Faction.OfPlayer, null);
+						}
+						caravan.AddPawn(this.pawns[i], true);
+					}
+					for (int j = 0; j < this.items.Count; j++)
+					{
+						CaravanInventoryUtility.GiveThing(caravan, this.items[j]);
+					}
+					this.items.Clear();
 				}
 			}
 		}
-	}
 
-	public override IEnumerable<GlobalTargetInfo> QuestLookTargets
-	{
-		get
+		// Token: 0x0600A554 RID: 42324 RVA: 0x002F5988 File Offset: 0x002F3B88
+		public override void PostQuestAdded()
 		{
-			foreach (GlobalTargetInfo questLookTarget in base.QuestLookTargets)
+			base.PostQuestAdded();
+			for (int i = 0; i < this.items.Count; i++)
 			{
-				yield return questLookTarget;
-			}
-			if (caravan != null)
-			{
-				yield return caravan;
-			}
-			foreach (Pawn questLookTarget2 in PawnsArriveQuestPartUtility.GetQuestLookTargets(pawns))
-			{
-				yield return questLookTarget2;
+				if (this.items[i].def == ThingDefOf.PsychicAmplifier)
+				{
+					Find.History.Notify_PsylinkAvailable();
+					return;
+				}
 			}
 		}
-	}
 
-	public override bool IncreasesPopulation => PawnsArriveQuestPartUtility.IncreasesPopulation(pawns, joinPlayer: true, makePrisoners: false);
+		// Token: 0x0600A555 RID: 42325 RVA: 0x002F59D4 File Offset: 0x002F3BD4
+		public override bool QuestPartReserves(Pawn p)
+		{
+			return this.pawns.Contains(p);
+		}
 
-	public override void Notify_QuestSignalReceived(Signal signal)
-	{
-		base.Notify_QuestSignalReceived(signal);
-		if (!(signal.tag == inSignal))
+		// Token: 0x0600A556 RID: 42326 RVA: 0x002F59E4 File Offset: 0x002F3BE4
+		public override void Cleanup()
 		{
-			return;
-		}
-		pawns.RemoveAll((Pawn x) => x.Destroyed);
-		Caravan arg = caravan;
-		if (arg == null)
-		{
-			signal.args.TryGetArg("CARAVAN", out arg);
-		}
-		if (arg == null || !Things.Any())
-		{
-			return;
-		}
-		for (int num = 0; num < pawns.Count; num++)
-		{
-			if (pawns[num].Faction != Faction.OfPlayer)
+			base.Cleanup();
+			for (int i = 0; i < this.items.Count; i++)
 			{
-				pawns[num].SetFaction(Faction.OfPlayer);
+				this.items[i].Destroy(DestroyMode.Vanish);
 			}
-			arg.AddPawn(pawns[num], addCarriedPawnToWorldPawnsIfAny: true);
+			this.items.Clear();
 		}
-		for (int num2 = 0; num2 < items.Count; num2++)
-		{
-			CaravanInventoryUtility.GiveThing(arg, items[num2]);
-		}
-		items.Clear();
-	}
 
-	public override void PostQuestAdded()
-	{
-		base.PostQuestAdded();
-		for (int i = 0; i < items.Count; i++)
+		// Token: 0x0600A557 RID: 42327 RVA: 0x002F5A2C File Offset: 0x002F3C2C
+		public override void ExposeData()
 		{
-			if (items[i].def == ThingDefOf.PsychicAmplifier)
+			base.ExposeData();
+			Scribe_Values.Look<string>(ref this.inSignal, "inSignal", null, false);
+			Scribe_References.Look<Caravan>(ref this.caravan, "caravan", false);
+			Scribe_Collections.Look<Thing>(ref this.items, "items", LookMode.Deep, Array.Empty<object>());
+			Scribe_Collections.Look<Pawn>(ref this.pawns, "pawns", LookMode.Reference, Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				Find.History.Notify_PsylinkAvailable();
-				break;
+				this.items.RemoveAll((Thing x) => x == null);
+				this.pawns.RemoveAll((Pawn x) => x == null);
 			}
 		}
-	}
 
-	public override bool QuestPartReserves(Pawn p)
-	{
-		return pawns.Contains(p);
-	}
-
-	public override void Cleanup()
-	{
-		base.Cleanup();
-		for (int i = 0; i < items.Count; i++)
+		// Token: 0x0600A558 RID: 42328 RVA: 0x002F5AEC File Offset: 0x002F3CEC
+		public override void AssignDebugData()
 		{
-			items[i].Destroy();
+			base.AssignDebugData();
+			this.inSignal = "DebugSignal" + Rand.Int.ToString();
 		}
-		items.Clear();
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref inSignal, "inSignal");
-		Scribe_References.Look(ref caravan, "caravan");
-		Scribe_Collections.Look(ref items, "items", LookMode.Deep);
-		Scribe_Collections.Look(ref pawns, "pawns", LookMode.Reference);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
+		// Token: 0x0600A559 RID: 42329 RVA: 0x002F5B1C File Offset: 0x002F3D1C
+		public override void ReplacePawnReferences(Pawn replace, Pawn with)
 		{
-			items.RemoveAll((Thing x) => x == null);
-			pawns.RemoveAll((Pawn x) => x == null);
+			this.pawns.Replace(replace, with);
 		}
-	}
 
-	public override void AssignDebugData()
-	{
-		base.AssignDebugData();
-		inSignal = "DebugSignal" + Rand.Int;
-	}
+		// Token: 0x04007237 RID: 29239
+		public string inSignal;
 
-	public override void ReplacePawnReferences(Pawn replace, Pawn with)
-	{
-		pawns.Replace(replace, with);
+		// Token: 0x04007238 RID: 29240
+		public Caravan caravan;
+
+		// Token: 0x04007239 RID: 29241
+		private List<Thing> items = new List<Thing>();
+
+		// Token: 0x0400723A RID: 29242
+		private List<Pawn> pawns = new List<Pawn>();
 	}
 }

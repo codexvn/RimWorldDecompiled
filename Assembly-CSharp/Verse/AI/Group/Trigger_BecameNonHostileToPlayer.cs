@@ -1,19 +1,21 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_BecameNonHostileToPlayer : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010DB RID: 4315
+	public class Trigger_BecameNonHostileToPlayer : Trigger
 	{
-		if (signal.type == TriggerSignalType.FactionRelationsChanged)
+		// Token: 0x06006938 RID: 26936 RVA: 0x00212B4C File Offset: 0x00210D4C
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			if (signal.previousRelationKind == FactionRelationKind.Hostile && lord.faction != null)
+			if (signal.type == TriggerSignalType.FactionRelationsChanged)
 			{
-				return !lord.faction.HostileTo(Faction.OfPlayer);
+				FactionRelationKind? previousRelationKind = signal.previousRelationKind;
+				FactionRelationKind factionRelationKind = FactionRelationKind.Hostile;
+				return (previousRelationKind.GetValueOrDefault() == factionRelationKind & previousRelationKind != null) && lord.faction != null && !lord.faction.HostileTo(Faction.OfPlayer);
 			}
 			return false;
 		}
-		return false;
 	}
 }

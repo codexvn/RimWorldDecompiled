@@ -1,113 +1,139 @@
+﻿using System;
 using System.Collections.Generic;
+using Verse.AI;
 
-namespace Verse;
-
-internal struct PawnStatusEffecters
+namespace Verse
 {
-	private class LiveEffecter : IFullPoolable
+	// Token: 0x020005DC RID: 1500
+	internal struct PawnStatusEffecters
 	{
-		public EffecterDef def;
-
-		public Effecter effecter;
-
-		public int lastMaintainTick;
-
-		public bool Expired => Find.TickManager.TicksGame > lastMaintainTick;
-
-		public void Cleanup()
+		// Token: 0x06002675 RID: 9845 RVA: 0x000CB844 File Offset: 0x000C9A44
+		public PawnStatusEffecters(Pawn pawn)
 		{
-			if (effecter != null)
+			this.pawn = pawn;
+			this.pairs = new List<PawnStatusEffecters.LiveEffecter>();
+		}
+
+		// Token: 0x06002676 RID: 9846 RVA: 0x000CB858 File Offset: 0x000C9A58
+		public void EffectersTick(bool suspended)
+		{
+			if (!suspended)
 			{
-				effecter.Cleanup();
-			}
-			FullPool<LiveEffecter>.Return(this);
-		}
-
-		public void Reset()
-		{
-			def = null;
-			effecter = null;
-			lastMaintainTick = -1;
-		}
-
-		public void Maintain()
-		{
-			lastMaintainTick = Find.TickManager.TicksGame;
-		}
-
-		public void Tick(Pawn pawn, int delta)
-		{
-			if (effecter == null)
-			{
-				effecter = def.SpawnAttached(pawn, pawn.MapHeld);
-			}
-			effecter.EffectTick(pawn, pawn);
-		}
-	}
-
-	public Pawn pawn;
-
-	private List<LiveEffecter> pairs;
-
-	public PawnStatusEffecters(Pawn pawn)
-	{
-		this.pawn = pawn;
-		pairs = new List<LiveEffecter>();
-	}
-
-	public void EffectersTick(bool suspended)
-	{
-		if (!suspended)
-		{
-			List<Hediff> hediffs = pawn.health.hediffSet.hediffs;
-			for (int i = 0; i < hediffs.Count; i++)
-			{
-				HediffComp_Effecter hediffComp_Effecter = hediffs[i].TryGetComp<HediffComp_Effecter>();
-				if (hediffComp_Effecter != null)
+				List<Hediff> hediffs = this.pawn.health.hediffSet.hediffs;
+				for (int i = 0; i < hediffs.Count; i++)
 				{
-					EffecterDef effecterDef = hediffComp_Effecter.CurrentStateEffecter();
-					if (effecterDef != null)
+					HediffComp_Effecter hediffComp_Effecter = hediffs[i].TryGetComp<HediffComp_Effecter>();
+					if (hediffComp_Effecter != null)
 					{
-						AddOrMaintain(effecterDef);
+						EffecterDef effecterDef = hediffComp_Effecter.CurrentStateEffecter();
+						if (effecterDef != null)
+						{
+							this.AddOrMaintain(effecterDef);
+						}
+					}
+				}
+				Pawn_MindState mindState = this.pawn.mindState;
+				if (((mindState != null) ? mindState.mentalStateHandler.CurState : null) != null)
+				{
+					EffecterDef effecterDef2 = this.pawn.mindState.mentalStateHandler.CurState.CurrentStateEffecter();
+					if (effecterDef2 != null)
+					{
+						this.AddOrMaintain(effecterDef2);
 					}
 				}
 			}
-			if (pawn.mindState?.mentalStateHandler.CurState != null)
+			for (int j = this.pairs.Count - 1; j >= 0; j--)
 			{
-				EffecterDef effecterDef2 = pawn.mindState.mentalStateHandler.CurState.CurrentStateEffecter();
-				if (effecterDef2 != null)
+				if (this.pairs[j].Expired)
 				{
-					AddOrMaintain(effecterDef2);
+					this.pairs[j].Cleanup();
+					this.pairs.RemoveAt(j);
+				}
+				else
+				{
+					this.pairs[j].Tick(this.pawn, 1);
 				}
 			}
 		}
-		for (int num = pairs.Count - 1; num >= 0; num--)
-		{
-			if (pairs[num].Expired)
-			{
-				pairs[num].Cleanup();
-				pairs.RemoveAt(num);
-			}
-			else
-			{
-				pairs[num].Tick(pawn, 1);
-			}
-		}
-	}
 
-	private void AddOrMaintain(EffecterDef def)
-	{
-		for (int i = 0; i < pairs.Count; i++)
+		// Token: 0x06002677 RID: 9847 RVA: 0x000CB964 File Offset: 0x000C9B64
+		private void AddOrMaintain(EffecterDef def)
 		{
-			if (pairs[i].def == def)
+			for (int i = 0; i < this.pairs.Count; i++)
 			{
-				pairs[i].Maintain();
-				return;
+				if (this.pairs[i].def == def)
+				{
+					this.pairs[i].Maintain();
+					return;
+				}
 			}
+			PawnStatusEffecters.LiveEffecter liveEffecter = FullPool<PawnStatusEffecters.LiveEffecter>.Get();
+			liveEffecter.def = def;
+			liveEffecter.Maintain();
+			this.pairs.Add(liveEffecter);
 		}
-		LiveEffecter liveEffecter = FullPool<LiveEffecter>.Get();
-		liveEffecter.def = def;
-		liveEffecter.Maintain();
-		pairs.Add(liveEffecter);
+
+		// Token: 0x04001FE1 RID: 8161
+		public Pawn pawn;
+
+		// Token: 0x04001FE2 RID: 8162
+		private List<PawnStatusEffecters.LiveEffecter> pairs;
+
+		// Token: 0x020005DD RID: 1501
+		private class LiveEffecter : IFullPoolable
+		{
+			// Token: 0x170006D0 RID: 1744
+			// (get) Token: 0x06002678 RID: 9848 RVA: 0x000CB9CC File Offset: 0x000C9BCC
+			public bool Expired
+			{
+				get
+				{
+					return Find.TickManager.TicksGame > this.lastMaintainTick;
+				}
+			}
+
+			// Token: 0x0600267A RID: 9850 RVA: 0x000CB9E0 File Offset: 0x000C9BE0
+			public void Cleanup()
+			{
+				if (this.effecter != null)
+				{
+					this.effecter.Cleanup();
+				}
+				FullPool<PawnStatusEffecters.LiveEffecter>.Return(this);
+			}
+
+			// Token: 0x0600267B RID: 9851 RVA: 0x000CB9FB File Offset: 0x000C9BFB
+			public void Reset()
+			{
+				this.def = null;
+				this.effecter = null;
+				this.lastMaintainTick = -1;
+			}
+
+			// Token: 0x0600267C RID: 9852 RVA: 0x000CBA12 File Offset: 0x000C9C12
+			public void Maintain()
+			{
+				this.lastMaintainTick = Find.TickManager.TicksGame;
+			}
+
+			// Token: 0x0600267D RID: 9853 RVA: 0x000CBA24 File Offset: 0x000C9C24
+			public void Tick(Pawn pawn, int delta)
+			{
+				if (this.effecter == null)
+				{
+					this.effecter = this.def.SpawnAttached(pawn, pawn.MapHeld, 1f);
+				}
+				this.effecter.EffectTick(pawn, pawn);
+			}
+
+			// Token: 0x04001FE3 RID: 8163
+			public EffecterDef def;
+
+			// Token: 0x04001FE4 RID: 8164
+			public Effecter effecter;
+
+			// Token: 0x04001FE5 RID: 8165
+			public int lastMaintainTick;
+		}
 	}
 }

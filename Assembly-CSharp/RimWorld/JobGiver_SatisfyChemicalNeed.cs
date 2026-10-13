@@ -1,127 +1,136 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobGiver_SatisfyChemicalNeed : ThinkNode_JobGiver
+namespace RimWorld
 {
-	private static List<Need_Chemical> tmpChemicalNeeds = new List<Need_Chemical>();
-
-	public override float GetPriority(Pawn pawn)
+	// Token: 0x020013EC RID: 5100
+	public class JobGiver_SatisfyChemicalNeed : ThinkNode_JobGiver
 	{
-		if (pawn.needs.AllNeeds.Any((Need x) => ShouldSatisfy(x)))
+		// Token: 0x06007C73 RID: 31859 RVA: 0x00257A34 File Offset: 0x00255C34
+		public override float GetPriority(Pawn pawn)
 		{
-			return 9.25f;
-		}
-		return 0f;
-	}
-
-	protected override Job TryGiveJob(Pawn pawn)
-	{
-		tmpChemicalNeeds.Clear();
-		List<Need> allNeeds = pawn.needs.AllNeeds;
-		for (int i = 0; i < allNeeds.Count; i++)
-		{
-			if (ShouldSatisfy(allNeeds[i]))
+			if (pawn.needs.AllNeeds.Any((Need x) => this.ShouldSatisfy(x)))
 			{
-				tmpChemicalNeeds.Add((Need_Chemical)allNeeds[i]);
+				return 9.25f;
 			}
+			return 0f;
 		}
-		if (!tmpChemicalNeeds.Any())
+
+		// Token: 0x06007C74 RID: 31860 RVA: 0x00257A60 File Offset: 0x00255C60
+		protected override Job TryGiveJob(Pawn pawn)
 		{
+			JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Clear();
+			List<Need> allNeeds = pawn.needs.AllNeeds;
+			for (int i = 0; i < allNeeds.Count; i++)
+			{
+				if (this.ShouldSatisfy(allNeeds[i]))
+				{
+					JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Add((Need_Chemical)allNeeds[i]);
+				}
+			}
+			if (!JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Any<Need_Chemical>())
+			{
+				return null;
+			}
+			JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.SortBy((Need_Chemical x) => x.CurLevel);
+			int j = 0;
+			while (j < JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Count)
+			{
+				Thing thing = this.FindDrugFor(pawn, JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds[j]);
+				if (thing != null)
+				{
+					JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Clear();
+					Pawn_InventoryTracker pawn_InventoryTracker = thing.ParentHolder as Pawn_InventoryTracker;
+					Pawn pawn2 = (pawn_InventoryTracker != null) ? pawn_InventoryTracker.pawn : null;
+					if (pawn2 != null && pawn2 != pawn)
+					{
+						Job job = JobMaker.MakeJob(JobDefOf.TakeFromOtherInventory, thing, pawn2);
+						job.count = 1;
+						return job;
+					}
+					return DrugAIUtility.IngestAndTakeToInventoryJob(thing, pawn, 1);
+				}
+				else
+				{
+					j++;
+				}
+			}
+			JobGiver_SatisfyChemicalNeed.tmpChemicalNeeds.Clear();
 			return null;
 		}
-		tmpChemicalNeeds.SortBy((Need_Chemical x) => x.CurLevel);
-		for (int num = 0; num < tmpChemicalNeeds.Count; num++)
+
+		// Token: 0x06007C75 RID: 31861 RVA: 0x00257B7C File Offset: 0x00255D7C
+		private bool ShouldSatisfy(Need need)
 		{
-			Thing thing = FindDrugFor(pawn, tmpChemicalNeeds[num]);
+			Need_Chemical need_Chemical = need as Need_Chemical;
+			return need_Chemical != null && need_Chemical.CurCategory <= DrugDesireCategory.Desire;
+		}
+
+		// Token: 0x06007C76 RID: 31862 RVA: 0x00257BA0 File Offset: 0x00255DA0
+		private Thing FindDrugFor(Pawn pawn, Need_Chemical need)
+		{
+			Hediff_Addiction addictionHediff = need.AddictionHediff;
+			if (addictionHediff == null)
+			{
+				return null;
+			}
+			ThingOwner<Thing> innerContainer = pawn.inventory.innerContainer;
+			for (int i = 0; i < innerContainer.Count; i++)
+			{
+				if (JobGiver_SatisfyChemicalNeed.DrugValidator(pawn, addictionHediff, innerContainer[i]))
+				{
+					return innerContainer[i];
+				}
+			}
+			Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Drug), PathEndMode.ClosestTouch, TraverseParms.For(pawn, Danger.Deadly, TraverseMode.ByPawn, false, false, false, true), 9999f, (Thing x) => JobGiver_SatisfyChemicalNeed.DrugValidator(pawn, addictionHediff, x), null, 0, -1, false, RegionType.Set_Passable, false, false);
 			if (thing != null)
 			{
-				tmpChemicalNeeds.Clear();
-				Pawn pawn2 = (thing.ParentHolder as Pawn_InventoryTracker)?.pawn;
-				if (pawn2 != null && pawn2 != pawn)
-				{
-					Job job = JobMaker.MakeJob(JobDefOf.TakeFromOtherInventory, thing, pawn2);
-					job.count = 1;
-					return job;
-				}
-				return DrugAIUtility.IngestAndTakeToInventoryJob(thing, pawn, 1);
+				return thing;
 			}
-		}
-		tmpChemicalNeeds.Clear();
-		return null;
-	}
-
-	private bool ShouldSatisfy(Need need)
-	{
-		if (need is Need_Chemical { CurCategory: <=DrugDesireCategory.Desire })
-		{
-			return true;
-		}
-		return false;
-	}
-
-	private Thing FindDrugFor(Pawn pawn, Need_Chemical need)
-	{
-		Hediff_Addiction addictionHediff = need.AddictionHediff;
-		if (addictionHediff == null)
-		{
-			return null;
-		}
-		ThingOwner<Thing> innerContainer = pawn.inventory.innerContainer;
-		for (int i = 0; i < innerContainer.Count; i++)
-		{
-			if (DrugValidator(pawn, addictionHediff, innerContainer[i]))
+			if (pawn.IsColonist && pawn.Map != null)
 			{
-				return innerContainer[i];
-			}
-		}
-		Thing thing = GenClosest.ClosestThingReachable(pawn.Position, pawn.Map, ThingRequest.ForGroup(ThingRequestGroup.Drug), PathEndMode.ClosestTouch, TraverseParms.For(pawn), 9999f, (Thing x) => DrugValidator(pawn, addictionHediff, x));
-		if (thing != null)
-		{
-			return thing;
-		}
-		if (pawn.IsColonist && pawn.Map != null)
-		{
-			foreach (Pawn spawnedColonyAnimal in pawn.Map.mapPawns.SpawnedColonyAnimals)
-			{
-				foreach (Thing item in spawnedColonyAnimal.inventory.innerContainer)
+				foreach (Pawn pawn2 in pawn.Map.mapPawns.SpawnedColonyAnimals)
 				{
-					if (DrugValidator(pawn, addictionHediff, item) && !spawnedColonyAnimal.IsForbidden(pawn) && pawn.CanReach(spawnedColonyAnimal, PathEndMode.OnCell, Danger.Some))
+					foreach (Thing thing2 in pawn2.inventory.innerContainer)
 					{
-						return item;
+						if (JobGiver_SatisfyChemicalNeed.DrugValidator(pawn, addictionHediff, thing2) && !pawn2.IsForbidden(pawn) && pawn.CanReach(pawn2, PathEndMode.OnCell, Danger.Some, false, false, TraverseMode.ByPawn))
+						{
+							return thing2;
+						}
 					}
 				}
 			}
+			return null;
 		}
-		return null;
-	}
 
-	private static bool DrugValidator(Pawn pawn, Hediff_Addiction addiction, Thing drug)
-	{
-		if (!drug.def.IsDrug)
+		// Token: 0x06007C77 RID: 31863 RVA: 0x00257D68 File Offset: 0x00255F68
+		private static bool DrugValidator(Pawn pawn, Hediff_Addiction addiction, Thing drug)
 		{
-			return false;
+			if (!drug.def.IsDrug)
+			{
+				return false;
+			}
+			if (drug.Spawned && (!pawn.CanReserve(drug, 1, -1, null, false) || drug.IsForbidden(pawn) || !drug.IsSociallyProper(pawn) || !drug.IngestibleNow))
+			{
+				return false;
+			}
+			CompDrug compDrug = drug.TryGetComp<CompDrug>();
+			if (((compDrug != null) ? compDrug.Props.chemical : null) == null)
+			{
+				return false;
+			}
+			if (compDrug.Props.chemical.addictionHediff != addiction.def)
+			{
+				return false;
+			}
+			Pawn_DrugPolicyTracker drugs = pawn.drugs;
+			DrugPolicy drugPolicy = (drugs != null) ? drugs.CurrentPolicy : null;
+			return drugPolicy == null || drugPolicy[drug.def].allowedForAddiction || pawn.story == null || pawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) > 0 || (pawn.InMentalState && pawn.MentalStateDef.ignoreDrugPolicy);
 		}
-		if (drug.Spawned && (!pawn.CanReserve(drug) || drug.IsForbidden(pawn) || !drug.IsSociallyProper(pawn) || !drug.IngestibleNow))
-		{
-			return false;
-		}
-		CompDrug compDrug = drug.TryGetComp<CompDrug>();
-		if (compDrug?.Props.chemical == null)
-		{
-			return false;
-		}
-		if (compDrug.Props.chemical.addictionHediff != addiction.def)
-		{
-			return false;
-		}
-		DrugPolicy drugPolicy = pawn.drugs?.CurrentPolicy;
-		if (drugPolicy != null && !drugPolicy[drug.def].allowedForAddiction && pawn.story != null && pawn.story.traits.DegreeOfTrait(TraitDefOf.DrugDesire) <= 0 && (!pawn.InMentalState || !pawn.MentalStateDef.ignoreDrugPolicy))
-		{
-			return false;
-		}
-		return true;
+
+		// Token: 0x040053EF RID: 21487
+		private static List<Need_Chemical> tmpChemicalNeeds = new List<Need_Chemical>();
 	}
 }

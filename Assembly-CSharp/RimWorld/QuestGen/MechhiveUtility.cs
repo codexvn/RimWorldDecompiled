@@ -1,26 +1,30 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public static class MechhiveUtility
+namespace RimWorld.QuestGen
 {
-	public static void FireRaid(Map map, float points, int fireTick = -1, string customLetterLabel = null, string customLetterText = null)
+	// Token: 0x02003B19 RID: 15129
+	public static class MechhiveUtility
 	{
-		IncidentParms incidentParms = new IncidentParms();
-		incidentParms.forced = true;
-		incidentParms.target = map;
-		incidentParms.points = Mathf.Max(points, Faction.OfMechanoids.def.MinPointsToGeneratePawnGroup(PawnGroupKindDefOf.Combat));
-		incidentParms.faction = Faction.OfMechanoids;
-		incidentParms.raidArrivalMode = PawnsArrivalModeDefOf.EdgeDrop;
-		incidentParms.raidStrategy = RaidStrategyDefOf.ImmediateAttack;
-		incidentParms.customLetterLabel = customLetterLabel ?? ((string)"MechhiveRaidLetterLabel".Translate());
-		incidentParms.customLetterText = customLetterText ?? ((string)"MechhiveRaidLetterText".Translate());
-		incidentParms.canRoofPunch = false;
-		if (fireTick < 0)
+		// Token: 0x0601495B RID: 84315 RVA: 0x00624340 File Offset: 0x00622540
+		public static void FireRaid(Map map, float points, int fireTick = -1, string customLetterLabel = null, string customLetterText = null)
 		{
-			fireTick = Find.TickManager.TicksGame;
+			IncidentParms incidentParms = new IncidentParms();
+			incidentParms.forced = true;
+			incidentParms.target = map;
+			incidentParms.points = Mathf.Max(points, Faction.OfMechanoids.def.MinPointsToGeneratePawnGroup(PawnGroupKindDefOf.Combat, null));
+			incidentParms.faction = Faction.OfMechanoids;
+			incidentParms.raidArrivalMode = PawnsArrivalModeDefOf.EdgeDrop;
+			incidentParms.raidStrategy = RaidStrategyDefOf.ImmediateAttack;
+			incidentParms.customLetterLabel = (customLetterLabel ?? "MechhiveRaidLetterLabel".Translate());
+			incidentParms.customLetterText = (customLetterText ?? "MechhiveRaidLetterText".Translate());
+			incidentParms.canRoofPunch = new bool?(false);
+			if (fireTick < 0)
+			{
+				fireTick = Find.TickManager.TicksGame;
+			}
+			Find.Storyteller.incidentQueue.Add(IncidentDefOf.RaidEnemy, fireTick, incidentParms, 0);
 		}
-		Find.Storyteller.incidentQueue.Add(IncidentDefOf.RaidEnemy, fireTick, incidentParms);
 	}
 }

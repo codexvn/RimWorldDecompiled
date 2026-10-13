@@ -1,17 +1,25 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class JobGiver_CreateAndEnterCocoon : JobGiver_CreateAndEnterDryadHolder
+namespace RimWorld
 {
-	public override JobDef JobDef => JobDefOf.CreateAndEnterCocoon;
-
-	public override bool ExtraValidator(Pawn pawn, CompTreeConnection connectionComp)
+	// Token: 0x02001576 RID: 5494
+	public class JobGiver_CreateAndEnterCocoon : JobGiver_CreateAndEnterDryadHolder
 	{
-		if (connectionComp.DryadKind != pawn.kindDef)
+		// Token: 0x170013F2 RID: 5106
+		// (get) Token: 0x0600824D RID: 33357 RVA: 0x00272D65 File Offset: 0x00270F65
+		public override JobDef JobDef
 		{
-			return true;
+			get
+			{
+				return JobDefOf.CreateAndEnterCocoon;
+			}
 		}
-		return base.ExtraValidator(pawn, connectionComp);
+
+		// Token: 0x0600824E RID: 33358 RVA: 0x00272D6C File Offset: 0x00270F6C
+		public override bool ExtraValidator(Pawn pawn, CompTreeConnection connectionComp)
+		{
+			return connectionComp.DryadKind != pawn.kindDef || base.ExtraValidator(pawn, connectionComp);
+		}
 	}
 }

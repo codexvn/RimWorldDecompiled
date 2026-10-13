@@ -1,20 +1,26 @@
-namespace Verse.AI;
+﻿using System;
 
-public static class Toils_ReserveAttackTarget
+namespace Verse.AI
 {
-	public static Toil TryReserve(TargetIndex ind)
+	// Token: 0x02000F44 RID: 3908
+	public static class Toils_ReserveAttackTarget
 	{
-		Toil toil = ToilMaker.MakeToil("TryReserve");
-		toil.initAction = delegate
+		// Token: 0x060060DD RID: 24797 RVA: 0x001EB20C File Offset: 0x001E940C
+		public static Toil TryReserve(TargetIndex ind)
 		{
-			Pawn actor = toil.actor;
-			if (actor.CurJob.GetTarget(ind).Thing is IAttackTarget target)
+			Toil toil = ToilMaker.MakeToil("TryReserve");
+			toil.initAction = delegate()
 			{
-				actor.Map.attackTargetReservationManager.Reserve(actor, toil.actor.CurJob, target);
-			}
-		};
-		toil.defaultCompleteMode = ToilCompleteMode.Instant;
-		toil.atomicWithPrevious = true;
-		return toil;
+				Pawn actor = toil.actor;
+				IAttackTarget attackTarget = actor.CurJob.GetTarget(ind).Thing as IAttackTarget;
+				if (attackTarget != null)
+				{
+					actor.Map.attackTargetReservationManager.Reserve(actor, toil.actor.CurJob, attackTarget);
+				}
+			};
+			toil.defaultCompleteMode = ToilCompleteMode.Instant;
+			toil.atomicWithPrevious = true;
+			return toil;
+		}
 	}
 }

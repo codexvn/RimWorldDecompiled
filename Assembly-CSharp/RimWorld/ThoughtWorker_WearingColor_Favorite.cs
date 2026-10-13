@@ -1,16 +1,25 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_WearingColor_Favorite : ThoughtWorker_WearingColor
+namespace RimWorld
 {
-	protected override Color? Color(Pawn p)
+	// Token: 0x020018B8 RID: 6328
+	public class ThoughtWorker_WearingColor_Favorite : ThoughtWorker_WearingColor
 	{
-		if (p.DevelopmentalStage.Baby())
+		// Token: 0x06009087 RID: 36999 RVA: 0x002A982C File Offset: 0x002A7A2C
+		protected override Color? Color(Pawn p)
 		{
-			return null;
+			if (p.DevelopmentalStage.Baby())
+			{
+				return null;
+			}
+			ColorDef favoriteColor = p.story.favoriteColor;
+			if (favoriteColor == null)
+			{
+				return null;
+			}
+			return new Color?(favoriteColor.color);
 		}
-		return p.story.favoriteColor?.color;
 	}
 }

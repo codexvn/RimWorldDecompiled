@@ -1,20 +1,25 @@
-namespace Verse.AI.Group;
+﻿using System;
 
-public class Trigger_NoMentalState : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010D9 RID: 4313
+	public class Trigger_NoMentalState : Trigger
 	{
-		if (signal.type == TriggerSignalType.Tick)
+		// Token: 0x06006934 RID: 26932 RVA: 0x00212A88 File Offset: 0x00210C88
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			for (int i = 0; i < lord.ownedPawns.Count; i++)
+			if (signal.type == TriggerSignalType.Tick)
 			{
-				if (lord.ownedPawns[i].InMentalState)
+				for (int i = 0; i < lord.ownedPawns.Count; i++)
 				{
-					return false;
+					if (lord.ownedPawns[i].InMentalState)
+					{
+						return false;
+					}
 				}
+				return true;
 			}
-			return true;
+			return false;
 		}
-		return false;
 	}
 }

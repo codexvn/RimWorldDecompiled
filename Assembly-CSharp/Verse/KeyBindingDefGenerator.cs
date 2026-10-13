@@ -1,49 +1,64 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 using UnityEngine;
 
-namespace Verse;
-
-public static class KeyBindingDefGenerator
+namespace Verse
 {
-	public static IEnumerable<KeyBindingCategoryDef> ImpliedKeyBindingCategoryDefs(bool hotReload = false)
+	// Token: 0x02000D27 RID: 3367
+	public static class KeyBindingDefGenerator
 	{
-		List<KeyBindingCategoryDef> gameUniversalCats = DefDatabase<KeyBindingCategoryDef>.AllDefs.Where((KeyBindingCategoryDef d) => d.isGameUniversal).ToList();
-		foreach (DesignationCategoryDef allDef in DefDatabase<DesignationCategoryDef>.AllDefs)
+		// Token: 0x060055D8 RID: 21976 RVA: 0x001BB6A1 File Offset: 0x001B98A1
+		public static IEnumerable<KeyBindingCategoryDef> ImpliedKeyBindingCategoryDefs(bool hotReload = false)
 		{
-			string defName = "Architect_" + allDef.defName;
-			KeyBindingCategoryDef keyBindingCategoryDef = (hotReload ? (DefDatabase<KeyBindingCategoryDef>.GetNamed(defName, errorOnFail: false) ?? new KeyBindingCategoryDef()) : new KeyBindingCategoryDef());
-			keyBindingCategoryDef.defName = defName;
-			keyBindingCategoryDef.label = allDef.label + " tab";
-			keyBindingCategoryDef.description = "Key bindings for the \"" + allDef.LabelCap + "\" section of the Architect menu";
-			keyBindingCategoryDef.modContentPack = allDef.modContentPack;
-			keyBindingCategoryDef.checkForConflicts.AddRange(gameUniversalCats);
-			for (int num = 0; num < gameUniversalCats.Count; num++)
+			List<KeyBindingCategoryDef> gameUniversalCats = (from d in DefDatabase<KeyBindingCategoryDef>.AllDefs
+			where d.isGameUniversal
+			select d).ToList<KeyBindingCategoryDef>();
+			foreach (DesignationCategoryDef designationCategoryDef in DefDatabase<DesignationCategoryDef>.AllDefs)
 			{
-				gameUniversalCats[num].checkForConflicts.Add(keyBindingCategoryDef);
+				string defName = "Architect_" + designationCategoryDef.defName;
+				KeyBindingCategoryDef keyBindingCategoryDef = hotReload ? (DefDatabase<KeyBindingCategoryDef>.GetNamed(defName, false) ?? new KeyBindingCategoryDef()) : new KeyBindingCategoryDef();
+				keyBindingCategoryDef.defName = defName;
+				keyBindingCategoryDef.label = designationCategoryDef.label + " tab";
+				keyBindingCategoryDef.description = "Key bindings for the \"" + designationCategoryDef.LabelCap + "\" section of the Architect menu";
+				keyBindingCategoryDef.modContentPack = designationCategoryDef.modContentPack;
+				keyBindingCategoryDef.checkForConflicts.AddRange(gameUniversalCats);
+				for (int i = 0; i < gameUniversalCats.Count; i++)
+				{
+					gameUniversalCats[i].checkForConflicts.Add(keyBindingCategoryDef);
+				}
+				designationCategoryDef.bindingCatDef = keyBindingCategoryDef;
+				yield return keyBindingCategoryDef;
 			}
-			allDef.bindingCatDef = keyBindingCategoryDef;
-			yield return keyBindingCategoryDef;
+			IEnumerator<DesignationCategoryDef> enumerator = null;
+			yield break;
+			yield break;
 		}
-	}
 
-	public static IEnumerable<KeyBindingDef> ImpliedKeyBindingDefs(bool hotReload = false)
-	{
-		foreach (MainButtonDef item in DefDatabase<MainButtonDef>.AllDefs.OrderBy((MainButtonDef td) => td.order))
+		// Token: 0x060055D9 RID: 21977 RVA: 0x001BB6B1 File Offset: 0x001B98B1
+		public static IEnumerable<KeyBindingDef> ImpliedKeyBindingDefs(bool hotReload = false)
 		{
-			if (item.defaultHotKey != KeyCode.None)
+			foreach (MainButtonDef mainButtonDef in from td in DefDatabase<MainButtonDef>.AllDefs
+			orderby td.order
+			select td)
 			{
-				string defName = "MainTab_" + item.defName;
-				KeyBindingDef keyBindingDef = (hotReload ? (DefDatabase<KeyBindingDef>.GetNamed(defName, errorOnFail: false) ?? new KeyBindingDef()) : new KeyBindingDef());
-				keyBindingDef.label = "Toggle " + item.label + " tab";
-				keyBindingDef.defName = defName;
-				keyBindingDef.category = KeyBindingCategoryDefOf.MainTabs;
-				keyBindingDef.defaultKeyCodeA = item.defaultHotKey;
-				keyBindingDef.modContentPack = item.modContentPack;
-				item.hotKey = keyBindingDef;
-				yield return keyBindingDef;
+				if (mainButtonDef.defaultHotKey != KeyCode.None)
+				{
+					string defName = "MainTab_" + mainButtonDef.defName;
+					KeyBindingDef keyBindingDef = hotReload ? (DefDatabase<KeyBindingDef>.GetNamed(defName, false) ?? new KeyBindingDef()) : new KeyBindingDef();
+					keyBindingDef.label = "Toggle " + mainButtonDef.label + " tab";
+					keyBindingDef.defName = defName;
+					keyBindingDef.category = KeyBindingCategoryDefOf.MainTabs;
+					keyBindingDef.defaultKeyCodeA = mainButtonDef.defaultHotKey;
+					keyBindingDef.modContentPack = mainButtonDef.modContentPack;
+					mainButtonDef.hotKey = keyBindingDef;
+					yield return keyBindingDef;
+				}
 			}
+			IEnumerator<MainButtonDef> enumerator = null;
+			yield break;
+			yield break;
 		}
 	}
 }

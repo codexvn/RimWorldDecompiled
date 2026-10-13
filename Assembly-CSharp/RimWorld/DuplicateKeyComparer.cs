@@ -1,17 +1,20 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace RimWorld;
-
-public class DuplicateKeyComparer<TKey> : IComparer<TKey> where TKey : IComparable
+namespace RimWorld
 {
-	public int Compare(TKey x, TKey y)
+	// Token: 0x0200388C RID: 14476
+	public class DuplicateKeyComparer<TKey> : IComparer<TKey> where TKey : IComparable
 	{
-		int num = x.CompareTo(y);
-		if (num == 0)
+		// Token: 0x0601401D RID: 81949 RVA: 0x005F0E90 File Offset: 0x005EF090
+		public int Compare(TKey x, TKey y)
 		{
-			return -1;
+			int num = x.CompareTo(y);
+			if (num == 0)
+			{
+				return -1;
+			}
+			return num;
 		}
-		return num;
 	}
 }

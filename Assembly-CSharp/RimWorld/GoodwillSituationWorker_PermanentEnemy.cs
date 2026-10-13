@@ -1,42 +1,28 @@
-namespace RimWorld;
+﻿using System;
 
-public class GoodwillSituationWorker_PermanentEnemy : GoodwillSituationWorker
+namespace RimWorld
 {
-	public override int GetMaxGoodwill(Faction other)
+	// Token: 0x0200259E RID: 9630
+	public class GoodwillSituationWorker_PermanentEnemy : GoodwillSituationWorker
 	{
-		if (Faction.OfPlayerSilentFail == null)
+		// Token: 0x0600D310 RID: 54032 RVA: 0x003E2A41 File Offset: 0x003E0C41
+		public override int GetMaxGoodwill(Faction other)
 		{
-			return 100;
+			if (Faction.OfPlayerSilentFail == null)
+			{
+				return 100;
+			}
+			if (!GoodwillSituationWorker_PermanentEnemy.ArePermanentEnemies(Faction.OfPlayer, other))
+			{
+				return 100;
+			}
+			return -100;
 		}
-		if (!ArePermanentEnemies(Faction.OfPlayer, other))
-		{
-			return 100;
-		}
-		return -100;
-	}
 
-	public static bool ArePermanentEnemies(Faction a, Faction b)
-	{
-		if (a.def.permanentEnemy || b.def.permanentEnemy)
+		// Token: 0x0600D311 RID: 54033 RVA: 0x003E2A60 File Offset: 0x003E0C60
+		public static bool ArePermanentEnemies(Faction a, Faction b)
 		{
-			return true;
+			return a.def.permanentEnemy || b.def.permanentEnemy || (a.def.permanentEnemyToEveryoneExceptPlayer && !b.IsPlayer) || (b.def.permanentEnemyToEveryoneExceptPlayer && !a.IsPlayer) || (a.def.permanentEnemyToEveryoneExcept != null && !a.def.permanentEnemyToEveryoneExcept.Contains(b.def)) || (b.def.permanentEnemyToEveryoneExcept != null && !b.def.permanentEnemyToEveryoneExcept.Contains(a.def));
 		}
-		if (a.def.permanentEnemyToEveryoneExceptPlayer && !b.IsPlayer)
-		{
-			return true;
-		}
-		if (b.def.permanentEnemyToEveryoneExceptPlayer && !a.IsPlayer)
-		{
-			return true;
-		}
-		if (a.def.permanentEnemyToEveryoneExcept != null && !a.def.permanentEnemyToEveryoneExcept.Contains(b.def))
-		{
-			return true;
-		}
-		if (b.def.permanentEnemyToEveryoneExcept != null && !b.def.permanentEnemyToEveryoneExcept.Contains(a.def))
-		{
-			return true;
-		}
-		return false;
 	}
 }

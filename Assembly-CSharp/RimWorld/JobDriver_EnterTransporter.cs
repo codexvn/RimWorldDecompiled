@@ -1,45 +1,79 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JobDriver_EnterTransporter : JobDriver
+namespace RimWorld
 {
-	private TargetIndex TransporterInd = TargetIndex.A;
-
-	public CompTransporter Transporter => job.GetTarget(TransporterInd).Thing?.TryGetComp<CompTransporter>();
-
-	public CompShuttle Shuttle => job.GetTarget(TransporterInd).Thing?.TryGetComp<CompShuttle>();
-
-	public override bool TryMakePreToilReservations(bool errorOnFailed)
+	// Token: 0x02001267 RID: 4711
+	public class JobDriver_EnterTransporter : JobDriver
 	{
-		return true;
-	}
-
-	protected override IEnumerable<Toil> MakeNewToils()
-	{
-		this.FailOnDespawnedOrNull(TransporterInd);
-		this.FailOn(() => Shuttle != null && !Shuttle.IsAllowed(pawn));
-		yield return Toils_Goto.GotoThing(TransporterInd, PathEndMode.Touch);
-		Toil toil = ToilMaker.MakeToil("MakeNewToils");
-		toil.initAction = delegate
+		// Token: 0x170011F8 RID: 4600
+		// (get) Token: 0x0600733B RID: 29499 RVA: 0x00237168 File Offset: 0x00235368
+		public CompTransporter Transporter
 		{
-			if (job.playerForced || !LoadTransportersJobUtility.HasJobOnTransporter(pawn, Transporter))
+			get
 			{
-				if (!Transporter.LoadingInProgressOrReadyToLaunch)
+				Thing thing = this.job.GetTarget(this.TransporterInd).Thing;
+				if (thing == null)
 				{
-					TransporterUtility.InitiateLoading(Gen.YieldSingle(Transporter));
+					return null;
 				}
-				CompTransporter transporter = Transporter;
-				bool flag = pawn.DeSpawnOrDeselect();
-				transporter.GetDirectlyHeldThings().TryAdd(pawn);
+				return thing.TryGetComp<CompTransporter>();
+			}
+		}
+
+		// Token: 0x170011F9 RID: 4601
+		// (get) Token: 0x0600733C RID: 29500 RVA: 0x0023719C File Offset: 0x0023539C
+		public CompShuttle Shuttle
+		{
+			get
+			{
+				Thing thing = this.job.GetTarget(this.TransporterInd).Thing;
+				if (thing == null)
+				{
+					return null;
+				}
+				return thing.TryGetComp<CompShuttle>();
+			}
+		}
+
+		// Token: 0x0600733D RID: 29501 RVA: 0x000028E7 File Offset: 0x00000AE7
+		public override bool TryMakePreToilReservations(bool errorOnFailed)
+		{
+			return true;
+		}
+
+		// Token: 0x0600733E RID: 29502 RVA: 0x002371CE File Offset: 0x002353CE
+		protected override IEnumerable<Toil> MakeNewToils()
+		{
+			this.FailOnDespawnedOrNull(this.TransporterInd);
+			this.FailOn(() => this.Shuttle != null && !this.Shuttle.IsAllowed(this.pawn));
+			yield return Toils_Goto.GotoThing(this.TransporterInd, PathEndMode.Touch, false);
+			Toil toil = ToilMaker.MakeToil("MakeNewToils");
+			toil.initAction = delegate()
+			{
+				if (!this.job.playerForced && LoadTransportersJobUtility.HasJobOnTransporter(this.pawn, this.Transporter))
+				{
+					return;
+				}
+				if (!this.Transporter.LoadingInProgressOrReadyToLaunch)
+				{
+					TransporterUtility.InitiateLoading(Gen.YieldSingle<CompTransporter>(this.Transporter));
+				}
+				CompTransporter transporter = this.Transporter;
+				bool flag = this.pawn.DeSpawnOrDeselect(DestroyMode.Vanish);
+				transporter.GetDirectlyHeldThings().TryAdd(this.pawn, true);
 				if (flag)
 				{
-					Find.Selector.Select(pawn, playSound: false, forceDesignatorDeselect: false);
+					Find.Selector.Select(this.pawn, false, false);
 				}
-			}
-		};
-		yield return toil;
+			};
+			yield return toil;
+			yield break;
+		}
+
+		// Token: 0x04004F7F RID: 20351
+		private TargetIndex TransporterInd = TargetIndex.A;
 	}
 }

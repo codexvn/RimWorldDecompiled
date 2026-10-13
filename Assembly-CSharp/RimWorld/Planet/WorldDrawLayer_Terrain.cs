@@ -1,240 +1,271 @@
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.CompilerServices;
 using Unity.Collections;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-public class WorldDrawLayer_Terrain : WorldDrawLayer
+namespace RimWorld.Planet
 {
-	private readonly List<Vector3> elevationValues = new List<Vector3>();
-
-	private static bool setGlobalMacro;
-
-	private static readonly List<PlanetTile> neighbours = new List<PlanetTile>(8);
-
-	private const string MacroTexturePath = "World/WorldMacro";
-
-	public override IEnumerable Regenerate()
+	// Token: 0x02003C9A RID: 15514
+	public class WorldDrawLayer_Terrain : WorldDrawLayer
 	{
-		foreach (object item2 in base.Regenerate())
+		// Token: 0x06015150 RID: 86352 RVA: 0x0064F14F File Offset: 0x0064D34F
+		public override IEnumerable Regenerate()
 		{
-			yield return item2;
-		}
-		if (!setGlobalMacro)
-		{
-			setGlobalMacro = true;
-			Shader.SetGlobalTexture(ShaderPropertyIDs.MacroTex, ContentFinder<Texture2D>.Get("World/WorldMacro"));
-		}
-		NativeArray<int> tileIDToVerts_offsets = planetLayer.UnsafeTileIDToVerts_offsets;
-		NativeArray<Vector3> verts = planetLayer.UnsafeVerts;
-		foreach (object item3 in CalculateInterpolatedVerticesParams())
-		{
-			yield return item3;
-		}
-		int num = 0;
-		for (int i = 0; i < planetLayer.TilesCount; i++)
-		{
-			Tile tile = planetLayer[i];
-			BiomeDef primaryBiome = tile.PrimaryBiome;
-			Landmark landmark = tile.Landmark;
-			bool flag = landmark != null && landmark.def.drawType == LandmarkDef.LandmarkDrawType.TerrainMask;
-			Material material = primaryBiome.DrawMaterial;
-			if (flag)
+			foreach (object obj in base.Regenerate())
 			{
-				MaterialRequest req = new MaterialRequest(material.mainTexture, material.shader);
-				req.maskTex = landmark.def.Texture;
-				req.secondaryTex = planetLayer.Def.backgroundBiome.DrawMaterial.mainTexture;
-				req.renderQueue = material.renderQueue;
-				req.shaderParameters = landmark.def.terrainParameters;
-				material = MaterialPool.MatFrom(req);
+				yield return obj;
 			}
-			int subMeshIndex;
-			LayerSubMesh subMesh = GetSubMesh(material, out subMeshIndex);
-			int count = subMesh.verts.Count;
-			int num2 = 0;
-			int oneAfterLastVertIndex = GetOneAfterLastVertIndex(i, tileIDToVerts_offsets, verts);
-			int num3 = oneAfterLastVertIndex - tileIDToVerts_offsets[i];
-			int num4 = tileIDToVerts_offsets[i];
-			int num5 = 0;
-			int num6 = 0;
-			if (flag)
+			IEnumerator enumerator = null;
+			if (!WorldDrawLayer_Terrain.setGlobalMacro)
 			{
-				num5 = Rand.RangeSeeded(0, landmark.def.atlasSize.x, i);
-				num6 = Rand.RangeSeeded(0, landmark.def.atlasSize.z, i ^ 0x1BD3E0);
+				WorldDrawLayer_Terrain.setGlobalMacro = true;
+				Shader.SetGlobalTexture(ShaderPropertyIDs.MacroTex, ContentFinder<Texture2D>.Get("World/WorldMacro", true));
 			}
-			int num7 = 0;
-			if (flag && landmark.def.coastRotateMode != LandmarkDef.CoastRotateMode.None)
+			NativeArray<int> tileIDToVerts_offsets = this.planetLayer.UnsafeTileIDToVerts_offsets;
+			NativeArray<Vector3> verts = this.planetLayer.UnsafeVerts;
+			foreach (object obj2 in this.CalculateInterpolatedVerticesParams())
 			{
-				num7 = GetLandmarkRotationIncrements(tile, planetLayer, landmark, tileIDToVerts_offsets, verts);
+				yield return obj2;
 			}
-			for (int j = num4; j < oneAfterLastVertIndex; j++)
+			enumerator = null;
+			int num = 0;
+			for (int i = 0; i < this.planetLayer.TilesCount; i++)
 			{
-				Vector3 item = verts[j];
-				subMesh.verts.Add(item);
-				subMesh.uvs.Add(elevationValues[num]);
+				Tile tile = this.planetLayer[i];
+				BiomeDef primaryBiome = tile.PrimaryBiome;
+				Landmark landmark = tile.Landmark;
+				bool flag = landmark != null && landmark.def.drawType == LandmarkDef.LandmarkDrawType.TerrainMask;
+				Material material = primaryBiome.DrawMaterial;
 				if (flag)
 				{
-					float angleOffset = 360f / (float)num3 * (float)(-num7);
-					Vector2 vector = (GenGeo.RegularPolygonVertexPosition(num3, num2, angleOffset) + Vector2.one) / 2f;
-					float num8 = 1f / (float)landmark.def.atlasSize.x;
-					float num9 = 1f / (float)landmark.def.atlasSize.z;
-					float num10 = (float)num5 * num8;
-					float num11 = (float)num6 * num9;
-					vector.x = Mathf.Lerp(num10, num10 + num8, vector.x);
-					vector.y = Mathf.Lerp(num11, num11 + num9, vector.y);
-					subMesh.uvsChannelTwo.Add(vector);
-				}
-				num++;
-				if (j < oneAfterLastVertIndex - 2)
-				{
-					subMesh.tris.Add(count + num2 + 2);
-					subMesh.tris.Add(count + num2 + 1);
-					subMesh.tris.Add(count);
-					AppendRaycastableTriangle(subMeshIndex, i);
-				}
-				num2++;
-			}
-		}
-		FinalizeMesh(MeshParts.All);
-		foreach (object item4 in RegenerateWorldMeshColliders())
-		{
-			yield return item4;
-		}
-		elevationValues.Clear();
-		elevationValues.TrimExcess();
-	}
-
-	private static int GetLandmarkRotationIncrements(Tile tile, PlanetLayer layer, Landmark landmark, NativeArray<int> tileIDToVerts_offsets, NativeArray<Vector3> verts)
-	{
-		int oneAfterLastVertIndex = GetOneAfterLastVertIndex(tile.tile.tileId, tileIDToVerts_offsets, verts);
-		int num = tileIDToVerts_offsets[tile.tile.tileId];
-		int num2 = 0;
-		layer.GetTileNeighbors(tile.tile, neighbours);
-		PlanetTile planetTile = PlanetTile.Invalid;
-		for (int i = 0; i < neighbours.Count; i++)
-		{
-			if (LandmarkDef.IsValidRotatableNeighbour(layer[neighbours[i]].PrimaryBiome, landmark.def.coastRotateMode))
-			{
-				planetTile = neighbours[i];
-				break;
-			}
-		}
-		if (planetTile.Valid)
-		{
-			int num3 = tileIDToVerts_offsets[planetTile.tileId];
-			int oneAfterLastVertIndex2 = GetOneAfterLastVertIndex(planetTile.tileId, tileIDToVerts_offsets, verts);
-			bool flag = false;
-			for (int j = num; j < oneAfterLastVertIndex; j++)
-			{
-				int index = WrapIndex(num, oneAfterLastVertIndex, j + 1);
-				int index2 = WrapIndex(num, oneAfterLastVertIndex, j + 2);
-				for (int k = num3; k < oneAfterLastVertIndex2; k++)
-				{
-					int index3 = WrapIndex(num3, oneAfterLastVertIndex2, k);
-					int index4 = WrapIndex(num3, oneAfterLastVertIndex2, k + 1);
-					if ((!(verts[index] != verts[index3]) || !(verts[index2] != verts[index3])) && (!(verts[index] != verts[index4]) || !(verts[index2] != verts[index4])))
+					material = MaterialPool.MatFrom(new MaterialRequest(material.mainTexture, material.shader)
 					{
-						flag = true;
-						break;
-					}
+						maskTex = landmark.def.Texture,
+						secondaryTex = this.planetLayer.Def.backgroundBiome.DrawMaterial.mainTexture,
+						renderQueue = material.renderQueue,
+						shaderParameters = landmark.def.terrainParameters
+					});
 				}
+				int subMeshIndex;
+				LayerSubMesh subMesh = base.GetSubMesh(material, out subMeshIndex);
+				int count = subMesh.verts.Count;
+				int num2 = 0;
+				int oneAfterLastVertIndex = WorldDrawLayer_Terrain.GetOneAfterLastVertIndex(i, tileIDToVerts_offsets, verts);
+				int num3 = oneAfterLastVertIndex - tileIDToVerts_offsets[i];
+				int num4 = tileIDToVerts_offsets[i];
+				int num5 = 0;
+				int num6 = 0;
 				if (flag)
 				{
+					num5 = Rand.RangeSeeded(0, landmark.def.atlasSize.x, i);
+					num6 = Rand.RangeSeeded(0, landmark.def.atlasSize.z, i ^ 1823712);
+				}
+				int num7 = 0;
+				if (flag && landmark.def.coastRotateMode != LandmarkDef.CoastRotateMode.None)
+				{
+					num7 = WorldDrawLayer_Terrain.GetLandmarkRotationIncrements(tile, this.planetLayer, landmark, tileIDToVerts_offsets, verts);
+				}
+				for (int j = num4; j < oneAfterLastVertIndex; j++)
+				{
+					Vector3 item = verts[j];
+					subMesh.verts.Add(item);
+					subMesh.uvs.Add(this.elevationValues[num]);
+					if (flag)
+					{
+						float angleOffset = 360f / (float)num3 * (float)(-(float)num7);
+						Vector2 vector = (GenGeo.RegularPolygonVertexPosition(num3, num2, angleOffset) + Vector2.one) / 2f;
+						float num8 = 1f / (float)landmark.def.atlasSize.x;
+						float num9 = 1f / (float)landmark.def.atlasSize.z;
+						float num10 = (float)num5 * num8;
+						float num11 = (float)num6 * num9;
+						vector.x = Mathf.Lerp(num10, num10 + num8, vector.x);
+						vector.y = Mathf.Lerp(num11, num11 + num9, vector.y);
+						subMesh.uvsChannelTwo.Add(vector);
+					}
+					num++;
+					if (j < oneAfterLastVertIndex - 2)
+					{
+						subMesh.tris.Add(count + num2 + 2);
+						subMesh.tris.Add(count + num2 + 1);
+						subMesh.tris.Add(count);
+						base.AppendRaycastableTriangle(subMeshIndex, i);
+					}
+					num2++;
+				}
+			}
+			base.FinalizeMesh(MeshParts.All);
+			foreach (object obj3 in base.RegenerateWorldMeshColliders())
+			{
+				yield return obj3;
+			}
+			enumerator = null;
+			this.elevationValues.Clear();
+			this.elevationValues.TrimExcess();
+			yield break;
+			yield break;
+		}
+
+		// Token: 0x06015151 RID: 86353 RVA: 0x0064F160 File Offset: 0x0064D360
+		private static int GetLandmarkRotationIncrements(Tile tile, PlanetLayer layer, Landmark landmark, NativeArray<int> tileIDToVerts_offsets, NativeArray<Vector3> verts)
+		{
+			int oneAfterLastVertIndex = WorldDrawLayer_Terrain.GetOneAfterLastVertIndex(tile.tile.tileId, tileIDToVerts_offsets, verts);
+			int num = tileIDToVerts_offsets[tile.tile.tileId];
+			int num2 = 0;
+			layer.GetTileNeighbors(tile.tile, WorldDrawLayer_Terrain.neighbours);
+			PlanetTile planetTile = PlanetTile.Invalid;
+			for (int i = 0; i < WorldDrawLayer_Terrain.neighbours.Count; i++)
+			{
+				if (LandmarkDef.IsValidRotatableNeighbour(layer[WorldDrawLayer_Terrain.neighbours[i]].PrimaryBiome, landmark.def.coastRotateMode))
+				{
+					planetTile = WorldDrawLayer_Terrain.neighbours[i];
 					break;
 				}
-				num2++;
 			}
-			if (!flag)
+			if (planetTile.Valid)
 			{
-				Log.Error($"Failed to get increments for rotation of landmark with a valid neighbouring tile. Tile: {tile}");
-			}
-		}
-		else
-		{
-			Log.Error($"Failed to get non background biome near tile with a landmark which has to rotate away from the background. Tile: {tile}");
-		}
-		return num2;
-		static int WrapIndex(int start, int oneAfterLast, int num4)
-		{
-			if (num4 >= oneAfterLast)
-			{
-				return start + num4 % oneAfterLast;
-			}
-			return num4;
-		}
-	}
-
-	private static int GetOneAfterLastVertIndex(int index, NativeArray<int> tileIDToVerts_offsets, NativeArray<Vector3> verts)
-	{
-		if (index + 1 >= tileIDToVerts_offsets.Length)
-		{
-			return verts.Length;
-		}
-		return tileIDToVerts_offsets[index + 1];
-	}
-
-	private IEnumerable CalculateInterpolatedVerticesParams()
-	{
-		elevationValues.Clear();
-		int tilesCount = planetLayer.TilesCount;
-		NativeArray<Vector3> verts = planetLayer.UnsafeVerts;
-		NativeArray<int> tileIDToVerts_offsets = planetLayer.UnsafeTileIDToVerts_offsets;
-		NativeArray<int> tileIDToNeighbors_offsets = planetLayer.UnsafeTileIDToNeighbors_offsets;
-		NativeArray<PlanetTile> tileIDToNeighbors_values = planetLayer.UnsafeTileIDToNeighbors_values;
-		for (int i = 0; i < planetLayer.TilesCount; i++)
-		{
-			Tile tile = planetLayer[i];
-			float elevation = tile.elevation;
-			int num = ((i + 1 < tileIDToNeighbors_offsets.Length) ? tileIDToNeighbors_offsets[i + 1] : tileIDToNeighbors_values.Length);
-			int num2 = ((i + 1 < tilesCount) ? tileIDToVerts_offsets[i + 1] : verts.Length);
-			for (int j = tileIDToVerts_offsets[i]; j < num2; j++)
-			{
-				Vector3 item = new Vector3
-				{
-					x = elevation
-				};
+				int num3 = tileIDToVerts_offsets[planetTile.tileId];
+				int oneAfterLastVertIndex2 = WorldDrawLayer_Terrain.GetOneAfterLastVertIndex(planetTile.tileId, tileIDToVerts_offsets, verts);
 				bool flag = false;
-				for (int k = tileIDToNeighbors_offsets[i]; k < num; k++)
+				for (int j = num; j < oneAfterLastVertIndex; j++)
 				{
-					int num3 = ((tileIDToNeighbors_values[k].tileId + 1 < tileIDToVerts_offsets.Length) ? tileIDToVerts_offsets[tileIDToNeighbors_values[k].tileId + 1] : verts.Length);
-					for (int l = tileIDToVerts_offsets[tileIDToNeighbors_values[k].tileId]; l < num3; l++)
+					int index = WorldDrawLayer_Terrain.<GetLandmarkRotationIncrements>g__WrapIndex|5_0(num, oneAfterLastVertIndex, j + 1);
+					int index2 = WorldDrawLayer_Terrain.<GetLandmarkRotationIncrements>g__WrapIndex|5_0(num, oneAfterLastVertIndex, j + 2);
+					for (int k = num3; k < oneAfterLastVertIndex2; k++)
 					{
-						if (!(verts[l] == verts[j]))
+						int index3 = WorldDrawLayer_Terrain.<GetLandmarkRotationIncrements>g__WrapIndex|5_0(num3, oneAfterLastVertIndex2, k);
+						int index4 = WorldDrawLayer_Terrain.<GetLandmarkRotationIncrements>g__WrapIndex|5_0(num3, oneAfterLastVertIndex2, k + 1);
+						if ((!(verts[index] != verts[index3]) || !(verts[index2] != verts[index3])) && (!(verts[index] != verts[index4]) || !(verts[index2] != verts[index4])))
 						{
-							continue;
+							flag = true;
+							break;
 						}
-						Tile tile2 = planetLayer[tileIDToNeighbors_values[k]];
-						if (!flag)
-						{
-							if ((tile2.elevation >= 0f && elevation <= 0f) || (tile2.elevation <= 0f && elevation >= 0f))
-							{
-								flag = true;
-							}
-							else if (tile2.elevation > item.x)
-							{
-								item.x = tile2.elevation;
-							}
-						}
+					}
+					if (flag)
+					{
 						break;
 					}
+					num2++;
 				}
-				item.y = item.x;
-				if (flag)
+				if (!flag)
 				{
-					item.x = 0f;
+					Log.Error(string.Format("Failed to get increments for rotation of landmark with a valid neighbouring tile. Tile: {0}", tile));
 				}
-				if (tile.PrimaryBiome.DrawMaterial.shader != ShaderDatabase.WorldOcean && item.x < 0f)
-				{
-					item.x = 0f;
-				}
-				elevationValues.Add(item);
 			}
-			if (i % 1000 == 0)
+			else
 			{
-				yield return null;
+				Log.Error(string.Format("Failed to get non background biome near tile with a landmark which has to rotate away from the background. Tile: {0}", tile));
 			}
+			return num2;
 		}
+
+		// Token: 0x06015152 RID: 86354 RVA: 0x0064F328 File Offset: 0x0064D528
+		private static int GetOneAfterLastVertIndex(int index, NativeArray<int> tileIDToVerts_offsets, NativeArray<Vector3> verts)
+		{
+			if (index + 1 >= tileIDToVerts_offsets.Length)
+			{
+				return verts.Length;
+			}
+			return tileIDToVerts_offsets[index + 1];
+		}
+
+		// Token: 0x06015153 RID: 86355 RVA: 0x0064F348 File Offset: 0x0064D548
+		private IEnumerable CalculateInterpolatedVerticesParams()
+		{
+			this.elevationValues.Clear();
+			int tilesCount = this.planetLayer.TilesCount;
+			NativeArray<Vector3> verts = this.planetLayer.UnsafeVerts;
+			NativeArray<int> tileIDToVerts_offsets = this.planetLayer.UnsafeTileIDToVerts_offsets;
+			NativeArray<int> tileIDToNeighbors_offsets = this.planetLayer.UnsafeTileIDToNeighbors_offsets;
+			NativeArray<PlanetTile> tileIDToNeighbors_values = this.planetLayer.UnsafeTileIDToNeighbors_values;
+			int num4;
+			for (int i = 0; i < this.planetLayer.TilesCount; i = num4 + 1)
+			{
+				Tile tile = this.planetLayer[i];
+				float elevation = tile.elevation;
+				int num = (i + 1 < tileIDToNeighbors_offsets.Length) ? tileIDToNeighbors_offsets[i + 1] : tileIDToNeighbors_values.Length;
+				int num2 = (i + 1 < tilesCount) ? tileIDToVerts_offsets[i + 1] : verts.Length;
+				for (int j = tileIDToVerts_offsets[i]; j < num2; j++)
+				{
+					Vector3 vector = new Vector3
+					{
+						x = elevation
+					};
+					bool flag = false;
+					for (int k = tileIDToNeighbors_offsets[i]; k < num; k++)
+					{
+						int num3 = (tileIDToNeighbors_values[k].tileId + 1 < tileIDToVerts_offsets.Length) ? tileIDToVerts_offsets[tileIDToNeighbors_values[k].tileId + 1] : verts.Length;
+						int l = tileIDToVerts_offsets[tileIDToNeighbors_values[k].tileId];
+						while (l < num3)
+						{
+							if (verts[l] == verts[j])
+							{
+								Tile tile2 = this.planetLayer[tileIDToNeighbors_values[k]];
+								if (flag)
+								{
+									break;
+								}
+								if ((tile2.elevation >= 0f && elevation <= 0f) || (tile2.elevation <= 0f && elevation >= 0f))
+								{
+									flag = true;
+									break;
+								}
+								if (tile2.elevation > vector.x)
+								{
+									vector.x = tile2.elevation;
+									break;
+								}
+								break;
+							}
+							else
+							{
+								l++;
+							}
+						}
+					}
+					vector.y = vector.x;
+					if (flag)
+					{
+						vector.x = 0f;
+					}
+					if (tile.PrimaryBiome.DrawMaterial.shader != ShaderDatabase.WorldOcean && vector.x < 0f)
+					{
+						vector.x = 0f;
+					}
+					this.elevationValues.Add(vector);
+				}
+				if (i % 1000 == 0)
+				{
+					yield return null;
+				}
+				num4 = i;
+			}
+			yield break;
+		}
+
+		// Token: 0x06015157 RID: 86359 RVA: 0x0064F378 File Offset: 0x0064D578
+		[CompilerGenerated]
+		internal static int <GetLandmarkRotationIncrements>g__WrapIndex|5_0(int start, int oneAfterLast, int index)
+		{
+			if (index >= oneAfterLast)
+			{
+				return start + index % oneAfterLast;
+			}
+			return index;
+		}
+
+		// Token: 0x0400EB2C RID: 60204
+		private readonly List<Vector3> elevationValues = new List<Vector3>();
+
+		// Token: 0x0400EB2D RID: 60205
+		private static bool setGlobalMacro;
+
+		// Token: 0x0400EB2E RID: 60206
+		private static readonly List<PlanetTile> neighbours = new List<PlanetTile>(8);
+
+		// Token: 0x0400EB2F RID: 60207
+		private const string MacroTexturePath = "World/WorldMacro";
 	}
 }

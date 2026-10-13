@@ -1,44 +1,50 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class RadialTrigger : PawnTrigger
+namespace Verse
 {
-	public int maxRadius;
-
-	public bool lineOfSight;
-
-	protected override void Tick()
+	// Token: 0x0200087C RID: 2172
+	public class RadialTrigger : PawnTrigger
 	{
-		if (!this.IsHashIntervalTick(60))
+		// Token: 0x06003715 RID: 14101 RVA: 0x001275DC File Offset: 0x001257DC
+		protected override void Tick()
 		{
-			return;
-		}
-		Map map = base.Map;
-		int num = GenRadial.NumCellsInRadius(maxRadius);
-		for (int i = 0; i < num; i++)
-		{
-			IntVec3 c = base.Position + GenRadial.RadialPattern[i];
-			if (!c.InBounds(map))
+			if (!this.IsHashIntervalTick(60))
 			{
-				continue;
+				return;
 			}
-			List<Thing> thingList = c.GetThingList(map);
-			for (int j = 0; j < thingList.Count; j++)
+			Map map = base.Map;
+			int num = GenRadial.NumCellsInRadius((float)this.maxRadius);
+			for (int i = 0; i < num; i++)
 			{
-				if (TriggeredBy(thingList[j]) && (!lineOfSight || GenSight.LineOfSightToThing(base.Position, thingList[j], map)))
+				IntVec3 c = base.Position + GenRadial.RadialPattern[i];
+				if (c.InBounds(map))
 				{
-					ActivatedBy((Pawn)thingList[j]);
-					return;
+					List<Thing> thingList = c.GetThingList(map);
+					for (int j = 0; j < thingList.Count; j++)
+					{
+						if (base.TriggeredBy(thingList[j]) && (!this.lineOfSight || GenSight.LineOfSightToThing(base.Position, thingList[j], map, false, null)))
+						{
+							base.ActivatedBy((Pawn)thingList[j]);
+							return;
+						}
+					}
 				}
 			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref maxRadius, "maxRadius", 0);
-		Scribe_Values.Look(ref lineOfSight, "lineOfSight", defaultValue: false);
+		// Token: 0x06003716 RID: 14102 RVA: 0x001276A0 File Offset: 0x001258A0
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<int>(ref this.maxRadius, "maxRadius", 0, false);
+			Scribe_Values.Look<bool>(ref this.lineOfSight, "lineOfSight", false, false);
+		}
+
+		// Token: 0x04002951 RID: 10577
+		public int maxRadius;
+
+		// Token: 0x04002952 RID: 10578
+		public bool lineOfSight;
 	}
 }

@@ -1,3 +1,4 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -6,396 +7,442 @@ using Verse;
 using Verse.AI;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public static class PrisonBreakUtility
+namespace RimWorld
 {
-	private const float DistanceToJoinPrisonBreak = 20f;
-
-	private const float ChanceForRoomToJoinPrisonBreak = 0.5f;
-
-	private const float SapperChance = 0.5f;
-
-	private const float BlissLobotomyMultiplier = 10f;
-
-	private const float PrisonBreakMTBFactorSecurityDoorsOnly = 1.1f;
-
-	private static readonly SimpleCurve PrisonBreakMTBFactorForDaysSincePrisonBreak = new SimpleCurve
+	// Token: 0x0200244B RID: 9291
+	public static class PrisonBreakUtility
 	{
-		new CurvePoint(0f, 20f),
-		new CurvePoint(5f, 1.5f),
-		new CurvePoint(10f, 1f)
-	};
-
-	private static HashSet<Region> tmpRegions = new HashSet<Region>();
-
-	private static HashSet<Building_Door> tmpDoors = new HashSet<Building_Door>();
-
-	private static HashSet<Room> participatingRooms = new HashSet<Room>();
-
-	private static List<Pawn> allEscapingPrisoners = new List<Pawn>();
-
-	private static List<Room> tmpToRemove = new List<Room>();
-
-	private static List<Pawn> escapingPrisonersGroup = new List<Pawn>();
-
-	public static float InitiatePrisonBreakMtbDays(Pawn pawn, StringBuilder sb = null, bool ignoreAsleep = false)
-	{
-		if (!ignoreAsleep && !pawn.Awake())
+		// Token: 0x0600C937 RID: 51511 RVA: 0x003AD0D8 File Offset: 0x003AB2D8
+		public static float InitiatePrisonBreakMtbDays(Pawn pawn, StringBuilder sb = null, bool ignoreAsleep = false)
 		{
-			return -1f;
-		}
-		if (!CanParticipateInPrisonBreak(pawn))
-		{
-			return -1f;
-		}
-		Room room = pawn.GetRoom();
-		if (room == null || !room.IsPrisonCell)
-		{
-			return -1f;
-		}
-		float basePrisonBreakMtbDays = pawn.kindDef.basePrisonBreakMtbDays;
-		float num = Mathf.Clamp(pawn.health.capacities.GetLevel(PawnCapacityDefOf.Moving), 0.01f, 1f);
-		basePrisonBreakMtbDays /= num;
-		if (sb != null && num != 1f)
-		{
-			sb.AppendLineIfNotEmpty();
-			sb.Append("  - " + "FactorForMovement".Translate() + ": " + (1f / num).ToStringPercent());
-		}
-		if (pawn.genes != null)
-		{
-			float prisonBreakIntervalFactor = pawn.genes.PrisonBreakIntervalFactor;
-			basePrisonBreakMtbDays *= prisonBreakIntervalFactor;
-			if (sb != null && prisonBreakIntervalFactor != 1f)
+			if (!ignoreAsleep && !pawn.Awake())
+			{
+				return -1f;
+			}
+			if (!PrisonBreakUtility.CanParticipateInPrisonBreak(pawn))
+			{
+				return -1f;
+			}
+			Room room = pawn.GetRoom(RegionType.Set_All);
+			if (room == null || !room.IsPrisonCell)
+			{
+				return -1f;
+			}
+			float num = pawn.kindDef.basePrisonBreakMtbDays;
+			float num2 = Mathf.Clamp(pawn.health.capacities.GetLevel(PawnCapacityDefOf.Moving), 0.01f, 1f);
+			num /= num2;
+			if (sb != null && num2 != 1f)
 			{
 				sb.AppendLineIfNotEmpty();
-				sb.Append(string.Format("  - {0}: {1}", "FactorForGenes".Translate(), prisonBreakIntervalFactor.ToStringPercent()));
+				sb.Append("  - " + "FactorForMovement".Translate() + ": " + (1f / num2).ToStringPercent());
 			}
-		}
-		tmpRegions.Clear();
-		tmpDoors.Clear();
-		foreach (Region region in room.Regions)
-		{
-			foreach (RegionLink link in region.links)
+			if (pawn.genes != null)
 			{
-				Region otherRegion = link.GetOtherRegion(region);
-				if (otherRegion.type != RegionType.Portal || !tmpRegions.Add(otherRegion))
+				float prisonBreakIntervalFactor = pawn.genes.PrisonBreakIntervalFactor;
+				num *= prisonBreakIntervalFactor;
+				if (sb != null && prisonBreakIntervalFactor != 1f)
 				{
-					continue;
+					sb.AppendLineIfNotEmpty();
+					sb.Append(string.Format("  - {0}: {1}", "FactorForGenes".Translate(), prisonBreakIntervalFactor.ToStringPercent()));
 				}
-				Building_Door door = otherRegion.door;
-				for (int i = 0; i < otherRegion.links.Count; i++)
+			}
+			PrisonBreakUtility.tmpRegions.Clear();
+			PrisonBreakUtility.tmpDoors.Clear();
+			foreach (Region region in room.Regions)
+			{
+				foreach (RegionLink regionLink in region.links)
 				{
-					Region regionA = otherRegion.links[i].RegionA;
-					Region regionB = otherRegion.links[i].RegionB;
-					if ((regionA.Room != room && regionA != otherRegion && regionA.door != door) || (regionB.Room != room && regionB != otherRegion && regionB.door != door))
+					Region otherRegion = regionLink.GetOtherRegion(region);
+					if (otherRegion.type == RegionType.Portal && PrisonBreakUtility.tmpRegions.Add(otherRegion))
 					{
-						tmpDoors.Add(door);
-						break;
+						Building_Door door = otherRegion.door;
+						for (int i = 0; i < otherRegion.links.Count; i++)
+						{
+							Region regionA = otherRegion.links[i].RegionA;
+							Region regionB = otherRegion.links[i].RegionB;
+							if ((regionA.Room != room && regionA != otherRegion && regionA.door != door) || (regionB.Room != room && regionB != otherRegion && regionB.door != door))
+							{
+								PrisonBreakUtility.tmpDoors.Add(door);
+								break;
+							}
+						}
 					}
 				}
 			}
-		}
-		float num2 = tmpDoors.Count;
-		if (num2 > 0f)
-		{
-			basePrisonBreakMtbDays /= num2;
-			if (sb != null && num2 > 1f)
+			float num3 = (float)PrisonBreakUtility.tmpDoors.Count;
+			if (num3 > 0f)
 			{
-				sb.AppendLineIfNotEmpty();
-				sb.Append("  - " + "FactorForDoorCount".Translate() + ": " + (1f / num2).ToStringPercent());
-			}
-			if (ModsConfig.AnomalyActive)
-			{
-				bool flag = false;
-				bool flag2 = true;
-				foreach (Building_Door tmpDoor in tmpDoors)
+				num /= num3;
+				if (sb != null && num3 > 1f)
 				{
-					if (tmpDoor.def != ThingDefOf.SecurityDoor)
+					sb.AppendLineIfNotEmpty();
+					sb.Append("  - " + "FactorForDoorCount".Translate() + ": " + (1f / num3).ToStringPercent());
+				}
+				if (ModsConfig.AnomalyActive)
+				{
+					bool flag = false;
+					bool flag2 = true;
+					using (HashSet<Building_Door>.Enumerator enumerator3 = PrisonBreakUtility.tmpDoors.GetEnumerator())
 					{
-						flag2 = false;
-						break;
+						while (enumerator3.MoveNext())
+						{
+							if (enumerator3.Current.def != ThingDefOf.SecurityDoor)
+							{
+								flag2 = false;
+								break;
+							}
+							flag = true;
+						}
 					}
-					flag = true;
-				}
-				if (flag && flag2)
-				{
-					if (sb != null)
+					if (flag && flag2)
 					{
-						sb.AppendLineIfNotEmpty();
-						sb.Append("  - " + "SecurityDoorsOnly".Translate() + ": " + 1.1f.ToStringPercent());
+						if (sb != null)
+						{
+							sb.AppendLineIfNotEmpty();
+							sb.Append("  - " + "SecurityDoorsOnly".Translate() + ": " + 1.1f.ToStringPercent());
+						}
+						num *= 1.1f;
 					}
-					basePrisonBreakMtbDays *= 1.1f;
 				}
 			}
-		}
-		if (ModsConfig.AnomalyActive && pawn.health.hediffSet.HasHediff(HediffDefOf.BlissLobotomy))
-		{
-			basePrisonBreakMtbDays *= 10f;
-			if (sb != null)
+			if (ModsConfig.AnomalyActive && pawn.health.hediffSet.HasHediff(HediffDefOf.BlissLobotomy, false))
 			{
-				sb.AppendLineIfNotEmpty();
-				sb.Append("  - " + "BlissLobotomy".Translate() + ": " + 10f.ToStringPercent());
-			}
-		}
-		if (pawn.guest.everParticipatedInPrisonBreak)
-		{
-			float x = (float)(Find.TickManager.TicksGame - pawn.guest.lastPrisonBreakTicks) / 60000f;
-			basePrisonBreakMtbDays *= PrisonBreakMTBFactorForDaysSincePrisonBreak.Evaluate(x);
-		}
-		return basePrisonBreakMtbDays;
-	}
-
-	public static bool CanParticipateInPrisonBreak(Pawn pawn)
-	{
-		if (pawn.Downed)
-		{
-			return false;
-		}
-		if (!pawn.IsPrisoner)
-		{
-			return false;
-		}
-		if (IsPrisonBreaking(pawn))
-		{
-			return false;
-		}
-		if (GenePreventsPrisonBreaking(pawn, out var _))
-		{
-			return false;
-		}
-		if (pawn.Spawned && pawn.Map.IsPocketMap && pawn.Map.generatorDef.pocketMapProperties.preventPrisonerEscape)
-		{
-			return false;
-		}
-		if (pawn.Spawned && pawn.Map.Biome.inVacuum)
-		{
-			return false;
-		}
-		return true;
-	}
-
-	public static bool GenePreventsPrisonBreaking(Pawn pawn, out Gene gene)
-	{
-		if (ModsConfig.BiotechActive && pawn.genes != null)
-		{
-			foreach (Gene item in pawn.genes.GenesListForReading)
-			{
-				if (item.def.prisonBreakMTBFactor < 0f)
+				num *= 10f;
+				if (sb != null)
 				{
-					gene = item;
-					return true;
+					sb.AppendLineIfNotEmpty();
+					sb.Append("  - " + "BlissLobotomy".Translate() + ": " + 10f.ToStringPercent());
 				}
 			}
-		}
-		gene = null;
-		return false;
-	}
-
-	public static bool IsPrisonBreaking(Pawn pawn)
-	{
-		Lord lord = pawn.GetLord();
-		if (lord != null)
-		{
-			return lord.LordJob is LordJob_PrisonBreak;
-		}
-		return false;
-	}
-
-	public static void StartPrisonBreak(Pawn initiator)
-	{
-		StartPrisonBreak(initiator, out var letterText, out var letterLabel, out var letterDef, out var escapingPrisoners);
-		if (!letterText.NullOrEmpty())
-		{
-			Find.LetterStack.ReceiveLetter(letterLabel, letterText, letterDef, escapingPrisoners);
-		}
-	}
-
-	public static void StartPrisonBreak(Pawn initiator, out string letterText, out string letterLabel, out LetterDef letterDef, out List<Pawn> escapingPrisoners)
-	{
-		participatingRooms.Clear();
-		foreach (IntVec3 item in GenRadial.RadialCellsAround(initiator.Position, 20f, useCenter: true))
-		{
-			if (item.InBounds(initiator.Map))
+			if (pawn.guest.everParticipatedInPrisonBreak)
 			{
-				Room room = item.GetRoom(initiator.Map);
-				if (room != null && IsOrCanBePrisonCell(room))
+				float x = (float)(Find.TickManager.TicksGame - pawn.guest.lastPrisonBreakTicks) / 60000f;
+				num *= PrisonBreakUtility.PrisonBreakMTBFactorForDaysSincePrisonBreak.Evaluate(x);
+			}
+			return num;
+		}
+
+		// Token: 0x0600C938 RID: 51512 RVA: 0x003AD530 File Offset: 0x003AB730
+		public static bool CanParticipateInPrisonBreak(Pawn pawn)
+		{
+			Gene gene;
+			return !pawn.Downed && pawn.IsPrisoner && !PrisonBreakUtility.IsPrisonBreaking(pawn) && !PrisonBreakUtility.GenePreventsPrisonBreaking(pawn, out gene) && (!pawn.Spawned || !pawn.Map.IsPocketMap || !pawn.Map.generatorDef.pocketMapProperties.preventPrisonerEscape) && (!pawn.Spawned || !pawn.Map.Biome.inVacuum);
+		}
+
+		// Token: 0x0600C939 RID: 51513 RVA: 0x003AD5B4 File Offset: 0x003AB7B4
+		public static bool GenePreventsPrisonBreaking(Pawn pawn, out Gene gene)
+		{
+			if (ModsConfig.BiotechActive && pawn.genes != null)
+			{
+				foreach (Gene gene2 in pawn.genes.GenesListForReading)
 				{
-					participatingRooms.Add(room);
+					if (gene2.def.prisonBreakMTBFactor < 0f)
+					{
+						gene = gene2;
+						return true;
+					}
 				}
 			}
-		}
-		RemoveRandomRooms(participatingRooms, initiator);
-		int sapperThingID = -1;
-		if (Rand.Value < 0.5f)
-		{
-			sapperThingID = initiator.thingIDNumber;
-		}
-		allEscapingPrisoners.Clear();
-		foreach (Room participatingRoom in participatingRooms)
-		{
-			StartPrisonBreakIn(participatingRoom, allEscapingPrisoners, sapperThingID, participatingRooms);
-		}
-		participatingRooms.Clear();
-		if (allEscapingPrisoners.Any())
-		{
-			StringBuilder stringBuilder = new StringBuilder();
-			for (int i = 0; i < allEscapingPrisoners.Count; i++)
-			{
-				stringBuilder.AppendLine("  - " + allEscapingPrisoners[i].NameShortColored.Resolve());
-				allEscapingPrisoners[i].Notify_PrisonBreakout();
-			}
-			letterText = "LetterPrisonBreak".Translate(stringBuilder.ToString().TrimEndNewlines());
-			letterLabel = "LetterLabelPrisonBreak".Translate();
-			letterDef = LetterDefOf.ThreatBig;
-			escapingPrisoners = allEscapingPrisoners.ToList();
-			allEscapingPrisoners.Clear();
-		}
-		else
-		{
-			letterText = null;
-			letterLabel = null;
-			letterDef = null;
-			escapingPrisoners = null;
-		}
-		Find.TickManager.slower.SignalForceNormalSpeed();
-	}
-
-	private static bool IsOrCanBePrisonCell(Room room)
-	{
-		if (room.IsPrisonCell)
-		{
-			return true;
-		}
-		if (room.TouchesMapEdge)
-		{
+			gene = null;
 			return false;
 		}
-		bool result = false;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
-		{
-			if (containedAndAdjacentThings[i] is Pawn { IsPrisoner: not false })
-			{
-				result = true;
-				break;
-			}
-		}
-		return result;
-	}
 
-	private static void RemoveRandomRooms(HashSet<Room> participatingRooms, Pawn initiator)
-	{
-		Room room = initiator.GetRoom();
-		tmpToRemove.Clear();
-		foreach (Room participatingRoom in participatingRooms)
+		// Token: 0x0600C93A RID: 51514 RVA: 0x003AD634 File Offset: 0x003AB834
+		public static bool IsPrisonBreaking(Pawn pawn)
 		{
-			if (participatingRoom != room && !(Rand.Value < 0.5f))
-			{
-				tmpToRemove.Add(participatingRoom);
-			}
+			Lord lord = pawn.GetLord();
+			return lord != null && lord.LordJob is LordJob_PrisonBreak;
 		}
-		for (int i = 0; i < tmpToRemove.Count; i++)
-		{
-			participatingRooms.Remove(tmpToRemove[i]);
-		}
-		tmpToRemove.Clear();
-	}
 
-	private static void StartPrisonBreakIn(Room room, List<Pawn> outAllEscapingPrisoners, int sapperThingID, HashSet<Room> participatingRooms)
-	{
-		escapingPrisonersGroup.Clear();
-		AddPrisonersFrom(room, escapingPrisonersGroup);
-		if (!escapingPrisonersGroup.Any())
+		// Token: 0x0600C93B RID: 51515 RVA: 0x003AD65C File Offset: 0x003AB85C
+		public static void StartPrisonBreak(Pawn initiator)
 		{
-			return;
-		}
-		foreach (Room participatingRoom in participatingRooms)
-		{
-			if (participatingRoom != room && RoomsAreCloseToEachOther(room, participatingRoom))
+			string str;
+			string str2;
+			LetterDef textLetterDef;
+			List<Pawn> targets;
+			PrisonBreakUtility.StartPrisonBreak(initiator, out str, out str2, out textLetterDef, out targets);
+			if (!str.NullOrEmpty())
 			{
-				AddPrisonersFrom(participatingRoom, escapingPrisonersGroup);
+				Find.LetterStack.ReceiveLetter(str2, str, textLetterDef, targets, null, null, null, null, 0, true);
 			}
 		}
-		if (!RCellFinder.TryFindRandomExitSpot(escapingPrisonersGroup[0], out var spot, TraverseMode.PassDoors) || !TryFindGroupUpLoc(escapingPrisonersGroup, spot, out var groupUpLoc))
+
+		// Token: 0x0600C93C RID: 51516 RVA: 0x003AD6A4 File Offset: 0x003AB8A4
+		public static void StartPrisonBreak(Pawn initiator, out string letterText, out string letterLabel, out LetterDef letterDef, out List<Pawn> escapingPrisoners)
 		{
-			return;
-		}
-		LordMaker.MakeNewLord(escapingPrisonersGroup[0].Faction, new LordJob_PrisonBreak(groupUpLoc, spot, sapperThingID), room.Map, escapingPrisonersGroup);
-		for (int i = 0; i < escapingPrisonersGroup.Count; i++)
-		{
-			Pawn pawn = escapingPrisonersGroup[i];
-			if (pawn.CurJob != null && pawn.GetPosture().Laying())
+			PrisonBreakUtility.participatingRooms.Clear();
+			foreach (IntVec3 intVec in GenRadial.RadialCellsAround(initiator.Position, 20f, true))
 			{
-				pawn.jobs.EndCurrentJob(JobCondition.InterruptForced);
+				if (intVec.InBounds(initiator.Map))
+				{
+					Room room = intVec.GetRoom(initiator.Map);
+					if (room != null && PrisonBreakUtility.IsOrCanBePrisonCell(room))
+					{
+						PrisonBreakUtility.participatingRooms.Add(room);
+					}
+				}
+			}
+			PrisonBreakUtility.RemoveRandomRooms(PrisonBreakUtility.participatingRooms, initiator);
+			int sapperThingID = -1;
+			if (Rand.Value < 0.5f)
+			{
+				sapperThingID = initiator.thingIDNumber;
+			}
+			PrisonBreakUtility.allEscapingPrisoners.Clear();
+			foreach (Room room2 in PrisonBreakUtility.participatingRooms)
+			{
+				PrisonBreakUtility.StartPrisonBreakIn(room2, PrisonBreakUtility.allEscapingPrisoners, sapperThingID, PrisonBreakUtility.participatingRooms);
+			}
+			PrisonBreakUtility.participatingRooms.Clear();
+			if (PrisonBreakUtility.allEscapingPrisoners.Any<Pawn>())
+			{
+				StringBuilder stringBuilder = new StringBuilder();
+				for (int i = 0; i < PrisonBreakUtility.allEscapingPrisoners.Count; i++)
+				{
+					stringBuilder.AppendLine("  - " + PrisonBreakUtility.allEscapingPrisoners[i].NameShortColored.Resolve());
+					PrisonBreakUtility.allEscapingPrisoners[i].Notify_PrisonBreakout();
+				}
+				letterText = "LetterPrisonBreak".Translate(stringBuilder.ToString().TrimEndNewlines());
+				letterLabel = "LetterLabelPrisonBreak".Translate();
+				letterDef = LetterDefOf.ThreatBig;
+				escapingPrisoners = PrisonBreakUtility.allEscapingPrisoners.ToList<Pawn>();
+				PrisonBreakUtility.allEscapingPrisoners.Clear();
 			}
 			else
 			{
-				pawn.jobs.CheckForJobOverride();
+				letterText = null;
+				letterLabel = null;
+				letterDef = null;
+				escapingPrisoners = null;
 			}
-			pawn.guest.everParticipatedInPrisonBreak = true;
-			pawn.guest.lastPrisonBreakTicks = Find.TickManager.TicksGame;
-			outAllEscapingPrisoners.Add(pawn);
+			Find.TickManager.slower.SignalForceNormalSpeed();
 		}
-		escapingPrisonersGroup.Clear();
-	}
 
-	private static void AddPrisonersFrom(Room room, List<Pawn> outEscapingPrisoners)
-	{
-		foreach (Thing containedAndAdjacentThing in room.ContainedAndAdjacentThings)
+		// Token: 0x0600C93D RID: 51517 RVA: 0x003AD88C File Offset: 0x003ABA8C
+		private static bool IsOrCanBePrisonCell(Room room)
 		{
-			if (containedAndAdjacentThing is Pawn pawn && CanParticipateInPrisonBreak(pawn) && !outEscapingPrisoners.Contains(pawn))
+			if (room.IsPrisonCell)
 			{
-				outEscapingPrisoners.Add(pawn);
+				return true;
 			}
-		}
-	}
-
-	public static bool TryFindGroupUpLoc(List<Pawn> escapingPrisoners, IntVec3 exitPoint, out IntVec3 groupUpLoc)
-	{
-		groupUpLoc = IntVec3.Invalid;
-		Map map = escapingPrisoners[0].Map;
-		using (PawnPath pawnPath = map.pathFinder.FindPathNow(escapingPrisoners[0].Position, exitPoint, TraverseParms.For(escapingPrisoners[0], Danger.Deadly, TraverseMode.PassDoors)))
-		{
-			if (!pawnPath.Found)
+			if (room.TouchesMapEdge)
 			{
-				Log.Warning("Prison break: could not find path for prisoner " + escapingPrisoners[0]?.ToString() + " to the exit point.");
 				return false;
 			}
-			for (int i = 0; i < pawnPath.NodesLeftCount; i++)
+			bool result = false;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				IntVec3 intVec = pawnPath.Peek(pawnPath.NodesLeftCount - i - 1);
-				Room room = intVec.GetRoom(map);
-				if (room != null && !room.IsPrisonCell && (room.TouchesMapEdge || room.IsHuge || room.Cells.Count((IntVec3 x) => x.Standable(map)) >= 5))
+				Pawn pawn = containedAndAdjacentThings[i] as Pawn;
+				if (pawn != null && pawn.IsPrisoner)
 				{
-					groupUpLoc = CellFinder.RandomClosewalkCellNear(intVec, map, 3);
+					result = true;
+					break;
+				}
+			}
+			return result;
+		}
+
+		// Token: 0x0600C93E RID: 51518 RVA: 0x003AD8E4 File Offset: 0x003ABAE4
+		private static void RemoveRandomRooms(HashSet<Room> participatingRooms, Pawn initiator)
+		{
+			Room room = initiator.GetRoom(RegionType.Set_All);
+			PrisonBreakUtility.tmpToRemove.Clear();
+			foreach (Room room2 in participatingRooms)
+			{
+				if (room2 != room && Rand.Value >= 0.5f)
+				{
+					PrisonBreakUtility.tmpToRemove.Add(room2);
+				}
+			}
+			for (int i = 0; i < PrisonBreakUtility.tmpToRemove.Count; i++)
+			{
+				participatingRooms.Remove(PrisonBreakUtility.tmpToRemove[i]);
+			}
+			PrisonBreakUtility.tmpToRemove.Clear();
+		}
+
+		// Token: 0x0600C93F RID: 51519 RVA: 0x003AD98C File Offset: 0x003ABB8C
+		private static void StartPrisonBreakIn(Room room, List<Pawn> outAllEscapingPrisoners, int sapperThingID, HashSet<Room> participatingRooms)
+		{
+			PrisonBreakUtility.escapingPrisonersGroup.Clear();
+			PrisonBreakUtility.AddPrisonersFrom(room, PrisonBreakUtility.escapingPrisonersGroup);
+			if (!PrisonBreakUtility.escapingPrisonersGroup.Any<Pawn>())
+			{
+				return;
+			}
+			foreach (Room room2 in participatingRooms)
+			{
+				if (room2 != room && PrisonBreakUtility.RoomsAreCloseToEachOther(room, room2))
+				{
+					PrisonBreakUtility.AddPrisonersFrom(room2, PrisonBreakUtility.escapingPrisonersGroup);
+				}
+			}
+			IntVec3 exitPoint;
+			if (!RCellFinder.TryFindRandomExitSpot(PrisonBreakUtility.escapingPrisonersGroup[0], out exitPoint, TraverseMode.PassDoors))
+			{
+				return;
+			}
+			IntVec3 groupUpLoc;
+			if (!PrisonBreakUtility.TryFindGroupUpLoc(PrisonBreakUtility.escapingPrisonersGroup, exitPoint, out groupUpLoc))
+			{
+				return;
+			}
+			LordMaker.MakeNewLord(PrisonBreakUtility.escapingPrisonersGroup[0].Faction, new LordJob_PrisonBreak(groupUpLoc, exitPoint, sapperThingID), room.Map, PrisonBreakUtility.escapingPrisonersGroup);
+			for (int i = 0; i < PrisonBreakUtility.escapingPrisonersGroup.Count; i++)
+			{
+				Pawn pawn = PrisonBreakUtility.escapingPrisonersGroup[i];
+				if (pawn.CurJob != null && pawn.GetPosture().Laying())
+				{
+					pawn.jobs.EndCurrentJob(JobCondition.InterruptForced, true, true);
+				}
+				else
+				{
+					pawn.jobs.CheckForJobOverride(0f, true);
+				}
+				pawn.guest.everParticipatedInPrisonBreak = true;
+				pawn.guest.lastPrisonBreakTicks = Find.TickManager.TicksGame;
+				outAllEscapingPrisoners.Add(pawn);
+			}
+			PrisonBreakUtility.escapingPrisonersGroup.Clear();
+		}
+
+		// Token: 0x0600C940 RID: 51520 RVA: 0x003ADAF8 File Offset: 0x003ABCF8
+		private static void AddPrisonersFrom(Room room, List<Pawn> outEscapingPrisoners)
+		{
+			foreach (Thing thing in room.ContainedAndAdjacentThings)
+			{
+				Pawn pawn = thing as Pawn;
+				if (pawn != null && PrisonBreakUtility.CanParticipateInPrisonBreak(pawn) && !outEscapingPrisoners.Contains(pawn))
+				{
+					outEscapingPrisoners.Add(pawn);
 				}
 			}
 		}
-		if (!groupUpLoc.IsValid)
-		{
-			groupUpLoc = escapingPrisoners[0].Position;
-		}
-		return true;
-	}
 
-	private static bool RoomsAreCloseToEachOther(Room a, Room b)
-	{
-		IntVec3 anyCell = a.FirstRegion.AnyCell;
-		IntVec3 anyCell2 = b.FirstRegion.AnyCell;
-		if (a.Map != b.Map)
+		// Token: 0x0600C941 RID: 51521 RVA: 0x003ADB64 File Offset: 0x003ABD64
+		public static bool TryFindGroupUpLoc(List<Pawn> escapingPrisoners, IntVec3 exitPoint, out IntVec3 groupUpLoc)
 		{
-			return false;
+			groupUpLoc = IntVec3.Invalid;
+			Map map = escapingPrisoners[0].Map;
+			using (PawnPath pawnPath = map.pathFinder.FindPathNow(escapingPrisoners[0].Position, exitPoint, TraverseParms.For(escapingPrisoners[0], Danger.Deadly, TraverseMode.PassDoors, false, false, false, true), null, PathEndMode.OnCell, null))
+			{
+				if (!pawnPath.Found)
+				{
+					string str = "Prison break: could not find path for prisoner ";
+					Pawn pawn = escapingPrisoners[0];
+					Log.Warning(str + ((pawn != null) ? pawn.ToString() : null) + " to the exit point.");
+					return false;
+				}
+				Func<IntVec3, bool> <>9__0;
+				for (int i = 0; i < pawnPath.NodesLeftCount; i++)
+				{
+					IntVec3 intVec = pawnPath.Peek(pawnPath.NodesLeftCount - i - 1);
+					Room room = intVec.GetRoom(map);
+					if (room != null && !room.IsPrisonCell)
+					{
+						if (!room.TouchesMapEdge && !room.IsHuge)
+						{
+							IEnumerable<IntVec3> cells = room.Cells;
+							Func<IntVec3, bool> predicate;
+							if ((predicate = <>9__0) == null)
+							{
+								predicate = (<>9__0 = ((IntVec3 x) => x.Standable(map)));
+							}
+							if (cells.Count(predicate) < 5)
+							{
+								goto IL_127;
+							}
+						}
+						groupUpLoc = CellFinder.RandomClosewalkCellNear(intVec, map, 3, null);
+					}
+					IL_127:;
+				}
+			}
+			if (!groupUpLoc.IsValid)
+			{
+				groupUpLoc = escapingPrisoners[0].Position;
+			}
+			return true;
 		}
-		if (!anyCell.WithinRegions(anyCell2, a.Map, 18, TraverseParms.For(TraverseMode.PassDoors)))
+
+		// Token: 0x0600C942 RID: 51522 RVA: 0x003ADCE4 File Offset: 0x003ABEE4
+		private static bool RoomsAreCloseToEachOther(Room a, Room b)
 		{
-			return false;
+			IntVec3 anyCell = a.FirstRegion.AnyCell;
+			IntVec3 anyCell2 = b.FirstRegion.AnyCell;
+			if (a.Map != b.Map)
+			{
+				return false;
+			}
+			if (!anyCell.WithinRegions(anyCell2, a.Map, 18, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false), RegionType.Set_Passable))
+			{
+				return false;
+			}
+			bool result;
+			using (PawnPath pawnPath = a.Map.pathFinder.FindPathNow(anyCell, anyCell2, TraverseParms.For(TraverseMode.PassDoors, Danger.Deadly, false, false, false, true, false), null, PathEndMode.OnCell, null))
+			{
+				if (!pawnPath.Found)
+				{
+					result = false;
+				}
+				else
+				{
+					result = (pawnPath.NodesLeftCount < 24);
+				}
+			}
+			return result;
 		}
-		using PawnPath pawnPath = a.Map.pathFinder.FindPathNow(anyCell, anyCell2, TraverseParms.For(TraverseMode.PassDoors));
-		if (!pawnPath.Found)
+
+		// Token: 0x040088F2 RID: 35058
+		private const float DistanceToJoinPrisonBreak = 20f;
+
+		// Token: 0x040088F3 RID: 35059
+		private const float ChanceForRoomToJoinPrisonBreak = 0.5f;
+
+		// Token: 0x040088F4 RID: 35060
+		private const float SapperChance = 0.5f;
+
+		// Token: 0x040088F5 RID: 35061
+		private const float BlissLobotomyMultiplier = 10f;
+
+		// Token: 0x040088F6 RID: 35062
+		private const float PrisonBreakMTBFactorSecurityDoorsOnly = 1.1f;
+
+		// Token: 0x040088F7 RID: 35063
+		private static readonly SimpleCurve PrisonBreakMTBFactorForDaysSincePrisonBreak = new SimpleCurve
 		{
-			return false;
-		}
-		return pawnPath.NodesLeftCount < 24;
+			{
+				new CurvePoint(0f, 20f),
+				true
+			},
+			{
+				new CurvePoint(5f, 1.5f),
+				true
+			},
+			{
+				new CurvePoint(10f, 1f),
+				true
+			}
+		};
+
+		// Token: 0x040088F8 RID: 35064
+		private static HashSet<Region> tmpRegions = new HashSet<Region>();
+
+		// Token: 0x040088F9 RID: 35065
+		private static HashSet<Building_Door> tmpDoors = new HashSet<Building_Door>();
+
+		// Token: 0x040088FA RID: 35066
+		private static HashSet<Room> participatingRooms = new HashSet<Room>();
+
+		// Token: 0x040088FB RID: 35067
+		private static List<Pawn> allEscapingPrisoners = new List<Pawn>();
+
+		// Token: 0x040088FC RID: 35068
+		private static List<Room> tmpToRemove = new List<Room>();
+
+		// Token: 0x040088FD RID: 35069
+		private static List<Pawn> escapingPrisonersGroup = new List<Pawn>();
 	}
 }

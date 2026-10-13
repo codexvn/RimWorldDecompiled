@@ -1,24 +1,27 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_BedroomTantrum : MentalState_TantrumRandom
+namespace Verse.AI
 {
-	protected override void GetPotentialTargets(List<Thing> outThings)
+	// Token: 0x02000F93 RID: 3987
+	public class MentalState_BedroomTantrum : MentalState_TantrumRandom
 	{
-		outThings.Clear();
-		Building_Bed ownedBed = pawn.ownership.OwnedBed;
-		if (ownedBed != null)
+		// Token: 0x06006254 RID: 25172 RVA: 0x001F0B24 File Offset: 0x001EED24
+		protected override void GetPotentialTargets(List<Thing> outThings)
 		{
-			if (ownedBed.GetRoom() != null && !ownedBed.GetRoom().PsychologicallyOutdoors)
+			outThings.Clear();
+			Building_Bed ownedBed = this.pawn.ownership.OwnedBed;
+			if (ownedBed == null)
 			{
-				TantrumMentalStateUtility.GetSmashableThingsIn(ownedBed.GetRoom(), pawn, outThings, GetCustomValidator());
+				return;
 			}
-			else
+			if (ownedBed.GetRoom(RegionType.Set_All) != null && !ownedBed.GetRoom(RegionType.Set_All).PsychologicallyOutdoors)
 			{
-				TantrumMentalStateUtility.GetSmashableThingsNear(pawn, ownedBed.Position, outThings, GetCustomValidator(), 0, 8);
+				TantrumMentalStateUtility.GetSmashableThingsIn(ownedBed.GetRoom(RegionType.Set_All), this.pawn, outThings, this.GetCustomValidator(), 0);
+				return;
 			}
+			TantrumMentalStateUtility.GetSmashableThingsNear(this.pawn, ownedBed.Position, outThings, this.GetCustomValidator(), 0, 8);
 		}
 	}
 }

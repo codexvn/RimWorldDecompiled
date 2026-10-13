@@ -1,52 +1,54 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Equal : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<object> value1;
-
-	[NoTranslate]
-	public SlateRef<object> value2;
-
-	public SlateRef<Type> compareAs;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x020039E4 RID: 14820
+	public class QuestNode_Equal : QuestNode
 	{
-		if (QuestNodeEqualUtility.Equal(value1.GetValue(slate), value2.GetValue(slate), compareAs.GetValue(slate)))
+		// Token: 0x06014552 RID: 83282 RVA: 0x00614310 File Offset: 0x00612510
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (QuestNodeEqualUtility.Equal(this.value1.GetValue(slate), this.value2.GetValue(slate), this.compareAs.GetValue(slate)))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		if (QuestNodeEqualUtility.Equal(value1.GetValue(slate), value2.GetValue(slate), compareAs.GetValue(slate)))
+		// Token: 0x06014553 RID: 83283 RVA: 0x00614378 File Offset: 0x00612578
+		protected override void RunInt()
 		{
-			if (node != null)
+			Slate slate = QuestGen.slate;
+			if (QuestNodeEqualUtility.Equal(this.value1.GetValue(slate), this.value2.GetValue(slate), this.compareAs.GetValue(slate)))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
+
+		// Token: 0x0400E050 RID: 57424
+		[NoTranslate]
+		public SlateRef<object> value1;
+
+		// Token: 0x0400E051 RID: 57425
+		[NoTranslate]
+		public SlateRef<object> value2;
+
+		// Token: 0x0400E052 RID: 57426
+		public SlateRef<Type> compareAs;
+
+		// Token: 0x0400E053 RID: 57427
+		public QuestNode node;
+
+		// Token: 0x0400E054 RID: 57428
+		public QuestNode elseNode;
 	}
 }

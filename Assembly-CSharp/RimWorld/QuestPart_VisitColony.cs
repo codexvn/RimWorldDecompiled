@@ -1,25 +1,32 @@
+﻿using System;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public class QuestPart_VisitColony : QuestPart_MakeLord
+namespace RimWorld
 {
-	public int? durationTicks;
-
-	protected override Lord MakeLord()
+	// Token: 0x02001BFB RID: 7163
+	public class QuestPart_VisitColony : QuestPart_MakeLord
 	{
-		if (!RCellFinder.TryFindRandomSpotJustOutsideColony(pawns[0], out var result))
+		// Token: 0x06009F78 RID: 40824 RVA: 0x002E0948 File Offset: 0x002DEB48
+		protected override Lord MakeLord()
 		{
-			result = CellFinder.RandomCell(pawns[0].Map);
+			IntVec3 chillSpot;
+			if (!RCellFinder.TryFindRandomSpotJustOutsideColony(this.pawns[0], out chillSpot))
+			{
+				chillSpot = CellFinder.RandomCell(this.pawns[0].Map);
+			}
+			LordJob_VisitColony lordJob = new LordJob_VisitColony(this.faction ?? this.pawns[0].Faction, chillSpot, this.durationTicks);
+			return LordMaker.MakeNewLord(this.faction ?? this.pawns[0].Faction, lordJob, this.mapParent.Map, null);
 		}
-		LordJob_VisitColony lordJob = new LordJob_VisitColony(faction ?? pawns[0].Faction, result, durationTicks);
-		return LordMaker.MakeNewLord(faction ?? pawns[0].Faction, lordJob, mapParent.Map);
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Values.Look(ref durationTicks, "durationTicks");
+		// Token: 0x06009F79 RID: 40825 RVA: 0x002E09D8 File Offset: 0x002DEBD8
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_Values.Look<int?>(ref this.durationTicks, "durationTicks", null, false);
+		}
+
+		// Token: 0x04006E54 RID: 28244
+		public int? durationTicks;
 	}
 }

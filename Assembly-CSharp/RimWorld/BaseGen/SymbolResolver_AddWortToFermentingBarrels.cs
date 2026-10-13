@@ -1,42 +1,48 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_AddWortToFermentingBarrels : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static List<Building_FermentingBarrel> barrels = new List<Building_FermentingBarrel>();
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003943 RID: 14659
+	public class SymbolResolver_AddWortToFermentingBarrels : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		barrels.Clear();
-		foreach (IntVec3 item2 in rp.rect)
+		// Token: 0x060142DB RID: 82651 RVA: 0x00603554 File Offset: 0x00601754
+		public override void Resolve(ResolveParams rp)
 		{
-			List<Thing> thingList = item2.GetThingList(map);
-			for (int i = 0; i < thingList.Count; i++)
+			Map map = BaseGen.globalSettings.map;
+			SymbolResolver_AddWortToFermentingBarrels.barrels.Clear();
+			foreach (IntVec3 c in rp.rect)
 			{
-				if (thingList[i] is Building_FermentingBarrel item && !barrels.Contains(item))
+				List<Thing> thingList = c.GetThingList(map);
+				for (int i = 0; i < thingList.Count; i++)
 				{
-					barrels.Add(item);
+					Building_FermentingBarrel building_FermentingBarrel = thingList[i] as Building_FermentingBarrel;
+					if (building_FermentingBarrel != null && !SymbolResolver_AddWortToFermentingBarrels.barrels.Contains(building_FermentingBarrel))
+					{
+						SymbolResolver_AddWortToFermentingBarrels.barrels.Add(building_FermentingBarrel);
+					}
 				}
 			}
-		}
-		float progress = Rand.Range(0.1f, 0.9f);
-		for (int j = 0; j < barrels.Count; j++)
-		{
-			if (!barrels[j].Fermented)
+			float progress = Rand.Range(0.1f, 0.9f);
+			for (int j = 0; j < SymbolResolver_AddWortToFermentingBarrels.barrels.Count; j++)
 			{
-				int a = Rand.RangeInclusive(1, 25);
-				a = Mathf.Min(a, barrels[j].SpaceLeftForWort);
-				if (a > 0)
+				if (!SymbolResolver_AddWortToFermentingBarrels.barrels[j].Fermented)
 				{
-					barrels[j].AddWort(a);
-					barrels[j].Progress = progress;
+					int num = Rand.RangeInclusive(1, 25);
+					num = Mathf.Min(num, SymbolResolver_AddWortToFermentingBarrels.barrels[j].SpaceLeftForWort);
+					if (num > 0)
+					{
+						SymbolResolver_AddWortToFermentingBarrels.barrels[j].AddWort(num);
+						SymbolResolver_AddWortToFermentingBarrels.barrels[j].Progress = progress;
+					}
 				}
 			}
+			SymbolResolver_AddWortToFermentingBarrels.barrels.Clear();
 		}
-		barrels.Clear();
+
+		// Token: 0x0400DF0E RID: 57102
+		private static List<Building_FermentingBarrel> barrels = new List<Building_FermentingBarrel>();
 	}
 }

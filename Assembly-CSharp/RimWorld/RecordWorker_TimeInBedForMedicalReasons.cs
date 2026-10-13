@@ -1,27 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class RecordWorker_TimeInBedForMedicalReasons : RecordWorker
+namespace RimWorld
 {
-	public override bool ShouldMeasureTimeNow(Pawn pawn)
+	// Token: 0x020023C4 RID: 9156
+	public class RecordWorker_TimeInBedForMedicalReasons : RecordWorker
 	{
-		if (!pawn.InBed())
+		// Token: 0x0600C6A7 RID: 50855 RVA: 0x0039E188 File Offset: 0x0039C388
+		public override bool ShouldMeasureTimeNow(Pawn pawn)
 		{
-			return false;
+			return pawn.InBed() && (HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn) || (HealthAIUtility.ShouldSeekMedicalRest(pawn) && (pawn.needs.rest == null || pawn.needs.rest.CurLevel >= 1f || pawn.CurJob.restUntilHealed)));
 		}
-		if (!HealthAIUtility.ShouldSeekMedicalRestUrgent(pawn))
-		{
-			if (HealthAIUtility.ShouldSeekMedicalRest(pawn))
-			{
-				if (pawn.needs.rest != null && !(pawn.needs.rest.CurLevel >= 1f))
-				{
-					return pawn.CurJob.restUntilHealed;
-				}
-				return true;
-			}
-			return false;
-		}
-		return true;
 	}
 }

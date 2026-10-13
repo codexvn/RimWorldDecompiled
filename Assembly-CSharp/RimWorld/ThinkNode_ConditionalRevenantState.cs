@@ -1,19 +1,20 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalRevenantState : ThinkNode_Conditional
+namespace RimWorld
 {
-	public RevenantState state;
-
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x020017D4 RID: 6100
+	public class ThinkNode_ConditionalRevenantState : ThinkNode_Conditional
 	{
-		CompRevenant compRevenant = pawn.TryGetComp<CompRevenant>();
-		if (compRevenant != null)
+		// Token: 0x06008DFE RID: 36350 RVA: 0x002A1A5C File Offset: 0x0029FC5C
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return compRevenant.revenantState == state;
+			CompRevenant compRevenant = pawn.TryGetComp<CompRevenant>();
+			return compRevenant != null && compRevenant.revenantState == this.state;
 		}
-		return false;
+
+		// Token: 0x04005BE5 RID: 23525
+		public RevenantState state;
 	}
 }

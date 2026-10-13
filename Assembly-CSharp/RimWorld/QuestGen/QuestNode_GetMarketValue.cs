@@ -1,36 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_GetMarketValue : QuestNode
+namespace RimWorld.QuestGen
 {
-	[NoTranslate]
-	public SlateRef<string> storeAs;
-
-	public SlateRef<IEnumerable<Thing>> things;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A52 RID: 14930
+	public class QuestNode_GetMarketValue : QuestNode
 	{
-		return DoWork(slate);
-	}
-
-	protected override void RunInt()
-	{
-		DoWork(QuestGen.slate);
-	}
-
-	private bool DoWork(Slate slate)
-	{
-		float num = 0f;
-		if (things.GetValue(slate) != null)
+		// Token: 0x060146B8 RID: 83640 RVA: 0x0061937C File Offset: 0x0061757C
+		protected override bool TestRunInt(Slate slate)
 		{
-			foreach (Thing item in things.GetValue(slate))
-			{
-				num += item.MarketValue * (float)item.stackCount;
-			}
+			return this.DoWork(slate);
 		}
-		slate.Set(storeAs.GetValue(slate), num);
-		return true;
+
+		// Token: 0x060146B9 RID: 83641 RVA: 0x00619385 File Offset: 0x00617585
+		protected override void RunInt()
+		{
+			this.DoWork(QuestGen.slate);
+		}
+
+		// Token: 0x060146BA RID: 83642 RVA: 0x00619394 File Offset: 0x00617594
+		private bool DoWork(Slate slate)
+		{
+			float num = 0f;
+			if (this.things.GetValue(slate) != null)
+			{
+				foreach (Thing thing in this.things.GetValue(slate))
+				{
+					num += thing.MarketValue * (float)thing.stackCount;
+				}
+			}
+			slate.Set<float>(this.storeAs.GetValue(slate), num, false);
+			return true;
+		}
+
+		// Token: 0x0400E1C7 RID: 57799
+		[NoTranslate]
+		public SlateRef<string> storeAs;
+
+		// Token: 0x0400E1C8 RID: 57800
+		public SlateRef<IEnumerable<Thing>> things;
 	}
 }

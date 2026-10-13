@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class CompProperties_CreatesInfestations : CompProperties
+namespace RimWorld
 {
-	public CompProperties_CreatesInfestations()
+	// Token: 0x02001994 RID: 6548
+	public class CompProperties_CreatesInfestations : CompProperties
 	{
-		compClass = typeof(CompCreatesInfestations);
+		// Token: 0x0600945F RID: 37983 RVA: 0x002B939B File Offset: 0x002B759B
+		public CompProperties_CreatesInfestations()
+		{
+			this.compClass = typeof(CompCreatesInfestations);
+		}
 	}
 }

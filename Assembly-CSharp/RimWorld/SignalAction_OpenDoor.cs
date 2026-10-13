@@ -1,29 +1,34 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SignalAction_OpenDoor : SignalAction
+namespace RimWorld
 {
-	public Building_Door door;
-
-	protected override void DoAction(SignalArgs args)
+	// Token: 0x02002AC2 RID: 10946
+	public class SignalAction_OpenDoor : SignalAction
 	{
-		if (door != null)
+		// Token: 0x0600F3E0 RID: 62432 RVA: 0x0046DAC8 File Offset: 0x0046BCC8
+		protected override void DoAction(SignalArgs args)
 		{
-			if (args.TryGetArg("SUBJECT", out Pawn arg))
+			if (this.door != null)
 			{
-				door.StartManualOpenBy(arg);
-			}
-			else
-			{
-				door.StartManualOpenBy(null);
+				Pawn opener;
+				if (args.TryGetArg<Pawn>("SUBJECT", out opener))
+				{
+					this.door.StartManualOpenBy(opener);
+					return;
+				}
+				this.door.StartManualOpenBy(null);
 			}
 		}
-	}
 
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_References.Look(ref door, "door");
+		// Token: 0x0600F3E1 RID: 62433 RVA: 0x0046DB06 File Offset: 0x0046BD06
+		public override void ExposeData()
+		{
+			base.ExposeData();
+			Scribe_References.Look<Building_Door>(ref this.door, "door", false);
+		}
+
+		// Token: 0x0400A0B1 RID: 41137
+		public Building_Door door;
 	}
 }

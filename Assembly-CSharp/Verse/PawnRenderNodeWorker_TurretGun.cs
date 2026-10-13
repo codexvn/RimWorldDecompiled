@@ -1,16 +1,21 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public class PawnRenderNodeWorker_TurretGun : PawnRenderNodeWorker
+namespace Verse
 {
-	public override Quaternion RotationFor(PawnRenderNode node, PawnDrawParms parms)
+	// Token: 0x02000651 RID: 1617
+	public class PawnRenderNodeWorker_TurretGun : PawnRenderNodeWorker
 	{
-		Quaternion result = base.RotationFor(node, parms);
-		if (node is PawnRenderNode_TurretGun pawnRenderNode_TurretGun)
+		// Token: 0x060028B3 RID: 10419 RVA: 0x000D718C File Offset: 0x000D538C
+		public override Quaternion RotationFor(PawnRenderNode node, PawnDrawParms parms)
 		{
-			result *= pawnRenderNode_TurretGun.turretComp.curRotation.ToQuat();
+			Quaternion quaternion = base.RotationFor(node, parms);
+			PawnRenderNode_TurretGun pawnRenderNode_TurretGun = node as PawnRenderNode_TurretGun;
+			if (pawnRenderNode_TurretGun != null)
+			{
+				quaternion *= pawnRenderNode_TurretGun.turretComp.curRotation.ToQuat();
+			}
+			return quaternion;
 		}
-		return result;
 	}
 }

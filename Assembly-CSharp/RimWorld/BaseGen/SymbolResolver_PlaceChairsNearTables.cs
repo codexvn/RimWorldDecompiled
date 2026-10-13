@@ -1,46 +1,67 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_PlaceChairsNearTables : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static List<Thing> tables = new List<Thing>();
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200396D RID: 14701
+	public class SymbolResolver_PlaceChairsNearTables : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		tables.Clear();
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x06014362 RID: 82786 RVA: 0x00607758 File Offset: 0x00605958
+		public override void Resolve(ResolveParams rp)
 		{
-			List<Thing> thingList = item.GetThingList(map);
-			for (int i = 0; i < thingList.Count; i++)
+			Map map = BaseGen.globalSettings.map;
+			SymbolResolver_PlaceChairsNearTables.tables.Clear();
+			foreach (IntVec3 c in rp.rect)
 			{
-				if (thingList[i].def.IsTable && !tables.Contains(thingList[i]))
+				List<Thing> thingList = c.GetThingList(map);
+				for (int i = 0; i < thingList.Count; i++)
 				{
-					tables.Add(thingList[i]);
+					if (thingList[i].def.IsTable && !SymbolResolver_PlaceChairsNearTables.tables.Contains(thingList[i]))
+					{
+						SymbolResolver_PlaceChairsNearTables.tables.Add(thingList[i]);
+					}
 				}
 			}
-		}
-		for (int j = 0; j < tables.Count; j++)
-		{
-			CellRect cellRect = tables[j].OccupiedRect().ExpandedBy(1);
-			bool flag = false;
-			foreach (IntVec3 item2 in cellRect.EdgeCells.InRandomOrder())
+			for (int j = 0; j < SymbolResolver_PlaceChairsNearTables.tables.Count; j++)
 			{
-				if (!cellRect.IsCorner(item2) && rp.rect.Contains(item2) && item2.Standable(map) && item2.GetEdifice(map) == null && (!flag || !Rand.Bool))
+				CellRect cellRect = SymbolResolver_PlaceChairsNearTables.tables[j].OccupiedRect().ExpandedBy(1);
+				bool flag = false;
+				foreach (IntVec3 intVec in cellRect.EdgeCells.InRandomOrder(null))
 				{
-					Rot4 value = ((item2.x == cellRect.minX) ? Rot4.East : ((item2.x == cellRect.maxX) ? Rot4.West : ((item2.z != cellRect.minZ) ? Rot4.South : Rot4.North)));
-					ResolveParams resolveParams = rp;
-					resolveParams.rect = CellRect.SingleCell(item2);
-					resolveParams.singleThingDef = ThingDefOf.DiningChair;
-					resolveParams.singleThingStuff = rp.singleThingStuff ?? ThingDefOf.WoodLog;
-					resolveParams.thingRot = value;
-					BaseGen.symbolStack.Push("thing", resolveParams);
-					flag = true;
+					if (!cellRect.IsCorner(intVec) && rp.rect.Contains(intVec) && intVec.Standable(map) && intVec.GetEdifice(map) == null && (!flag || !Rand.Bool))
+					{
+						Rot4 value;
+						if (intVec.x == cellRect.minX)
+						{
+							value = Rot4.East;
+						}
+						else if (intVec.x == cellRect.maxX)
+						{
+							value = Rot4.West;
+						}
+						else if (intVec.z == cellRect.minZ)
+						{
+							value = Rot4.North;
+						}
+						else
+						{
+							value = Rot4.South;
+						}
+						ResolveParams resolveParams = rp;
+						resolveParams.rect = CellRect.SingleCell(intVec);
+						resolveParams.singleThingDef = ThingDefOf.DiningChair;
+						resolveParams.singleThingStuff = (rp.singleThingStuff ?? ThingDefOf.WoodLog);
+						resolveParams.thingRot = new Rot4?(value);
+						BaseGen.symbolStack.Push("thing", resolveParams, null);
+						flag = true;
+					}
 				}
 			}
+			SymbolResolver_PlaceChairsNearTables.tables.Clear();
 		}
-		tables.Clear();
+
+		// Token: 0x0400DF5D RID: 57181
+		private static List<Thing> tables = new List<Thing>();
 	}
 }

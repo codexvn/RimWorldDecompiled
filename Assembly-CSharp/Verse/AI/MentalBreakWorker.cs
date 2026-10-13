@@ -1,95 +1,96 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalBreakWorker
+namespace Verse.AI
 {
-	public MentalBreakDef def;
-
-	public virtual float CommonalityFor(Pawn pawn, bool moodCaused = false)
+	// Token: 0x02000F62 RID: 3938
+	public class MentalBreakWorker
 	{
-		float num = def.baseCommonality;
-		if (pawn.Faction == Faction.OfPlayer && def.commonalityFactorPerPopulationCurve != null)
+		// Token: 0x06006170 RID: 24944 RVA: 0x001ED738 File Offset: 0x001EB938
+		public virtual float CommonalityFor(Pawn pawn, bool moodCaused = false)
 		{
-			num *= def.commonalityFactorPerPopulationCurve.Evaluate(PawnsFinder.AllMaps_FreeColonists.Count());
+			float num = this.def.baseCommonality;
+			if (pawn.Faction == Faction.OfPlayer && this.def.commonalityFactorPerPopulationCurve != null)
+			{
+				num *= this.def.commonalityFactorPerPopulationCurve.Evaluate((float)PawnsFinder.AllMaps_FreeColonists.Count<Pawn>());
+			}
+			if (pawn.genes != null && this.def.mentalState != null && this.def.mentalState.IsAggro)
+			{
+				num *= pawn.genes.AggroMentalBreakSelectionChanceFactor;
+			}
+			return num;
 		}
-		if (pawn.genes != null && def.mentalState != null && def.mentalState.IsAggro)
-		{
-			num *= pawn.genes.AggroMentalBreakSelectionChanceFactor;
-		}
-		return num;
-	}
 
-	public virtual bool BreakCanOccur(Pawn pawn)
-	{
-		if (def.requiredTrait != null && (pawn.story == null || !pawn.story.traits.HasTrait(def.requiredTrait)))
+		// Token: 0x06006171 RID: 24945 RVA: 0x001ED7C0 File Offset: 0x001EB9C0
+		public virtual bool BreakCanOccur(Pawn pawn)
 		{
-			return false;
-		}
-		if (def.requiredGene != null && (pawn.genes == null || !pawn.genes.HasActiveGene(def.requiredGene)))
-		{
-			return false;
-		}
-		if (def.requiredPrecept != null && (pawn.Ideo == null || !pawn.Ideo.HasPrecept(def.requiredPrecept)))
-		{
-			return false;
-		}
-		if (!def.layerWhitelist.NullOrEmpty() && (!pawn.SpawnedOrAnyParentSpawned || !pawn.MapHeld.Tile.Valid || !def.layerWhitelist.Contains(pawn.MapHeld.Tile.LayerDef)))
-		{
-			return false;
-		}
-		if (def.mentalState != null && pawn.story != null && pawn.story.traits.allTraits.Any((Trait tr) => !tr.Suppressed && tr.CurrentData.disallowedMentalStates != null && tr.CurrentData.disallowedMentalStates.Contains(def.mentalState)))
-		{
-			return false;
-		}
-		if (!def.questLodgersCanDo && pawn.IsQuestLodger())
-		{
-			return false;
-		}
-		if (def.mentalState != null && !def.mentalState.Worker.StateCanOccur(pawn))
-		{
-			return false;
-		}
-		if (pawn.story != null)
-		{
-			IEnumerable<MentalBreakDef> theOnlyAllowedMentalBreaks = pawn.story.traits.TheOnlyAllowedMentalBreaks;
-			if (!theOnlyAllowedMentalBreaks.Contains(def) && theOnlyAllowedMentalBreaks.Any((MentalBreakDef x) => x.intensity == def.intensity && x.Worker.BreakCanOccur(pawn)))
+			if (this.def.requiredTrait != null && (pawn.story == null || !pawn.story.traits.HasTrait(this.def.requiredTrait)))
 			{
 				return false;
 			}
+			if (this.def.requiredGene != null && (pawn.genes == null || !pawn.genes.HasActiveGene(this.def.requiredGene)))
+			{
+				return false;
+			}
+			if (this.def.requiredPrecept != null && (pawn.Ideo == null || !pawn.Ideo.HasPrecept(this.def.requiredPrecept)))
+			{
+				return false;
+			}
+			if (!this.def.layerWhitelist.NullOrEmpty<PlanetLayerDef>() && (!pawn.SpawnedOrAnyParentSpawned || !pawn.MapHeld.Tile.Valid || !this.def.layerWhitelist.Contains(pawn.MapHeld.Tile.LayerDef)))
+			{
+				return false;
+			}
+			if (this.def.mentalState != null && pawn.story != null && pawn.story.traits.allTraits.Any((Trait tr) => !tr.Suppressed && tr.CurrentData.disallowedMentalStates != null && tr.CurrentData.disallowedMentalStates.Contains(this.def.mentalState)))
+			{
+				return false;
+			}
+			if (!this.def.questLodgersCanDo && pawn.IsQuestLodger())
+			{
+				return false;
+			}
+			if (this.def.mentalState != null && !this.def.mentalState.Worker.StateCanOccur(pawn))
+			{
+				return false;
+			}
+			if (pawn.story != null)
+			{
+				IEnumerable<MentalBreakDef> theOnlyAllowedMentalBreaks = pawn.story.traits.TheOnlyAllowedMentalBreaks;
+				if (!theOnlyAllowedMentalBreaks.Contains(this.def) && theOnlyAllowedMentalBreaks.Any((MentalBreakDef x) => x.intensity == this.def.intensity && x.Worker.BreakCanOccur(pawn)))
+				{
+					return false;
+				}
+			}
+			return !TutorSystem.TutorialMode || pawn.Faction != Faction.OfPlayer;
 		}
-		if (TutorSystem.TutorialMode && pawn.Faction == Faction.OfPlayer)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public virtual bool TryStart(Pawn pawn, string reason, bool causedByMood)
-	{
-		if (pawn.mindState?.mentalStateHandler == null)
+		// Token: 0x06006172 RID: 24946 RVA: 0x001ED9E8 File Offset: 0x001EBBE8
+		public virtual bool TryStart(Pawn pawn, string reason, bool causedByMood)
 		{
-			return false;
+			Pawn_MindState mindState = pawn.mindState;
+			return ((mindState != null) ? mindState.mentalStateHandler : null) != null && pawn.mindState.mentalStateHandler.TryStartMentalState(this.def.mentalState, reason, false, false, causedByMood, null, false, false, false);
 		}
-		return pawn.mindState.mentalStateHandler.TryStartMentalState(def.mentalState, reason, forced: false, forceWake: false, causedByMood);
-	}
 
-	protected bool TrySendLetter(Pawn pawn, string textKey, string reason)
-	{
-		if (!PawnUtility.ShouldSendNotificationAbout(pawn))
+		// Token: 0x06006173 RID: 24947 RVA: 0x001EDA30 File Offset: 0x001EBC30
+		protected bool TrySendLetter(Pawn pawn, string textKey, string reason)
 		{
-			return false;
+			if (!PawnUtility.ShouldSendNotificationAbout(pawn))
+			{
+				return false;
+			}
+			TaggedString label = this.def.LabelCap + ": " + pawn.LabelShortCap;
+			TaggedString taggedString = textKey.Translate(pawn.LabelShort, pawn.Named("PAWN")).CapitalizeFirst();
+			if (reason != null)
+			{
+				taggedString += "\n\n" + reason;
+			}
+			taggedString = taggedString.AdjustedFor(pawn, "PAWN", true);
+			Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NegativeEvent, pawn, null, null, null, null, 0, true);
+			return true;
 		}
-		TaggedString label = def.LabelCap + ": " + pawn.LabelShortCap;
-		TaggedString taggedString = textKey.Translate(pawn.LabelShort, pawn.Named("PAWN")).CapitalizeFirst();
-		if (reason != null)
-		{
-			taggedString += "\n\n" + reason;
-		}
-		taggedString = taggedString.AdjustedFor(pawn);
-		Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NegativeEvent, pawn);
-		return true;
+
+		// Token: 0x04004628 RID: 17960
+		public MentalBreakDef def;
 	}
 }

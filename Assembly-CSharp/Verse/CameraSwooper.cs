@@ -1,75 +1,87 @@
-using System;
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public class CameraSwooper
+namespace Verse
 {
-	public bool Swooping;
-
-	private bool SwoopingTo;
-
-	private float TimeSinceSwoopStart;
-
-	private Vector3 FinalOffset;
-
-	private float FinalOrthoSizeOffset;
-
-	private float TotalSwoopTime;
-
-	private SwoopCallbackMethod SwoopFinishedCallback;
-
-	public void StartSwoopFromRoot(Vector3 FinalOffset, float FinalOrthoSizeOffset, float TotalSwoopTime, SwoopCallbackMethod SwoopFinishedCallback)
+	// Token: 0x020001E9 RID: 489
+	public class CameraSwooper
 	{
-		Swooping = true;
-		TimeSinceSwoopStart = 0f;
-		this.FinalOffset = FinalOffset;
-		this.FinalOrthoSizeOffset = FinalOrthoSizeOffset;
-		this.TotalSwoopTime = TotalSwoopTime;
-		this.SwoopFinishedCallback = SwoopFinishedCallback;
-		SwoopingTo = false;
-	}
-
-	public void StartSwoopToRoot(Vector3 FinalOffset, float FinalOrthoSizeOffset, float TotalSwoopTime, SwoopCallbackMethod SwoopFinishedCallback)
-	{
-		StartSwoopFromRoot(FinalOffset, FinalOrthoSizeOffset, TotalSwoopTime, SwoopFinishedCallback);
-		SwoopingTo = true;
-	}
-
-	public void Update()
-	{
-		if (!Swooping)
+		// Token: 0x06000D29 RID: 3369 RVA: 0x0003E4F9 File Offset: 0x0003C6F9
+		public void StartSwoopFromRoot(Vector3 FinalOffset, float FinalOrthoSizeOffset, float TotalSwoopTime, SwoopCallbackMethod SwoopFinishedCallback)
 		{
-			return;
+			this.Swooping = true;
+			this.TimeSinceSwoopStart = 0f;
+			this.FinalOffset = FinalOffset;
+			this.FinalOrthoSizeOffset = FinalOrthoSizeOffset;
+			this.TotalSwoopTime = TotalSwoopTime;
+			this.SwoopFinishedCallback = SwoopFinishedCallback;
+			this.SwoopingTo = false;
 		}
-		TimeSinceSwoopStart += Time.deltaTime;
-		if (TimeSinceSwoopStart >= TotalSwoopTime)
+
+		// Token: 0x06000D2A RID: 3370 RVA: 0x0003E531 File Offset: 0x0003C731
+		public void StartSwoopToRoot(Vector3 FinalOffset, float FinalOrthoSizeOffset, float TotalSwoopTime, SwoopCallbackMethod SwoopFinishedCallback)
 		{
-			Swooping = false;
-			if (SwoopFinishedCallback != null)
+			this.StartSwoopFromRoot(FinalOffset, FinalOrthoSizeOffset, TotalSwoopTime, SwoopFinishedCallback);
+			this.SwoopingTo = true;
+		}
+
+		// Token: 0x06000D2B RID: 3371 RVA: 0x0003E548 File Offset: 0x0003C748
+		public void Update()
+		{
+			if (this.Swooping)
 			{
-				SwoopFinishedCallback();
+				this.TimeSinceSwoopStart += Time.deltaTime;
+				if (this.TimeSinceSwoopStart >= this.TotalSwoopTime)
+				{
+					this.Swooping = false;
+					if (this.SwoopFinishedCallback != null)
+					{
+						this.SwoopFinishedCallback();
+					}
+				}
 			}
 		}
-	}
 
-	public void OffsetCameraFrom(GameObject camObj, Vector3 basePos, float baseSize)
-	{
-		float num = TimeSinceSwoopStart / TotalSwoopTime;
-		if (!Swooping)
+		// Token: 0x06000D2C RID: 3372 RVA: 0x0003E598 File Offset: 0x0003C798
+		public void OffsetCameraFrom(GameObject camObj, Vector3 basePos, float baseSize)
 		{
-			num = 0f;
-		}
-		else
-		{
-			num = TimeSinceSwoopStart / TotalSwoopTime;
-			if (SwoopingTo)
+			float num = this.TimeSinceSwoopStart / this.TotalSwoopTime;
+			if (!this.Swooping)
 			{
-				num = 1f - num;
+				num = 0f;
 			}
-			num = (float)Math.Pow(num, 1.7000000476837158);
+			else
+			{
+				num = this.TimeSinceSwoopStart / this.TotalSwoopTime;
+				if (this.SwoopingTo)
+				{
+					num = 1f - num;
+				}
+				num = (float)Math.Pow((double)num, 1.7000000476837158);
+			}
+			camObj.transform.position = basePos + this.FinalOffset * num;
+			Find.Camera.orthographicSize = baseSize + this.FinalOrthoSizeOffset * num;
 		}
-		camObj.transform.position = basePos + FinalOffset * num;
-		Find.Camera.orthographicSize = baseSize + FinalOrthoSizeOffset * num;
+
+		// Token: 0x040007A0 RID: 1952
+		public bool Swooping;
+
+		// Token: 0x040007A1 RID: 1953
+		private bool SwoopingTo;
+
+		// Token: 0x040007A2 RID: 1954
+		private float TimeSinceSwoopStart;
+
+		// Token: 0x040007A3 RID: 1955
+		private Vector3 FinalOffset;
+
+		// Token: 0x040007A4 RID: 1956
+		private float FinalOrthoSizeOffset;
+
+		// Token: 0x040007A5 RID: 1957
+		private float TotalSwoopTime;
+
+		// Token: 0x040007A6 RID: 1958
+		private SwoopCallbackMethod SwoopFinishedCallback;
 	}
 }

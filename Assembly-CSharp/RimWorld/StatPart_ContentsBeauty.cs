@@ -1,21 +1,29 @@
-namespace RimWorld;
+﻿using System;
 
-public class StatPart_ContentsBeauty : StatPart
+namespace RimWorld
 {
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x020036EE RID: 14062
+	public class StatPart_ContentsBeauty : StatPart
 	{
-		if (req.Thing is IBeautyContainer beautyContainer)
+		// Token: 0x06013812 RID: 79890 RVA: 0x005C9FA4 File Offset: 0x005C81A4
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val += beautyContainer.BeautyOffset;
+			IBeautyContainer beautyContainer = req.Thing as IBeautyContainer;
+			if (beautyContainer != null)
+			{
+				val += beautyContainer.BeautyOffset;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.Thing is IBeautyContainer beautyContainer)
+		// Token: 0x06013813 RID: 79891 RVA: 0x005C9FCC File Offset: 0x005C81CC
+		public override string ExplanationPart(StatRequest req)
 		{
-			return beautyContainer.BeautyOffsetExplanation;
+			IBeautyContainer beautyContainer = req.Thing as IBeautyContainer;
+			if (beautyContainer != null)
+			{
+				return beautyContainer.BeautyOffsetExplanation;
+			}
+			return null;
 		}
-		return null;
 	}
 }

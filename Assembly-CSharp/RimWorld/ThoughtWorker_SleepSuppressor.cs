@@ -1,31 +1,35 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_SleepSuppressor : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x020018EB RID: 6379
+	public class ThoughtWorker_SleepSuppressor : ThoughtWorker
 	{
-		if (!ModsConfig.AnomalyActive)
+		// Token: 0x06009124 RID: 37156 RVA: 0x002AB190 File Offset: 0x002A9390
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return false;
-		}
-		if (p.MapHeld == null)
-		{
-			return false;
-		}
-		if (!p.health.capacities.CapableOf(PawnCapacityDefOf.Hearing))
-		{
-			return false;
-		}
-		foreach (Thing item in p.MapHeld.listerThings.ThingsOfDef(ThingDefOf.SleepSuppressor))
-		{
-			CompNoiseSource compNoiseSource = item.TryGetComp<CompNoiseSource>();
-			if (compNoiseSource.Active && p.PositionHeld.InHorDistOf(item.Position, compNoiseSource.Props.radius))
+			if (!ModsConfig.AnomalyActive)
 			{
-				return true;
+				return false;
 			}
+			if (p.MapHeld == null)
+			{
+				return false;
+			}
+			if (!p.health.capacities.CapableOf(PawnCapacityDefOf.Hearing))
+			{
+				return false;
+			}
+			foreach (Thing thing in p.MapHeld.listerThings.ThingsOfDef(ThingDefOf.SleepSuppressor))
+			{
+				CompNoiseSource compNoiseSource = thing.TryGetComp<CompNoiseSource>();
+				if (compNoiseSource.Active && p.PositionHeld.InHorDistOf(thing.Position, compNoiseSource.Props.radius))
+				{
+					return true;
+				}
+			}
+			return false;
 		}
-		return false;
 	}
 }

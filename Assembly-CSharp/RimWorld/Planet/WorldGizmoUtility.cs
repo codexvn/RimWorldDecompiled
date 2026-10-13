@@ -1,299 +1,342 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.Planet;
-
-[StaticConstructorOnStartup]
-public static class WorldGizmoUtility
+namespace RimWorld.Planet
 {
-	private static readonly Texture2D FormCaravanCommand = ContentFinder<Texture2D>.Get("UI/Commands/FormCaravan");
-
-	private static readonly Texture2D JumpToCommand = ContentFinder<Texture2D>.Get("UI/Commands/JumpTo");
-
-	private static Gizmo mouseoverGizmo;
-
-	private static Gizmo lastMouseOverGizmo;
-
-	private static readonly List<object> tmpObjectsList = new List<object>();
-
-	private static readonly List<MapParent> settlements = new List<MapParent>();
-
-	private static HashSet<WorldObject> tmpJumpTargets = new HashSet<WorldObject>();
-
-	private static readonly List<MapParent> possible = new List<MapParent>();
-
-	public static Gizmo LastMouseOverGizmo => lastMouseOverGizmo;
-
-	public static void WorldUIOnGUI()
+	// Token: 0x02003D9B RID: 15771
+	[StaticConstructorOnStartup]
+	public static class WorldGizmoUtility
 	{
-		tmpObjectsList.Clear();
-		foreach (Gizmo gizmo2 in Find.WorldGrid.GetGizmos())
+		// Token: 0x17003572 RID: 13682
+		// (get) Token: 0x060157D0 RID: 88016 RVA: 0x00670377 File Offset: 0x0066E577
+		public static Gizmo LastMouseOverGizmo
 		{
-			tmpObjectsList.Add(gizmo2);
-		}
-		if (!Find.TilePicker.Active)
-		{
-			WorldRoutePlanner worldRoutePlanner = Find.WorldRoutePlanner;
-			List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
-			if (TryGetCaravanGizmo(out var gizmo))
+			get
 			{
-				tmpObjectsList.Add(gizmo);
+				return WorldGizmoUtility.lastMouseOverGizmo;
 			}
-			for (int i = 0; i < selectedObjects.Count; i++)
+		}
+
+		// Token: 0x060157D1 RID: 88017 RVA: 0x00670380 File Offset: 0x0066E580
+		public static void WorldUIOnGUI()
+		{
+			WorldGizmoUtility.tmpObjectsList.Clear();
+			foreach (Gizmo item in Find.WorldGrid.GetGizmos())
 			{
-				if (!worldRoutePlanner.Active || selectedObjects[i] is RoutePlannerWaypoint)
+				WorldGizmoUtility.tmpObjectsList.Add(item);
+			}
+			if (!Find.TilePicker.Active)
+			{
+				WorldRoutePlanner worldRoutePlanner = Find.WorldRoutePlanner;
+				List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
+				Gizmo item2;
+				if (WorldGizmoUtility.TryGetCaravanGizmo(out item2))
 				{
-					tmpObjectsList.Add(selectedObjects[i]);
+					WorldGizmoUtility.tmpObjectsList.Add(item2);
+				}
+				for (int i = 0; i < selectedObjects.Count; i++)
+				{
+					if (!worldRoutePlanner.Active || selectedObjects[i] is RoutePlannerWaypoint)
+					{
+						WorldGizmoUtility.tmpObjectsList.Add(selectedObjects[i]);
+					}
+				}
+				if (Find.WorldSelector.SelectedTile != PlanetTile.Invalid)
+				{
+					WorldGizmoUtility.tmpObjectsList.AddRange(Find.WorldSelector.SelectedTile.Tile.GetGizmos());
 				}
 			}
-			if (Find.WorldSelector.SelectedTile != PlanetTile.Invalid)
+			GizmoGridDrawer.DrawGizmoGridFor(WorldGizmoUtility.tmpObjectsList, out WorldGizmoUtility.mouseoverGizmo);
+			WorldGizmoUtility.tmpObjectsList.Clear();
+		}
+
+		// Token: 0x060157D2 RID: 88018 RVA: 0x006704A4 File Offset: 0x0066E6A4
+		public static void WorldUIUpdate()
+		{
+			WorldGizmoUtility.lastMouseOverGizmo = WorldGizmoUtility.mouseoverGizmo;
+			if (WorldGizmoUtility.mouseoverGizmo != null)
 			{
-				tmpObjectsList.AddRange(Find.WorldSelector.SelectedTile.Tile.GetGizmos());
+				WorldGizmoUtility.mouseoverGizmo.GizmoUpdateOnMouseover();
 			}
 		}
-		GizmoGridDrawer.DrawGizmoGridFor(tmpObjectsList, out mouseoverGizmo);
-		tmpObjectsList.Clear();
-	}
 
-	public static void WorldUIUpdate()
-	{
-		lastMouseOverGizmo = mouseoverGizmo;
-		if (mouseoverGizmo != null)
+		// Token: 0x060157D3 RID: 88019 RVA: 0x006704C4 File Offset: 0x0066E6C4
+		public static Gizmo GetJumpToGizmo()
 		{
-			mouseoverGizmo.GizmoUpdateOnMouseover();
-		}
-	}
-
-	public static Gizmo GetJumpToGizmo()
-	{
-		return new Command_Action
-		{
-			defaultLabel = "WorldJumpTo".Translate() + "...",
-			defaultDesc = "WorldJumpToDesc".Translate(),
-			icon = JumpToCommand,
-			action = delegate
+			Command_Action command_Action = new Command_Action();
+			command_Action.defaultLabel = "WorldJumpTo".Translate() + "...";
+			command_Action.defaultDesc = "WorldJumpToDesc".Translate();
+			command_Action.icon = WorldGizmoUtility.JumpToCommand;
+			command_Action.action = delegate()
 			{
 				List<FloatMenuOption> list = new List<FloatMenuOption>();
-				tmpJumpTargets.Clear();
-				foreach (Map m in Find.Maps)
+				WorldGizmoUtility.tmpJumpTargets.Clear();
+				using (List<Map>.Enumerator enumerator = Find.Maps.GetEnumerator())
 				{
-					if (!tmpJumpTargets.Contains(m.Parent) && !m.IsPocketMap)
+					while (enumerator.MoveNext())
 					{
-						string text = m.Parent.LabelCap;
-						if (GravshipUtility.TryGetNameOfGravshipOnMap(m, out var name))
+						Map m = enumerator.Current;
+						if (!WorldGizmoUtility.tmpJumpTargets.Contains(m.Parent) && !m.IsPocketMap)
 						{
-							text = text + " (" + name + ")";
-						}
-						list.Add(new FloatMenuOption(text, delegate
-						{
-							CameraJumper.TryJumpAndSelect(m.Parent);
-						}, m.Parent.ExpandingIcon, m.Parent.ExpandingIconColor));
-						tmpJumpTargets.Add(m.Parent);
-					}
-				}
-				foreach (Quest item in Find.QuestManager.questsInDisplayOrder)
-				{
-					foreach (QuestPart item2 in item.PartsListForReading)
-					{
-						QuestPart_SpawnWorldObject spawnPart = item2 as QuestPart_SpawnWorldObject;
-						if (spawnPart != null && spawnPart.worldObject != null && !spawnPart.worldObject.Destroyed && spawnPart.worldObject.Spawned && !tmpJumpTargets.Contains(spawnPart.worldObject))
-						{
-							list.Add(new FloatMenuOption(spawnPart.worldObject.LabelCap, delegate
+							string text = m.Parent.LabelCap;
+							string str;
+							if (GravshipUtility.TryGetNameOfGravshipOnMap(m, out str))
 							{
-								CameraJumper.TryJumpAndSelect(spawnPart.worldObject);
-							}, spawnPart.worldObject.ExpandingIcon, spawnPart.worldObject.ExpandingIconColor));
-							tmpJumpTargets.Add(spawnPart.worldObject);
+								text = text + " (" + str + ")";
+							}
+							list.Add(new FloatMenuOption(text, delegate()
+							{
+								CameraJumper.TryJumpAndSelect(m.Parent, CameraJumper.MovementMode.Pan);
+							}, m.Parent.ExpandingIcon, m.Parent.ExpandingIconColor, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false));
+							WorldGizmoUtility.tmpJumpTargets.Add(m.Parent);
 						}
 					}
 				}
-				foreach (Caravan caravan in Find.WorldObjects.Caravans)
+				foreach (Quest quest in Find.QuestManager.questsInDisplayOrder)
 				{
-					if (!tmpJumpTargets.Contains(caravan))
+					foreach (QuestPart questPart in quest.PartsListForReading)
 					{
-						list.Add(new FloatMenuOption(caravan.LabelCap, delegate
+						QuestPart_SpawnWorldObject spawnPart = questPart as QuestPart_SpawnWorldObject;
+						if (spawnPart != null && spawnPart.worldObject != null && !spawnPart.worldObject.Destroyed && spawnPart.worldObject.Spawned && !WorldGizmoUtility.tmpJumpTargets.Contains(spawnPart.worldObject))
 						{
-							CameraJumper.TryJumpAndSelect(caravan);
-						}, caravan.ExpandingIcon, caravan.ExpandingIconColor));
-						tmpJumpTargets.Add(caravan);
+							list.Add(new FloatMenuOption(spawnPart.worldObject.LabelCap, delegate()
+							{
+								CameraJumper.TryJumpAndSelect(spawnPart.worldObject, CameraJumper.MovementMode.Pan);
+							}, spawnPart.worldObject.ExpandingIcon, spawnPart.worldObject.ExpandingIconColor, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false));
+							WorldGizmoUtility.tmpJumpTargets.Add(spawnPart.worldObject);
+						}
 					}
 				}
-				if (!list.Any())
+				using (List<Caravan>.Enumerator enumerator4 = Find.WorldObjects.Caravans.GetEnumerator())
 				{
-					list.Add(new FloatMenuOption("NothingToJumpTo".Translate(), null));
+					while (enumerator4.MoveNext())
+					{
+						Caravan caravan = enumerator4.Current;
+						if (!WorldGizmoUtility.tmpJumpTargets.Contains(caravan))
+						{
+							list.Add(new FloatMenuOption(caravan.LabelCap, delegate()
+							{
+								CameraJumper.TryJumpAndSelect(caravan, CameraJumper.MovementMode.Pan);
+							}, caravan.ExpandingIcon, caravan.ExpandingIconColor, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false));
+							WorldGizmoUtility.tmpJumpTargets.Add(caravan);
+						}
+					}
+				}
+				if (!list.Any<FloatMenuOption>())
+				{
+					list.Add(new FloatMenuOption("NothingToJumpTo".Translate(), null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
 				}
 				Find.WindowStack.Add(new FloatMenu(list));
-			}
-		};
-	}
+			};
+			return command_Action;
+		}
 
-	public static bool TryGetCaravanGizmo(out Gizmo gizmo)
-	{
-		gizmo = null;
-		if (Find.WorldRoutePlanner.Active)
+		// Token: 0x060157D4 RID: 88020 RVA: 0x0067053C File Offset: 0x0066E73C
+		public static bool TryGetCaravanGizmo(out Gizmo gizmo)
 		{
-			return false;
-		}
-		if (!PlanetLayer.Selected.Def.canFormCaravans)
-		{
-			return false;
-		}
-		List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
-		PlanetTile tile = Find.WorldSelector.SelectedTile;
-		Settlement settlement = null;
-		foreach (WorldObject item in selectedObjects)
-		{
-			if (item is Caravan || item is CaravansBattlefield || item is TravellingTransporters)
+			gizmo = null;
+			if (Find.WorldRoutePlanner.Active)
 			{
 				return false;
 			}
-			if (item is Settlement settlement2)
-			{
-				settlement = settlement2;
-			}
-			FormCaravanComp component = item.GetComponent<FormCaravanComp>();
-			if (component != null && component.CanReformNow())
+			if (!PlanetLayer.Selected.Def.canFormCaravans)
 			{
 				return false;
 			}
-			if (!tile.Valid)
+			List<WorldObject> selectedObjects = Find.WorldSelector.SelectedObjects;
+			PlanetTile tile = Find.WorldSelector.SelectedTile;
+			Settlement settlement = null;
+			foreach (WorldObject worldObject in selectedObjects)
 			{
-				tile = item.Tile;
-			}
-		}
-		RefreshSettlements();
-		if (settlements.Count == 0 || Find.TilePicker.ForGravship)
-		{
-			return false;
-		}
-		settlement = settlement ?? Find.WorldObjects.SettlementAt(tile);
-		if (settlement != null)
-		{
-			if (settlement.Faction != Faction.OfPlayer)
-			{
-				gizmo = SendToTileGizmo(settlement.Tile);
-			}
-			else if (settlement.Map != null)
-			{
-				gizmo = GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
+				if (worldObject is Caravan || worldObject is CaravansBattlefield || worldObject is TravellingTransporters)
 				{
-					Find.WindowStack.Add(new Dialog_FormCaravan(settlement.Map));
-				});
+					return false;
+				}
+				Settlement settlement2 = worldObject as Settlement;
+				if (settlement2 != null)
+				{
+					settlement = settlement2;
+				}
+				FormCaravanComp component = worldObject.GetComponent<FormCaravanComp>();
+				if (component != null && component.CanReformNow())
+				{
+					return false;
+				}
+				if (!tile.Valid)
+				{
+					tile = worldObject.Tile;
+				}
 			}
-			return true;
-		}
-		MapParent parent = Find.WorldObjects.MapParentAt(tile);
-		FormCaravanComp formCaravanComp = parent?.GetComponent<FormCaravanComp>();
-		if (formCaravanComp != null && parent.HasMap && parent.Map.mapPawns.ColonistCount > 0 && !formCaravanComp.Reform)
-		{
-			gizmo = GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
+			WorldGizmoUtility.RefreshSettlements();
+			if (WorldGizmoUtility.settlements.Count == 0 || Find.TilePicker.ForGravship)
 			{
-				Dialog_FormCaravan window = new Dialog_FormCaravan(parent.Map);
+				return false;
+			}
+			settlement = (settlement ?? Find.WorldObjects.SettlementAt(tile));
+			if (settlement != null)
+			{
+				if (settlement.Faction != Faction.OfPlayer)
+				{
+					gizmo = WorldGizmoUtility.SendToTileGizmo(settlement.Tile);
+				}
+				else if (settlement.Map != null)
+				{
+					gizmo = WorldGizmoUtility.GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
+					{
+						Find.WindowStack.Add(new Dialog_FormCaravan(settlement.Map, false, null, false, null));
+					});
+				}
+				return true;
+			}
+			MapParent parent = Find.WorldObjects.MapParentAt(tile);
+			MapParent parent2 = parent;
+			FormCaravanComp formCaravanComp = (parent2 != null) ? parent2.GetComponent<FormCaravanComp>() : null;
+			if (formCaravanComp != null && parent.HasMap && parent.Map.mapPawns.ColonistCount > 0 && !formCaravanComp.Reform)
+			{
+				gizmo = WorldGizmoUtility.GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
+				{
+					Dialog_FormCaravan window = new Dialog_FormCaravan(parent.Map, false, null, false, null);
+					Find.WindowStack.Add(window);
+				});
+				return true;
+			}
+			if (tile.Valid)
+			{
+				gizmo = WorldGizmoUtility.SendToTileGizmo(tile);
+				return true;
+			}
+			gizmo = WorldGizmoUtility.GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
+			{
+				Dialog_FormCaravan window = new Dialog_FormCaravan(WorldGizmoUtility.settlements[0].Map, false, null, false, null);
 				Find.WindowStack.Add(window);
 			});
 			return true;
 		}
-		if (tile.Valid)
-		{
-			gizmo = SendToTileGizmo(tile);
-			return true;
-		}
-		gizmo = GetFormCaravanAction("CommandFormCaravan".Translate(), "CommandFormCaravanDesc".Translate(), delegate
-		{
-			Dialog_FormCaravan window = new Dialog_FormCaravan(settlements[0].Map);
-			Find.WindowStack.Add(window);
-		});
-		return true;
-	}
 
-	private static Gizmo SendToTileGizmo(PlanetTile tile)
-	{
-		possible.Clear();
-		if (!PlanetLayer.Selected.Def.canFormCaravans)
+		// Token: 0x060157D5 RID: 88021 RVA: 0x006707BC File Offset: 0x0066E9BC
+		private static Gizmo SendToTileGizmo(PlanetTile tile)
 		{
-			return null;
-		}
-		if (!Find.World.Impassable(tile) || Find.WorldObjects.AnySettlementAt(tile))
-		{
-			for (int i = 0; i < settlements.Count; i++)
+			WorldGizmoUtility.possible.Clear();
+			if (!PlanetLayer.Selected.Def.canFormCaravans)
 			{
-				if (settlements[i].Tile.LayerDef.canFormCaravans && Find.WorldReachability.CanReach(settlements[i].Tile, tile))
+				return null;
+			}
+			if (!Find.World.Impassable(tile) || Find.WorldObjects.AnySettlementAt(tile))
+			{
+				for (int i = 0; i < WorldGizmoUtility.settlements.Count; i++)
 				{
-					possible.Add(settlements[i]);
+					if (WorldGizmoUtility.settlements[i].Tile.LayerDef.canFormCaravans && Find.WorldReachability.CanReach(WorldGizmoUtility.settlements[i].Tile, tile))
+					{
+						WorldGizmoUtility.possible.Add(WorldGizmoUtility.settlements[i]);
+					}
+				}
+			}
+			TaggedString taggedString = "CommandSendCaravanDesc".Translate();
+			Gizmo formCaravanAction;
+			if (WorldGizmoUtility.possible.Count > 1)
+			{
+				formCaravanAction = WorldGizmoUtility.GetFormCaravanAction("CommandSendCaravanMultiple".Translate(), taggedString, delegate
+				{
+					List<FloatMenuOption> list = new List<FloatMenuOption>();
+					for (int j = 0; j < WorldGizmoUtility.possible.Count; j++)
+					{
+						MapParent settlement = WorldGizmoUtility.possible[j];
+						list.Add(new FloatMenuOption(settlement.LabelCap, delegate()
+						{
+							WorldGizmoUtility.DialogFromToSettlement(settlement.Map, tile);
+						}, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0));
+					}
+					FloatMenu floatMenu = new FloatMenu(list);
+					floatMenu.absorbInputAroundWindow = true;
+					Find.WindowStack.Add(floatMenu);
+				});
+			}
+			else
+			{
+				formCaravanAction = WorldGizmoUtility.GetFormCaravanAction("CommandSendCaravan".Translate(), taggedString, delegate
+				{
+					WorldGizmoUtility.DialogFromToSettlement(WorldGizmoUtility.possible[0].Map, tile);
+				});
+			}
+			if (!WorldGizmoUtility.possible.Any<MapParent>())
+			{
+				formCaravanAction.Disable("CommandSendCaravanCantReach".Translate());
+			}
+			return formCaravanAction;
+		}
+
+		// Token: 0x060157D6 RID: 88022 RVA: 0x00670910 File Offset: 0x0066EB10
+		private static void DialogFromToSettlement(Map origin, PlanetTile tile)
+		{
+			Dialog_FormCaravan dialog_FormCaravan = new Dialog_FormCaravan(origin, false, null, false, null);
+			Find.WindowStack.Add(dialog_FormCaravan);
+			WorldRoutePlanner worldRoutePlanner = Find.WorldRoutePlanner;
+			worldRoutePlanner.Start(dialog_FormCaravan);
+			worldRoutePlanner.TryAddWaypoint(tile, true);
+		}
+
+		// Token: 0x060157D7 RID: 88023 RVA: 0x0067094E File Offset: 0x0066EB4E
+		private static Command_Action GetFormCaravanAction(string label, string desc, Action action)
+		{
+			return new Command_Action
+			{
+				tutorTag = "FormCaravan",
+				defaultLabel = label,
+				defaultDesc = desc,
+				icon = WorldGizmoUtility.FormCaravanCommand,
+				hotKey = KeyBindingDefOf.Misc2,
+				action = action
+			};
+		}
+
+		// Token: 0x060157D8 RID: 88024 RVA: 0x0067098C File Offset: 0x0066EB8C
+		private static void RefreshSettlements()
+		{
+			for (int i = WorldGizmoUtility.settlements.Count - 1; i >= 0; i--)
+			{
+				if (WorldGizmoUtility.settlements[i] == null)
+				{
+					WorldGizmoUtility.settlements.RemoveAt(i);
+				}
+				else if (!Current.Game.Maps.Contains(WorldGizmoUtility.settlements[i].Map))
+				{
+					WorldGizmoUtility.settlements.RemoveAt(i);
+				}
+			}
+			for (int j = 0; j < Current.Game.Maps.Count; j++)
+			{
+				Map map = Current.Game.Maps[j];
+				if (map.IsPlayerHome && !WorldGizmoUtility.settlements.Contains(map.Parent))
+				{
+					WorldGizmoUtility.settlements.Add(map.Parent);
 				}
 			}
 		}
-		TaggedString taggedString = "CommandSendCaravanDesc".Translate();
-		Gizmo gizmo = ((possible.Count <= 1) ? GetFormCaravanAction("CommandSendCaravan".Translate(), taggedString, delegate
-		{
-			DialogFromToSettlement(possible[0].Map, tile);
-		}) : GetFormCaravanAction("CommandSendCaravanMultiple".Translate(), taggedString, delegate
-		{
-			List<FloatMenuOption> list = new List<FloatMenuOption>();
-			for (int j = 0; j < possible.Count; j++)
-			{
-				MapParent settlement = possible[j];
-				list.Add(new FloatMenuOption(settlement.LabelCap, delegate
-				{
-					DialogFromToSettlement(settlement.Map, tile);
-				}));
-			}
-			FloatMenu window = new FloatMenu(list)
-			{
-				absorbInputAroundWindow = true
-			};
-			Find.WindowStack.Add(window);
-		}));
-		if (!possible.Any())
-		{
-			gizmo.Disable("CommandSendCaravanCantReach".Translate());
-		}
-		return gizmo;
-	}
 
-	private static void DialogFromToSettlement(Map origin, PlanetTile tile)
-	{
-		Dialog_FormCaravan dialog_FormCaravan = new Dialog_FormCaravan(origin);
-		Find.WindowStack.Add(dialog_FormCaravan);
-		WorldRoutePlanner worldRoutePlanner = Find.WorldRoutePlanner;
-		worldRoutePlanner.Start(dialog_FormCaravan);
-		worldRoutePlanner.TryAddWaypoint(tile);
-	}
+		// Token: 0x0400EF1E RID: 61214
+		private static readonly Texture2D FormCaravanCommand = ContentFinder<Texture2D>.Get("UI/Commands/FormCaravan", true);
 
-	private static Command_Action GetFormCaravanAction(string label, string desc, Action action)
-	{
-		return new Command_Action
-		{
-			tutorTag = "FormCaravan",
-			defaultLabel = label,
-			defaultDesc = desc,
-			icon = FormCaravanCommand,
-			hotKey = KeyBindingDefOf.Misc2,
-			action = action
-		};
-	}
+		// Token: 0x0400EF1F RID: 61215
+		private static readonly Texture2D JumpToCommand = ContentFinder<Texture2D>.Get("UI/Commands/JumpTo", true);
 
-	private static void RefreshSettlements()
-	{
-		for (int num = settlements.Count - 1; num >= 0; num--)
-		{
-			if (settlements[num] == null)
-			{
-				settlements.RemoveAt(num);
-			}
-			else if (!Current.Game.Maps.Contains(settlements[num].Map))
-			{
-				settlements.RemoveAt(num);
-			}
-		}
-		for (int i = 0; i < Current.Game.Maps.Count; i++)
-		{
-			Map map = Current.Game.Maps[i];
-			if (map.IsPlayerHome && !settlements.Contains(map.Parent))
-			{
-				settlements.Add(map.Parent);
-			}
-		}
+		// Token: 0x0400EF20 RID: 61216
+		private static Gizmo mouseoverGizmo;
+
+		// Token: 0x0400EF21 RID: 61217
+		private static Gizmo lastMouseOverGizmo;
+
+		// Token: 0x0400EF22 RID: 61218
+		private static readonly List<object> tmpObjectsList = new List<object>();
+
+		// Token: 0x0400EF23 RID: 61219
+		private static readonly List<MapParent> settlements = new List<MapParent>();
+
+		// Token: 0x0400EF24 RID: 61220
+		private static HashSet<WorldObject> tmpJumpTargets = new HashSet<WorldObject>();
+
+		// Token: 0x0400EF25 RID: 61221
+		private static readonly List<MapParent> possible = new List<MapParent>();
 	}
 }

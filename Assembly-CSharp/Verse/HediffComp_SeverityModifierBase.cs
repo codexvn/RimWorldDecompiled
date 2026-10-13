@@ -1,31 +1,38 @@
+﻿using System;
 using System.Text;
 
-namespace Verse;
-
-public abstract class HediffComp_SeverityModifierBase : HediffComp
+namespace Verse
 {
-	protected const int SeverityUpdateInterval = 200;
-
-	public abstract float SeverityChangePerDay();
-
-	public override void CompPostTickInterval(ref float severityAdjustment, int delta)
+	// Token: 0x02000723 RID: 1827
+	public abstract class HediffComp_SeverityModifierBase : HediffComp
 	{
-		if (base.Pawn.IsHashIntervalTick(200, delta))
-		{
-			float num = SeverityChangePerDay();
-			num *= 0.0033333334f;
-			severityAdjustment += num;
-		}
-	}
+		// Token: 0x06002C81 RID: 11393
+		public abstract float SeverityChangePerDay();
 
-	public override string CompDebugString()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append(base.CompDebugString());
-		if (!base.Pawn.Dead)
+		// Token: 0x06002C82 RID: 11394 RVA: 0x000E6A68 File Offset: 0x000E4C68
+		public override void CompPostTickInterval(ref float severityAdjustment, int delta)
 		{
-			stringBuilder.AppendLine("severity/day: " + SeverityChangePerDay().ToString("F3"));
+			if (base.Pawn.IsHashIntervalTick(200, delta))
+			{
+				float num = this.SeverityChangePerDay();
+				num *= 0.0033333334f;
+				severityAdjustment += num;
+			}
 		}
-		return stringBuilder.ToString().TrimEndNewlines();
+
+		// Token: 0x06002C83 RID: 11395 RVA: 0x000E6AA0 File Offset: 0x000E4CA0
+		public override string CompDebugString()
+		{
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append(base.CompDebugString());
+			if (!base.Pawn.Dead)
+			{
+				stringBuilder.AppendLine("severity/day: " + this.SeverityChangePerDay().ToString("F3"));
+			}
+			return stringBuilder.ToString().TrimEndNewlines();
+		}
+
+		// Token: 0x040023AA RID: 9130
+		protected const int SeverityUpdateInterval = 200;
 	}
 }

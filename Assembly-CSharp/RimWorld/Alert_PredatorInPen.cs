@@ -1,57 +1,64 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld;
-
-public class Alert_PredatorInPen : Alert
+namespace RimWorld
 {
-	private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
-
-	public override string GetLabel()
+	// Token: 0x02003030 RID: 12336
+	public class Alert_PredatorInPen : Alert
 	{
-		return "AlertPredatorInAnimalPen".Translate(targets.First().Thing.Named("ANIMAL")).CapitalizeFirst();
-	}
-
-	private void CalculateTargets()
-	{
-		targets.Clear();
-		foreach (Map map in Find.Maps)
+		// Token: 0x0601157D RID: 71037 RVA: 0x004F98C4 File Offset: 0x004F7AC4
+		public override string GetLabel()
 		{
-			if (!map.IsPlayerHome)
+			return "AlertPredatorInAnimalPen".Translate(this.targets.First<GlobalTargetInfo>().Thing.Named("ANIMAL")).CapitalizeFirst();
+		}
+
+		// Token: 0x0601157E RID: 71038 RVA: 0x004F9908 File Offset: 0x004F7B08
+		private void CalculateTargets()
+		{
+			this.targets.Clear();
+			foreach (Map map in Find.Maps)
 			{
-				continue;
-			}
-			foreach (Building allBuildingsAnimalPenMarker in map.listerBuildings.allBuildingsAnimalPenMarkers)
-			{
-				CompAnimalPenMarker compAnimalPenMarker = allBuildingsAnimalPenMarker.TryGetComp<CompAnimalPenMarker>();
-				if (compAnimalPenMarker.PenState.Unenclosed)
+				if (map.IsPlayerHome)
 				{
-					continue;
-				}
-				foreach (Region connectedRegion in compAnimalPenMarker.PenState.ConnectedRegions)
-				{
-					foreach (Pawn item in connectedRegion.ListerThings.ThingsInGroup(ThingRequestGroup.Pawn))
+					foreach (Building thing in map.listerBuildings.allBuildingsAnimalPenMarkers)
 					{
-						if (item.IsAnimal && item.RaceProps.predator && item.Faction == null && item.GetRegion() == connectedRegion)
+						CompAnimalPenMarker compAnimalPenMarker = thing.TryGetComp<CompAnimalPenMarker>();
+						if (!compAnimalPenMarker.PenState.Unenclosed)
 						{
-							targets.Add(item);
+							foreach (Region region in compAnimalPenMarker.PenState.ConnectedRegions)
+							{
+								foreach (Thing thing2 in region.ListerThings.ThingsInGroup(ThingRequestGroup.Pawn))
+								{
+									Pawn pawn = (Pawn)thing2;
+									if (pawn.IsAnimal && pawn.RaceProps.predator && pawn.Faction == null && pawn.GetRegion(RegionType.Set_Passable) == region)
+									{
+										this.targets.Add(pawn);
+									}
+								}
+							}
 						}
 					}
 				}
 			}
 		}
-	}
 
-	public override TaggedString GetExplanation()
-	{
-		return "AlertPredatorInAnimalPenDesc".Translate(targets.First().Thing.Named("ANIMAL")).CapitalizeFirst();
-	}
+		// Token: 0x0601157F RID: 71039 RVA: 0x004F9ACC File Offset: 0x004F7CCC
+		public override TaggedString GetExplanation()
+		{
+			return "AlertPredatorInAnimalPenDesc".Translate(this.targets.First<GlobalTargetInfo>().Thing.Named("ANIMAL")).CapitalizeFirst();
+		}
 
-	public override AlertReport GetReport()
-	{
-		CalculateTargets();
-		return AlertReport.CulpritsAre(targets);
+		// Token: 0x06011580 RID: 71040 RVA: 0x004F9B08 File Offset: 0x004F7D08
+		public override AlertReport GetReport()
+		{
+			this.CalculateTargets();
+			return AlertReport.CulpritsAre(this.targets);
+		}
+
+		// Token: 0x0400B3A0 RID: 45984
+		private List<GlobalTargetInfo> targets = new List<GlobalTargetInfo>();
 	}
 }

@@ -1,22 +1,26 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Roof : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003934 RID: 14644
+	public class SymbolResolver_Roof : SymbolResolver
 	{
-		if (rp.noRoof.HasValue && rp.noRoof.Value)
+		// Token: 0x060142AF RID: 82607 RVA: 0x006023D8 File Offset: 0x006005D8
+		public override void Resolve(ResolveParams rp)
 		{
-			return;
-		}
-		RoofGrid roofGrid = BaseGen.globalSettings.map.roofGrid;
-		RoofDef def = rp.roofDef ?? RoofDefOf.RoofConstructed;
-		foreach (IntVec3 item in rp.rect)
-		{
-			if (!roofGrid.Roofed(item))
+			if (rp.noRoof != null && rp.noRoof.Value)
 			{
-				roofGrid.SetRoof(item, def);
+				return;
+			}
+			RoofGrid roofGrid = BaseGen.globalSettings.map.roofGrid;
+			RoofDef def = rp.roofDef ?? RoofDefOf.RoofConstructed;
+			foreach (IntVec3 c in rp.rect)
+			{
+				if (!roofGrid.Roofed(c))
+				{
+					roofGrid.SetRoof(c, def);
+				}
 			}
 		}
 	}

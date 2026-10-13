@@ -1,20 +1,28 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class OrderedTakeGroupDef : Def
+namespace Verse
 {
-	public int max = 3;
-
-	public override IEnumerable<string> ConfigErrors()
+	// Token: 0x020002AF RID: 687
+	public class OrderedTakeGroupDef : Def
 	{
-		foreach (string item in base.ConfigErrors())
+		// Token: 0x060010DD RID: 4317 RVA: 0x0004F6B7 File Offset: 0x0004D8B7
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return item;
+			foreach (string text in base.ConfigErrors())
+			{
+				yield return text;
+			}
+			IEnumerator<string> enumerator = null;
+			if (this.max <= 0)
+			{
+				yield return "Max should be greather than zero.";
+			}
+			yield break;
+			yield break;
 		}
-		if (max <= 0)
-		{
-			yield return "Max should be greather than zero.";
-		}
+
+		// Token: 0x04000E5B RID: 3675
+		public int max = 3;
 	}
 }

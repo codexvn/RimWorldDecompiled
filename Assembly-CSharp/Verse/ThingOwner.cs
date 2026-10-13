@@ -1,1075 +1,514 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Collections.Generic;
 using RimWorld;
-using RimWorld.Planet;
 using UnityEngine;
 
-namespace Verse;
-
-public class ThingOwner<T> : ThingOwner, IList<T>, ICollection<T>, IEnumerable<T>, IEnumerable where T : Thing
+namespace Verse
 {
-	private List<T> innerList = new List<T>();
-
-	public List<T> InnerListForReading => innerList;
-
-	public new T this[int index] => innerList[index];
-
-	public override int Count => innerList.Count;
-
-	T IList<T>.this[int index]
+	// Token: 0x020008D6 RID: 2262
+	public class ThingOwner<T> : ThingOwner, IList<T>, ICollection<T>, IEnumerable<!0>, IEnumerable where T : Thing
 	{
-		get
+		// Token: 0x17000AC5 RID: 2757
+		// (get) Token: 0x060039BE RID: 14782 RVA: 0x00133B6C File Offset: 0x00131D6C
+		public List<T> InnerListForReading
 		{
-			return innerList[index];
-		}
-		set
-		{
-			throw new InvalidOperationException("ThingOwner doesn't allow setting individual elements.");
-		}
-	}
-
-	bool ICollection<T>.IsReadOnly => true;
-
-	public ThingOwner()
-	{
-	}
-
-	public ThingOwner(IThingHolder owner)
-		: base(owner)
-	{
-	}
-
-	public ThingOwner(IThingHolder owner, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true)
-		: base(owner)
-	{
-	}
-
-	public ThingOwner(IThingHolder owner, bool oneStackOnly, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true)
-		: base(owner, oneStackOnly, contentsLookMode, removeContentsIfDestroyed)
-	{
-	}
-
-	public override void ExposeData()
-	{
-		base.ExposeData();
-		Scribe_Collections.Look(ref innerList, "innerList", true, contentsLookMode);
-		if (Scribe.mode == LoadSaveMode.PostLoadInit)
-		{
-			int num = innerList.RemoveAll((T x) => x == null || (x is MinifiedThing minifiedThing && minifiedThing.InnerThing == null));
-			if (num > 0)
+			get
 			{
-				Log.Warning($"ThingOwner removed {num} invalid entries during PostLoadInit.");
+				return this.innerList;
 			}
 		}
-		if (Scribe.mode != LoadSaveMode.LoadingVars && Scribe.mode != LoadSaveMode.PostLoadInit)
+
+		// Token: 0x17000AC6 RID: 2758
+		public T this[int index]
 		{
-			return;
-		}
-		for (int num2 = 0; num2 < innerList.Count; num2++)
-		{
-			if (innerList[num2] != null)
+			get
 			{
-				innerList[num2].holdingOwner = this;
+				return this.innerList[index];
 			}
 		}
-	}
 
-	public List<T>.Enumerator GetEnumerator()
-	{
-		return innerList.GetEnumerator();
-	}
+		// Token: 0x17000AC7 RID: 2759
+		// (get) Token: 0x060039C0 RID: 14784 RVA: 0x00133B82 File Offset: 0x00131D82
+		public override int Count
+		{
+			get
+			{
+				return this.innerList.Count;
+			}
+		}
 
-	public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
-	{
-		if (!(item is T))
+		// Token: 0x17000AC8 RID: 2760
+		T IList<!0>.this[int index]
 		{
-			return 0;
+			get
+			{
+				return this.innerList[index];
+			}
+			set
+			{
+				throw new InvalidOperationException("ThingOwner doesn't allow setting individual elements.");
+			}
 		}
-		return base.GetCountCanAccept(item, canMergeWithExistingStacks);
-	}
 
-	public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
-	{
-		if (count <= 0)
+		// Token: 0x17000AC9 RID: 2761
+		// (get) Token: 0x060039C3 RID: 14787 RVA: 0x000028E7 File Offset: 0x00000AE7
+		bool ICollection<!0>.IsReadOnly
 		{
-			return 0;
+			get
+			{
+				return true;
+			}
 		}
-		if (item == null)
+
+		// Token: 0x060039C4 RID: 14788 RVA: 0x00133B9B File Offset: 0x00131D9B
+		public ThingOwner()
 		{
-			Log.Warning("Tried to add null item to ThingOwner.");
-			return 0;
 		}
-		if (Contains(item))
+
+		// Token: 0x060039C5 RID: 14789 RVA: 0x00133BAE File Offset: 0x00131DAE
+		public ThingOwner(IThingHolder owner) : base(owner)
 		{
-			Log.Warning("Tried to add " + item?.ToString() + " to ThingOwner but this item is already here.");
-			return 0;
 		}
-		if (item.holdingOwner != null)
+
+		// Token: 0x060039C6 RID: 14790 RVA: 0x00133BAE File Offset: 0x00131DAE
+		public ThingOwner(IThingHolder owner, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true) : base(owner)
 		{
-			Log.Warning("Tried to add " + count + " of " + item.ToStringSafe() + " to ThingOwner but this thing is already in another container. owner=" + owner.ToStringSafe() + ", current container owner=" + item.holdingOwner.Owner.ToStringSafe() + ". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it.");
-			return 0;
 		}
-		if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
+
+		// Token: 0x060039C7 RID: 14791 RVA: 0x00133BC2 File Offset: 0x00131DC2
+		public ThingOwner(IThingHolder owner, bool oneStackOnly, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true) : base(owner, oneStackOnly, contentsLookMode, removeContentsIfDestroyed)
 		{
-			return 0;
 		}
-		int stackCount = item.stackCount;
-		int num = Mathf.Min(stackCount, count);
-		Thing thing = item.SplitOff(num);
-		if (!TryAdd((T)thing, canMergeWithExistingStacks))
+
+		// Token: 0x060039C8 RID: 14792 RVA: 0x00133BDC File Offset: 0x00131DDC
+		public override void ExposeData()
 		{
+			base.ExposeData();
+			Scribe_Collections.Look<T>(ref this.innerList, "innerList", true, this.contentsLookMode, Array.Empty<object>());
+			if (Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				int num = this.innerList.RemoveAll(delegate(T x)
+				{
+					if (x != null)
+					{
+						MinifiedThing minifiedThing = x as MinifiedThing;
+						return minifiedThing != null && minifiedThing.InnerThing == null;
+					}
+					return true;
+				});
+				if (num > 0)
+				{
+					Log.Warning(string.Format("ThingOwner removed {0} invalid entries during PostLoadInit.", num));
+				}
+			}
+			if (Scribe.mode == LoadSaveMode.LoadingVars || Scribe.mode == LoadSaveMode.PostLoadInit)
+			{
+				for (int i = 0; i < this.innerList.Count; i++)
+				{
+					if (this.innerList[i] != null)
+					{
+						this.innerList[i].holdingOwner = this;
+					}
+				}
+			}
+		}
+
+		// Token: 0x060039C9 RID: 14793 RVA: 0x00133CA7 File Offset: 0x00131EA7
+		public List<T>.Enumerator GetEnumerator()
+		{
+			return this.innerList.GetEnumerator();
+		}
+
+		// Token: 0x060039CA RID: 14794 RVA: 0x00133CB4 File Offset: 0x00131EB4
+		public override int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
+		{
+			if (!(item is T))
+			{
+				return 0;
+			}
+			return base.GetCountCanAccept(item, canMergeWithExistingStacks);
+		}
+
+		// Token: 0x060039CB RID: 14795 RVA: 0x00133CC8 File Offset: 0x00131EC8
+		public override int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true)
+		{
+			if (count <= 0)
+			{
+				return 0;
+			}
+			if (item == null)
+			{
+				Log.Warning("Tried to add null item to ThingOwner.");
+				return 0;
+			}
+			if (base.Contains(item))
+			{
+				Log.Warning("Tried to add " + ((item != null) ? item.ToString() : null) + " to ThingOwner but this item is already here.");
+				return 0;
+			}
+			if (item.holdingOwner != null)
+			{
+				Log.Warning(string.Concat(new string[]
+				{
+					"Tried to add ",
+					count.ToString(),
+					" of ",
+					item.ToStringSafe<Thing>(),
+					" to ThingOwner but this thing is already in another container. owner=",
+					this.owner.ToStringSafe<IThingHolder>(),
+					", current container owner=",
+					item.holdingOwner.Owner.ToStringSafe<IThingHolder>(),
+					". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it."
+				}));
+				return 0;
+			}
+			if (!base.CanAcceptAnyOf(item, canMergeWithExistingStacks))
+			{
+				return 0;
+			}
+			int stackCount = item.stackCount;
+			int num = Mathf.Min(stackCount, count);
+			Thing thing = item.SplitOff(num);
+			if (this.TryAdd((T)((object)thing), canMergeWithExistingStacks))
+			{
+				CompPushable compPushable = item.TryGetComp<CompPushable>();
+				if (compPushable != null)
+				{
+					Pawn pawn = this.owner as Pawn;
+					if (pawn != null)
+					{
+						compPushable.OnStartedCarrying(pawn);
+					}
+				}
+				return num;
+			}
 			if (thing != item)
 			{
 				int result = stackCount - item.stackCount - thing.stackCount;
-				item.TryAbsorbStack(thing, respectStackLimit: false);
+				item.TryAbsorbStack(thing, false);
 				return result;
 			}
 			return stackCount - item.stackCount;
 		}
-		CompPushable compPushable = item.TryGetComp<CompPushable>();
-		if (compPushable != null && owner is Pawn pawn)
-		{
-			compPushable.OnStartedCarrying(pawn);
-		}
-		return num;
-	}
 
-	public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
-	{
-		if (item == null)
+		// Token: 0x060039CC RID: 14796 RVA: 0x00133E10 File Offset: 0x00132010
+		public override bool TryAdd(Thing item, bool canMergeWithExistingStacks = true)
 		{
-			Log.Warning("Tried to add null item to ThingOwner.");
-			return false;
-		}
-		if (!(item is T item2))
-		{
-			return false;
-		}
-		if (Contains(item))
-		{
-			Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this item is already here.");
-			return false;
-		}
-		if (item.holdingOwner != null)
-		{
-			Log.Warning("Tried to add " + item.ToStringSafe() + " to ThingOwner but this thing is already in another container. owner=" + owner.ToStringSafe() + ", current container owner=" + item.holdingOwner.Owner.ToStringSafe() + ". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it.");
-			return false;
-		}
-		if (!CanAcceptAnyOf(item, canMergeWithExistingStacks))
-		{
-			return false;
-		}
-		if (canMergeWithExistingStacks)
-		{
-			for (int i = 0; i < innerList.Count; i++)
+			if (item == null)
 			{
-				T val = innerList[i];
-				if (!val.CanStackWith(item))
+				Log.Warning("Tried to add null item to ThingOwner.");
+				return false;
+			}
+			T t = item as T;
+			if (t == null)
+			{
+				return false;
+			}
+			if (base.Contains(item))
+			{
+				Log.Warning("Tried to add " + item.ToStringSafe<Thing>() + " to ThingOwner but this item is already here.");
+				return false;
+			}
+			if (item.holdingOwner != null)
+			{
+				Log.Warning(string.Concat(new string[]
 				{
-					continue;
-				}
-				int num = Mathf.Min(item.stackCount, val.def.stackLimit - val.stackCount);
-				if (num > 0)
+					"Tried to add ",
+					item.ToStringSafe<Thing>(),
+					" to ThingOwner but this thing is already in another container. owner=",
+					this.owner.ToStringSafe<IThingHolder>(),
+					", current container owner=",
+					item.holdingOwner.Owner.ToStringSafe<IThingHolder>(),
+					". Use TryAddOrTransfer, TryTransferToContainer, or remove the item before adding it."
+				}));
+				return false;
+			}
+			if (!base.CanAcceptAnyOf(item, canMergeWithExistingStacks))
+			{
+				return false;
+			}
+			if (canMergeWithExistingStacks)
+			{
+				for (int i = 0; i < this.innerList.Count; i++)
 				{
-					Thing other = item.SplitOff(num);
-					int stackCount = val.stackCount;
-					val.TryAbsorbStack(other, respectStackLimit: true);
-					if (val.stackCount > stackCount)
+					T t2 = this.innerList[i];
+					if (t2.CanStackWith(item))
 					{
-						NotifyAddedAndMergedWith(val, val.stackCount - stackCount);
-					}
-					if (item.Destroyed || item.stackCount == 0)
-					{
-						return true;
-					}
-				}
-			}
-		}
-		if (Count >= maxStacks)
-		{
-			return false;
-		}
-		item.holdingOwner = this;
-		innerList.Add(item2);
-		NotifyAdded(item2);
-		return true;
-	}
-
-	protected override void NotifyAdded(Thing item)
-	{
-		if (owner is IThingHolderEvents<T> thingHolderEvents)
-		{
-			thingHolderEvents.Notify_ItemAdded(item as T);
-		}
-		base.NotifyAdded(item);
-	}
-
-	protected override void NotifyRemoved(Thing item)
-	{
-		if (owner is IThingHolderEvents<T> thingHolderEvents)
-		{
-			thingHolderEvents.Notify_ItemRemoved(item as T);
-		}
-		base.NotifyRemoved(item);
-	}
-
-	public void TryAddRangeOrTransfer(IEnumerable<T> things, bool canMergeWithExistingStacks = true, bool destroyLeftover = false)
-	{
-		if (things == this)
-		{
-			return;
-		}
-		if (things is ThingOwner thingOwner)
-		{
-			thingOwner.TryTransferAllToContainer(this, canMergeWithExistingStacks);
-			if (destroyLeftover)
-			{
-				thingOwner.ClearAndDestroyContents();
-			}
-			return;
-		}
-		if (things is IList<T> list)
-		{
-			for (int i = 0; i < list.Count; i++)
-			{
-				if (!TryAddOrTransfer(list[i], canMergeWithExistingStacks) && destroyLeftover)
-				{
-					list[i].Destroy();
-				}
-			}
-			return;
-		}
-		foreach (T thing in things)
-		{
-			if (!TryAddOrTransfer(thing, canMergeWithExistingStacks) && destroyLeftover)
-			{
-				thing.Destroy();
-			}
-		}
-	}
-
-	public override int IndexOf(Thing item)
-	{
-		if (!(item is T item2))
-		{
-			return -1;
-		}
-		return innerList.IndexOf(item2);
-	}
-
-	public override bool Remove(Thing item)
-	{
-		if (!Contains(item))
-		{
-			return false;
-		}
-		if (item.holdingOwner == this)
-		{
-			item.holdingOwner = null;
-		}
-		int index = innerList.LastIndexOf((T)item);
-		innerList.RemoveAt(index);
-		NotifyRemoved(item);
-		return true;
-	}
-
-	public int RemoveAll(Predicate<T> predicate)
-	{
-		int num = 0;
-		for (int num2 = innerList.Count - 1; num2 >= 0; num2--)
-		{
-			if (predicate(innerList[num2]))
-			{
-				Remove(innerList[num2]);
-				num++;
-			}
-		}
-		return num;
-	}
-
-	protected override Thing GetAt(int index)
-	{
-		return innerList[index];
-	}
-
-	public void GetThingsOfType<J>(List<J> list) where J : Thing
-	{
-		for (int i = 0; i < innerList.Count; i++)
-		{
-			if (innerList[i] is J item)
-			{
-				list.Add(item);
-			}
-		}
-	}
-
-	public int TryTransferToContainer(Thing item, ThingOwner otherContainer, int stackCount, out T resultingTransferredItem, bool canMergeWithExistingStacks = true)
-	{
-		Thing resultingTransferredItem2;
-		int result = TryTransferToContainer(item, otherContainer, stackCount, out resultingTransferredItem2, canMergeWithExistingStacks);
-		resultingTransferredItem = (T)resultingTransferredItem2;
-		return result;
-	}
-
-	public new T Take(Thing thing, int count)
-	{
-		return (T)base.Take(thing, count);
-	}
-
-	public new T Take(Thing thing)
-	{
-		return (T)base.Take(thing);
-	}
-
-	public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, int count, out T resultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		Action<Thing, int> placedAction2 = null;
-		if (placedAction != null)
-		{
-			placedAction2 = delegate(Thing t, int c)
-			{
-				placedAction((T)t, c);
-			};
-		}
-		Thing resultingThing2;
-		bool result = TryDrop(thing, dropLoc, map, mode, count, out resultingThing2, placedAction2, nearPlaceValidator);
-		resultingThing = (T)resultingThing2;
-		return result;
-	}
-
-	public bool TryDrop(Thing thing, ThingPlaceMode mode, out T lastResultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		Action<Thing, int> placedAction2 = null;
-		if (placedAction != null)
-		{
-			placedAction2 = delegate(Thing t, int c)
-			{
-				placedAction((T)t, c);
-			};
-		}
-		Thing lastResultingThing2;
-		bool result = TryDrop(thing, mode, out lastResultingThing2, placedAction2, nearPlaceValidator);
-		lastResultingThing = (T)lastResultingThing2;
-		return result;
-	}
-
-	public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, out T lastResultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		Action<Thing, int> placedAction2 = null;
-		if (placedAction != null)
-		{
-			placedAction2 = delegate(Thing t, int c)
-			{
-				placedAction((T)t, c);
-			};
-		}
-		Thing lastResultingThing2;
-		bool result = TryDrop(thing, dropLoc, map, mode, out lastResultingThing2, placedAction2, nearPlaceValidator, playDropSound: true);
-		lastResultingThing = (T)lastResultingThing2;
-		return result;
-	}
-
-	int IList<T>.IndexOf(T item)
-	{
-		return innerList.IndexOf(item);
-	}
-
-	void IList<T>.Insert(int index, T item)
-	{
-		throw new InvalidOperationException("ThingOwner doesn't allow inserting individual elements at any position.");
-	}
-
-	void ICollection<T>.Add(T item)
-	{
-		TryAdd(item);
-	}
-
-	void ICollection<T>.CopyTo(T[] array, int arrayIndex)
-	{
-		innerList.CopyTo(array, arrayIndex);
-	}
-
-	bool ICollection<T>.Contains(T item)
-	{
-		return innerList.Contains(item);
-	}
-
-	bool ICollection<T>.Remove(T item)
-	{
-		return Remove(item);
-	}
-
-	IEnumerator<T> IEnumerable<T>.GetEnumerator()
-	{
-		return innerList.GetEnumerator();
-	}
-
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		return innerList.GetEnumerator();
-	}
-}
-public abstract class ThingOwner : IExposable, IList<Thing>, ICollection<Thing>, IEnumerable<Thing>, IEnumerable
-{
-	protected IThingHolder owner;
-
-	protected int maxStacks = 999999;
-
-	public LookMode contentsLookMode = LookMode.Deep;
-
-	public bool removeContentsIfDestroyed = true;
-
-	public bool dontTickContents;
-
-	private const int InfMaxStacks = 999999;
-
-	public IThingHolder Owner => owner;
-
-	public abstract int Count { get; }
-
-	public Thing this[int index] => GetAt(index);
-
-	public bool Any => Count > 0;
-
-	public int TotalStackCount
-	{
-		get
-		{
-			int num = 0;
-			int count = Count;
-			for (int i = 0; i < count; i++)
-			{
-				num += GetAt(i).stackCount;
-			}
-			return num;
-		}
-	}
-
-	public string ContentsString
-	{
-		get
-		{
-			if (Any)
-			{
-				return GenThing.ThingsToCommaList(this);
-			}
-			return "NothingLower".Translate();
-		}
-	}
-
-	Thing IList<Thing>.this[int index]
-	{
-		get
-		{
-			return GetAt(index);
-		}
-		set
-		{
-			throw new InvalidOperationException("ThingOwner doesn't allow setting individual elements.");
-		}
-	}
-
-	bool ICollection<Thing>.IsReadOnly => true;
-
-	public event Action OnContentsChanged;
-
-	public ThingOwner()
-	{
-	}
-
-	public ThingOwner(IThingHolder owner)
-	{
-		this.owner = owner;
-	}
-
-	public ThingOwner(IThingHolder owner, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true)
-	{
-		this.owner = owner;
-		this.contentsLookMode = contentsLookMode;
-		this.removeContentsIfDestroyed = removeContentsIfDestroyed;
-	}
-
-	public ThingOwner(IThingHolder owner, bool oneStackOnly, LookMode contentsLookMode = LookMode.Deep, bool removeContentsIfDestroyed = true)
-		: this(owner)
-	{
-		maxStacks = (oneStackOnly ? 1 : 999999);
-		this.contentsLookMode = contentsLookMode;
-		this.removeContentsIfDestroyed = removeContentsIfDestroyed;
-	}
-
-	public virtual void ExposeData()
-	{
-		Scribe_Values.Look(ref maxStacks, "maxStacks", 999999);
-		Scribe_Values.Look(ref contentsLookMode, "contentsLookMode", LookMode.Deep);
-		Scribe_Values.Look(ref removeContentsIfDestroyed, "removeContentsIfDestroyed", defaultValue: true);
-		Scribe_Values.Look(ref dontTickContents, "dontTickContents", defaultValue: false);
-	}
-
-	public void DoTick()
-	{
-		if (dontTickContents)
-		{
-			return;
-		}
-		for (int num = Count - 1; num >= 0; num--)
-		{
-			Thing at = GetAt(num);
-			at.DoTick();
-			if (at.Destroyed && removeContentsIfDestroyed)
-			{
-				Remove(at);
-			}
-		}
-	}
-
-	public void Clear()
-	{
-		for (int num = Count - 1; num >= 0; num--)
-		{
-			Remove(GetAt(num));
-		}
-	}
-
-	public void ClearAndDestroyContents(DestroyMode mode = DestroyMode.Vanish)
-	{
-		while (Any)
-		{
-			for (int num = Count - 1; num >= 0; num--)
-			{
-				Thing at = GetAt(num);
-				at.Destroy(mode);
-				Remove(at);
-			}
-		}
-	}
-
-	public void ClearAndDestroyContentsOrPassToWorld(DestroyMode mode = DestroyMode.Vanish)
-	{
-		while (Any)
-		{
-			for (int num = Count - 1; num >= 0; num--)
-			{
-				Thing at = GetAt(num);
-				at.DestroyOrPassToWorld(mode);
-				Remove(at);
-			}
-		}
-	}
-
-	public bool CanAcceptAnyOf(Thing item, bool canMergeWithExistingStacks = true)
-	{
-		return GetCountCanAccept(item, canMergeWithExistingStacks) > 0;
-	}
-
-	public virtual int GetCountCanAccept(Thing item, bool canMergeWithExistingStacks = true)
-	{
-		if (item == null || item.stackCount <= 0)
-		{
-			return 0;
-		}
-		if (maxStacks == 999999)
-		{
-			return item.stackCount;
-		}
-		int num = 0;
-		if (Count < maxStacks)
-		{
-			num += (maxStacks - Count) * item.def.stackLimit;
-		}
-		if (num >= item.stackCount)
-		{
-			return Mathf.Min(num, item.stackCount);
-		}
-		if (canMergeWithExistingStacks)
-		{
-			int i = 0;
-			for (int count = Count; i < count; i++)
-			{
-				Thing at = GetAt(i);
-				if (at.stackCount < at.def.stackLimit && at.CanStackWith(item))
-				{
-					num += at.def.stackLimit - at.stackCount;
-					if (num >= item.stackCount)
-					{
-						return Mathf.Min(num, item.stackCount);
+						int num = Mathf.Min(item.stackCount, t2.def.stackLimit - t2.stackCount);
+						if (num > 0)
+						{
+							Thing other = item.SplitOff(num);
+							int stackCount = t2.stackCount;
+							t2.TryAbsorbStack(other, true);
+							if (t2.stackCount > stackCount)
+							{
+								base.NotifyAddedAndMergedWith(t2, t2.stackCount - stackCount);
+							}
+							if (item.Destroyed || item.stackCount == 0)
+							{
+								return true;
+							}
+						}
 					}
 				}
 			}
-		}
-		return Mathf.Min(num, item.stackCount);
-	}
-
-	public abstract int TryAdd(Thing item, int count, bool canMergeWithExistingStacks = true);
-
-	public abstract bool TryAdd(Thing item, bool canMergeWithExistingStacks = true);
-
-	public abstract int IndexOf(Thing item);
-
-	public abstract bool Remove(Thing item);
-
-	protected abstract Thing GetAt(int index);
-
-	public bool Contains(Thing item)
-	{
-		if (item == null)
-		{
-			return false;
-		}
-		return item.holdingOwner == this;
-	}
-
-	public void RemoveAt(int index)
-	{
-		if (index < 0 || index >= Count)
-		{
-			throw new ArgumentOutOfRangeException("index");
-		}
-		Remove(GetAt(index));
-	}
-
-	public int TryAddOrTransfer(Thing item, int count, bool canMergeWithExistingStacks = true)
-	{
-		if (item == null)
-		{
-			Log.Warning("Tried to add or transfer null item to ThingOwner.");
-			return 0;
-		}
-		if (item.holdingOwner != null)
-		{
-			return item.holdingOwner.TryTransferToContainer(item, this, count, canMergeWithExistingStacks);
-		}
-		return TryAdd(item, count, canMergeWithExistingStacks);
-	}
-
-	public bool TryAddOrTransfer(Thing item, bool canMergeWithExistingStacks = true)
-	{
-		if (item == null)
-		{
-			Log.Warning("Tried to add or transfer null item to ThingOwner.");
-			return false;
-		}
-		if (item.holdingOwner != null)
-		{
-			return item.holdingOwner.TryTransferToContainer(item, this, canMergeWithExistingStacks);
-		}
-		return TryAdd(item, canMergeWithExistingStacks);
-	}
-
-	public void TryAddRangeOrTransfer(IEnumerable<Thing> things, bool canMergeWithExistingStacks = true, bool destroyLeftover = false)
-	{
-		if (things == this)
-		{
-			return;
-		}
-		if (things is ThingOwner thingOwner)
-		{
-			thingOwner.TryTransferAllToContainer(this, canMergeWithExistingStacks);
-			if (destroyLeftover)
+			if (this.Count >= this.maxStacks)
 			{
-				thingOwner.ClearAndDestroyContents();
+				return false;
 			}
-			return;
+			item.holdingOwner = this;
+			this.innerList.Add(t);
+			this.NotifyAdded(t);
+			return true;
 		}
-		if (things is IList<Thing> list)
+
+		// Token: 0x060039CD RID: 14797 RVA: 0x00133FD4 File Offset: 0x001321D4
+		protected override void NotifyAdded(Thing item)
 		{
-			for (int i = 0; i < list.Count; i++)
+			IThingHolderEvents<T> thingHolderEvents = this.owner as IThingHolderEvents<T>;
+			if (thingHolderEvents != null)
 			{
-				if (!TryAddOrTransfer(list[i], canMergeWithExistingStacks) && destroyLeftover)
+				thingHolderEvents.Notify_ItemAdded(item as T);
+			}
+			base.NotifyAdded(item);
+		}
+
+		// Token: 0x060039CE RID: 14798 RVA: 0x00134008 File Offset: 0x00132208
+		protected override void NotifyRemoved(Thing item)
+		{
+			IThingHolderEvents<T> thingHolderEvents = this.owner as IThingHolderEvents<T>;
+			if (thingHolderEvents != null)
+			{
+				thingHolderEvents.Notify_ItemRemoved(item as T);
+			}
+			base.NotifyRemoved(item);
+		}
+
+		// Token: 0x060039CF RID: 14799 RVA: 0x0013403C File Offset: 0x0013223C
+		public void TryAddRangeOrTransfer(IEnumerable<T> things, bool canMergeWithExistingStacks = true, bool destroyLeftover = false)
+		{
+			if (things == this)
+			{
+				return;
+			}
+			ThingOwner thingOwner = things as ThingOwner;
+			if (thingOwner != null)
+			{
+				thingOwner.TryTransferAllToContainer(this, canMergeWithExistingStacks);
+				if (destroyLeftover)
 				{
-					list[i].Destroy();
+					thingOwner.ClearAndDestroyContents(DestroyMode.Vanish);
+					return;
 				}
-			}
-			return;
-		}
-		foreach (Thing thing in things)
-		{
-			if (!TryAddOrTransfer(thing, canMergeWithExistingStacks) && destroyLeftover)
-			{
-				thing.Destroy();
-			}
-		}
-	}
-
-	public int RemoveAll(Predicate<Thing> predicate)
-	{
-		int num = 0;
-		for (int num2 = Count - 1; num2 >= 0; num2--)
-		{
-			if (predicate(GetAt(num2)))
-			{
-				Remove(GetAt(num2));
-				num++;
-			}
-		}
-		return num;
-	}
-
-	public bool TryTransferToContainer(Thing item, ThingOwner otherContainer, bool canMergeWithExistingStacks = true)
-	{
-		return TryTransferToContainer(item, otherContainer, item.stackCount, canMergeWithExistingStacks) == item.stackCount;
-	}
-
-	public int TryTransferToContainer(Thing item, ThingOwner otherContainer, int count, bool canMergeWithExistingStacks = true)
-	{
-		Thing resultingTransferredItem;
-		return TryTransferToContainer(item, otherContainer, count, out resultingTransferredItem, canMergeWithExistingStacks);
-	}
-
-	public int TryTransferToContainer(Thing item, ThingOwner otherContainer, int count, out Thing resultingTransferredItem, bool canMergeWithExistingStacks = true)
-	{
-		if (!Contains(item))
-		{
-			Log.Error("Can't transfer item " + item?.ToString() + " because it's not here. owner=" + owner.ToStringSafe());
-			resultingTransferredItem = null;
-			return 0;
-		}
-		if (otherContainer == this && count > 0)
-		{
-			resultingTransferredItem = item;
-			return item.stackCount;
-		}
-		if (!otherContainer.CanAcceptAnyOf(item, canMergeWithExistingStacks))
-		{
-			resultingTransferredItem = null;
-			return 0;
-		}
-		if (count <= 0)
-		{
-			resultingTransferredItem = null;
-			return 0;
-		}
-		if (owner is Map || otherContainer.owner is Map)
-		{
-			Log.Warning("Can't transfer items to or from Maps directly. They must be spawned or despawned manually. Use TryAdd(item.SplitOff(count))");
-			resultingTransferredItem = null;
-			return 0;
-		}
-		int num = Mathf.Min(item.stackCount, count);
-		Thing thing = item.SplitOff(num);
-		if (Contains(thing))
-		{
-			Remove(thing);
-		}
-		if (otherContainer.TryAdd(thing, canMergeWithExistingStacks))
-		{
-			resultingTransferredItem = thing;
-			item.MapHeld?.resourceCounter?.CheckUpdateResource(thing);
-			return thing.stackCount;
-		}
-		resultingTransferredItem = null;
-		if (!otherContainer.Contains(thing) && thing.stackCount > 0 && !thing.Destroyed)
-		{
-			int result = num - thing.stackCount;
-			if (item != thing)
-			{
-				item.TryAbsorbStack(thing, respectStackLimit: false);
 			}
 			else
 			{
-				TryAdd(thing, canMergeWithExistingStacks: false);
-			}
-			Map mapHeld = item.MapHeld;
-			if (mapHeld != null)
-			{
-				ResourceCounter resourceCounter = mapHeld.resourceCounter;
-				if (resourceCounter != null)
+				IList<T> list = things as IList<!0>;
+				if (list != null)
 				{
-					resourceCounter.CheckUpdateResource(thing);
-					return result;
+					for (int i = 0; i < list.Count; i++)
+					{
+						if (!base.TryAddOrTransfer(list[i], canMergeWithExistingStacks) && destroyLeftover)
+						{
+							list[i].Destroy(DestroyMode.Vanish);
+						}
+					}
+					return;
 				}
-				return result;
+				foreach (T t in things)
+				{
+					if (!base.TryAddOrTransfer(t, canMergeWithExistingStacks) && destroyLeftover)
+					{
+						t.Destroy(DestroyMode.Vanish);
+					}
+				}
 			}
+		}
+
+		// Token: 0x060039D0 RID: 14800 RVA: 0x00134110 File Offset: 0x00132310
+		public override int IndexOf(Thing item)
+		{
+			T t = item as T;
+			if (t == null)
+			{
+				return -1;
+			}
+			return this.innerList.IndexOf(t);
+		}
+
+		// Token: 0x060039D1 RID: 14801 RVA: 0x00134140 File Offset: 0x00132340
+		public override bool Remove(Thing item)
+		{
+			if (!base.Contains(item))
+			{
+				return false;
+			}
+			if (item.holdingOwner == this)
+			{
+				item.holdingOwner = null;
+			}
+			int index = this.innerList.LastIndexOf((T)((object)item));
+			this.innerList.RemoveAt(index);
+			this.NotifyRemoved(item);
+			return true;
+		}
+
+		// Token: 0x060039D2 RID: 14802 RVA: 0x00134190 File Offset: 0x00132390
+		public int RemoveAll(Predicate<T> predicate)
+		{
+			int num = 0;
+			for (int i = this.innerList.Count - 1; i >= 0; i--)
+			{
+				if (predicate(this.innerList[i]))
+				{
+					this.Remove(this.innerList[i]);
+					num++;
+				}
+			}
+			return num;
+		}
+
+		// Token: 0x060039D3 RID: 14803 RVA: 0x001341E8 File Offset: 0x001323E8
+		protected override Thing GetAt(int index)
+		{
+			return this.innerList[index];
+		}
+
+		// Token: 0x060039D4 RID: 14804 RVA: 0x001341FC File Offset: 0x001323FC
+		public void GetThingsOfType<J>(List<J> list) where J : Thing
+		{
+			for (int i = 0; i < this.innerList.Count; i++)
+			{
+				J j = this.innerList[i] as J;
+				if (j != null)
+				{
+					list.Add(j);
+				}
+			}
+		}
+
+		// Token: 0x060039D5 RID: 14805 RVA: 0x0013424C File Offset: 0x0013244C
+		public int TryTransferToContainer(Thing item, ThingOwner otherContainer, int stackCount, out T resultingTransferredItem, bool canMergeWithExistingStacks = true)
+		{
+			Thing thing;
+			int result = base.TryTransferToContainer(item, otherContainer, stackCount, out thing, canMergeWithExistingStacks);
+			resultingTransferredItem = (T)((object)thing);
 			return result;
 		}
-		return thing.stackCount;
-	}
 
-	public void TryTransferAllToContainer(ThingOwner other, bool canMergeWithExistingStacks = true)
-	{
-		for (int num = Count - 1; num >= 0; num--)
+		// Token: 0x060039D6 RID: 14806 RVA: 0x00134273 File Offset: 0x00132473
+		public new T Take(Thing thing, int count)
 		{
-			TryTransferToContainer(GetAt(num), other, canMergeWithExistingStacks);
+			return (T)((object)base.Take(thing, count));
 		}
-	}
 
-	public Thing Take(Thing thing, int count)
-	{
-		if (!Contains(thing))
+		// Token: 0x060039D7 RID: 14807 RVA: 0x00134282 File Offset: 0x00132482
+		public new T Take(Thing thing)
 		{
-			Log.Error("Tried to take " + thing.ToStringSafe() + " but it's not here.");
-			return null;
+			return (T)((object)base.Take(thing));
 		}
-		if (count > thing.stackCount)
-		{
-			Log.Error("Tried to get " + count + " of " + thing.ToStringSafe() + " while only having " + thing.stackCount);
-			count = thing.stackCount;
-		}
-		if (count == thing.stackCount)
-		{
-			Remove(thing);
-			return thing;
-		}
-		Thing thing2 = thing.SplitOff(count);
-		thing2.holdingOwner = null;
-		return thing2;
-	}
 
-	public Thing Take(Thing thing)
-	{
-		return Take(thing, thing.stackCount);
-	}
-
-	public bool TryDrop(Thing thing, ThingPlaceMode mode, int count, out Thing lastResultingThing, Action<Thing, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		Map rootMap = ThingOwnerUtility.GetRootMap(owner);
-		IntVec3 rootPosition = ThingOwnerUtility.GetRootPosition(owner);
-		if (rootMap == null || !rootPosition.IsValid)
+		// Token: 0x060039D8 RID: 14808 RVA: 0x00134290 File Offset: 0x00132490
+		public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, int count, out T resultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
 		{
-			Log.Error("Cannot drop " + thing?.ToString() + " without a dropLoc and with an owner whose map is null.");
-			lastResultingThing = null;
-			return false;
-		}
-		return TryDrop(thing, rootPosition, rootMap, mode, count, out lastResultingThing, placedAction, nearPlaceValidator);
-	}
-
-	public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, int count, out Thing resultingThing, Action<Thing, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		if (!Contains(thing))
-		{
-			Log.Error("Tried to drop " + thing.ToStringSafe() + " but it's not here.");
-			resultingThing = null;
-			return false;
-		}
-		if (thing.stackCount < count)
-		{
-			Log.Error("Tried to drop " + count + " of " + thing?.ToString() + " while only having " + thing.stackCount);
-			count = thing.stackCount;
-		}
-		if (count == thing.stackCount)
-		{
-			if (GenDrop.TryDropSpawn(thing, dropLoc, map, mode, out resultingThing, placedAction, nearPlaceValidator))
+			Action<Thing, int> placedAction2 = null;
+			if (placedAction != null)
 			{
-				Remove(thing);
-				return true;
+				placedAction2 = delegate(Thing t, int c)
+				{
+					placedAction((T)((object)t), c);
+				};
 			}
-			return false;
+			Thing thing2;
+			bool result = base.TryDrop(thing, dropLoc, map, mode, count, out thing2, placedAction2, nearPlaceValidator);
+			resultingThing = (T)((object)thing2);
+			return result;
 		}
-		Thing thing2 = thing.SplitOff(count);
-		if (GenDrop.TryDropSpawn(thing2, dropLoc, map, mode, out resultingThing, placedAction, nearPlaceValidator))
-		{
-			return true;
-		}
-		thing.TryAbsorbStack(thing2, respectStackLimit: false);
-		return false;
-	}
 
-	public bool TryDrop(Thing thing, ThingPlaceMode mode, out Thing lastResultingThing, Action<Thing, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
-	{
-		Map rootMap = ThingOwnerUtility.GetRootMap(owner);
-		IntVec3 rootPosition = ThingOwnerUtility.GetRootPosition(owner);
-		if (rootMap == null || !rootPosition.IsValid)
+		// Token: 0x060039D9 RID: 14809 RVA: 0x001342E4 File Offset: 0x001324E4
+		public bool TryDrop(Thing thing, ThingPlaceMode mode, out T lastResultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
 		{
-			Log.Error("Cannot drop " + thing?.ToString() + " without a dropLoc and with an owner whose map is null.");
-			lastResultingThing = null;
-			return false;
-		}
-		return TryDrop(thing, rootPosition, rootMap, mode, out lastResultingThing, placedAction, nearPlaceValidator);
-	}
-
-	public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, out Thing lastResultingThing, Action<Thing, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null, bool playDropSound = true)
-	{
-		if (!Contains(thing))
-		{
-			Log.Error(owner.ToStringSafe() + " container tried to drop  " + thing.ToStringSafe() + " which it didn't contain.");
-			lastResultingThing = null;
-			return false;
-		}
-		if (GenDrop.TryDropSpawn(thing, dropLoc, map, mode, out lastResultingThing, placedAction, nearPlaceValidator, playDropSound))
-		{
-			Remove(thing);
-			return true;
-		}
-		return false;
-	}
-
-	public bool TryDropAll(IntVec3 dropLoc, Map map, ThingPlaceMode mode, Action<Thing, int> placeAction = null, Predicate<IntVec3> nearPlaceValidator = null, bool playDropSound = true)
-	{
-		bool result = true;
-		for (int num = Count - 1; num >= 0; num--)
-		{
-			if (!TryDrop(GetAt(num), dropLoc, map, mode, out var _, placeAction, nearPlaceValidator, playDropSound))
+			Action<Thing, int> placedAction2 = null;
+			if (placedAction != null)
 			{
-				result = false;
+				placedAction2 = delegate(Thing t, int c)
+				{
+					placedAction((T)((object)t), c);
+				};
 			}
+			Thing thing2;
+			bool result = base.TryDrop(thing, mode, out thing2, placedAction2, nearPlaceValidator);
+			lastResultingThing = (T)((object)thing2);
+			return result;
 		}
-		return result;
-	}
 
-	public bool Contains(ThingDef def)
-	{
-		return Contains(def, 1);
-	}
-
-	public bool Contains(ThingDef def, int minCount)
-	{
-		if (minCount <= 0)
+		// Token: 0x060039DA RID: 14810 RVA: 0x00134330 File Offset: 0x00132530
+		public bool TryDrop(Thing thing, IntVec3 dropLoc, Map map, ThingPlaceMode mode, out T lastResultingThing, Action<T, int> placedAction = null, Predicate<IntVec3> nearPlaceValidator = null)
 		{
-			return true;
-		}
-		int num = 0;
-		int count = Count;
-		for (int i = 0; i < count; i++)
-		{
-			if (GetAt(i).def == def)
+			Action<Thing, int> placedAction2 = null;
+			if (placedAction != null)
 			{
-				num += GetAt(i).stackCount;
+				placedAction2 = delegate(Thing t, int c)
+				{
+					placedAction((T)((object)t), c);
+				};
 			}
-			if (num >= minCount)
-			{
-				return true;
-			}
+			Thing thing2;
+			bool result = base.TryDrop(thing, dropLoc, map, mode, out thing2, placedAction2, nearPlaceValidator, true);
+			lastResultingThing = (T)((object)thing2);
+			return result;
 		}
-		return false;
-	}
 
-	public int TotalStackCountOfDef(ThingDef def)
-	{
-		int num = 0;
-		int count = Count;
-		for (int i = 0; i < count; i++)
+		// Token: 0x060039DB RID: 14811 RVA: 0x00134380 File Offset: 0x00132580
+		int IList<!0>.IndexOf(T item)
 		{
-			if (GetAt(i).def == def)
-			{
-				num += GetAt(i).stackCount;
-			}
+			return this.innerList.IndexOf(item);
 		}
-		return num;
-	}
 
-	public void Notify_ContainedItemDestroyed(Thing t)
-	{
-		if (ThingOwnerUtility.ShouldAutoRemoveDestroyedThings(owner))
+		// Token: 0x060039DC RID: 14812 RVA: 0x0013438E File Offset: 0x0013258E
+		void IList<!0>.Insert(int index, T item)
 		{
-			Remove(t);
+			throw new InvalidOperationException("ThingOwner doesn't allow inserting individual elements at any position.");
 		}
-	}
 
-	protected virtual void NotifyAdded(Thing item)
-	{
-		if (ThingOwnerUtility.ShouldAutoExtinguishInnerThings(owner) && item.HasAttachment(ThingDefOf.Fire))
+		// Token: 0x060039DD RID: 14813 RVA: 0x0013439A File Offset: 0x0013259A
+		void ICollection<!0>.Add(T item)
 		{
-			item.GetAttachment(ThingDefOf.Fire).Destroy();
+			this.TryAdd(item, true);
 		}
-		if (ThingOwnerUtility.ShouldRemoveDesignationsOnAddedThings(owner))
-		{
-			List<Map> maps = Find.Maps;
-			for (int i = 0; i < maps.Count; i++)
-			{
-				maps[i].designationManager.RemoveAllDesignationsOn(item);
-			}
-		}
-		if ((owner is Thing thing && thing.Faction.IsPlayerSafe()) || (owner is WorldObject worldObject && worldObject.Faction.IsPlayerSafe()) || (owner is Pawn_InventoryTracker pawn_InventoryTracker && pawn_InventoryTracker.pawn.Faction.IsPlayerSafe()))
-		{
-			item.EverSeenByPlayer = true;
-		}
-		if (owner is CompTransporter compTransporter)
-		{
-			compTransporter.Notify_ThingAdded(item);
-		}
-		if (owner is Caravan caravan)
-		{
-			caravan.Notify_PawnAdded((Pawn)item);
-		}
-		if (owner is Pawn_ApparelTracker pawn_ApparelTracker)
-		{
-			pawn_ApparelTracker.Notify_ApparelAdded((Apparel)item);
-			if (pawn_ApparelTracker.pawn.Faction.IsPlayerSafe())
-			{
-				item.EverSeenByPlayer = true;
-			}
-		}
-		if (owner is Pawn_EquipmentTracker pawn_EquipmentTracker)
-		{
-			pawn_EquipmentTracker.Notify_EquipmentAdded((ThingWithComps)item);
-			if (pawn_EquipmentTracker.pawn.Faction.IsPlayerSafe())
-			{
-				item.EverSeenByPlayer = true;
-			}
-		}
-		NotifyColonistBarIfColonistCorpse(item);
-		this.OnContentsChanged?.Invoke();
-	}
 
-	protected void NotifyAddedAndMergedWith(Thing item, int mergedCount)
-	{
-		if (owner is CompTransporter compTransporter)
+		// Token: 0x060039DE RID: 14814 RVA: 0x001343AA File Offset: 0x001325AA
+		void ICollection<!0>.CopyTo(T[] array, int arrayIndex)
 		{
-			compTransporter.Notify_ThingAddedAndMergedWith(item, mergedCount);
+			this.innerList.CopyTo(array, arrayIndex);
 		}
-	}
 
-	protected virtual void NotifyRemoved(Thing item)
-	{
-		if (owner is Pawn_InventoryTracker pawn_InventoryTracker)
+		// Token: 0x060039DF RID: 14815 RVA: 0x001343B9 File Offset: 0x001325B9
+		bool ICollection<!0>.Contains(T item)
 		{
-			pawn_InventoryTracker.Notify_ItemRemoved(item);
+			return this.innerList.Contains(item);
 		}
-		if (owner is Pawn_ApparelTracker pawn_ApparelTracker)
-		{
-			pawn_ApparelTracker.Notify_ApparelRemoved((Apparel)item);
-		}
-		if (owner is Pawn_EquipmentTracker pawn_EquipmentTracker)
-		{
-			pawn_EquipmentTracker.Notify_EquipmentRemoved((ThingWithComps)item);
-		}
-		if (owner is Caravan caravan)
-		{
-			caravan.Notify_PawnRemoved((Pawn)item);
-		}
-		NotifyColonistBarIfColonistCorpse(item);
-		this.OnContentsChanged?.Invoke();
-	}
 
-	private void NotifyColonistBarIfColonistCorpse(Thing thing)
-	{
-		if (thing is Corpse { Bugged: false } corpse && corpse.InnerPawn.Faction != null && corpse.InnerPawn.Faction.IsPlayer && Current.ProgramState == ProgramState.Playing)
+		// Token: 0x060039E0 RID: 14816 RVA: 0x001343C7 File Offset: 0x001325C7
+		bool ICollection<!0>.Remove(T item)
 		{
-			Find.ColonistBar.MarkColonistsDirty();
+			return this.Remove(item);
 		}
-	}
 
-	void IList<Thing>.Insert(int index, Thing item)
-	{
-		throw new InvalidOperationException("ThingOwner doesn't allow inserting individual elements at any position.");
-	}
-
-	void ICollection<Thing>.Add(Thing item)
-	{
-		TryAdd(item);
-	}
-
-	void ICollection<Thing>.CopyTo(Thing[] array, int arrayIndex)
-	{
-		for (int i = 0; i < Count; i++)
+		// Token: 0x060039E1 RID: 14817 RVA: 0x001343D5 File Offset: 0x001325D5
+		IEnumerator<T> IEnumerable<!0>.GetEnumerator()
 		{
-			array[i + arrayIndex] = GetAt(i);
+			return this.innerList.GetEnumerator();
 		}
-	}
 
-	IEnumerator<Thing> IEnumerable<Thing>.GetEnumerator()
-	{
-		for (int i = 0; i < Count; i++)
+		// Token: 0x060039E2 RID: 14818 RVA: 0x001343D5 File Offset: 0x001325D5
+		IEnumerator IEnumerable.GetEnumerator()
 		{
-			yield return GetAt(i);
+			return this.innerList.GetEnumerator();
 		}
-	}
 
-	IEnumerator IEnumerable.GetEnumerator()
-	{
-		for (int i = 0; i < Count; i++)
-		{
-			yield return GetAt(i);
-		}
+		// Token: 0x04002A72 RID: 10866
+		private List<T> innerList = new List<T>();
 	}
 }

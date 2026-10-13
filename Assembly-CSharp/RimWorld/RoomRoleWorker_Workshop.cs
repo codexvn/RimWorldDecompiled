@@ -1,30 +1,37 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomRoleWorker_Workshop : RoomRoleWorker
+namespace RimWorld
 {
-	public override float GetScore(Room room)
+	// Token: 0x02002171 RID: 8561
+	public class RoomRoleWorker_Workshop : RoomRoleWorker
 	{
-		int num = 0;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
+		// Token: 0x0600BAE1 RID: 47841 RVA: 0x0035F150 File Offset: 0x0035D350
+		public override float GetScore(Room room)
 		{
-			if (containedAndAdjacentThings[i].def.building?.workTableRoomRole == RoomRoleDefOf.Workshop)
+			int num = 0;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				num++;
+				BuildingProperties building = containedAndAdjacentThings[i].def.building;
+				if (((building != null) ? building.workTableRoomRole : null) == RoomRoleDefOf.Workshop)
+				{
+					num++;
+				}
 			}
+			return 27f * (float)num;
 		}
-		return 27f * (float)num;
-	}
 
-	public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
-	{
-		if (buildingDef.building?.workTableRoomRole == RoomRoleDefOf.Workshop)
+		// Token: 0x0600BAE2 RID: 47842 RVA: 0x0035F1A7 File Offset: 0x0035D3A7
+		public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
 		{
-			return 27f;
+			BuildingProperties building = buildingDef.building;
+			if (((building != null) ? building.workTableRoomRole : null) == RoomRoleDefOf.Workshop)
+			{
+				return 27f;
+			}
+			return 0f;
 		}
-		return 0f;
 	}
 }

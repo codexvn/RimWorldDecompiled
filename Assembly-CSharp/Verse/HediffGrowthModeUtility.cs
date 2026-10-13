@@ -1,17 +1,24 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-public static class HediffGrowthModeUtility
+namespace Verse
 {
-	public static string GetLabel(this HediffGrowthMode m)
+	// Token: 0x020006CD RID: 1741
+	public static class HediffGrowthModeUtility
 	{
-		return m switch
+		// Token: 0x06002B3A RID: 11066 RVA: 0x000E223C File Offset: 0x000E043C
+		public static string GetLabel(this HediffGrowthMode m)
 		{
-			HediffGrowthMode.Growing => "HediffGrowthMode_Growing".Translate(), 
-			HediffGrowthMode.Stable => "HediffGrowthMode_Stable".Translate(), 
-			HediffGrowthMode.Remission => "HediffGrowthMode_Remission".Translate(), 
-			_ => throw new ArgumentException(), 
-		};
+			switch (m)
+			{
+			case HediffGrowthMode.Growing:
+				return "HediffGrowthMode_Growing".Translate();
+			case HediffGrowthMode.Stable:
+				return "HediffGrowthMode_Stable".Translate();
+			case HediffGrowthMode.Remission:
+				return "HediffGrowthMode_Remission".Translate();
+			default:
+				throw new ArgumentException();
+			}
+		}
 	}
 }

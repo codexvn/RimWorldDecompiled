@@ -1,100 +1,96 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public static class ShipLandingBeaconUtility
+namespace RimWorld
 {
-	public static List<ShipLandingArea> tmpShipLandingAreas = new List<ShipLandingArea>();
-
-	public static List<ShipLandingArea> GetLandingZones(Map map)
+	// Token: 0x02002E12 RID: 11794
+	public static class ShipLandingBeaconUtility
 	{
-		tmpShipLandingAreas.Clear();
-		if (!ModsConfig.RoyaltyActive)
+		// Token: 0x060109A3 RID: 68003 RVA: 0x004C8F98 File Offset: 0x004C7198
+		public static List<ShipLandingArea> GetLandingZones(Map map)
 		{
-			return tmpShipLandingAreas;
-		}
-		foreach (Thing item in map.listerThings.ThingsOfDef(ThingDefOf.ShipLandingBeacon))
-		{
-			CompShipLandingBeacon compShipLandingBeacon = item.TryGetComp<CompShipLandingBeacon>();
-			if (compShipLandingBeacon == null || item.Faction != Faction.OfPlayer)
+			ShipLandingBeaconUtility.tmpShipLandingAreas.Clear();
+			if (!ModsConfig.RoyaltyActive)
 			{
-				continue;
+				return ShipLandingBeaconUtility.tmpShipLandingAreas;
 			}
-			foreach (ShipLandingArea landingArea in compShipLandingBeacon.LandingAreas)
+			foreach (Thing thing in map.listerThings.ThingsOfDef(ThingDefOf.ShipLandingBeacon))
 			{
-				if (landingArea.Active && !tmpShipLandingAreas.Contains(landingArea))
+				CompShipLandingBeacon compShipLandingBeacon = thing.TryGetComp<CompShipLandingBeacon>();
+				if (compShipLandingBeacon != null && thing.Faction == Faction.OfPlayer)
 				{
-					landingArea.RecalculateBlockingThing();
-					tmpShipLandingAreas.Add(landingArea);
+					foreach (ShipLandingArea shipLandingArea in compShipLandingBeacon.LandingAreas)
+					{
+						if (shipLandingArea.Active && !ShipLandingBeaconUtility.tmpShipLandingAreas.Contains(shipLandingArea))
+						{
+							shipLandingArea.RecalculateBlockingThing();
+							ShipLandingBeaconUtility.tmpShipLandingAreas.Add(shipLandingArea);
+						}
+					}
+				}
+			}
+			return ShipLandingBeaconUtility.tmpShipLandingAreas;
+		}
+
+		// Token: 0x060109A4 RID: 68004 RVA: 0x004C908C File Offset: 0x004C728C
+		public static void DrawLinesToNearbyBeacons(ThingDef myDef, IntVec3 myPos, Rot4 myRot, Map map, Thing thing = null)
+		{
+			Vector3 a = GenThing.TrueCenter(myPos, myRot, myDef.size, myDef.Altitude);
+			foreach (Thing thing2 in map.listerThings.ThingsOfDef(ThingDefOf.ShipLandingBeacon))
+			{
+				if ((thing == null || thing != thing2) && thing2.Faction == Faction.OfPlayer)
+				{
+					CompShipLandingBeacon compShipLandingBeacon = thing2.TryGetComp<CompShipLandingBeacon>();
+					if (compShipLandingBeacon != null && ShipLandingBeaconUtility.CanLinkTo(myPos, compShipLandingBeacon) && !GenThing.CloserThingBetween(myDef, myPos, thing2.Position, map, null))
+					{
+						GenDraw.DrawLineBetween(a, thing2.TrueCenter(), SimpleColor.White, 0.2f);
+					}
+				}
+			}
+			float minEdgeDistance = myDef.GetCompProperties<CompProperties_ShipLandingBeacon>().edgeLengthRange.min - 1f;
+			float maxEdgeDistance = myDef.GetCompProperties<CompProperties_ShipLandingBeacon>().edgeLengthRange.max - 1f;
+			foreach (Thing thing3 in map.listerThings.ThingsInGroup(ThingRequestGroup.Blueprint))
+			{
+				if ((thing == null || thing != thing3) && thing3.def.entityDefToBuild == myDef && (myPos.x == thing3.Position.x || myPos.z == thing3.Position.z) && !ShipLandingBeaconUtility.AlignedDistanceTooShort(myPos, thing3.Position, minEdgeDistance) && !ShipLandingBeaconUtility.AlignedDistanceTooLong(myPos, thing3.Position, maxEdgeDistance) && !GenThing.CloserThingBetween(myDef, myPos, thing3.Position, map, null))
+				{
+					GenDraw.DrawLineBetween(a, thing3.TrueCenter(), SimpleColor.White, 0.2f);
 				}
 			}
 		}
-		return tmpShipLandingAreas;
-	}
 
-	public static void DrawLinesToNearbyBeacons(ThingDef myDef, IntVec3 myPos, Rot4 myRot, Map map, Thing thing = null)
-	{
-		Vector3 a = GenThing.TrueCenter(myPos, myRot, myDef.size, myDef.Altitude);
-		foreach (Thing item in map.listerThings.ThingsOfDef(ThingDefOf.ShipLandingBeacon))
+		// Token: 0x060109A5 RID: 68005 RVA: 0x004C9248 File Offset: 0x004C7448
+		public static bool AlignedDistanceTooShort(IntVec3 position, IntVec3 otherPos, float minEdgeDistance)
 		{
-			if ((thing == null || thing != item) && item.Faction == Faction.OfPlayer)
+			if (position.x == otherPos.x)
 			{
-				CompShipLandingBeacon compShipLandingBeacon = item.TryGetComp<CompShipLandingBeacon>();
-				if (compShipLandingBeacon != null && CanLinkTo(myPos, compShipLandingBeacon) && !GenThing.CloserThingBetween(myDef, myPos, item.Position, map))
-				{
-					GenDraw.DrawLineBetween(a, item.TrueCenter(), SimpleColor.White);
-				}
+				return (float)Mathf.Abs(position.z - otherPos.z) < minEdgeDistance;
 			}
+			return position.z == otherPos.z && (float)Mathf.Abs(position.x - otherPos.x) < minEdgeDistance;
 		}
-		float minEdgeDistance = myDef.GetCompProperties<CompProperties_ShipLandingBeacon>().edgeLengthRange.min - 1f;
-		float maxEdgeDistance = myDef.GetCompProperties<CompProperties_ShipLandingBeacon>().edgeLengthRange.max - 1f;
-		foreach (Thing item2 in map.listerThings.ThingsInGroup(ThingRequestGroup.Blueprint))
+
+		// Token: 0x060109A6 RID: 68006 RVA: 0x004C92A0 File Offset: 0x004C74A0
+		private static bool AlignedDistanceTooLong(IntVec3 position, IntVec3 otherPos, float maxEdgeDistance)
 		{
-			if ((thing == null || thing != item2) && item2.def.entityDefToBuild == myDef && (myPos.x == item2.Position.x || myPos.z == item2.Position.z) && !AlignedDistanceTooShort(myPos, item2.Position, minEdgeDistance) && !AlignedDistanceTooLong(myPos, item2.Position, maxEdgeDistance) && !GenThing.CloserThingBetween(myDef, myPos, item2.Position, map))
+			if (position.x == otherPos.x)
 			{
-				GenDraw.DrawLineBetween(a, item2.TrueCenter(), SimpleColor.White);
+				return (float)Mathf.Abs(position.z - otherPos.z) >= maxEdgeDistance;
 			}
+			return position.z == otherPos.z && (float)Mathf.Abs(position.x - otherPos.x) >= maxEdgeDistance;
 		}
-	}
 
-	public static bool AlignedDistanceTooShort(IntVec3 position, IntVec3 otherPos, float minEdgeDistance)
-	{
-		if (position.x == otherPos.x)
+		// Token: 0x060109A7 RID: 68007 RVA: 0x004C9300 File Offset: 0x004C7500
+		public static bool CanLinkTo(IntVec3 position, CompShipLandingBeacon other)
 		{
-			return (float)Mathf.Abs(position.z - otherPos.z) < minEdgeDistance;
+			if (position.x == other.parent.Position.x)
+			{
+				return other.parent.def.displayNumbersBetweenSameDefDistRange.Includes((float)(Mathf.Abs(position.z - other.parent.Position.z) + 1));
+			}
+			return position.z == other.parent.Position.z && other.parent.def.displayNumbersBetweenSameDefDistRange.Includes((float)(Mathf.Abs(position.x - other.parent.Position.x) + 1));
 		}
-		if (position.z == otherPos.z)
-		{
-			return (float)Mathf.Abs(position.x - otherPos.x) < minEdgeDistance;
-		}
-		return false;
-	}
 
-	private static bool AlignedDistanceTooLong(IntVec3 position, IntVec3 otherPos, float maxEdgeDistance)
-	{
-		if (position.x == otherPos.x)
-		{
-			return (float)Mathf.Abs(position.z - otherPos.z) >= maxEdgeDistance;
-		}
-		if (position.z == otherPos.z)
-		{
-			return (float)Mathf.Abs(position.x - otherPos.x) >= maxEdgeDistance;
-		}
-		return false;
-	}
-
-	public static bool CanLinkTo(IntVec3 position, CompShipLandingBeacon other)
-	{
-		if (position.x == other.parent.Position.x)
-		{
-			return other.parent.def.displayNumbersBetweenSameDefDistRange.Includes(Mathf.Abs(position.z - other.parent.Position.z) + 1);
-		}
-		if (position.z == other.parent.Position.z)
-		{
-			return other.parent.def.displayNumbersBetweenSameDefDistRange.Includes(Mathf.Abs(position.x - other.parent.Position.x) + 1);
-		}
-		return false;
+		// Token: 0x0400ACFC RID: 44284
+		public static List<ShipLandingArea> tmpShipLandingAreas = new List<ShipLandingArea>();
 	}
 }

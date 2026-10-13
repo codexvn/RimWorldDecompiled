@@ -1,23 +1,31 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_NeedRest : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x02001844 RID: 6212
+	public class ThoughtWorker_NeedRest : ThoughtWorker
 	{
-		if (p.needs.rest == null)
+		// Token: 0x06008F69 RID: 36713 RVA: 0x002A5BA0 File Offset: 0x002A3DA0
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.Inactive;
+			if (p.needs.rest == null)
+			{
+				return ThoughtState.Inactive;
+			}
+			switch (p.needs.rest.CurCategory)
+			{
+			case RestCategory.Rested:
+				return ThoughtState.Inactive;
+			case RestCategory.Tired:
+				return ThoughtState.ActiveAtStage(0);
+			case RestCategory.VeryTired:
+				return ThoughtState.ActiveAtStage(1);
+			case RestCategory.Exhausted:
+				return ThoughtState.ActiveAtStage(2);
+			default:
+				throw new NotImplementedException();
+			}
 		}
-		return p.needs.rest.CurCategory switch
-		{
-			RestCategory.Rested => ThoughtState.Inactive, 
-			RestCategory.Tired => ThoughtState.ActiveAtStage(0), 
-			RestCategory.VeryTired => ThoughtState.ActiveAtStage(1), 
-			RestCategory.Exhausted => ThoughtState.ActiveAtStage(2), 
-			_ => throw new NotImplementedException(), 
-		};
 	}
 }

@@ -1,140 +1,168 @@
-using System;
+﻿using System;
 using System.Xml;
 using RimWorld;
 using RimWorld.Planet;
 
-namespace Verse;
-
-public class BackCompatibilityConverter_1_2 : BackCompatibilityConverter
+namespace Verse
 {
-	public override bool AppliesToVersion(int majorVer, int minorVer)
+	// Token: 0x02000C58 RID: 3160
+	public class BackCompatibilityConverter_1_2 : BackCompatibilityConverter
 	{
-		return majorVer switch
+		// Token: 0x060050EB RID: 20715 RVA: 0x001A3BAD File Offset: 0x001A1DAD
+		public override bool AppliesToVersion(int majorVer, int minorVer)
 		{
-			1 => minorVer <= 2, 
-			0 => true, 
-			_ => false, 
-		};
-	}
+			return majorVer == 0 || (majorVer == 1 && minorVer <= 2);
+		}
 
-	public override string BackCompatibleDefName(Type defType, string defName, bool forDefInjections = false, XmlNode node = null)
-	{
-		if (defType == typeof(RoyalTitleDef) && defName == "Esquire")
+		// Token: 0x060050EC RID: 20716 RVA: 0x001A3BC4 File Offset: 0x001A1DC4
+		public override string BackCompatibleDefName(Type defType, string defName, bool forDefInjections = false, XmlNode node = null)
 		{
-			return "Acolyte";
+			if (defType == typeof(RoyalTitleDef) && defName == "Esquire")
+			{
+				return "Acolyte";
+			}
+			if (defType == typeof(PawnKindDef) && defName == "Empire_Royal_Esquire")
+			{
+				return "Empire_Royal_Acolyte";
+			}
+			if (defType == typeof(HairDef) && defName == "ShavedFemale")
+			{
+				return "Shaved";
+			}
+			return null;
 		}
-		if (defType == typeof(PawnKindDef) && defName == "Empire_Royal_Esquire")
-		{
-			return "Empire_Royal_Acolyte";
-		}
-		if (defType == typeof(HairDef) && defName == "ShavedFemale")
-		{
-			return "Shaved";
-		}
-		return null;
-	}
 
-	public override Type GetBackCompatibleType(Type baseType, string providedClassName, XmlNode node)
-	{
-		if (providedClassName == "Hediff_ImplantWithLevel")
+		// Token: 0x060050ED RID: 20717 RVA: 0x001A3C41 File Offset: 0x001A1E41
+		public override Type GetBackCompatibleType(Type baseType, string providedClassName, XmlNode node)
 		{
-			return typeof(Hediff_Level);
+			if (providedClassName == "Hediff_ImplantWithLevel")
+			{
+				return typeof(Hediff_Level);
+			}
+			return null;
 		}
-		return null;
-	}
 
-	public override void PostExposeData(object obj)
-	{
-		if (Scribe.mode == LoadSaveMode.LoadingVars)
+		// Token: 0x060050EE RID: 20718 RVA: 0x001A3C5C File Offset: 0x001A1E5C
+		public override void PostExposeData(object obj)
 		{
-			if (obj is Building_Bed { CompAssignableToPawn: not null } building_Bed)
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
-				bool value = false;
-				Scribe_Values.Look(ref value, "forPrisoners", defaultValue: false);
-				if (value)
+				Building_Bed building_Bed = obj as Building_Bed;
+				if (building_Bed != null && building_Bed.CompAssignableToPawn != null)
 				{
-					building_Bed.ForOwnerType = BedOwnerType.Prisoner;
-				}
-			}
-			else if (obj is Pawn_GuestTracker pawn_GuestTracker)
-			{
-				bool value2 = false;
-				Scribe_Values.Look(ref value2, "prisoner", defaultValue: false);
-				if (value2)
-				{
-					pawn_GuestTracker.guestStatusInt = GuestStatus.Prisoner;
-				}
-			}
-			else if (obj is QuestPart_RequirementsToAcceptNoDanger questPart_RequirementsToAcceptNoDanger)
-			{
-				Map refee = null;
-				Scribe_References.Look(ref refee, "map");
-				questPart_RequirementsToAcceptNoDanger.mapParent = refee.Parent;
-			}
-		}
-		else
-		{
-			if (Scribe.mode != LoadSaveMode.PostLoadInit)
-			{
-				return;
-			}
-			if (obj is World world)
-			{
-				if (world.ideoManager == null)
-				{
-					world.ideoManager = new IdeoManager();
-				}
-				return;
-			}
-			Pawn pawn = obj as Pawn;
-			if (pawn != null)
-			{
-				if (Find.World.ideoManager == null)
-				{
-					Find.World.ideoManager = new IdeoManager();
-				}
-				if (pawn.ownership == null)
-				{
-					pawn.ownership = new Pawn_Ownership(pawn);
-				}
-				if (!pawn.RaceProps.Humanlike)
-				{
-					return;
-				}
-				if (pawn.ideo == null)
-				{
-					pawn.ideo = new Pawn_IdeoTracker(pawn);
-					if (pawn.Faction != null && pawn.Faction.def.humanlikeFaction && pawn.Faction.ideos == null)
+					bool flag = false;
+					Scribe_Values.Look<bool>(ref flag, "forPrisoners", false, false);
+					if (flag)
 					{
-						pawn.Faction.ideos = new FactionIdeosTracker(pawn.Faction);
-						pawn.Faction.ideos.ChooseOrGenerateIdeo(FactionIdeosTracker.IdeoGenerationParmsForFaction_BackCompatibility(pawn.Faction.def, !ModsConfig.IdeologyActive));
-					}
-					Ideo result;
-					if (pawn.Faction?.ideos?.PrimaryIdeo != null)
-					{
-						pawn.ideo.SetIdeo(pawn.Faction.ideos.PrimaryIdeo);
-					}
-					else if (Find.IdeoManager.IdeosListForReading.TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(pawn, x), out result))
-					{
-						pawn.ideo.SetIdeo(result);
+						building_Bed.ForOwnerType = BedOwnerType.Prisoner;
+						return;
 					}
 				}
-				if (pawn.style == null)
+				else
 				{
-					pawn.style = new Pawn_StyleTracker(pawn);
-					pawn.style.beardDef = BeardDefOf.NoBeard;
+					Pawn_GuestTracker pawn_GuestTracker = obj as Pawn_GuestTracker;
+					if (pawn_GuestTracker != null)
+					{
+						bool flag2 = false;
+						Scribe_Values.Look<bool>(ref flag2, "prisoner", false, false);
+						if (flag2)
+						{
+							pawn_GuestTracker.guestStatusInt = GuestStatus.Prisoner;
+							return;
+						}
+					}
+					else
+					{
+						QuestPart_RequirementsToAcceptNoDanger questPart_RequirementsToAcceptNoDanger = obj as QuestPart_RequirementsToAcceptNoDanger;
+						if (questPart_RequirementsToAcceptNoDanger != null)
+						{
+							Map map = null;
+							Scribe_References.Look<Map>(ref map, "map", false);
+							questPart_RequirementsToAcceptNoDanger.mapParent = map.Parent;
+							return;
+						}
+					}
 				}
 			}
-			else if (obj is Faction faction)
+			else if (Scribe.mode == LoadSaveMode.PostLoadInit)
 			{
-				if (Find.World.ideoManager == null)
+				World world = obj as World;
+				if (world != null)
 				{
-					Find.World.ideoManager = new IdeoManager();
+					if (world.ideoManager == null)
+					{
+						world.ideoManager = new IdeoManager();
+						return;
+					}
 				}
-				if (faction.def.humanlikeFaction && faction.ideos == null)
+				else
 				{
-					faction.ideos = new FactionIdeosTracker(faction);
-					faction.ideos.ChooseOrGenerateIdeo(FactionIdeosTracker.IdeoGenerationParmsForFaction_BackCompatibility(faction.def, !ModsConfig.IdeologyActive));
+					Pawn pawn = obj as Pawn;
+					if (pawn != null)
+					{
+						if (Find.World.ideoManager == null)
+						{
+							Find.World.ideoManager = new IdeoManager();
+						}
+						if (pawn.ownership == null)
+						{
+							pawn.ownership = new Pawn_Ownership(pawn);
+						}
+						if (pawn.RaceProps.Humanlike)
+						{
+							if (pawn.ideo == null)
+							{
+								pawn.ideo = new Pawn_IdeoTracker(pawn);
+								if (pawn.Faction != null && pawn.Faction.def.humanlikeFaction && pawn.Faction.ideos == null)
+								{
+									pawn.Faction.ideos = new FactionIdeosTracker(pawn.Faction);
+									pawn.Faction.ideos.ChooseOrGenerateIdeo(FactionIdeosTracker.IdeoGenerationParmsForFaction_BackCompatibility(pawn.Faction.def, !ModsConfig.IdeologyActive));
+								}
+								Faction faction = pawn.Faction;
+								bool flag3;
+								if (faction == null)
+								{
+									flag3 = (null != null);
+								}
+								else
+								{
+									FactionIdeosTracker ideos = faction.ideos;
+									flag3 = (((ideos != null) ? ideos.PrimaryIdeo : null) != null);
+								}
+								Ideo ideo;
+								if (flag3)
+								{
+									pawn.ideo.SetIdeo(pawn.Faction.ideos.PrimaryIdeo);
+								}
+								else if (Find.IdeoManager.IdeosListForReading.TryRandomElementByWeight((Ideo x) => IdeoUtility.IdeoChangeToWeight(pawn, x), out ideo))
+								{
+									pawn.ideo.SetIdeo(ideo);
+								}
+							}
+							if (pawn.style == null)
+							{
+								pawn.style = new Pawn_StyleTracker(pawn);
+								pawn.style.beardDef = BeardDefOf.NoBeard;
+								return;
+							}
+						}
+					}
+					else
+					{
+						Faction faction2 = obj as Faction;
+						if (faction2 != null)
+						{
+							if (Find.World.ideoManager == null)
+							{
+								Find.World.ideoManager = new IdeoManager();
+							}
+							if (faction2.def.humanlikeFaction && faction2.ideos == null)
+							{
+								faction2.ideos = new FactionIdeosTracker(faction2);
+								faction2.ideos.ChooseOrGenerateIdeo(FactionIdeosTracker.IdeoGenerationParmsForFaction_BackCompatibility(faction2.def, !ModsConfig.IdeologyActive));
+							}
+						}
+					}
 				}
 			}
 		}

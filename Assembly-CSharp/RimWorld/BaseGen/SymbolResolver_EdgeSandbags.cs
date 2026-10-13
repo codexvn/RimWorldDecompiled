@@ -1,67 +1,72 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_EdgeSandbags : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static readonly IntRange LineLengthRange = new IntRange(2, 5);
-
-	private static readonly IntRange GapLengthRange = new IntRange(1, 5);
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x0200390E RID: 14606
+	public class SymbolResolver_EdgeSandbags : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		int num = 0;
-		int num2 = 0;
-		int num3 = -1;
-		if (rp.rect.EdgeCellsCount < (LineLengthRange.max + GapLengthRange.max) * 2)
+		// Token: 0x0601422D RID: 82477 RVA: 0x005FF700 File Offset: 0x005FD900
+		public override void Resolve(ResolveParams rp)
 		{
-			num = rp.rect.EdgeCellsCount;
-		}
-		else if (Rand.Bool)
-		{
-			num = LineLengthRange.RandomInRange;
-		}
-		else
-		{
-			num2 = GapLengthRange.RandomInRange;
-		}
-		foreach (IntVec3 edgeCell in rp.rect.EdgeCells)
-		{
-			num3++;
-			if (num2 > 0)
+			Map map = BaseGen.globalSettings.map;
+			int num = 0;
+			int num2 = 0;
+			int num3 = -1;
+			if (rp.rect.EdgeCellsCount < (SymbolResolver_EdgeSandbags.LineLengthRange.max + SymbolResolver_EdgeSandbags.GapLengthRange.max) * 2)
 			{
-				num2--;
-				if (num2 == 0)
-				{
-					if (num3 == rp.rect.EdgeCellsCount - 2)
-					{
-						num2 = 1;
-					}
-					else
-					{
-						num = LineLengthRange.RandomInRange;
-					}
-				}
+				num = rp.rect.EdgeCellsCount;
+			}
+			else if (Rand.Bool)
+			{
+				num = SymbolResolver_EdgeSandbags.LineLengthRange.RandomInRange;
 			}
 			else
 			{
-				if (!edgeCell.Standable(map) || edgeCell.Roofed(map) || !edgeCell.SupportsStructureType(map, ThingDefOf.Sandbags.terrainAffordanceNeeded) || GenSpawn.WouldWipeAnythingWith(edgeCell, Rot4.North, ThingDefOf.Sandbags, map, (Thing x) => x.def.category == ThingCategory.Building || x.def.category == ThingCategory.Item))
+				num2 = SymbolResolver_EdgeSandbags.GapLengthRange.RandomInRange;
+			}
+			foreach (IntVec3 intVec in rp.rect.EdgeCells)
+			{
+				num3++;
+				if (num2 > 0)
 				{
-					continue;
-				}
-				if (num > 0)
-				{
-					num--;
-					if (num == 0)
+					num2--;
+					if (num2 == 0)
 					{
-						num2 = GapLengthRange.RandomInRange;
+						if (num3 == rp.rect.EdgeCellsCount - 2)
+						{
+							num2 = 1;
+						}
+						else
+						{
+							num = SymbolResolver_EdgeSandbags.LineLengthRange.RandomInRange;
+						}
 					}
 				}
-				Thing thing = ThingMaker.MakeThing(ThingDefOf.Sandbags, ThingDefOf.Cloth);
-				thing.SetFaction(rp.faction);
-				GenSpawn.Spawn(thing, edgeCell, map);
+				else if (intVec.Standable(map) && !intVec.Roofed(map) && intVec.SupportsStructureType(map, ThingDefOf.Sandbags.terrainAffordanceNeeded))
+				{
+					if (!GenSpawn.WouldWipeAnythingWith(intVec, Rot4.North, ThingDefOf.Sandbags, map, (Thing x) => x.def.category == ThingCategory.Building || x.def.category == ThingCategory.Item))
+					{
+						if (num > 0)
+						{
+							num--;
+							if (num == 0)
+							{
+								num2 = SymbolResolver_EdgeSandbags.GapLengthRange.RandomInRange;
+							}
+						}
+						Thing thing = ThingMaker.MakeThing(ThingDefOf.Sandbags, ThingDefOf.Cloth);
+						thing.SetFaction(rp.faction, null);
+						GenSpawn.Spawn(thing, intVec, map, WipeMode.Vanish);
+					}
+				}
 			}
 		}
+
+		// Token: 0x0400DEC1 RID: 57025
+		private static readonly IntRange LineLengthRange = new IntRange(2, 5);
+
+		// Token: 0x0400DEC2 RID: 57026
+		private static readonly IntRange GapLengthRange = new IntRange(1, 5);
 	}
 }

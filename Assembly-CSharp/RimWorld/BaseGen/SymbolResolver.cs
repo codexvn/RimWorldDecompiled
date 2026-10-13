@@ -1,21 +1,24 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public abstract class SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public IntVec2 minRectSize = IntVec2.One;
-
-	public float selectionWeight = 1f;
-
-	public virtual bool CanResolve(ResolveParams rp)
+	// Token: 0x020039B0 RID: 14768
+	public abstract class SymbolResolver
 	{
-		if (rp.rect.Width >= minRectSize.x)
+		// Token: 0x06014422 RID: 82978 RVA: 0x0060C7DA File Offset: 0x0060A9DA
+		public virtual bool CanResolve(ResolveParams rp)
 		{
-			return rp.rect.Height >= minRectSize.z;
+			return rp.rect.Width >= this.minRectSize.x && rp.rect.Height >= this.minRectSize.z;
 		}
-		return false;
-	}
 
-	public abstract void Resolve(ResolveParams rp);
+		// Token: 0x06014423 RID: 82979
+		public abstract void Resolve(ResolveParams rp);
+
+		// Token: 0x0400DFD3 RID: 57299
+		public IntVec2 minRectSize = IntVec2.One;
+
+		// Token: 0x0400DFD4 RID: 57300
+		public float selectionWeight = 1f;
+	}
 }

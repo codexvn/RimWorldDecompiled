@@ -1,41 +1,47 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class RottableUtility
+namespace RimWorld
 {
-	public static bool IsNotFresh(this Thing t)
+	// Token: 0x02002DF0 RID: 11760
+	public static class RottableUtility
 	{
-		CompRottable compRottable = t.TryGetComp<CompRottable>();
-		if (compRottable != null)
+		// Token: 0x060108CD RID: 67789 RVA: 0x004C5860 File Offset: 0x004C3A60
+		public static bool IsNotFresh(this Thing t)
 		{
-			return compRottable.Stage != RotStage.Fresh;
+			CompRottable compRottable = t.TryGetComp<CompRottable>();
+			return compRottable != null && compRottable.Stage > RotStage.Fresh;
 		}
-		return false;
-	}
 
-	public static bool IsDessicated(this Thing t)
-	{
-		CompRottable compRottable = t.TryGetComp<CompRottable>();
-		if (compRottable != null)
+		// Token: 0x060108CE RID: 67790 RVA: 0x004C5884 File Offset: 0x004C3A84
+		public static bool IsDessicated(this Thing t)
 		{
-			return compRottable.Stage == RotStage.Dessicated;
+			CompRottable compRottable = t.TryGetComp<CompRottable>();
+			return compRottable != null && compRottable.Stage == RotStage.Dessicated;
 		}
-		return false;
-	}
 
-	public static RotStage GetRotStage(this Thing t)
-	{
-		return t.TryGetComp<CompRottable>()?.Stage ?? RotStage.Fresh;
-	}
-
-	public static RotDrawMode GetRotDrawMode(RotStage stage)
-	{
-		return stage switch
+		// Token: 0x060108CF RID: 67791 RVA: 0x004C58A8 File Offset: 0x004C3AA8
+		public static RotStage GetRotStage(this Thing t)
 		{
-			RotStage.Rotting => RotDrawMode.Rotting, 
-			RotStage.Dessicated => RotDrawMode.Dessicated, 
-			_ => RotDrawMode.Fresh, 
-		};
+			CompRottable compRottable = t.TryGetComp<CompRottable>();
+			if (compRottable == null)
+			{
+				return RotStage.Fresh;
+			}
+			return compRottable.Stage;
+		}
+
+		// Token: 0x060108D0 RID: 67792 RVA: 0x004C58C7 File Offset: 0x004C3AC7
+		public static RotDrawMode GetRotDrawMode(RotStage stage)
+		{
+			switch (stage)
+			{
+			case RotStage.Rotting:
+				return RotDrawMode.Rotting;
+			case RotStage.Dessicated:
+				return RotDrawMode.Dessicated;
+			}
+			return RotDrawMode.Fresh;
+		}
 	}
 }

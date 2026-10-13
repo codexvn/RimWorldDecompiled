@@ -1,42 +1,31 @@
+﻿using System;
 using Verse;
 using Verse.AI.Group;
 
-namespace RimWorld;
-
-public static class RestraintsUtility
+namespace RimWorld
 {
-	public static bool InRestraints(Pawn pawn)
+	// Token: 0x0200244D RID: 9293
+	public static class RestraintsUtility
 	{
-		if (!pawn.Spawned)
+		// Token: 0x0600C946 RID: 51526 RVA: 0x003ADE44 File Offset: 0x003AC044
+		public static bool InRestraints(Pawn pawn)
 		{
-			return false;
+			if (!pawn.Spawned)
+			{
+				return false;
+			}
+			if (pawn.HostFaction == null)
+			{
+				return false;
+			}
+			Lord lord = pawn.GetLord();
+			return (lord == null || lord.LordJob == null || !lord.LordJob.NeverInRestraints) && (pawn.guest == null || !pawn.guest.Released) && !pawn.IsSlave;
 		}
-		if (pawn.HostFaction == null)
-		{
-			return false;
-		}
-		Lord lord = pawn.GetLord();
-		if (lord != null && lord.LordJob != null && lord.LordJob.NeverInRestraints)
-		{
-			return false;
-		}
-		if (pawn.guest != null && pawn.guest.Released)
-		{
-			return false;
-		}
-		if (pawn.IsSlave)
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public static bool ShouldShowRestraintsInfo(Pawn pawn)
-	{
-		if (pawn.IsPrisonerOfColony)
+		// Token: 0x0600C947 RID: 51527 RVA: 0x003ADEA8 File Offset: 0x003AC0A8
+		public static bool ShouldShowRestraintsInfo(Pawn pawn)
 		{
-			return InRestraints(pawn);
+			return pawn.IsPrisonerOfColony && RestraintsUtility.InRestraints(pawn);
 		}
-		return false;
 	}
 }

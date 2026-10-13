@@ -1,36 +1,25 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class ThoughtWorker_NoxiousHaze : ThoughtWorker
+namespace RimWorld
 {
-	protected override ThoughtState CurrentStateInternal(Pawn p)
+	// Token: 0x020018CE RID: 6350
+	public class ThoughtWorker_NoxiousHaze : ThoughtWorker
 	{
-		if (NoxiousHazeUtility.IsExposedToNoxiousHaze(p) && AppliesTo(p))
+		// Token: 0x060090C0 RID: 37056 RVA: 0x002AA18F File Offset: 0x002A838F
+		protected override ThoughtState CurrentStateInternal(Pawn p)
 		{
-			return ThoughtState.ActiveDefault;
+			if (NoxiousHazeUtility.IsExposedToNoxiousHaze(p) && this.AppliesTo(p))
+			{
+				return ThoughtState.ActiveDefault;
+			}
+			return ThoughtState.Inactive;
 		}
-		return ThoughtState.Inactive;
-	}
 
-	private bool AppliesTo(Pawn pawn)
-	{
-		if (ThoughtUtility.NullifyingGene(def, pawn) != null)
+		// Token: 0x060090C1 RID: 37057 RVA: 0x002AA1B0 File Offset: 0x002A83B0
+		private bool AppliesTo(Pawn pawn)
 		{
-			return true;
+			return ThoughtUtility.NullifyingGene(this.def, pawn) != null || (pawn.GetStatValue(StatDefOf.ToxicResistance, true, -1) < 1f && pawn.GetStatValue(StatDefOf.ToxicEnvironmentResistance, true, -1) < 1f && !pawn.kindDef.immuneToGameConditionEffects);
 		}
-		if (pawn.GetStatValue(StatDefOf.ToxicResistance) >= 1f)
-		{
-			return false;
-		}
-		if (pawn.GetStatValue(StatDefOf.ToxicEnvironmentResistance) >= 1f)
-		{
-			return false;
-		}
-		if (pawn.kindDef.immuneToGameConditionEffects)
-		{
-			return false;
-		}
-		return true;
 	}
 }

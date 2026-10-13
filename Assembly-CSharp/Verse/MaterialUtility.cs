@@ -1,24 +1,29 @@
+﻿using System;
 using UnityEngine;
 
-namespace Verse;
-
-public static class MaterialUtility
+namespace Verse
 {
-	public static Texture2D GetMaskTexture(this Material mat)
+	// Token: 0x02000D37 RID: 3383
+	public static class MaterialUtility
 	{
-		if (!mat.HasProperty(ShaderPropertyIDs.MaskTex))
+		// Token: 0x0600561D RID: 22045 RVA: 0x001BCCDD File Offset: 0x001BAEDD
+		public static Texture2D GetMaskTexture(this Material mat)
 		{
-			return null;
+			if (!mat.HasProperty(ShaderPropertyIDs.MaskTex))
+			{
+				return null;
+			}
+			return (Texture2D)mat.GetTexture(ShaderPropertyIDs.MaskTex);
 		}
-		return (Texture2D)mat.GetTexture(ShaderPropertyIDs.MaskTex);
-	}
 
-	public static Color GetColorTwo(this Material mat)
-	{
-		if (!mat.HasProperty(ShaderPropertyIDs.ColorTwo))
+		// Token: 0x0600561E RID: 22046 RVA: 0x001BCCFE File Offset: 0x001BAEFE
+		public static Color GetColorTwo(this Material mat)
 		{
-			return Color.white;
+			if (!mat.HasProperty(ShaderPropertyIDs.ColorTwo))
+			{
+				return Color.white;
+			}
+			return mat.GetColor(ShaderPropertyIDs.ColorTwo);
 		}
-		return mat.GetColor(ShaderPropertyIDs.ColorTwo);
 	}
 }

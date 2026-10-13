@@ -1,13 +1,14 @@
-namespace Verse.AI;
+﻿using System;
 
-public class MentalStateWorker_CorpseObsession : MentalStateWorker
+namespace Verse.AI
 {
-	public override bool StateCanOccur(Pawn pawn)
+	// Token: 0x02000FA5 RID: 4005
+	public class MentalStateWorker_CorpseObsession : MentalStateWorker
 	{
-		if (!base.StateCanOccur(pawn))
+		// Token: 0x06006294 RID: 25236 RVA: 0x001F1554 File Offset: 0x001EF754
+		public override bool StateCanOccur(Pawn pawn)
 		{
-			return false;
+			return base.StateCanOccur(pawn) && CorpseObsessionMentalStateUtility.GetClosestCorpseToDigUp(pawn) != null;
 		}
-		return CorpseObsessionMentalStateUtility.GetClosestCorpseToDigUp(pawn) != null;
 	}
 }

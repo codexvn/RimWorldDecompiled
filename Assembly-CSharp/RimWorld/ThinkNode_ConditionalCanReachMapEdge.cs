@@ -1,33 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalCanReachMapEdge : ThinkNode_Conditional
+namespace RimWorld
 {
-	public bool allowFlyOutInstead;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x020017A9 RID: 6057
+	public class ThinkNode_ConditionalCanReachMapEdge : ThinkNode_Conditional
 	{
-		ThinkNode_ConditionalCanReachMapEdge obj = (ThinkNode_ConditionalCanReachMapEdge)base.DeepCopy(resolve);
-		obj.allowFlyOutInstead = allowFlyOutInstead;
-		return obj;
-	}
+		// Token: 0x06008D9D RID: 36253 RVA: 0x002A0E06 File Offset: 0x0029F006
+		public override ThinkNode DeepCopy(bool resolve = true)
+		{
+			ThinkNode_ConditionalCanReachMapEdge thinkNode_ConditionalCanReachMapEdge = (ThinkNode_ConditionalCanReachMapEdge)base.DeepCopy(resolve);
+			thinkNode_ConditionalCanReachMapEdge.allowFlyOutInstead = this.allowFlyOutInstead;
+			return thinkNode_ConditionalCanReachMapEdge;
+		}
 
-	protected override bool Satisfied(Pawn pawn)
-	{
-		if (pawn.CanReachMapEdge())
+		// Token: 0x06008D9E RID: 36254 RVA: 0x002A0E20 File Offset: 0x0029F020
+		protected override bool Satisfied(Pawn pawn)
 		{
-			return true;
+			return pawn.CanReachMapEdge() || (this.allowFlyOutInstead && (pawn.RaceProps.canLeaveMapFlying && !pawn.Position.Roofed(pawn.Map) && pawn.Faction != Faction.OfPlayer && pawn.flight.CanEverFly) && !pawn.IsQuestLodger());
 		}
-		if (allowFlyOutInstead)
-		{
-			if (pawn.RaceProps.canLeaveMapFlying && !pawn.Position.Roofed(pawn.Map) && pawn.Faction != Faction.OfPlayer && pawn.flight.CanEverFly)
-			{
-				return !pawn.IsQuestLodger();
-			}
-			return false;
-		}
-		return false;
+
+		// Token: 0x04005BCE RID: 23502
+		public bool allowFlyOutInstead;
 	}
 }

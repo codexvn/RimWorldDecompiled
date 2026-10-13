@@ -1,18 +1,20 @@
-namespace RimWorld.BaseGen;
+﻿using System;
 
-public class SymbolResolver_AncientComplex_Sketch : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override bool CanResolve(ResolveParams rp)
+	// Token: 0x020038ED RID: 14573
+	public class SymbolResolver_AncientComplex_Sketch : SymbolResolver
 	{
-		if (base.CanResolve(rp))
+		// Token: 0x060141C2 RID: 82370 RVA: 0x005FCD84 File Offset: 0x005FAF84
+		public override bool CanResolve(ResolveParams rp)
 		{
-			return rp.ancientLayoutStructureSketch != null;
+			return base.CanResolve(rp) && rp.ancientLayoutStructureSketch != null;
 		}
-		return false;
-	}
 
-	public override void Resolve(ResolveParams rp)
-	{
-		rp.ancientLayoutStructureSketch.layoutDef.Worker.Spawn(rp.ancientLayoutStructureSketch, BaseGen.globalSettings.map, rp.rect.Min, rp.threatPoints);
+		// Token: 0x060141C3 RID: 82371 RVA: 0x005FCD9C File Offset: 0x005FAF9C
+		public override void Resolve(ResolveParams rp)
+		{
+			rp.ancientLayoutStructureSketch.layoutDef.Worker.Spawn(rp.ancientLayoutStructureSketch, BaseGen.globalSettings.map, rp.rect.Min, rp.threatPoints, null, true, false, null);
+		}
 	}
 }

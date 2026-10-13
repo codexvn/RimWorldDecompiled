@@ -1,36 +1,51 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse;
-
-public class WeatherEventHandler
+namespace Verse
 {
-	private List<WeatherEvent> liveEvents = new List<WeatherEvent>();
-
-	public List<WeatherEvent> LiveEventsListForReading => liveEvents;
-
-	public void AddEvent(WeatherEvent newEvent)
+	// Token: 0x02000548 RID: 1352
+	public class WeatherEventHandler
 	{
-		liveEvents.Add(newEvent);
-		newEvent.FireEvent();
-	}
-
-	public void WeatherEventHandlerTick()
-	{
-		for (int num = liveEvents.Count - 1; num >= 0; num--)
+		// Token: 0x17000632 RID: 1586
+		// (get) Token: 0x06002317 RID: 8983 RVA: 0x000B6989 File Offset: 0x000B4B89
+		public List<WeatherEvent> LiveEventsListForReading
 		{
-			liveEvents[num].WeatherEventTick();
-			if (liveEvents[num].Expired)
+			get
 			{
-				liveEvents.RemoveAt(num);
+				return this.liveEvents;
 			}
 		}
-	}
 
-	public void WeatherEventsDraw()
-	{
-		for (int i = 0; i < liveEvents.Count; i++)
+		// Token: 0x06002318 RID: 8984 RVA: 0x000B6991 File Offset: 0x000B4B91
+		public void AddEvent(WeatherEvent newEvent)
 		{
-			liveEvents[i].WeatherEventDraw();
+			this.liveEvents.Add(newEvent);
+			newEvent.FireEvent();
 		}
+
+		// Token: 0x06002319 RID: 8985 RVA: 0x000B69A8 File Offset: 0x000B4BA8
+		public void WeatherEventHandlerTick()
+		{
+			for (int i = this.liveEvents.Count - 1; i >= 0; i--)
+			{
+				this.liveEvents[i].WeatherEventTick();
+				if (this.liveEvents[i].Expired)
+				{
+					this.liveEvents.RemoveAt(i);
+				}
+			}
+		}
+
+		// Token: 0x0600231A RID: 8986 RVA: 0x000B6A00 File Offset: 0x000B4C00
+		public void WeatherEventsDraw()
+		{
+			for (int i = 0; i < this.liveEvents.Count; i++)
+			{
+				this.liveEvents[i].WeatherEventDraw();
+			}
+		}
+
+		// Token: 0x04001D4B RID: 7499
+		private List<WeatherEvent> liveEvents = new List<WeatherEvent>();
 	}
 }

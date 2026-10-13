@@ -1,38 +1,37 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_Pollution : StatPart
+namespace RimWorld
 {
-	private float multiplier = 1f;
-
-	public override void TransformValue(StatRequest req, ref float val)
+	// Token: 0x02003718 RID: 14104
+	public class StatPart_Pollution : StatPart
 	{
-		if (ActiveFor(req.Thing))
+		// Token: 0x060138DB RID: 80091 RVA: 0x005CC65A File Offset: 0x005CA85A
+		public override void TransformValue(StatRequest req, ref float val)
 		{
-			val *= multiplier;
+			if (this.ActiveFor(req.Thing))
+			{
+				val *= this.multiplier;
+			}
 		}
-	}
 
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
+		// Token: 0x060138DC RID: 80092 RVA: 0x005CC678 File Offset: 0x005CA878
+		public override string ExplanationPart(StatRequest req)
 		{
-			return "StatsReport_Pollution".Translate() + (": x" + multiplier.ToStringPercent());
+			if (req.HasThing && this.ActiveFor(req.Thing))
+			{
+				return "StatsReport_Pollution".Translate() + (": x" + this.multiplier.ToStringPercent());
+			}
+			return null;
 		}
-		return null;
-	}
 
-	private bool ActiveFor(Thing t)
-	{
-		if (!ModLister.CheckBiotech("Pollution stat part"))
+		// Token: 0x060138DD RID: 80093 RVA: 0x005CC6C8 File Offset: 0x005CA8C8
+		private bool ActiveFor(Thing t)
 		{
-			return false;
+			return ModLister.CheckBiotech("Pollution stat part") && (t != null && t.Spawned && t.def.deteriorateFromEnvironmentalEffects) && t.Position.IsPolluted(t.Map);
 		}
-		if (t != null && t.Spawned && t.def.deteriorateFromEnvironmentalEffects)
-		{
-			return t.Position.IsPolluted(t.Map);
-		}
-		return false;
+
+		// Token: 0x0400D8E0 RID: 55520
+		private float multiplier = 1f;
 	}
 }

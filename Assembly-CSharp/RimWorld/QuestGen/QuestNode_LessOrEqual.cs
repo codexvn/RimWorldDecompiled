@@ -1,45 +1,48 @@
-namespace RimWorld.QuestGen;
+﻿using System;
 
-public class QuestNode_LessOrEqual : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<double> value1;
-
-	public SlateRef<double> value2;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x020039F2 RID: 14834
+	public class QuestNode_LessOrEqual : QuestNode
 	{
-		if (value1.GetValue(slate) <= value2.GetValue(slate))
+		// Token: 0x0601457A RID: 83322 RVA: 0x00614B90 File Offset: 0x00612D90
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.value1.GetValue(slate) <= this.value2.GetValue(slate))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		Slate slate = QuestGen.slate;
-		if (value1.GetValue(slate) <= value2.GetValue(slate))
+		// Token: 0x0601457B RID: 83323 RVA: 0x00614BE4 File Offset: 0x00612DE4
+		protected override void RunInt()
 		{
-			if (node != null)
+			Slate slate = QuestGen.slate;
+			if (this.value1.GetValue(slate) <= this.value2.GetValue(slate))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
+
+		// Token: 0x0400E07D RID: 57469
+		public SlateRef<double> value1;
+
+		// Token: 0x0400E07E RID: 57470
+		public SlateRef<double> value2;
+
+		// Token: 0x0400E07F RID: 57471
+		public QuestNode node;
+
+		// Token: 0x0400E080 RID: 57472
+		public QuestNode elseNode;
 	}
 }

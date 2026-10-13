@@ -1,97 +1,112 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_AddWallEdgeThings : SketchResolver
+namespace RimWorld.SketchGen
 {
-	private HashSet<IntVec3> processed = new HashSet<IntVec3>();
-
-	private const float Chance = 0.2f;
-
-	protected override void ResolveInt(SketchResolveParams parms)
+	// Token: 0x020038C1 RID: 14529
+	public class SketchResolver_AddWallEdgeThings : SketchResolver
 	{
-		CellRect outerRect = parms.rect ?? parms.sketch.OccupiedRect;
-		bool allowWood = parms.allowWood ?? true;
-		ThingDef stuff = GenStuff.RandomStuffInexpensiveFor(parms.wallEdgeThing, null, (ThingDef x) => SketchGenUtility.IsStuffAllowed(x, allowWood, parms.useOnlyStonesAvailableOnMap, allowFlammableWalls: true, parms.wallEdgeThing));
-		Rot4 rot = ((parms.wallEdgeThing.size.z > parms.wallEdgeThing.size.x) ? Rot4.North : Rot4.East);
-		Rot4 rot2 = ((parms.wallEdgeThing.size.z > parms.wallEdgeThing.size.x) ? Rot4.East : Rot4.North);
-		CellRect cellRect = GenAdj.OccupiedRect(default(IntVec3), rot, parms.wallEdgeThing.size);
-		CellRect cellRect2 = GenAdj.OccupiedRect(default(IntVec3), rot2, parms.wallEdgeThing.size);
-		bool requireFloor = parms.requireFloor == true;
-		processed.Clear();
-		try
+		// Token: 0x060140F5 RID: 82165 RVA: 0x005F5B80 File Offset: 0x005F3D80
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
-			foreach (IntVec3 item in outerRect.Cells.InRandomOrder())
+			CellRect cellRect = parms.rect ?? parms.sketch.OccupiedRect;
+			bool allowWood = parms.allowWood ?? true;
+			ThingDef stuff = GenStuff.RandomStuffInexpensiveFor(parms.wallEdgeThing, null, (ThingDef x) => SketchGenUtility.IsStuffAllowed(x, allowWood, parms.useOnlyStonesAvailableOnMap, true, parms.wallEdgeThing));
+			Rot4 rot = (parms.wallEdgeThing.size.z > parms.wallEdgeThing.size.x) ? Rot4.North : Rot4.East;
+			Rot4 rot2 = (parms.wallEdgeThing.size.z > parms.wallEdgeThing.size.x) ? Rot4.East : Rot4.North;
+			CellRect cellRect2 = GenAdj.OccupiedRect(default(IntVec3), rot, parms.wallEdgeThing.size);
+			CellRect cellRect3 = GenAdj.OccupiedRect(default(IntVec3), rot2, parms.wallEdgeThing.size);
+			bool requireFloor = parms.requireFloor.GetValueOrDefault();
+			this.processed.Clear();
+			try
 			{
-				CellRect cellRect3 = SketchGenUtility.FindBiggestRectAt(item, outerRect, parms.sketch, processed, (IntVec3 x) => !parms.sketch.ThingsAt(x).Any() && (!requireFloor || (parms.sketch.TerrainAt(x) != null && parms.sketch.TerrainAt(x).layerable)));
-				if (cellRect3.Width < cellRect.Width || cellRect3.Height < cellRect.Height || cellRect3.Width < cellRect2.Width || cellRect3.Height < cellRect2.Height || !Rand.Chance(parms.chance ?? 0.2f))
+				Predicate<IntVec3> <>9__1;
+				foreach (IntVec3 c in cellRect.Cells.InRandomOrder(null))
 				{
-					continue;
-				}
-				CellRect rect = new CellRect(cellRect3.minX, cellRect3.CenterCell.z - cellRect.Height / 2, cellRect.Width, cellRect.Height);
-				CellRect rect2 = new CellRect(cellRect3.maxX - (cellRect.Width - 1), cellRect3.CenterCell.z - cellRect.Height / 2, cellRect.Width, cellRect.Height);
-				CellRect rect3 = new CellRect(cellRect3.CenterCell.x - cellRect2.Width / 2, cellRect3.maxZ - (cellRect2.Height - 1), cellRect2.Width, cellRect2.Height);
-				CellRect rect4 = new CellRect(cellRect3.CenterCell.x - cellRect2.Width / 2, cellRect3.minZ, cellRect2.Width, cellRect2.Height);
-				if ((Rand.Bool && CanPlaceAt(rect, Rot4.West, parms.sketch)) || CanPlaceAt(rect2, Rot4.East, parms.sketch))
-				{
-					if (Rand.Bool && CanPlaceAt(rect, Rot4.West, parms.sketch))
+					CellRect outerRect = cellRect;
+					Sketch sketch = parms.sketch;
+					HashSet<IntVec3> hashSet = this.processed;
+					Predicate<IntVec3> canTraverse;
+					if ((canTraverse = <>9__1) == null)
 					{
-						parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(rect.minX - cellRect.minX, 0, rect.minZ - cellRect.minZ), rot, stuff, 1, null, null, wipeIfCollides: false);
+						canTraverse = (<>9__1 = ((IntVec3 x) => !parms.sketch.ThingsAt(x).Any<SketchThing>() && (!requireFloor || (parms.sketch.TerrainAt(x) != null && parms.sketch.TerrainAt(x).layerable))));
 					}
-					else if (CanPlaceAt(rect2, Rot4.East, parms.sketch))
+					CellRect cellRect4 = SketchGenUtility.FindBiggestRectAt(c, outerRect, sketch, hashSet, canTraverse);
+					if (cellRect4.Width >= cellRect2.Width && cellRect4.Height >= cellRect2.Height && cellRect4.Width >= cellRect3.Width && cellRect4.Height >= cellRect3.Height && Rand.Chance(parms.chance ?? 0.2f))
 					{
-						parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(rect2.minX - cellRect.minX, 0, rect2.minZ - cellRect.minZ), rot.Opposite, stuff, 1, null, null, wipeIfCollides: false);
+						CellRect cellRect5 = new CellRect(cellRect4.minX, cellRect4.CenterCell.z - cellRect2.Height / 2, cellRect2.Width, cellRect2.Height);
+						CellRect cellRect6 = new CellRect(cellRect4.maxX - (cellRect2.Width - 1), cellRect4.CenterCell.z - cellRect2.Height / 2, cellRect2.Width, cellRect2.Height);
+						CellRect cellRect7 = new CellRect(cellRect4.CenterCell.x - cellRect3.Width / 2, cellRect4.maxZ - (cellRect3.Height - 1), cellRect3.Width, cellRect3.Height);
+						CellRect cellRect8 = new CellRect(cellRect4.CenterCell.x - cellRect3.Width / 2, cellRect4.minZ, cellRect3.Width, cellRect3.Height);
+						if ((Rand.Bool && this.CanPlaceAt(cellRect5, Rot4.West, parms.sketch)) || this.CanPlaceAt(cellRect6, Rot4.East, parms.sketch))
+						{
+							if (Rand.Bool && this.CanPlaceAt(cellRect5, Rot4.West, parms.sketch))
+							{
+								parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(cellRect5.minX - cellRect2.minX, 0, cellRect5.minZ - cellRect2.minZ), rot, stuff, 1, null, null, false, 2f);
+							}
+							else if (this.CanPlaceAt(cellRect6, Rot4.East, parms.sketch))
+							{
+								parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(cellRect6.minX - cellRect2.minX, 0, cellRect6.minZ - cellRect2.minZ), rot.Opposite, stuff, 1, null, null, false, 2f);
+							}
+						}
+						else if (Rand.Bool && this.CanPlaceAt(cellRect7, Rot4.North, parms.sketch))
+						{
+							parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(cellRect7.minX - cellRect3.minX, 0, cellRect7.minZ - cellRect3.minZ), rot2.Opposite, stuff, 1, null, null, false, 2f);
+						}
+						else if (this.CanPlaceAt(cellRect8, Rot4.South, parms.sketch))
+						{
+							parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(cellRect8.minX - cellRect3.minX, 0, cellRect8.minZ - cellRect3.minZ), rot2, stuff, 1, null, null, false, 2f);
+						}
 					}
 				}
-				else if (Rand.Bool && CanPlaceAt(rect3, Rot4.North, parms.sketch))
-				{
-					parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(rect3.minX - cellRect2.minX, 0, rect3.minZ - cellRect2.minZ), rot2.Opposite, stuff, 1, null, null, wipeIfCollides: false);
-				}
-				else if (CanPlaceAt(rect4, Rot4.South, parms.sketch))
-				{
-					parms.sketch.AddThing(parms.wallEdgeThing, new IntVec3(rect4.minX - cellRect2.minX, 0, rect4.minZ - cellRect2.minZ), rot2, stuff, 1, null, null, wipeIfCollides: false);
-				}
+			}
+			finally
+			{
+				this.processed.Clear();
 			}
 		}
-		finally
-		{
-			processed.Clear();
-		}
-	}
 
-	protected override bool CanResolveInt(SketchResolveParams parms)
-	{
-		return true;
-	}
-
-	private bool CanPlaceAt(CellRect rect, Rot4 dir, Sketch sketch)
-	{
-		foreach (IntVec3 edgeCell in rect.GetEdgeCells(dir))
+		// Token: 0x060140F6 RID: 82166 RVA: 0x000028E7 File Offset: 0x00000AE7
+		protected override bool CanResolveInt(SketchResolveParams parms)
 		{
-			IntVec3 current = edgeCell;
-			if (dir == Rot4.North)
-			{
-				current.z++;
-			}
-			else if (dir == Rot4.South)
-			{
-				current.z++;
-			}
-			else if (dir == Rot4.East)
-			{
-				current.x++;
-			}
-			else
-			{
-				current.x--;
-			}
-			if (!sketch.ThingsAt(current).Any((SketchThing x) => x.def == ThingDefOf.Wall))
-			{
-				return false;
-			}
+			return true;
 		}
-		return true;
+
+		// Token: 0x060140F7 RID: 82167 RVA: 0x005F6138 File Offset: 0x005F4338
+		private bool CanPlaceAt(CellRect rect, Rot4 dir, Sketch sketch)
+		{
+			foreach (IntVec3 pos in rect.GetEdgeCells(dir))
+			{
+				if (dir == Rot4.North)
+				{
+					pos.z++;
+				}
+				else if (dir == Rot4.South)
+				{
+					pos.z++;
+				}
+				else if (dir == Rot4.East)
+				{
+					pos.x++;
+				}
+				else
+				{
+					pos.x--;
+				}
+				if (!sketch.ThingsAt(pos).Any((SketchThing x) => x.def == ThingDefOf.Wall))
+				{
+					return false;
+				}
+			}
+			return true;
+		}
+
+		// Token: 0x0400DD8E RID: 56718
+		private HashSet<IntVec3> processed = new HashSet<IntVec3>();
+
+		// Token: 0x0400DD8F RID: 56719
+		private const float Chance = 0.2f;
 	}
 }

@@ -1,39 +1,44 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class RoomRoleWorker_ContainmentCell : RoomRoleWorker
+namespace RimWorld
 {
-	public override float GetScore(Room room)
+	// Token: 0x02002161 RID: 8545
+	public class RoomRoleWorker_ContainmentCell : RoomRoleWorker
 	{
-		float num = 0f;
-		List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
-		for (int i = 0; i < containedAndAdjacentThings.Count; i++)
+		// Token: 0x0600BAB2 RID: 47794 RVA: 0x0035E62C File Offset: 0x0035C82C
+		public override float GetScore(Room room)
 		{
-			Thing thing = containedAndAdjacentThings[i];
-			if (ThingRequestGroup.EntityHolder.Includes(thing.def))
+			float num = 0f;
+			List<Thing> containedAndAdjacentThings = room.ContainedAndAdjacentThings;
+			for (int i = 0; i < containedAndAdjacentThings.Count; i++)
 			{
-				num += 100f;
+				Thing thing = containedAndAdjacentThings[i];
+				if (ThingRequestGroup.EntityHolder.Includes(thing.def))
+				{
+					num += 100f;
+				}
+				else if (thing.def == ThingDefOf.Electroharvester || thing.def == ThingDefOf.ElectricInhibitor || thing.def == ThingDefOf.BioferriteHarvester)
+				{
+					num += 50f;
+				}
 			}
-			else if (thing.def == ThingDefOf.Electroharvester || thing.def == ThingDefOf.ElectricInhibitor || thing.def == ThingDefOf.BioferriteHarvester)
-			{
-				num += 50f;
-			}
+			return num;
 		}
-		return num;
-	}
 
-	public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
-	{
-		if (ThingRequestGroup.EntityHolder.Includes(buildingDef))
+		// Token: 0x0600BAB3 RID: 47795 RVA: 0x0035E6A8 File Offset: 0x0035C8A8
+		public override float GetScoreDeltaIfBuildingPlaced(Room room, ThingDef buildingDef)
 		{
-			return 100f;
+			if (ThingRequestGroup.EntityHolder.Includes(buildingDef))
+			{
+				return 100f;
+			}
+			if (buildingDef == ThingDefOf.Electroharvester || buildingDef == ThingDefOf.ElectricInhibitor || buildingDef == ThingDefOf.BioferriteHarvester)
+			{
+				return 50f;
+			}
+			return 0f;
 		}
-		if (buildingDef == ThingDefOf.Electroharvester || buildingDef == ThingDefOf.ElectricInhibitor || buildingDef == ThingDefOf.BioferriteHarvester)
-		{
-			return 50f;
-		}
-		return 0f;
 	}
 }

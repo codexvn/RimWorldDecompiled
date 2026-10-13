@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-[AttributeUsage(AttributeTargets.Field)]
-public class EditorHiddenAttribute : Attribute
+namespace Verse
 {
+	// Token: 0x02000B5C RID: 2908
+	[AttributeUsage(AttributeTargets.Field)]
+	public class EditorHiddenAttribute : Attribute
+	{
+	}
 }

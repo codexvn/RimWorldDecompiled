@@ -1,31 +1,46 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class StorytellerComp_CategoryMTB : StorytellerComp
+namespace RimWorld
 {
-	protected StorytellerCompProperties_CategoryMTB Props => (StorytellerCompProperties_CategoryMTB)props;
-
-	public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+	// Token: 0x02001E30 RID: 7728
+	public class StorytellerComp_CategoryMTB : StorytellerComp
 	{
-		float num = Props.mtbDays;
-		if (Props.mtbDaysFactorByDaysPassedCurve != null)
+		// Token: 0x17001A35 RID: 6709
+		// (get) Token: 0x0600AC10 RID: 44048 RVA: 0x003135BF File Offset: 0x003117BF
+		protected StorytellerCompProperties_CategoryMTB Props
 		{
-			num *= Props.mtbDaysFactorByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
-		}
-		if (Rand.MTBEventOccurs(num, 60000f, 1000f))
-		{
-			IncidentParms parms = GenerateParms(Props.category, target);
-			if (TrySelectRandomIncident(UsableIncidentsInCategory(Props.category, parms), out var foundDef, target))
+			get
 			{
-				yield return new FiringIncident(foundDef, this, parms);
+				return (StorytellerCompProperties_CategoryMTB)this.props;
 			}
 		}
-	}
 
-	public override string ToString()
-	{
-		return $"{base.ToString()} {Props.category}";
+		// Token: 0x0600AC11 RID: 44049 RVA: 0x003135CC File Offset: 0x003117CC
+		public override IEnumerable<FiringIncident> MakeIntervalIncidents(IIncidentTarget target)
+		{
+			float num = this.Props.mtbDays;
+			if (this.Props.mtbDaysFactorByDaysPassedCurve != null)
+			{
+				num *= this.Props.mtbDaysFactorByDaysPassedCurve.Evaluate(GenDate.DaysPassedSinceSettleFloat);
+			}
+			if (Rand.MTBEventOccurs(num, 60000f, 1000f))
+			{
+				IncidentParms parms = this.GenerateParms(this.Props.category, target);
+				IncidentDef def;
+				if (base.TrySelectRandomIncident(base.UsableIncidentsInCategory(this.Props.category, parms), out def, target))
+				{
+					yield return new FiringIncident(def, this, parms);
+				}
+			}
+			yield break;
+		}
+
+		// Token: 0x0600AC12 RID: 44050 RVA: 0x003135E3 File Offset: 0x003117E3
+		public override string ToString()
+		{
+			return string.Format("{0} {1}", base.ToString(), this.Props.category);
+		}
 	}
 }

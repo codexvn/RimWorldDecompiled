@@ -1,97 +1,95 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.Planet;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_RefugeePodCrash_Baby : QuestNode_Root_WandererJoin
+namespace RimWorld.QuestGen
 {
-	private const float ChanceToTryGenerateParent = 0.5f;
-
-	private const string HasParentFlagName = "hasParent";
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003B83 RID: 15235
+	public class QuestNode_Root_RefugeePodCrash_Baby : QuestNode_Root_WandererJoin
 	{
-		if (Find.Storyteller.difficulty.ChildrenAllowed)
+		// Token: 0x06014B20 RID: 84768 RVA: 0x0063005E File Offset: 0x0062E25E
+		protected override bool TestRunInt(Slate slate)
 		{
-			return base.TestRunInt(slate);
+			return Find.Storyteller.difficulty.ChildrenAllowed && base.TestRunInt(slate);
 		}
-		return false;
-	}
 
-	public override Pawn GeneratePawn()
-	{
-		return GeneratePawn_NewTemp(null);
-	}
-
-	public override Pawn GeneratePawn_NewTemp(Map map)
-	{
-		Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out var faction, tryMedievalOrBetter: true);
-		PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, faction, PawnGenerationContext.NonPlayer, map?.Tile, forceGenerateNewPawn: true, allowDead: false, allowDowned: true, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, forceRecruitable: true);
-		request.AllowedDevelopmentalStages = DevelopmentalStage.Baby;
-		Pawn pawn = PawnGenerator.GeneratePawn(request);
-		pawn.ageTracker.AgeChronologicalTicks = pawn.ageTracker.AgeBiologicalTicks;
-		return pawn;
-	}
-
-	protected override void AddSpawnPawnQuestParts(Quest quest, Map map, Pawn pawn)
-	{
-		List<Thing> list = new List<Thing> { pawn };
-		if (Rand.Value < 0.5f)
+		// Token: 0x06014B21 RID: 84769 RVA: 0x0063007C File Offset: 0x0062E27C
+		public override Pawn GeneratePawn()
 		{
-			Pawn mother = pawn.GetMother();
-			bool flag = mother == null || Find.WorldPawns.GetSituation(mother) == WorldPawnSituation.None;
-			Pawn father = pawn.GetFather();
-			bool flag2 = father == null || Find.WorldPawns.GetSituation(father) == WorldPawnSituation.None;
-			if (flag || flag2)
+			Faction faction;
+			Find.FactionManager.TryGetRandomNonColonyHumanlikeFaction(out faction, true, false, TechLevel.Undefined, TechLevel.Undefined, false, false);
+			Pawn pawn = PawnGenerator.GeneratePawn(new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, faction, PawnGenerationContext.NonPlayer, null, true, false, true, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, false, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, true, false, false, -1, 0, false)
 			{
-				QuestGen.slate.Set("hasParent", var: true);
-				PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, pawn.Faction, PawnGenerationContext.NonPlayer, map.Tile, forceGenerateNewPawn: true, allowDead: true, allowDowned: false, canGeneratePawnRelations: true, mustBeCapableOfViolence: false, 1f, forceAddFreeWarmLayerIfNeeded: false, allowGay: true, allowPregnant: false, allowFood: true, allowAddictions: true, inhabitant: false, certainlyBeenInCryptosleep: false, forceRedressWorldPawnIfFormerColonist: false, worldPawnFactionDoesntMatter: false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, forceNoIdeo: false, forceNoBackstory: false, forbidAnyTitle: false, forceDead: true);
-				if (flag && !flag2)
+				AllowedDevelopmentalStages = DevelopmentalStage.Baby
+			});
+			pawn.ageTracker.AgeChronologicalTicks = pawn.ageTracker.AgeBiologicalTicks;
+			return pawn;
+		}
+
+		// Token: 0x06014B22 RID: 84770 RVA: 0x00630158 File Offset: 0x0062E358
+		protected override void AddSpawnPawnQuestParts(Quest quest, Map map, Pawn pawn)
+		{
+			List<Thing> list = new List<Thing>
+			{
+				pawn
+			};
+			if (Rand.Value < 0.5f)
+			{
+				Pawn mother = pawn.GetMother();
+				bool flag = mother == null || Find.WorldPawns.GetSituation(mother) == WorldPawnSituation.None;
+				Pawn father = pawn.GetFather();
+				bool flag2 = father == null || Find.WorldPawns.GetSituation(father) == WorldPawnSituation.None;
+				if (flag || flag2)
 				{
-					request.FixedGender = Gender.Female;
+					QuestGen.slate.Set<bool>("hasParent", true, false);
+					PawnGenerationRequest request = new PawnGenerationRequest(PawnKindDefOf.SpaceRefugee, pawn.Faction, PawnGenerationContext.NonPlayer, null, true, true, false, true, false, 1f, false, true, false, true, true, false, false, false, false, 0f, 0f, null, 1f, null, null, null, null, null, null, null, null, null, null, null, null, false, false, false, true, null, null, null, null, null, 0f, DevelopmentalStage.Adult, null, null, null, false, false, false, -1, 0, false);
+					if (flag && !flag2)
+					{
+						request.FixedGender = new Gender?(Gender.Female);
+					}
+					else if (flag2 && !flag)
+					{
+						request.FixedGender = new Gender?(Gender.Male);
+					}
+					else if (Rand.Value < 0.5f)
+					{
+						request.FixedGender = new Gender?(Gender.Female);
+					}
+					else
+					{
+						request.FixedGender = new Gender?(Gender.Male);
+					}
+					Pawn pawn2 = PawnGenerator.GeneratePawn(request);
+					pawn.relations.AddDirectRelation(PawnRelationDefOf.Parent, pawn2);
+					list.Add(pawn2.Corpse);
 				}
-				else if (flag2 && !flag)
-				{
-					request.FixedGender = Gender.Male;
-				}
-				else if (Rand.Value < 0.5f)
-				{
-					request.FixedGender = Gender.Female;
-				}
-				else
-				{
-					request.FixedGender = Gender.Male;
-				}
-				Pawn pawn2 = PawnGenerator.GeneratePawn(request);
-				pawn.relations.AddDirectRelation(PawnRelationDefOf.Parent, pawn2);
-				list.Add(pawn2.Corpse);
 			}
+			else
+			{
+				QuestGen.slate.Set<bool>("hasParent", false, false);
+			}
+			quest.DropPods(map.Parent, list, null, null, null, null, new bool?(false), false, false, false, null, null, QuestPart.SignalListenMode.OngoingOnly, null, true, true, false, null);
 		}
-		else
-		{
-			QuestGen.slate.Set("hasParent", var: false);
-		}
-		quest.DropPods(map.Parent, list, null, null, null, null, false, useTradeDropSpot: false, joinPlayer: false, makePrisoners: false, null, null, QuestPart.SignalListenMode.OngoingOnly, null, destroyItemsOnCleanup: true, dropAllInSamePod: true);
-	}
 
-	[Obsolete]
-	public override void SendLetter(Quest quest, Pawn pawn)
-	{
-		SendLetter_NewTemp(quest, pawn, Find.AnyPlayerHomeMap);
-	}
-
-	public override void SendLetter_NewTemp(Quest quest, Pawn pawn, Map map)
-	{
-		TaggedString title = "LetterLabelRefugeePodCrash".Translate();
-		TaggedString letterText = "RefugeePodCrashBaby".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
-		if (QuestGen.slate.Get("hasParent", defaultValue: false))
+		// Token: 0x06014B23 RID: 84771 RVA: 0x0063032C File Offset: 0x0062E52C
+		public override void SendLetter(Quest quest, Pawn pawn)
 		{
-			letterText += "\n\n" + "RefugeePodCrashBabyHasParent".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
+			TaggedString label = "LetterLabelRefugeePodCrash".Translate();
+			TaggedString taggedString = "RefugeePodCrashBaby".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			if (QuestGen.slate.Get<bool>("hasParent", false, false))
+			{
+				taggedString += "\n\n" + "RefugeePodCrashBabyHasParent".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			}
+			QuestNode_Root_WandererJoin_WalkIn.AppendCharityInfoToLetter("JoinerCharityInfo".Translate(pawn), ref taggedString);
+			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref taggedString, ref label, pawn);
+			Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NeutralEvent, new TargetInfo(pawn), null, null, null, null, 0, true);
 		}
-		QuestNode_Root_WandererJoin_WalkIn.AppendCharityInfoToLetter("JoinerCharityInfo".Translate(pawn), ref letterText);
-		PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref letterText, ref title, pawn);
-		Find.LetterStack.ReceiveLetter(title, letterText, LetterDefOf.NeutralEvent, new TargetInfo(pawn));
+
+		// Token: 0x0400E5F2 RID: 58866
+		private const float ChanceToTryGenerateParent = 0.5f;
+
+		// Token: 0x0400E5F3 RID: 58867
+		private const string HasParentFlagName = "hasParent";
 	}
 }

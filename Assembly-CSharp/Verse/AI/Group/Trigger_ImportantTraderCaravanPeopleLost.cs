@@ -1,22 +1,26 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public class Trigger_ImportantTraderCaravanPeopleLost : Trigger
+namespace Verse.AI.Group
 {
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010E2 RID: 4322
+	public class Trigger_ImportantTraderCaravanPeopleLost : Trigger
 	{
-		if (signal.type == TriggerSignalType.PawnLost && (signal.condition == PawnLostCondition.Incapped || signal.condition == PawnLostCondition.MadePrisoner || signal.condition == PawnLostCondition.Killed))
+		// Token: 0x06006946 RID: 26950 RVA: 0x00212EB0 File Offset: 0x002110B0
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			if (signal.Pawn.GetTraderCaravanRole() == TraderCaravanRole.Trader || signal.Pawn.RaceProps.packAnimal)
+			if (signal.type == TriggerSignalType.PawnLost && (signal.condition == PawnLostCondition.Incapped || signal.condition == PawnLostCondition.MadePrisoner || signal.condition == PawnLostCondition.Killed))
 			{
-				return true;
+				if (signal.Pawn.GetTraderCaravanRole() == TraderCaravanRole.Trader || signal.Pawn.RaceProps.packAnimal)
+				{
+					return true;
+				}
+				if (lord.numPawnsLostViolently > 0 && (float)lord.numPawnsLostViolently / (float)lord.numPawnsEverGained >= 0.5f)
+				{
+					return true;
+				}
 			}
-			if (lord.numPawnsLostViolently > 0 && (float)lord.numPawnsLostViolently / (float)lord.numPawnsEverGained >= 0.5f)
-			{
-				return true;
-			}
+			return false;
 		}
-		return false;
 	}
 }

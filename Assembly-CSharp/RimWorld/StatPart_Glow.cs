@@ -1,87 +1,103 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class StatPart_Glow : StatPart
+namespace RimWorld
 {
-	private bool pawnOnly;
-
-	private bool humanlikeOnly;
-
-	private SimpleCurve factorFromGlowCurve;
-
-	private bool ignoreIfPrefersDarkness;
-
-	private bool ignoreIfIncapableOfSight;
-
-	public override IEnumerable<string> ConfigErrors()
+	// Token: 0x02003701 RID: 14081
+	public class StatPart_Glow : StatPart
 	{
-		if (factorFromGlowCurve == null)
+		// Token: 0x0601386C RID: 79980 RVA: 0x005CB543 File Offset: 0x005C9743
+		public override IEnumerable<string> ConfigErrors()
 		{
-			yield return "factorFromLightCurve is null.";
-		}
-	}
-
-	public override void TransformValue(StatRequest req, ref float val)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
-		{
-			val *= FactorFromGlow(req.Thing);
-		}
-	}
-
-	public override string ExplanationPart(StatRequest req)
-	{
-		if (req.HasThing && ActiveFor(req.Thing))
-		{
-			return "StatsReport_LightMultiplier".Translate(GlowLevel(req.Thing).ToStringPercent()) + ": x" + FactorFromGlow(req.Thing).ToStringPercent();
-		}
-		return null;
-	}
-
-	private bool ActiveFor(Thing t)
-	{
-		if (t is Pawn pawn)
-		{
-			if (humanlikeOnly && !pawn.RaceProps.Humanlike)
+			if (this.factorFromGlowCurve == null)
 			{
-				return false;
+				yield return "factorFromLightCurve is null.";
 			}
-			if (pawn.IsShambler)
+			yield break;
+		}
+
+		// Token: 0x0601386D RID: 79981 RVA: 0x005CB553 File Offset: 0x005C9753
+		public override void TransformValue(StatRequest req, ref float val)
+		{
+			if (req.HasThing && this.ActiveFor(req.Thing))
 			{
-				return false;
+				val *= this.FactorFromGlow(req.Thing);
 			}
-			if (ignoreIfIncapableOfSight && PawnUtility.IsBiologicallyOrArtificiallyBlind(pawn))
+		}
+
+		// Token: 0x0601386E RID: 79982 RVA: 0x005CB580 File Offset: 0x005C9780
+		public override string ExplanationPart(StatRequest req)
+		{
+			if (req.HasThing && this.ActiveFor(req.Thing))
 			{
-				return false;
+				return "StatsReport_LightMultiplier".Translate(this.GlowLevel(req.Thing).ToStringPercent()) + ": x" + this.FactorFromGlow(req.Thing).ToStringPercent();
 			}
-			if (ignoreIfPrefersDarkness)
+			return null;
+		}
+
+		// Token: 0x0601386F RID: 79983 RVA: 0x005CB5F0 File Offset: 0x005C97F0
+		private bool ActiveFor(Thing t)
+		{
+			Pawn pawn = t as Pawn;
+			if (pawn != null)
 			{
-				if (pawn.Ideo != null && pawn.Ideo.IdeoPrefersDarkness())
+				if (this.humanlikeOnly && !pawn.RaceProps.Humanlike)
 				{
 					return false;
 				}
-				if (pawn.genes != null && !pawn.genes.AffectedByDarkness)
+				if (pawn.IsShambler)
 				{
 					return false;
 				}
+				if (this.ignoreIfIncapableOfSight && PawnUtility.IsBiologicallyOrArtificiallyBlind(pawn))
+				{
+					return false;
+				}
+				if (this.ignoreIfPrefersDarkness)
+				{
+					if (pawn.Ideo != null && pawn.Ideo.IdeoPrefersDarkness())
+					{
+						return false;
+					}
+					if (pawn.genes != null && !pawn.genes.AffectedByDarkness)
+					{
+						return false;
+					}
+				}
 			}
+			else if (this.pawnOnly)
+			{
+				return false;
+			}
+			return t.Spawned;
 		}
-		else if (pawnOnly)
+
+		// Token: 0x06013870 RID: 79984 RVA: 0x005CB680 File Offset: 0x005C9880
+		private float GlowLevel(Thing t)
 		{
-			return false;
+			return t.Map.glowGrid.GroundGlowAt(t.Position, false, false);
 		}
-		return t.Spawned;
-	}
 
-	private float GlowLevel(Thing t)
-	{
-		return t.Map.glowGrid.GroundGlowAt(t.Position);
-	}
+		// Token: 0x06013871 RID: 79985 RVA: 0x005CB69A File Offset: 0x005C989A
+		private float FactorFromGlow(Thing t)
+		{
+			return this.factorFromGlowCurve.Evaluate(this.GlowLevel(t));
+		}
 
-	private float FactorFromGlow(Thing t)
-	{
-		return factorFromGlowCurve.Evaluate(GlowLevel(t));
+		// Token: 0x0400D8BC RID: 55484
+		private bool pawnOnly;
+
+		// Token: 0x0400D8BD RID: 55485
+		private bool humanlikeOnly;
+
+		// Token: 0x0400D8BE RID: 55486
+		private SimpleCurve factorFromGlowCurve;
+
+		// Token: 0x0400D8BF RID: 55487
+		private bool ignoreIfPrefersDarkness;
+
+		// Token: 0x0400D8C0 RID: 55488
+		private bool ignoreIfIncapableOfSight;
 	}
 }

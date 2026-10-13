@@ -1,29 +1,49 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Comp_ProjectileEffecter : ThingComp
+namespace RimWorld
 {
-	private Effecter effecter;
-
-	public CompProperties_ProjectileEffecter Props => (CompProperties_ProjectileEffecter)props;
-
-	public override void CompTick()
+	// Token: 0x0200197D RID: 6525
+	public class Comp_ProjectileEffecter : ThingComp
 	{
-		base.CompTick();
-		if (parent.Spawned)
+		// Token: 0x1700167A RID: 5754
+		// (get) Token: 0x0600940F RID: 37903 RVA: 0x002B8377 File Offset: 0x002B6577
+		public CompProperties_ProjectileEffecter Props
 		{
-			Projectile projectile = parent as Projectile;
-			if (effecter == null)
+			get
 			{
-				effecter = Props.effecterDef.Spawn(projectile.Position, projectile.intendedTarget.Cell, parent.MapHeld);
+				return (CompProperties_ProjectileEffecter)this.props;
 			}
-			effecter?.EffectTick(parent, parent);
 		}
-		else
+
+		// Token: 0x06009410 RID: 37904 RVA: 0x002B8384 File Offset: 0x002B6584
+		public override void CompTick()
 		{
-			effecter?.Cleanup();
-			effecter = null;
+			base.CompTick();
+			if (!this.parent.Spawned)
+			{
+				Effecter effecter = this.effecter;
+				if (effecter != null)
+				{
+					effecter.Cleanup();
+				}
+				this.effecter = null;
+				return;
+			}
+			Projectile projectile = this.parent as Projectile;
+			if (this.effecter == null)
+			{
+				this.effecter = this.Props.effecterDef.Spawn(projectile.Position, projectile.intendedTarget.Cell, this.parent.MapHeld, 1f);
+			}
+			Effecter effecter2 = this.effecter;
+			if (effecter2 == null)
+			{
+				return;
+			}
+			effecter2.EffectTick(this.parent, this.parent);
 		}
+
+		// Token: 0x04005F9B RID: 24475
+		private Effecter effecter;
 	}
 }

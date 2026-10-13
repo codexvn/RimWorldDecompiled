@@ -1,14 +1,24 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public interface IHaulDestination : IStoreSettingsParent
+namespace RimWorld
 {
-	IntVec3 Position { get; }
+	// Token: 0x020029A7 RID: 10663
+	public interface IHaulDestination : IStoreSettingsParent
+	{
+		// Token: 0x17002415 RID: 9237
+		// (get) Token: 0x0600EB09 RID: 60169
+		IntVec3 Position { get; }
 
-	Map Map { get; }
+		// Token: 0x17002416 RID: 9238
+		// (get) Token: 0x0600EB0A RID: 60170
+		Map Map { get; }
 
-	bool HaulDestinationEnabled { get; }
+		// Token: 0x17002417 RID: 9239
+		// (get) Token: 0x0600EB0B RID: 60171
+		bool HaulDestinationEnabled { get; }
 
-	bool Accepts(Thing t);
+		// Token: 0x0600EB0C RID: 60172
+		bool Accepts(Thing t);
+	}
 }

@@ -1,75 +1,122 @@
+﻿using System;
 using RimWorld;
 
-namespace Verse;
-
-public class HediffComp_Discoverable : HediffComp
+namespace Verse
 {
-	private bool discovered;
-
-	private const int CheckInterval = 103;
-
-	public HediffCompProperties_Discoverable Props => (HediffCompProperties_Discoverable)props;
-
-	public override void CompExposeData()
+	// Token: 0x020006AA RID: 1706
+	public class HediffComp_Discoverable : HediffComp
 	{
-		Scribe_Values.Look(ref discovered, "discovered", defaultValue: false);
-	}
-
-	public override void CompPostTickInterval(ref float severityAdjustment, int delta)
-	{
-		if (parent.pawn.IsHashIntervalTick(103, delta))
+		// Token: 0x1700077D RID: 1917
+		// (get) Token: 0x06002ACC RID: 10956 RVA: 0x000E0756 File Offset: 0x000DE956
+		public HediffCompProperties_Discoverable Props
 		{
-			CheckDiscovered();
-		}
-	}
-
-	public override void CompPostPostAdd(DamageInfo? dinfo)
-	{
-		CheckDiscovered();
-	}
-
-	private void CheckDiscovered()
-	{
-		if (discovered || !parent.Visible)
-		{
-			return;
-		}
-		discovered = true;
-		if (!Props.sendLetterWhenDiscovered || !PawnUtility.ShouldSendNotificationAbout(base.Pawn))
-		{
-			return;
-		}
-		if (base.Pawn.RaceProps.Humanlike)
-		{
-			string text = (Props.discoverLetterLabel.NullOrEmpty() ? ((string)("LetterLabelNewDisease".Translate() + ": " + base.Def.LabelCap)) : string.Format(Props.discoverLetterLabel, base.Pawn.LabelShortCap).CapitalizeFirst());
-			string text2 = ((!Props.discoverLetterText.NullOrEmpty()) ? ((string)Props.discoverLetterText.Formatted(base.Pawn.LabelIndefinite(), base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn).CapitalizeFirst()) : ((parent.Part != null) ? ((string)"NewPartDisease".Translate(base.Pawn.Named("PAWN"), parent.Part.Label, base.Pawn.LabelDefinite(), base.Def.label).AdjustedFor(base.Pawn).CapitalizeFirst()) : ((string)"NewDisease".Translate(base.Pawn.Named("PAWN"), base.Def.label, base.Pawn.LabelDefinite()).AdjustedFor(base.Pawn).CapitalizeFirst())));
-			Find.LetterStack.ReceiveLetter(text, text2, (Props.letterType != null) ? Props.letterType : LetterDefOf.NegativeEvent, base.Pawn);
-			return;
-		}
-		string text3;
-		if (Props.discoverLetterText.NullOrEmpty())
-		{
-			text3 = ((parent.Part != null) ? ((string)"NewPartDiseaseAnimal".Translate(base.Pawn.LabelShort, parent.Part.Label, base.Pawn.LabelDefinite(), base.Def.LabelCap, base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn).CapitalizeFirst()) : ((string)"NewDiseaseAnimal".Translate(base.Pawn.LabelShort, base.Def.LabelCap, base.Pawn.LabelDefinite(), base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn).CapitalizeFirst()));
-		}
-		else
-		{
-			string text4 = base.Pawn.KindLabelIndefinite();
-			if (base.Pawn.Name.IsValid && !base.Pawn.Name.Numerical)
+			get
 			{
-				text4 = base.Pawn.Name?.ToString() + " (" + base.Pawn.KindLabel + ")";
+				return (HediffCompProperties_Discoverable)this.props;
 			}
-			text3 = Props.discoverLetterText.Formatted(text4, base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn).CapitalizeFirst();
 		}
-		Messages.Message(text3, base.Pawn, (Props.messageType != null) ? Props.messageType : MessageTypeDefOf.NegativeHealthEvent);
-	}
 
-	public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
-	{
-		CheckDiscovered();
-	}
+		// Token: 0x06002ACD RID: 10957 RVA: 0x000E0763 File Offset: 0x000DE963
+		public override void CompExposeData()
+		{
+			Scribe_Values.Look<bool>(ref this.discovered, "discovered", false, false);
+		}
 
-	public override string CompDebugString()
-	{
-		return "discovered: " + discovered;
+		// Token: 0x06002ACE RID: 10958 RVA: 0x000E0777 File Offset: 0x000DE977
+		public override void CompPostTickInterval(ref float severityAdjustment, int delta)
+		{
+			if (this.parent.pawn.IsHashIntervalTick(103, delta))
+			{
+				this.CheckDiscovered();
+			}
+		}
+
+		// Token: 0x06002ACF RID: 10959 RVA: 0x000E0794 File Offset: 0x000DE994
+		public override void CompPostPostAdd(DamageInfo? dinfo)
+		{
+			this.CheckDiscovered();
+		}
+
+		// Token: 0x06002AD0 RID: 10960 RVA: 0x000E079C File Offset: 0x000DE99C
+		private void CheckDiscovered()
+		{
+			if (this.discovered)
+			{
+				return;
+			}
+			if (!this.parent.Visible)
+			{
+				return;
+			}
+			this.discovered = true;
+			if (this.Props.sendLetterWhenDiscovered && PawnUtility.ShouldSendNotificationAbout(base.Pawn))
+			{
+				if (base.Pawn.RaceProps.Humanlike)
+				{
+					string str;
+					if (!this.Props.discoverLetterLabel.NullOrEmpty())
+					{
+						str = string.Format(this.Props.discoverLetterLabel, base.Pawn.LabelShortCap).CapitalizeFirst();
+					}
+					else
+					{
+						str = "LetterLabelNewDisease".Translate() + ": " + base.Def.LabelCap;
+					}
+					string str2;
+					if (!this.Props.discoverLetterText.NullOrEmpty())
+					{
+						str2 = this.Props.discoverLetterText.Formatted(base.Pawn.LabelIndefinite(), base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+					}
+					else if (this.parent.Part == null)
+					{
+						str2 = "NewDisease".Translate(base.Pawn.Named("PAWN"), base.Def.label, base.Pawn.LabelDefinite()).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+					}
+					else
+					{
+						str2 = "NewPartDisease".Translate(base.Pawn.Named("PAWN"), this.parent.Part.Label, base.Pawn.LabelDefinite(), base.Def.label).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+					}
+					Find.LetterStack.ReceiveLetter(str, str2, (this.Props.letterType != null) ? this.Props.letterType : LetterDefOf.NegativeEvent, base.Pawn, null, null, null, null, 0, true);
+					return;
+				}
+				string text;
+				if (!this.Props.discoverLetterText.NullOrEmpty())
+				{
+					string value = base.Pawn.KindLabelIndefinite();
+					if (base.Pawn.Name.IsValid && !base.Pawn.Name.Numerical)
+					{
+						Name name = base.Pawn.Name;
+						value = ((name != null) ? name.ToString() : null) + " (" + base.Pawn.KindLabel + ")";
+					}
+					text = this.Props.discoverLetterText.Formatted(value, base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+				}
+				else if (this.parent.Part == null)
+				{
+					text = "NewDiseaseAnimal".Translate(base.Pawn.LabelShort, base.Def.LabelCap, base.Pawn.LabelDefinite(), base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+				}
+				else
+				{
+					text = "NewPartDiseaseAnimal".Translate(base.Pawn.LabelShort, this.parent.Part.Label, base.Pawn.LabelDefinite(), base.Def.LabelCap, base.Pawn.Named("PAWN")).AdjustedFor(base.Pawn, "PAWN", true).CapitalizeFirst();
+				}
+				Messages.Message(text, base.Pawn, (this.Props.messageType != null) ? this.Props.messageType : MessageTypeDefOf.NegativeHealthEvent, true);
+			}
+		}
+
+		// Token: 0x06002AD1 RID: 10961 RVA: 0x000E0794 File Offset: 0x000DE994
+		public override void Notify_PawnDied(DamageInfo? dinfo, Hediff culprit = null)
+		{
+			this.CheckDiscovered();
+		}
+
+		// Token: 0x06002AD2 RID: 10962 RVA: 0x000E0BDE File Offset: 0x000DEDDE
+		public override string CompDebugString()
+		{
+			return "discovered: " + this.discovered.ToString();
+		}
+
+		// Token: 0x04002298 RID: 8856
+		private bool discovered;
+
+		// Token: 0x04002299 RID: 8857
+		private const int CheckInterval = 103;
 	}
 }

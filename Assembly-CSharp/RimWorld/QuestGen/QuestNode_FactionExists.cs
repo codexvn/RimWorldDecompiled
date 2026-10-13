@@ -1,47 +1,50 @@
-namespace RimWorld.QuestGen;
+﻿using System;
 
-public class QuestNode_FactionExists : QuestNode
+namespace RimWorld.QuestGen
 {
-	public SlateRef<Faction> faction;
-
-	public QuestNode node;
-
-	public QuestNode elseNode;
-
-	protected override bool TestRunInt(Slate slate)
+	// Token: 0x02003A97 RID: 14999
+	public class QuestNode_FactionExists : QuestNode
 	{
-		if (FactionExists(slate))
+		// Token: 0x060147A9 RID: 83881 RVA: 0x0061DA7B File Offset: 0x0061BC7B
+		protected override bool TestRunInt(Slate slate)
 		{
-			if (node != null)
+			if (this.FactionExists(slate))
 			{
-				return node.TestRun(slate);
+				return this.node == null || this.node.TestRun(slate);
 			}
-			return true;
+			return this.elseNode == null || this.elseNode.TestRun(slate);
 		}
-		if (elseNode != null)
-		{
-			return elseNode.TestRun(slate);
-		}
-		return true;
-	}
 
-	protected override void RunInt()
-	{
-		if (FactionExists(QuestGen.slate))
+		// Token: 0x060147AA RID: 83882 RVA: 0x0061DAB3 File Offset: 0x0061BCB3
+		protected override void RunInt()
 		{
-			if (node != null)
+			if (this.FactionExists(QuestGen.slate))
 			{
-				node.Run();
+				if (this.node != null)
+				{
+					this.node.Run();
+					return;
+				}
+			}
+			else if (this.elseNode != null)
+			{
+				this.elseNode.Run();
 			}
 		}
-		else if (elseNode != null)
-		{
-			elseNode.Run();
-		}
-	}
 
-	private bool FactionExists(Slate slate)
-	{
-		return faction.GetValue(slate) != null;
+		// Token: 0x060147AB RID: 83883 RVA: 0x0061DAE9 File Offset: 0x0061BCE9
+		private bool FactionExists(Slate slate)
+		{
+			return this.faction.GetValue(slate) != null;
+		}
+
+		// Token: 0x0400E2C9 RID: 58057
+		public SlateRef<Faction> faction;
+
+		// Token: 0x0400E2CA RID: 58058
+		public QuestNode node;
+
+		// Token: 0x0400E2CB RID: 58059
+		public QuestNode elseNode;
 	}
 }

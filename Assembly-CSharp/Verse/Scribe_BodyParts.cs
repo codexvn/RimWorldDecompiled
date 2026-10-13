@@ -1,36 +1,41 @@
-namespace Verse;
+﻿using System;
 
-public static class Scribe_BodyParts
+namespace Verse
 {
-	public static void Look(ref BodyPartRecord part, string label, BodyPartRecord defaultValue = null)
+	// Token: 0x02000861 RID: 2145
+	public static class Scribe_BodyParts
 	{
-		if (Scribe.mode == LoadSaveMode.Saving)
+		// Token: 0x06003629 RID: 13865 RVA: 0x001212E0 File Offset: 0x0011F4E0
+		public static void Look(ref BodyPartRecord part, string label, BodyPartRecord defaultValue = null)
 		{
-			if (part == defaultValue || !Scribe.EnterNode(label))
+			if (Scribe.mode == LoadSaveMode.Saving)
 			{
-				return;
-			}
-			try
-			{
-				if (part == null)
+				if (part == defaultValue || !Scribe.EnterNode(label))
 				{
-					Scribe.saver.WriteAttribute("IsNull", "True");
 					return;
 				}
-				string value = part.body.defName;
-				Scribe_Values.Look(ref value, "body");
-				int value2 = part.Index;
-				Scribe_Values.Look(ref value2, "index", 0, forceSave: true);
-				return;
+				try
+				{
+					if (part == null)
+					{
+						Scribe.saver.WriteAttribute("IsNull", "True");
+						return;
+					}
+					string defName = part.body.defName;
+					Scribe_Values.Look<string>(ref defName, "body", null, false);
+					int index = part.Index;
+					Scribe_Values.Look<int>(ref index, "index", 0, true);
+					return;
+				}
+				finally
+				{
+					Scribe.ExitNode();
+				}
 			}
-			finally
+			if (Scribe.mode == LoadSaveMode.LoadingVars)
 			{
-				Scribe.ExitNode();
+				part = ScribeExtractor.BodyPartFromNode(Scribe.loader.curXmlParent[label], label, defaultValue);
 			}
-		}
-		if (Scribe.mode == LoadSaveMode.LoadingVars)
-		{
-			part = ScribeExtractor.BodyPartFromNode(Scribe.loader.curXmlParent[label], label, defaultValue);
 		}
 	}
 }

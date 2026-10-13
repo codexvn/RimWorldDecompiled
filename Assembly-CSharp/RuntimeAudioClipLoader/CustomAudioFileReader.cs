@@ -1,125 +1,173 @@
+﻿using System;
 using System.IO;
 using NAudio.Wave;
 using NAudio.Wave.SampleProviders;
 using NVorbis.NAudioSupport;
 using UnityEngine;
 
-namespace RuntimeAudioClipLoader;
-
-internal class CustomAudioFileReader : WaveStream, ISampleProvider
+namespace RuntimeAudioClipLoader
 {
-	private WaveStream readerStream;
-
-	private readonly SampleChannel sampleChannel;
-
-	private readonly int destBytesPerSample;
-
-	private readonly int sourceBytesPerSample;
-
-	private readonly long length;
-
-	private readonly object lockObject;
-
-	public override WaveFormat WaveFormat => sampleChannel.WaveFormat;
-
-	public override long Length => length;
-
-	public override long Position
+	// Token: 0x0200005D RID: 93
+	internal class CustomAudioFileReader : WaveStream, ISampleProvider
 	{
-		get
+		// Token: 0x060001EE RID: 494 RVA: 0x0000B504 File Offset: 0x00009704
+		public CustomAudioFileReader(Stream stream, AudioFormat format)
 		{
-			return SourceToDest(readerStream.Position);
+			this.lockObject = new object();
+			this.CreateReaderStream(stream, format);
+			this.sourceBytesPerSample = this.readerStream.WaveFormat.BitsPerSample / 8 * this.readerStream.WaveFormat.Channels;
+			this.sampleChannel = new SampleChannel(this.readerStream, false);
+			this.destBytesPerSample = 4 * this.sampleChannel.WaveFormat.Channels;
+			this.length = this.SourceToDest(this.readerStream.Length);
 		}
-		set
+
+		// Token: 0x060001EF RID: 495 RVA: 0x0000B594 File Offset: 0x00009794
+		private void CreateReaderStream(Stream stream, AudioFormat format)
 		{
-			lock (lockObject)
+			if (format == AudioFormat.wav)
 			{
-				readerStream.Position = DestToSource(value);
+				this.readerStream = new WaveFileReader(stream);
+				if (this.readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && this.readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
+				{
+					this.readerStream = WaveFormatConversionStream.CreatePcmStream(this.readerStream);
+					this.readerStream = new BlockAlignReductionStream(this.readerStream);
+					return;
+				}
+			}
+			else
+			{
+				if (format == AudioFormat.mp3)
+				{
+					this.readerStream = new Mp3FileReader(stream);
+					return;
+				}
+				if (format == AudioFormat.aiff)
+				{
+					this.readerStream = new AiffFileReader(stream);
+					return;
+				}
+				if (format == AudioFormat.ogg)
+				{
+					this.readerStream = new VorbisWaveReader(stream);
+					return;
+				}
+				Debug.LogWarning(string.Format("Audio format {0} is not supported", format));
 			}
 		}
-	}
 
-	public float Volume
-	{
-		get
+		// Token: 0x17000055 RID: 85
+		// (get) Token: 0x060001F0 RID: 496 RVA: 0x0000B641 File Offset: 0x00009841
+		public override WaveFormat WaveFormat
 		{
-			return sampleChannel.Volume;
-		}
-		set
-		{
-			sampleChannel.Volume = value;
-		}
-	}
-
-	public CustomAudioFileReader(Stream stream, AudioFormat format)
-	{
-		lockObject = new object();
-		CreateReaderStream(stream, format);
-		sourceBytesPerSample = readerStream.WaveFormat.BitsPerSample / 8 * readerStream.WaveFormat.Channels;
-		sampleChannel = new SampleChannel(readerStream, forceStereo: false);
-		destBytesPerSample = 4 * sampleChannel.WaveFormat.Channels;
-		length = SourceToDest(readerStream.Length);
-	}
-
-	private void CreateReaderStream(Stream stream, AudioFormat format)
-	{
-		switch (format)
-		{
-		case AudioFormat.wav:
-			readerStream = new WaveFileReader(stream);
-			if (readerStream.WaveFormat.Encoding != WaveFormatEncoding.Pcm && readerStream.WaveFormat.Encoding != WaveFormatEncoding.IeeeFloat)
+			get
 			{
-				readerStream = WaveFormatConversionStream.CreatePcmStream(readerStream);
-				readerStream = new BlockAlignReductionStream(readerStream);
+				return this.sampleChannel.WaveFormat;
 			}
-			break;
-		case AudioFormat.mp3:
-			readerStream = new Mp3FileReader(stream);
-			break;
-		case AudioFormat.aiff:
-			readerStream = new AiffFileReader(stream);
-			break;
-		case AudioFormat.ogg:
-			readerStream = new VorbisWaveReader(stream);
-			break;
-		default:
-			Debug.LogWarning($"Audio format {format} is not supported");
-			break;
 		}
-	}
 
-	public override int Read(byte[] buffer, int offset, int count)
-	{
-		WaveBuffer waveBuffer = new WaveBuffer(buffer);
-		int count2 = count / 4;
-		return Read(waveBuffer.FloatBuffer, offset / 4, count2) * 4;
-	}
-
-	public int Read(float[] buffer, int offset, int count)
-	{
-		lock (lockObject)
+		// Token: 0x17000056 RID: 86
+		// (get) Token: 0x060001F1 RID: 497 RVA: 0x0000B64E File Offset: 0x0000984E
+		public override long Length
 		{
-			return sampleChannel.Read(buffer, offset, count);
+			get
+			{
+				return this.length;
+			}
 		}
-	}
 
-	private long SourceToDest(long sourceBytes)
-	{
-		return destBytesPerSample * (sourceBytes / sourceBytesPerSample);
-	}
-
-	private long DestToSource(long destBytes)
-	{
-		return sourceBytesPerSample * (destBytes / destBytesPerSample);
-	}
-
-	protected override void Dispose(bool disposing)
-	{
-		if (disposing && readerStream != null)
+		// Token: 0x17000057 RID: 87
+		// (get) Token: 0x060001F2 RID: 498 RVA: 0x0000B656 File Offset: 0x00009856
+		// (set) Token: 0x060001F3 RID: 499 RVA: 0x0000B66C File Offset: 0x0000986C
+		public override long Position
 		{
-			readerStream.Dispose();
-			readerStream = null;
+			get
+			{
+				return this.SourceToDest(this.readerStream.Position);
+			}
+			set
+			{
+				object obj = this.lockObject;
+				lock (obj)
+				{
+					this.readerStream.Position = this.DestToSource(value);
+				}
+			}
 		}
-		base.Dispose(disposing);
+
+		// Token: 0x060001F4 RID: 500 RVA: 0x0000B6B8 File Offset: 0x000098B8
+		public override int Read(byte[] buffer, int offset, int count)
+		{
+			WaveBuffer waveBuffer = new WaveBuffer(buffer);
+			int count2 = count / 4;
+			return this.Read(waveBuffer.FloatBuffer, offset / 4, count2) * 4;
+		}
+
+		// Token: 0x060001F5 RID: 501 RVA: 0x0000B6E4 File Offset: 0x000098E4
+		public int Read(float[] buffer, int offset, int count)
+		{
+			object obj = this.lockObject;
+			int result;
+			lock (obj)
+			{
+				result = this.sampleChannel.Read(buffer, offset, count);
+			}
+			return result;
+		}
+
+		// Token: 0x17000058 RID: 88
+		// (get) Token: 0x060001F6 RID: 502 RVA: 0x0000B730 File Offset: 0x00009930
+		// (set) Token: 0x060001F7 RID: 503 RVA: 0x0000B73D File Offset: 0x0000993D
+		public float Volume
+		{
+			get
+			{
+				return this.sampleChannel.Volume;
+			}
+			set
+			{
+				this.sampleChannel.Volume = value;
+			}
+		}
+
+		// Token: 0x060001F8 RID: 504 RVA: 0x0000B74B File Offset: 0x0000994B
+		private long SourceToDest(long sourceBytes)
+		{
+			return (long)this.destBytesPerSample * (sourceBytes / (long)this.sourceBytesPerSample);
+		}
+
+		// Token: 0x060001F9 RID: 505 RVA: 0x0000B75E File Offset: 0x0000995E
+		private long DestToSource(long destBytes)
+		{
+			return (long)this.sourceBytesPerSample * (destBytes / (long)this.destBytesPerSample);
+		}
+
+		// Token: 0x060001FA RID: 506 RVA: 0x0000B771 File Offset: 0x00009971
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing && this.readerStream != null)
+			{
+				this.readerStream.Dispose();
+				this.readerStream = null;
+			}
+			base.Dispose(disposing);
+		}
+
+		// Token: 0x040000F0 RID: 240
+		private WaveStream readerStream;
+
+		// Token: 0x040000F1 RID: 241
+		private readonly SampleChannel sampleChannel;
+
+		// Token: 0x040000F2 RID: 242
+		private readonly int destBytesPerSample;
+
+		// Token: 0x040000F3 RID: 243
+		private readonly int sourceBytesPerSample;
+
+		// Token: 0x040000F4 RID: 244
+		private readonly long length;
+
+		// Token: 0x040000F5 RID: 245
+		private readonly object lockObject;
 	}
 }

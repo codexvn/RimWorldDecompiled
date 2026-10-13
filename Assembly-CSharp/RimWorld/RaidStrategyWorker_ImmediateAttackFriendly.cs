@@ -1,17 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class RaidStrategyWorker_ImmediateAttackFriendly : RaidStrategyWorker_ImmediateAttack
+namespace RimWorld
 {
-	public override bool CanUseWith(IncidentParms parms, PawnGroupKindDef groupKind)
+	// Token: 0x0200174D RID: 5965
+	public class RaidStrategyWorker_ImmediateAttackFriendly : RaidStrategyWorker_ImmediateAttack
 	{
-		if (!base.CanUseWith(parms, groupKind))
+		// Token: 0x06008C10 RID: 35856 RVA: 0x0029B331 File Offset: 0x00299531
+		public override bool CanUseWith(IncidentParms parms, PawnGroupKindDef groupKind)
 		{
-			return false;
+			return base.CanUseWith(parms, groupKind) && parms.faction != null && !parms.faction.HostileTo(Faction.OfPlayer);
 		}
-		if (parms.faction != null)
-		{
-			return !parms.faction.HostileTo(Faction.OfPlayer);
-		}
-		return false;
 	}
 }

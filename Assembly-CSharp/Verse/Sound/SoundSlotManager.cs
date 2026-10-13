@@ -1,38 +1,40 @@
+﻿using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-namespace Verse.Sound;
-
-public static class SoundSlotManager
+namespace Verse.Sound
 {
-	private static Dictionary<string, float> allowedPlayTimes = new Dictionary<string, float>();
-
-	public static bool CanPlayNow(string slotName)
+	// Token: 0x02000E3C RID: 3644
+	public static class SoundSlotManager
 	{
-		if (slotName == "")
+		// Token: 0x06005BED RID: 23533 RVA: 0x001D6204 File Offset: 0x001D4404
+		public static bool CanPlayNow(string slotName)
 		{
-			return true;
+			if (slotName == "")
+			{
+				return true;
+			}
+			float num = 0f;
+			return !SoundSlotManager.allowedPlayTimes.TryGetValue(slotName, out num) || Time.realtimeSinceStartup >= SoundSlotManager.allowedPlayTimes[slotName];
 		}
-		float value = 0f;
-		if (allowedPlayTimes.TryGetValue(slotName, out value) && Time.realtimeSinceStartup < allowedPlayTimes[slotName])
-		{
-			return false;
-		}
-		return true;
-	}
 
-	public static void Notify_Played(string slot, float duration)
-	{
-		if (!(slot == ""))
+		// Token: 0x06005BEE RID: 23534 RVA: 0x001D624C File Offset: 0x001D444C
+		public static void Notify_Played(string slot, float duration)
 		{
-			if (allowedPlayTimes.TryGetValue(slot, out var value))
+			if (slot == "")
 			{
-				allowedPlayTimes[slot] = Mathf.Max(value, Time.realtimeSinceStartup + duration);
+				return;
 			}
-			else
+			float a;
+			if (SoundSlotManager.allowedPlayTimes.TryGetValue(slot, out a))
 			{
-				allowedPlayTimes[slot] = Time.realtimeSinceStartup + duration;
+				SoundSlotManager.allowedPlayTimes[slot] = Mathf.Max(a, Time.realtimeSinceStartup + duration);
+				return;
 			}
+			SoundSlotManager.allowedPlayTimes[slot] = Time.realtimeSinceStartup + duration;
 		}
+
+		// Token: 0x0400429B RID: 17051
+		private static Dictionary<string, float> allowedPlayTimes = new Dictionary<string, float>();
 	}
 }

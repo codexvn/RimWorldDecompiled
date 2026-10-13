@@ -1,37 +1,46 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class Dialog_ModList_Load : Dialog_ModList
+namespace RimWorld
 {
-	private Action<ModList> modListReturner;
-
-	public Dialog_ModList_Load(Action<ModList> modListReturner)
+	// Token: 0x020031CF RID: 12751
+	public class Dialog_ModList_Load : Dialog_ModList
 	{
-		interactButLabel = "Load".Translate();
-		this.modListReturner = modListReturner;
-	}
-
-	protected override void DoFileInteraction(string fileName)
-	{
-		string text = GenFilePaths.AbsFilePathForModList(fileName);
-		try
+		// Token: 0x06011F0A RID: 73482 RVA: 0x00539037 File Offset: 0x00537237
+		public Dialog_ModList_Load(Action<ModList> modListReturner)
 		{
-			Scribe.loader.InitLoadingMetaHeaderOnly(text);
-			ScribeMetaHeaderUtility.LoadGameDataHeader(ScribeMetaHeaderUtility.ScribeHeaderMode.ModList, logVersionConflictWarning: false);
-			Scribe.loader.FinalizeLoading();
-			ModList modList = null;
-			if (GameDataSaveLoader.TryLoadModList(text, out modList))
+			this.interactButLabel = "Load".Translate();
+			this.modListReturner = modListReturner;
+		}
+
+		// Token: 0x06011F0B RID: 73483 RVA: 0x0053905C File Offset: 0x0053725C
+		protected override void DoFileInteraction(string fileName)
+		{
+			string text = GenFilePaths.AbsFilePathForModList(fileName);
+			try
 			{
-				modListReturner(modList);
+				Scribe.loader.InitLoadingMetaHeaderOnly(text);
+				ScribeMetaHeaderUtility.LoadGameDataHeader(ScribeMetaHeaderUtility.ScribeHeaderMode.ModList, false);
+				Scribe.loader.FinalizeLoading();
+				ModList obj = null;
+				if (GameDataSaveLoader.TryLoadModList(text, out obj))
+				{
+					this.modListReturner(obj);
+				}
+				this.Close(true);
 			}
-			Close();
+			catch (Exception ex)
+			{
+				string str = "Exception loading ";
+				string str2 = text;
+				string str3 = ": ";
+				Exception ex2 = ex;
+				Log.Warning(str + str2 + str3 + ((ex2 != null) ? ex2.ToString() : null));
+				Scribe.ForceStop();
+			}
 		}
-		catch (Exception ex)
-		{
-			Log.Warning("Exception loading " + text + ": " + ex);
-			Scribe.ForceStop();
-		}
+
+		// Token: 0x0400B9C9 RID: 47561
+		private Action<ModList> modListReturner;
 	}
 }

@@ -1,187 +1,270 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using LudeonTK;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public static class PawnWeaponGenerator
+namespace RimWorld
 {
-	private static List<ThingStuffPair> allWeaponPairs;
-
-	private static List<ThingStuffPair> workingWeapons = new List<ThingStuffPair>();
-
-	private const float WeaponSelectFactor_NobleByIdeo = 100f;
-
-	private const float WeaponSelectFactor_DespisedByIdeo = 0.001f;
-
-	public static List<ThingStuffPair> AllWeaponPairs => allWeaponPairs;
-
-	public static void Reset()
+	// Token: 0x02002370 RID: 9072
+	public static class PawnWeaponGenerator
 	{
-		allWeaponPairs = ThingStuffPair.AllWith(IsWeapon);
-		foreach (ThingDef thingDef in DefDatabase<ThingDef>.AllDefs.Where(IsWeapon))
+		// Token: 0x17001DE2 RID: 7650
+		// (get) Token: 0x0600C4A7 RID: 50343 RVA: 0x00393251 File Offset: 0x00391451
+		public static List<ThingStuffPair> AllWeaponPairs
 		{
-			float num = allWeaponPairs.Where((ThingStuffPair pa) => pa.thing == thingDef).Sum((ThingStuffPair pa) => pa.Commonality);
-			if (num == 0f)
+			get
 			{
-				continue;
+				return PawnWeaponGenerator.allWeaponPairs;
 			}
-			float num2 = thingDef.generateCommonality / num;
-			if (Mathf.Approximately(num2, 1f))
+		}
+
+		// Token: 0x0600C4A8 RID: 50344 RVA: 0x00393258 File Offset: 0x00391458
+		public static void Reset()
+		{
+			PawnWeaponGenerator.allWeaponPairs = ThingStuffPair.AllWith(new Predicate<ThingDef>(PawnWeaponGenerator.<Reset>g__IsWeapon|6_0));
+			using (IEnumerator<ThingDef> enumerator = DefDatabase<ThingDef>.AllDefs.Where(new Func<ThingDef, bool>(PawnWeaponGenerator.<Reset>g__IsWeapon|6_0)).GetEnumerator())
 			{
-				continue;
-			}
-			for (int num3 = 0; num3 < allWeaponPairs.Count; num3++)
-			{
-				ThingStuffPair thingStuffPair = allWeaponPairs[num3];
-				if (thingStuffPair.thing == thingDef)
+				while (enumerator.MoveNext())
 				{
-					allWeaponPairs[num3] = new ThingStuffPair(thingStuffPair.thing, thingStuffPair.stuff, thingStuffPair.commonalityMultiplier * num2);
+					ThingDef thingDef = enumerator.Current;
+					float num = (from pa in PawnWeaponGenerator.allWeaponPairs
+					where pa.thing == thingDef
+					select pa).Sum((ThingStuffPair pa) => pa.Commonality);
+					if (num != 0f)
+					{
+						float num2 = thingDef.generateCommonality / num;
+						if (!Mathf.Approximately(num2, 1f))
+						{
+							for (int i = 0; i < PawnWeaponGenerator.allWeaponPairs.Count; i++)
+							{
+								ThingStuffPair thingStuffPair = PawnWeaponGenerator.allWeaponPairs[i];
+								if (thingStuffPair.thing == thingDef)
+								{
+									PawnWeaponGenerator.allWeaponPairs[i] = new ThingStuffPair(thingStuffPair.thing, thingStuffPair.stuff, thingStuffPair.commonalityMultiplier * num2);
+								}
+							}
+						}
+					}
 				}
 			}
 		}
-		static bool IsWeapon(ThingDef td)
-		{
-			if (td.equipmentType == EquipmentType.Primary)
-			{
-				return !td.weaponTags.NullOrEmpty();
-			}
-			return false;
-		}
-	}
 
-	public static void TryGenerateWeaponFor(Pawn pawn, PawnGenerationRequest request)
-	{
-		workingWeapons.Clear();
-		if (pawn.kindDef.weaponTags == null || pawn.kindDef.weaponTags.Count == 0 || !pawn.RaceProps.ToolUser || !pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) || pawn.WorkTagIsDisabled(WorkTags.Violent))
+		// Token: 0x0600C4A9 RID: 50345 RVA: 0x00393394 File Offset: 0x00391594
+		public static void TryGenerateWeaponFor(Pawn pawn, PawnGenerationRequest request)
 		{
-			return;
-		}
-		float randomInRange = pawn.kindDef.weaponMoney.RandomInRange;
-		for (int i = 0; i < allWeaponPairs.Count; i++)
-		{
-			ThingStuffPair w = allWeaponPairs[i];
-			if (!(w.Price > randomInRange) && (pawn.kindDef.weaponTags == null || pawn.kindDef.weaponTags.Any((string tag) => w.thing.weaponTags.Contains(tag))) && (pawn.kindDef.weaponStuffOverride == null || w.stuff == pawn.kindDef.weaponStuffOverride) && (!w.thing.IsRangedWeapon || !pawn.WorkTagIsDisabled(WorkTags.Shooting)) && (w.stuff == null || w.stuff.stuffProps.allowedInStuffGeneration) && (!(w.thing.generateAllowChance < 1f) || Rand.ChanceSeeded(w.thing.generateAllowChance, pawn.thingIDNumber ^ w.thing.shortHash ^ 0x1B3B648)))
+			PawnWeaponGenerator.workingWeapons.Clear();
+			if (pawn.kindDef.weaponTags == null || pawn.kindDef.weaponTags.Count == 0)
 			{
-				workingWeapons.Add(w);
+				return;
 			}
-		}
-		if (workingWeapons.Count == 0)
-		{
-			return;
-		}
-		pawn.equipment.DestroyAllEquipment();
-		if (workingWeapons.TryRandomElementByWeight((ThingStuffPair pair) => GetCommonality(pawn, pair), out var result))
-		{
-			ThingWithComps thingWithComps = (ThingWithComps)ThingMaker.MakeThing(result.thing, result.stuff);
-			PawnGenerator.PostProcessGeneratedGear(thingWithComps, pawn);
-			CompEquippable compEquippable = thingWithComps.TryGetComp<CompEquippable>();
-			if (compEquippable != null)
+			if (!pawn.RaceProps.ToolUser)
 			{
-				if (pawn.kindDef.weaponStyleDef != null)
+				return;
+			}
+			if (!pawn.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation))
+			{
+				return;
+			}
+			if (pawn.WorkTagIsDisabled(WorkTags.Violent))
+			{
+				return;
+			}
+			float randomInRange = pawn.kindDef.weaponMoney.RandomInRange;
+			for (int i = 0; i < PawnWeaponGenerator.allWeaponPairs.Count; i++)
+			{
+				ThingStuffPair w = PawnWeaponGenerator.allWeaponPairs[i];
+				if (w.Price <= randomInRange && (pawn.kindDef.weaponTags == null || pawn.kindDef.weaponTags.Any((string tag) => w.thing.weaponTags.Contains(tag))) && (pawn.kindDef.weaponStuffOverride == null || w.stuff == pawn.kindDef.weaponStuffOverride) && (!w.thing.IsRangedWeapon || !pawn.WorkTagIsDisabled(WorkTags.Shooting)) && (w.stuff == null || w.stuff.stuffProps.allowedInStuffGeneration) && (w.thing.generateAllowChance >= 1f || Rand.ChanceSeeded(w.thing.generateAllowChance, pawn.thingIDNumber ^ (int)w.thing.shortHash ^ 28554824)))
 				{
-					compEquippable.parent.StyleDef = pawn.kindDef.weaponStyleDef;
-				}
-				else if (pawn.Ideo != null)
-				{
-					compEquippable.parent.StyleDef = pawn.Ideo.GetStyleFor(thingWithComps.def);
+					PawnWeaponGenerator.workingWeapons.Add(w);
 				}
 			}
-			float num = ((request.BiocodeWeaponChance > 0f) ? request.BiocodeWeaponChance : pawn.kindDef.biocodeWeaponChance);
-			if (Rand.Value < num)
+			if (PawnWeaponGenerator.workingWeapons.Count == 0)
 			{
-				thingWithComps.TryGetComp<CompBiocodable>()?.CodeFor(pawn);
+				return;
 			}
-			pawn.equipment.AddEquipment(thingWithComps);
+			pawn.equipment.DestroyAllEquipment(DestroyMode.Vanish);
+			ThingStuffPair thingStuffPair;
+			if (PawnWeaponGenerator.workingWeapons.TryRandomElementByWeight((ThingStuffPair w) => PawnWeaponGenerator.GetCommonality(pawn, w), out thingStuffPair))
+			{
+				ThingWithComps thingWithComps = (ThingWithComps)ThingMaker.MakeThing(thingStuffPair.thing, thingStuffPair.stuff);
+				PawnGenerator.PostProcessGeneratedGear(thingWithComps, pawn);
+				CompEquippable compEquippable = thingWithComps.TryGetComp<CompEquippable>();
+				if (compEquippable != null)
+				{
+					if (pawn.kindDef.weaponStyleDef != null)
+					{
+						compEquippable.parent.StyleDef = pawn.kindDef.weaponStyleDef;
+					}
+					else if (pawn.Ideo != null)
+					{
+						compEquippable.parent.StyleDef = pawn.Ideo.GetStyleFor(thingWithComps.def);
+					}
+				}
+				float num = (request.BiocodeWeaponChance > 0f) ? request.BiocodeWeaponChance : pawn.kindDef.biocodeWeaponChance;
+				if (Rand.Value < num)
+				{
+					CompBiocodable compBiocodable = thingWithComps.TryGetComp<CompBiocodable>();
+					if (compBiocodable != null)
+					{
+						compBiocodable.CodeFor(pawn);
+					}
+				}
+				pawn.equipment.AddEquipment(thingWithComps);
+			}
+			PawnWeaponGenerator.workingWeapons.Clear();
 		}
-		workingWeapons.Clear();
-	}
 
-	private static float GetCommonality(Pawn pawn, ThingStuffPair pair)
-	{
-		return pair.Commonality * pair.Price * GetWeaponCommonalityFromIdeo(pawn, pair) * GetWeaponCommonalityFromXenotype(pawn, pair);
-	}
-
-	private static float GetWeaponCommonalityFromIdeo(Pawn pawn, ThingStuffPair pair)
-	{
-		if (pawn.Ideo == null)
+		// Token: 0x0600C4AA RID: 50346 RVA: 0x003936D0 File Offset: 0x003918D0
+		private static float GetCommonality(Pawn pawn, ThingStuffPair pair)
 		{
+			return pair.Commonality * pair.Price * PawnWeaponGenerator.GetWeaponCommonalityFromIdeo(pawn, pair) * PawnWeaponGenerator.GetWeaponCommonalityFromXenotype(pawn, pair);
+		}
+
+		// Token: 0x0600C4AB RID: 50347 RVA: 0x003936F4 File Offset: 0x003918F4
+		private static float GetWeaponCommonalityFromIdeo(Pawn pawn, ThingStuffPair pair)
+		{
+			if (pawn.Ideo == null)
+			{
+				return 1f;
+			}
+			switch (pawn.Ideo.GetDispositionForWeapon(pair.thing))
+			{
+			case IdeoWeaponDisposition.Noble:
+				return 100f;
+			case IdeoWeaponDisposition.Despised:
+				return 0.001f;
+			}
 			return 1f;
 		}
-		return pawn.Ideo.GetDispositionForWeapon(pair.thing) switch
-		{
-			IdeoWeaponDisposition.Noble => 100f, 
-			IdeoWeaponDisposition.Despised => 0.001f, 
-			_ => 1f, 
-		};
-	}
 
-	private static float GetWeaponCommonalityFromXenotype(Pawn pawn, ThingStuffPair pair)
-	{
-		if (pawn.genes?.Xenotype?.forbiddenWeaponClasses != null && !pair.thing.weaponClasses.NullOrEmpty())
+		// Token: 0x0600C4AC RID: 50348 RVA: 0x00393748 File Offset: 0x00391948
+		private static float GetWeaponCommonalityFromXenotype(Pawn pawn, ThingStuffPair pair)
 		{
-			foreach (WeaponClassDef forbiddenWeaponClass in pawn.genes.Xenotype.forbiddenWeaponClasses)
+			Pawn_GeneTracker genes = pawn.genes;
+			bool flag;
+			if (genes == null)
 			{
-				if (pair.thing.weaponClasses.Contains(forbiddenWeaponClass))
+				flag = (null != null);
+			}
+			else
+			{
+				XenotypeDef xenotype = genes.Xenotype;
+				flag = (((xenotype != null) ? xenotype.forbiddenWeaponClasses : null) != null);
+			}
+			if (flag && !pair.thing.weaponClasses.NullOrEmpty<WeaponClassDef>())
+			{
+				foreach (WeaponClassDef item in pawn.genes.Xenotype.forbiddenWeaponClasses)
 				{
-					return 0f;
+					if (pair.thing.weaponClasses.Contains(item))
+					{
+						return 0f;
+					}
 				}
 			}
+			return 1f;
 		}
-		return 1f;
-	}
 
-	public static bool IsDerpWeapon(ThingDef thing, ThingDef stuff)
-	{
-		if (stuff == null)
+		// Token: 0x0600C4AD RID: 50349 RVA: 0x003937F4 File Offset: 0x003919F4
+		public static bool IsDerpWeapon(ThingDef thing, ThingDef stuff)
 		{
+			if (stuff == null)
+			{
+				return false;
+			}
+			if (thing.IsMeleeWeapon)
+			{
+				if (thing.tools.NullOrEmpty<Tool>())
+				{
+					return false;
+				}
+				DamageDef damageDef = ThingUtility.PrimaryMeleeWeaponDamageType(thing);
+				if (damageDef == null)
+				{
+					return false;
+				}
+				DamageArmorCategoryDef armorCategory = damageDef.armorCategory;
+				if (armorCategory != null && armorCategory.multStat != null && stuff.GetStatValueAbstract(armorCategory.multStat, null) < 0.7f)
+				{
+					return true;
+				}
+			}
 			return false;
 		}
-		if (thing.IsMeleeWeapon)
+
+		// Token: 0x0600C4AE RID: 50350 RVA: 0x00393854 File Offset: 0x00391A54
+		public static float CheapestNonDerpPriceFor(ThingDef weaponDef)
 		{
-			if (thing.tools.NullOrEmpty())
+			float num = 9999999f;
+			for (int i = 0; i < PawnWeaponGenerator.allWeaponPairs.Count; i++)
 			{
-				return false;
+				ThingStuffPair thingStuffPair = PawnWeaponGenerator.allWeaponPairs[i];
+				if (thingStuffPair.thing == weaponDef && !PawnWeaponGenerator.IsDerpWeapon(thingStuffPair.thing, thingStuffPair.stuff) && thingStuffPair.Price < num)
+				{
+					num = thingStuffPair.Price;
+				}
 			}
-			DamageDef damageDef = ThingUtility.PrimaryMeleeWeaponDamageType(thing);
-			if (damageDef == null)
-			{
-				return false;
-			}
-			DamageArmorCategoryDef armorCategory = damageDef.armorCategory;
-			if (armorCategory != null && armorCategory.multStat != null && stuff.GetStatValueAbstract(armorCategory.multStat) < 0.7f)
-			{
-				return true;
-			}
+			return num;
 		}
-		return false;
-	}
 
-	public static float CheapestNonDerpPriceFor(ThingDef weaponDef)
-	{
-		float num = 9999999f;
-		for (int i = 0; i < allWeaponPairs.Count; i++)
+		// Token: 0x0600C4AF RID: 50351 RVA: 0x003938B8 File Offset: 0x00391AB8
+		[DebugOutput]
+		private static void WeaponPairs()
 		{
-			ThingStuffPair thingStuffPair = allWeaponPairs[i];
-			if (thingStuffPair.thing == weaponDef && !IsDerpWeapon(thingStuffPair.thing, thingStuffPair.stuff) && thingStuffPair.Price < num)
+			IEnumerable<ThingStuffPair> dataSources = from p in PawnWeaponGenerator.allWeaponPairs
+			orderby p.thing.defName descending
+			select p;
+			TableDataGetter<ThingStuffPair>[] array = new TableDataGetter<ThingStuffPair>[7];
+			array[0] = new TableDataGetter<ThingStuffPair>("thing", (ThingStuffPair p) => p.thing.defName);
+			array[1] = new TableDataGetter<ThingStuffPair>("stuff", delegate(ThingStuffPair p)
 			{
-				num = thingStuffPair.Price;
-			}
+				if (p.stuff == null)
+				{
+					return "";
+				}
+				return p.stuff.defName;
+			});
+			array[2] = new TableDataGetter<ThingStuffPair>("price", (ThingStuffPair p) => p.Price.ToString());
+			array[3] = new TableDataGetter<ThingStuffPair>("commonality", (ThingStuffPair p) => p.Commonality.ToString("F5"));
+			array[4] = new TableDataGetter<ThingStuffPair>("commMult", (ThingStuffPair p) => p.commonalityMultiplier.ToString("F5"));
+			array[5] = new TableDataGetter<ThingStuffPair>("generateCommonality", (ThingStuffPair p) => p.thing.generateCommonality.ToString("F2"));
+			array[6] = new TableDataGetter<ThingStuffPair>("derp", delegate(ThingStuffPair p)
+			{
+				if (!PawnWeaponGenerator.IsDerpWeapon(p.thing, p.stuff))
+				{
+					return "";
+				}
+				return "D";
+			});
+			DebugTables.MakeTablesDialog<ThingStuffPair>(dataSources, array);
 		}
-		return num;
-	}
 
-	[DebugOutput]
-	private static void WeaponPairs()
-	{
-		DebugTables.MakeTablesDialog(allWeaponPairs.OrderByDescending((ThingStuffPair p) => p.thing.defName), new TableDataGetter<ThingStuffPair>("thing", (ThingStuffPair p) => p.thing.defName), new TableDataGetter<ThingStuffPair>("stuff", (ThingStuffPair p) => (p.stuff == null) ? "" : p.stuff.defName), new TableDataGetter<ThingStuffPair>("price", (ThingStuffPair p) => p.Price.ToString()), new TableDataGetter<ThingStuffPair>("commonality", (ThingStuffPair p) => p.Commonality.ToString("F5")), new TableDataGetter<ThingStuffPair>("commMult", (ThingStuffPair p) => p.commonalityMultiplier.ToString("F5")), new TableDataGetter<ThingStuffPair>("generateCommonality", (ThingStuffPair p) => p.thing.generateCommonality.ToString("F2")), new TableDataGetter<ThingStuffPair>("derp", (ThingStuffPair p) => (!IsDerpWeapon(p.thing, p.stuff)) ? "" : "D"));
-	}
+		// Token: 0x0600C4B0 RID: 50352 RVA: 0x00393A2D File Offset: 0x00391C2D
+		[DebugOutput]
+		private static void WeaponPairsByThing()
+		{
+			DebugOutputsGeneral.MakeTablePairsByThing(PawnWeaponGenerator.allWeaponPairs);
+		}
 
-	[DebugOutput]
-	private static void WeaponPairsByThing()
-	{
-		DebugOutputsGeneral.MakeTablePairsByThing(allWeaponPairs);
+		// Token: 0x0600C4B2 RID: 50354 RVA: 0x00393A45 File Offset: 0x00391C45
+		[CompilerGenerated]
+		internal static bool <Reset>g__IsWeapon|6_0(ThingDef td)
+		{
+			return td.equipmentType == EquipmentType.Primary && !td.weaponTags.NullOrEmpty<string>();
+		}
+
+		// Token: 0x04008628 RID: 34344
+		private static List<ThingStuffPair> allWeaponPairs;
+
+		// Token: 0x04008629 RID: 34345
+		private static List<ThingStuffPair> workingWeapons = new List<ThingStuffPair>();
+
+		// Token: 0x0400862A RID: 34346
+		private const float WeaponSelectFactor_NobleByIdeo = 100f;
+
+		// Token: 0x0400862B RID: 34347
+		private const float WeaponSelectFactor_DespisedByIdeo = 0.001f;
 	}
 }

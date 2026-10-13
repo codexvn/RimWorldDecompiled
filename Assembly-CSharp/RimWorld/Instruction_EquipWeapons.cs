@@ -1,49 +1,67 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using Verse;
 
-namespace RimWorld;
-
-public class Instruction_EquipWeapons : Lesson_Instruction
+namespace RimWorld
 {
-	protected override float ProgressPercent
+	// Token: 0x020034D3 RID: 13523
+	public class Instruction_EquipWeapons : Lesson_Instruction
 	{
-		get
+		// Token: 0x1700317E RID: 12670
+		// (get) Token: 0x06013011 RID: 77841 RVA: 0x005A2E98 File Offset: 0x005A1098
+		protected override float ProgressPercent
 		{
-			IEnumerable<Pawn> source = base.Map.mapPawns.FreeColonists.Where((Pawn c) => !LifeStageUtility.AlwaysDowned(c));
-			return (float)source.Where((Pawn c) => c.equipment.Primary != null).Count() / (float)source.Count();
+			get
+			{
+				IEnumerable<Pawn> source = from c in base.Map.mapPawns.FreeColonists
+				where !LifeStageUtility.AlwaysDowned(c)
+				select c;
+				return (float)(from c in source
+				where c.equipment.Primary != null
+				select c).Count<Pawn>() / (float)source.Count<Pawn>();
+			}
 		}
-	}
 
-	private IEnumerable<Thing> Weapons => Find.TutorialState.startingItems.Where((Thing it) => IsWeapon(it) && it.Spawned);
-
-	public static bool IsWeapon(Thing t)
-	{
-		if (t.def.IsWeapon)
+		// Token: 0x1700317F RID: 12671
+		// (get) Token: 0x06013012 RID: 77842 RVA: 0x005A2F0D File Offset: 0x005A110D
+		private IEnumerable<Thing> Weapons
 		{
-			return t.def.BaseMarketValue > 30f;
+			get
+			{
+				return from it in Find.TutorialState.startingItems
+				where Instruction_EquipWeapons.IsWeapon(it) && it.Spawned
+				select it;
+			}
 		}
-		return false;
-	}
 
-	public override void LessonOnGUI()
-	{
-		foreach (Thing weapon in Weapons)
+		// Token: 0x06013013 RID: 77843 RVA: 0x005A2F3D File Offset: 0x005A113D
+		public static bool IsWeapon(Thing t)
 		{
-			TutorUtility.DrawLabelOnThingOnGUI(weapon, def.onMapInstruction);
+			return t.def.IsWeapon && t.def.BaseMarketValue > 30f;
 		}
-		base.LessonOnGUI();
-	}
 
-	public override void LessonUpdate()
-	{
-		foreach (Thing weapon in Weapons)
+		// Token: 0x06013014 RID: 77844 RVA: 0x005A2F60 File Offset: 0x005A1160
+		public override void LessonOnGUI()
 		{
-			GenDraw.DrawArrowPointingAt(weapon.DrawPos, offscreenOnly: true);
+			foreach (Thing t in this.Weapons)
+			{
+				TutorUtility.DrawLabelOnThingOnGUI(t, this.def.onMapInstruction);
+			}
+			base.LessonOnGUI();
 		}
-		if (ProgressPercent > 0.9999f)
+
+		// Token: 0x06013015 RID: 77845 RVA: 0x005A2FBC File Offset: 0x005A11BC
+		public override void LessonUpdate()
 		{
-			Find.ActiveLesson.Deactivate();
+			foreach (Thing thing in this.Weapons)
+			{
+				GenDraw.DrawArrowPointingAt(thing.DrawPos, true);
+			}
+			if (this.ProgressPercent > 0.9999f)
+			{
+				Find.ActiveLesson.Deactivate();
+			}
 		}
 	}
 }

@@ -1,90 +1,132 @@
+﻿using System;
 using System.Text;
 using RimWorld;
 
-namespace Verse.AI.Group;
-
-public struct TriggerSignal
+namespace Verse.AI.Group
 {
-	public TriggerSignalType type;
-
-	public string memo;
-
-	public Signal signal;
-
-	public Thing thing;
-
-	public Thing otherThing;
-
-	public DamageInfo dinfo;
-
-	public PawnLostCondition condition;
-
-	public Faction faction;
-
-	public FactionRelationKind? previousRelationKind;
-
-	public ClamorDef clamorType;
-
-	public Pawn Pawn => thing as Pawn;
-
-	public static TriggerSignal ForTick => new TriggerSignal(TriggerSignalType.Tick);
-
-	public TriggerSignal(TriggerSignalType type)
+	// Token: 0x020010F2 RID: 4338
+	public struct TriggerSignal
 	{
-		this.type = type;
-		memo = null;
-		signal = default(Signal);
-		thing = null;
-		otherThing = null;
-		dinfo = default(DamageInfo);
-		condition = PawnLostCondition.Undefined;
-		faction = null;
-		clamorType = null;
-		previousRelationKind = null;
-	}
+		// Token: 0x1700103F RID: 4159
+		// (get) Token: 0x0600696A RID: 26986 RVA: 0x0021348B File Offset: 0x0021168B
+		public Pawn Pawn
+		{
+			get
+			{
+				return this.thing as Pawn;
+			}
+		}
 
-	public static TriggerSignal ForMemo(string memo)
-	{
-		TriggerSignal result = new TriggerSignal(TriggerSignalType.Memo);
-		result.memo = memo;
-		return result;
-	}
+		// Token: 0x0600696B RID: 26987 RVA: 0x00213498 File Offset: 0x00211698
+		public TriggerSignal(TriggerSignalType type)
+		{
+			this.type = type;
+			this.memo = null;
+			this.signal = default(Signal);
+			this.thing = null;
+			this.otherThing = null;
+			this.dinfo = default(DamageInfo);
+			this.condition = PawnLostCondition.Undefined;
+			this.faction = null;
+			this.clamorType = null;
+			this.previousRelationKind = null;
+		}
 
-	public static TriggerSignal ForSignal(Signal signal)
-	{
-		TriggerSignal result = new TriggerSignal(TriggerSignalType.Signal);
-		result.signal = signal;
-		return result;
-	}
+		// Token: 0x17001040 RID: 4160
+		// (get) Token: 0x0600696C RID: 26988 RVA: 0x002134FA File Offset: 0x002116FA
+		public static TriggerSignal ForTick
+		{
+			get
+			{
+				return new TriggerSignal(TriggerSignalType.Tick);
+			}
+		}
 
-	public override string ToString()
-	{
-		StringBuilder stringBuilder = new StringBuilder();
-		stringBuilder.Append("(");
-		stringBuilder.Append(type.ToString());
-		if (memo != null)
+		// Token: 0x0600696D RID: 26989 RVA: 0x00213504 File Offset: 0x00211704
+		public static TriggerSignal ForMemo(string memo)
 		{
-			stringBuilder.Append(", memo=" + memo);
+			return new TriggerSignal(TriggerSignalType.Memo)
+			{
+				memo = memo
+			};
 		}
-		if (Pawn != null)
+
+		// Token: 0x0600696E RID: 26990 RVA: 0x00213524 File Offset: 0x00211724
+		public static TriggerSignal ForSignal(Signal signal)
 		{
-			stringBuilder.Append(", pawn=" + Pawn);
+			return new TriggerSignal(TriggerSignalType.Signal)
+			{
+				signal = signal
+			};
 		}
-		if (dinfo.Def != null)
+
+		// Token: 0x0600696F RID: 26991 RVA: 0x00213544 File Offset: 0x00211744
+		public override string ToString()
 		{
-			DamageInfo damageInfo = dinfo;
-			stringBuilder.Append(", dinfo=" + damageInfo.ToString());
+			StringBuilder stringBuilder = new StringBuilder();
+			stringBuilder.Append("(");
+			stringBuilder.Append(this.type.ToString());
+			if (this.memo != null)
+			{
+				stringBuilder.Append(", memo=" + this.memo);
+			}
+			if (this.Pawn != null)
+			{
+				StringBuilder stringBuilder2 = stringBuilder;
+				string str = ", pawn=";
+				Pawn pawn = this.Pawn;
+				stringBuilder2.Append(str + ((pawn != null) ? pawn.ToString() : null));
+			}
+			if (this.dinfo.Def != null)
+			{
+				StringBuilder stringBuilder3 = stringBuilder;
+				string str2 = ", dinfo=";
+				DamageInfo damageInfo = this.dinfo;
+				stringBuilder3.Append(str2 + damageInfo.ToString());
+			}
+			if (this.condition != PawnLostCondition.Undefined)
+			{
+				stringBuilder.Append(", condition=" + this.condition.ToString());
+			}
+			if (this.signal.tag != null)
+			{
+				StringBuilder stringBuilder4 = stringBuilder;
+				string str3 = ", signal=";
+				Signal signal = this.signal;
+				stringBuilder4.Append(str3 + signal.ToString());
+			}
+			stringBuilder.Append(")");
+			return stringBuilder.ToString();
 		}
-		if (condition != PawnLostCondition.Undefined)
-		{
-			stringBuilder.Append(", condition=" + condition);
-		}
-		if (this.signal.tag != null)
-		{
-			Signal signal = this.signal;
-			stringBuilder.Append(", signal=" + signal.ToString());
-		}
-		stringBuilder.Append(")");
-		return stringBuilder.ToString();
+
+		// Token: 0x04004A9C RID: 19100
+		public TriggerSignalType type;
+
+		// Token: 0x04004A9D RID: 19101
+		public string memo;
+
+		// Token: 0x04004A9E RID: 19102
+		public Signal signal;
+
+		// Token: 0x04004A9F RID: 19103
+		public Thing thing;
+
+		// Token: 0x04004AA0 RID: 19104
+		public Thing otherThing;
+
+		// Token: 0x04004AA1 RID: 19105
+		public DamageInfo dinfo;
+
+		// Token: 0x04004AA2 RID: 19106
+		public PawnLostCondition condition;
+
+		// Token: 0x04004AA3 RID: 19107
+		public Faction faction;
+
+		// Token: 0x04004AA4 RID: 19108
+		public FactionRelationKind? previousRelationKind;
+
+		// Token: 0x04004AA5 RID: 19109
+		public ClamorDef clamorType;
 	}
 }

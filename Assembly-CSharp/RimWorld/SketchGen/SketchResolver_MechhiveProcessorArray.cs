@@ -1,36 +1,37 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.SketchGen;
-
-public class SketchResolver_MechhiveProcessorArray : SketchResolver
+namespace RimWorld.SketchGen
 {
-	protected override bool CanResolveInt(SketchResolveParams parms)
+	// Token: 0x020038D5 RID: 14549
+	public class SketchResolver_MechhiveProcessorArray : SketchResolver
 	{
-		if (parms.sketch != null)
+		// Token: 0x06014140 RID: 82240 RVA: 0x005F87B4 File Offset: 0x005F69B4
+		protected override bool CanResolveInt(SketchResolveParams parms)
 		{
-			return parms.rect.HasValue;
+			return parms.sketch != null && parms.rect != null;
 		}
-		return false;
-	}
 
-	protected override void ResolveInt(SketchResolveParams parms)
-	{
-		if (!ModLister.CheckOdyssey("Mechhive guard outpost"))
+		// Token: 0x06014141 RID: 82241 RVA: 0x005F8978 File Offset: 0x005F6B78
+		protected override void ResolveInt(SketchResolveParams parms)
 		{
-			return;
-		}
-		Sketch sketch = new Sketch();
-		_ = parms.rect.Value;
-		int num = parms.rect.Value.Width / (ThingDefOf.MechanoidProcessor.size.x + 1);
-		int num2 = parms.rect.Value.Height / (ThingDefOf.MechanoidProcessor.size.z + 1);
-		for (int i = 0; i < num; i++)
-		{
-			for (int j = 0; j < num2; j++)
+			if (!ModLister.CheckOdyssey("Mechhive guard outpost"))
 			{
-				IntVec3 pos = new IntVec3(2, 0, 2) + new IntVec3(i * (ThingDefOf.MechanoidProcessor.size.x + 1), 0, j * (ThingDefOf.MechanoidProcessor.size.z + 1));
-				sketch.AddThing(ThingDefOf.MechanoidProcessor, pos, Rot4.North);
+				return;
 			}
+			Sketch sketch = new Sketch();
+			CellRect value = parms.rect.Value;
+			int num = parms.rect.Value.Width / (ThingDefOf.MechanoidProcessor.size.x + 1);
+			int num2 = parms.rect.Value.Height / (ThingDefOf.MechanoidProcessor.size.z + 1);
+			for (int i = 0; i < num; i++)
+			{
+				for (int j = 0; j < num2; j++)
+				{
+					IntVec3 pos = new IntVec3(2, 0, 2) + new IntVec3(i * (ThingDefOf.MechanoidProcessor.size.x + 1), 0, j * (ThingDefOf.MechanoidProcessor.size.z + 1));
+					sketch.AddThing(ThingDefOf.MechanoidProcessor, pos, Rot4.North, null, 1, null, null, true, 2f);
+				}
+			}
+			parms.sketch.Merge(sketch, true);
 		}
-		parms.sketch.Merge(sketch);
 	}
 }

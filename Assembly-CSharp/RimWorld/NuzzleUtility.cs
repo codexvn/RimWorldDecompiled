@@ -1,33 +1,38 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public static class NuzzleUtility
+namespace RimWorld
 {
-	public static float GetNuzzleMTBHours(Pawn pawn)
+	// Token: 0x02002403 RID: 9219
+	public static class NuzzleUtility
 	{
-		float num = pawn.RaceProps.nuzzleMtbHours;
-		if (ModsConfig.OdysseyActive)
+		// Token: 0x0600C7BA RID: 51130 RVA: 0x003A4210 File Offset: 0x003A2410
+		public static float GetNuzzleMTBHours(Pawn pawn)
 		{
-			Pawn_TrainingTracker training = pawn.training;
-			if (training != null && training.HasLearned(TrainableDefOf.Comfort))
+			float num = pawn.RaceProps.nuzzleMtbHours;
+			if (ModsConfig.OdysseyActive)
 			{
-				num *= 0.75f;
+				Pawn_TrainingTracker training = pawn.training;
+				if (training != null && training.HasLearned(TrainableDefOf.Comfort))
+				{
+					num *= 0.75f;
+				}
 			}
+			return num;
 		}
-		return num;
-	}
 
-	public static int GetNuzzleStageIndex(Pawn pawn)
-	{
-		if (ModsConfig.OdysseyActive)
+		// Token: 0x0600C7BB RID: 51131 RVA: 0x003A4252 File Offset: 0x003A2452
+		public static int GetNuzzleStageIndex(Pawn pawn)
 		{
-			Pawn_TrainingTracker training = pawn.training;
-			if (training != null && training.HasLearned(TrainableDefOf.Comfort))
+			if (ModsConfig.OdysseyActive)
 			{
-				return 1;
+				Pawn_TrainingTracker training = pawn.training;
+				if (training != null && training.HasLearned(TrainableDefOf.Comfort))
+				{
+					return 1;
+				}
 			}
+			return 0;
 		}
-		return 0;
 	}
 }

@@ -1,25 +1,29 @@
+﻿using System;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_FloorFill : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003926 RID: 14630
+	public class SymbolResolver_FloorFill : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		TerrainGrid terrainGrid = map.terrainGrid;
-		TerrainDef terrainDef = rp.floorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction);
-		bool valueOrDefault = rp.floorOnlyIfTerrainSupports == true;
-		bool valueOrDefault2 = rp.allowBridgeOnAnyImpassableTerrain == true;
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x06014287 RID: 82567 RVA: 0x00601A70 File Offset: 0x005FFC70
+		public override void Resolve(ResolveParams rp)
 		{
-			if ((!rp.chanceToSkipFloor.HasValue || !Rand.Chance(rp.chanceToSkipFloor.Value)) && (!valueOrDefault || GenConstruct.CanBuildOnTerrain(terrainDef, item, map, Rot4.North) || (valueOrDefault2 && item.GetTerrain(map).passability == Traversability.Impassable)))
+			Map map = BaseGen.globalSettings.map;
+			TerrainGrid terrainGrid = map.terrainGrid;
+			TerrainDef terrainDef = rp.floorDef ?? BaseGenUtility.RandomBasicFloorDef(rp.faction, false);
+			bool valueOrDefault = rp.floorOnlyIfTerrainSupports.GetValueOrDefault();
+			bool valueOrDefault2 = rp.allowBridgeOnAnyImpassableTerrain.GetValueOrDefault();
+			foreach (IntVec3 c in rp.rect)
 			{
-				terrainGrid.SetTerrain(item, terrainDef);
-				if (rp.filthDef != null)
+				if ((rp.chanceToSkipFloor == null || !Rand.Chance(rp.chanceToSkipFloor.Value)) && (!valueOrDefault || GenConstruct.CanBuildOnTerrain(terrainDef, c, map, Rot4.North, null, null) || (valueOrDefault2 && c.GetTerrain(map).passability == Traversability.Impassable)))
 				{
-					FilthMaker.TryMakeFilth(item, map, rp.filthDef, (!rp.filthDensity.HasValue) ? 1 : Mathf.RoundToInt(rp.filthDensity.Value.RandomInRange));
+					terrainGrid.SetTerrain(c, terrainDef);
+					if (rp.filthDef != null)
+					{
+						FilthMaker.TryMakeFilth(c, map, rp.filthDef, (rp.filthDensity != null) ? Mathf.RoundToInt(rp.filthDensity.Value.RandomInRange) : 1, FilthSourceFlags.None, true);
+					}
 				}
 			}
 		}

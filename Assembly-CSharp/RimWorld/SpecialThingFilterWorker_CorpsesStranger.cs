@@ -1,23 +1,16 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class SpecialThingFilterWorker_CorpsesStranger : SpecialThingFilterWorker
+namespace RimWorld
 {
-	public override bool Matches(Thing t)
+	// Token: 0x020036BA RID: 14010
+	public class SpecialThingFilterWorker_CorpsesStranger : SpecialThingFilterWorker
 	{
-		if (!(t is Corpse corpse))
+		// Token: 0x06013757 RID: 79703 RVA: 0x005C8AB0 File Offset: 0x005C6CB0
+		public override bool Matches(Thing t)
 		{
-			return false;
+			Corpse corpse = t as Corpse;
+			return corpse != null && corpse.InnerPawn.def.race.Humanlike && (!ModsConfig.AnomalyActive || !(t is UnnaturalCorpse)) && corpse.InnerPawn.Faction != Faction.OfPlayer;
 		}
-		if (!corpse.InnerPawn.def.race.Humanlike)
-		{
-			return false;
-		}
-		if (ModsConfig.AnomalyActive && t is UnnaturalCorpse)
-		{
-			return false;
-		}
-		return corpse.InnerPawn.Faction != Faction.OfPlayer;
 	}
 }

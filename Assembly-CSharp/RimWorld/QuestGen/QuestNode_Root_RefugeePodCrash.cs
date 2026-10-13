@@ -1,55 +1,45 @@
-using System;
+﻿using System;
 using Verse;
 
-namespace RimWorld.QuestGen;
-
-public class QuestNode_Root_RefugeePodCrash : QuestNode_Root_WandererJoin
+namespace RimWorld.QuestGen
 {
-	public override Pawn GeneratePawn()
+	// Token: 0x02003B82 RID: 15234
+	public class QuestNode_Root_RefugeePodCrash : QuestNode_Root_WandererJoin
 	{
-		return GeneratePawn_NewTemp(null);
-	}
+		// Token: 0x06014B1D RID: 84765 RVA: 0x0062FEAC File Offset: 0x0062E0AC
+		public override Pawn GeneratePawn()
+		{
+			Pawn pawn = ThingUtility.FindPawn(ThingSetMakerDefOf.RefugeePod.root.Generate());
+			pawn.guest.Recruitable = true;
+			return pawn;
+		}
 
-	public override Pawn GeneratePawn_NewTemp(Map map)
-	{
-		Pawn pawn = ThingUtility.FindPawn(ThingSetMakerDefOf.RefugeePod.root.Generate(new ThingSetMakerParams
+		// Token: 0x06014B1E RID: 84766 RVA: 0x0062FED0 File Offset: 0x0062E0D0
+		public override void SendLetter(Quest quest, Pawn pawn)
 		{
-			tile = map?.Tile
-		}));
-		pawn.guest.Recruitable = true;
-		return pawn;
-	}
-
-	[Obsolete]
-	public override void SendLetter(Quest quest, Pawn pawn)
-	{
-		SendLetter_NewTemp(quest, pawn, Find.AnyPlayerHomeMap);
-	}
-
-	public override void SendLetter_NewTemp(Quest quest, Pawn pawn, Map map)
-	{
-		TaggedString title = "LetterLabelRefugeePodCrash".Translate();
-		TaggedString letterText = "RefugeePodCrash".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
-		letterText += "\n\n";
-		if (pawn.Faction == null)
-		{
-			letterText += "RefugeePodCrash_Factionless".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
+			TaggedString label = "LetterLabelRefugeePodCrash".Translate();
+			TaggedString taggedString = "RefugeePodCrash".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			taggedString += "\n\n";
+			if (pawn.Faction == null)
+			{
+				taggedString += "RefugeePodCrash_Factionless".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			}
+			else if (pawn.Faction.HostileTo(Faction.OfPlayer))
+			{
+				taggedString += "RefugeePodCrash_Hostile".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			}
+			else
+			{
+				taggedString += "RefugeePodCrash_NonHostile".Translate(pawn.Named("PAWN")).AdjustedFor(pawn, "PAWN", true);
+			}
+			if (pawn.DevelopmentalStage.Juvenile())
+			{
+				string arg = (pawn.ageTracker.AgeBiologicalYears * 3600000).ToStringTicksToPeriod(true, false, true, true, false);
+				taggedString += "\n\n" + "RefugeePodCrash_Child".Translate(pawn.Named("PAWN"), arg.Named("AGE"));
+			}
+			QuestNode_Root_WandererJoin_WalkIn.AppendCharityInfoToLetter("JoinerCharityInfo".Translate(pawn), ref taggedString);
+			PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref taggedString, ref label, pawn);
+			Find.LetterStack.ReceiveLetter(label, taggedString, LetterDefOf.NeutralEvent, new TargetInfo(pawn), null, null, null, null, 0, true);
 		}
-		else if (pawn.Faction.HostileTo(Faction.OfPlayer))
-		{
-			letterText += "RefugeePodCrash_Hostile".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
-		}
-		else
-		{
-			letterText += "RefugeePodCrash_NonHostile".Translate(pawn.Named("PAWN")).AdjustedFor(pawn);
-		}
-		if (pawn.DevelopmentalStage.Juvenile())
-		{
-			string arg = (pawn.ageTracker.AgeBiologicalYears * 3600000).ToStringTicksToPeriod();
-			letterText += "\n\n" + "RefugeePodCrash_Child".Translate(pawn.Named("PAWN"), arg.Named("AGE"));
-		}
-		QuestNode_Root_WandererJoin_WalkIn.AppendCharityInfoToLetter("JoinerCharityInfo".Translate(pawn), ref letterText);
-		PawnRelationUtility.TryAppendRelationsWithColonistsInfo(ref letterText, ref title, pawn);
-		Find.LetterStack.ReceiveLetter(title, letterText, LetterDefOf.NeutralEvent, new TargetInfo(pawn));
 	}
 }

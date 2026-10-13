@@ -1,6 +1,11 @@
-namespace Unity.Collections;
+﻿using System;
 
-internal struct TableValue
+namespace Unity.Collections
 {
-	public int HeapIndex;
+	// Token: 0x02000064 RID: 100
+	internal struct TableValue
+	{
+		// Token: 0x0400010D RID: 269
+		public int HeapIndex;
+	}
 }

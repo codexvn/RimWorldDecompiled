@@ -1,12 +1,16 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalIsCrawling : ThinkNode_Conditional
+namespace RimWorld
 {
-	protected override bool Satisfied(Pawn pawn)
+	// Token: 0x02001789 RID: 6025
+	public class ThinkNode_ConditionalIsCrawling : ThinkNode_Conditional
 	{
-		return pawn.Crawling;
+		// Token: 0x06008D5B RID: 36187 RVA: 0x002A0A18 File Offset: 0x0029EC18
+		protected override bool Satisfied(Pawn pawn)
+		{
+			return pawn.Crawling;
+		}
 	}
 }

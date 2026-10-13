@@ -1,64 +1,78 @@
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using Verse;
 
-namespace RimWorld;
-
-public class CompRitualSeat : ThingComp
+namespace RimWorld
 {
-	private static StringBuilder tmpStringBuilder = new StringBuilder();
-
-	private static List<Ideo> tmpIdeos = new List<Ideo>();
-
-	public override string CompInspectStringExtra()
+	// Token: 0x02002DEB RID: 11755
+	public class CompRitualSeat : ThingComp
 	{
-		string ideosString = GetIdeosString();
-		if (string.IsNullOrEmpty(ideosString))
+		// Token: 0x060108BB RID: 67771 RVA: 0x004C5538 File Offset: 0x004C3738
+		public override string CompInspectStringExtra()
 		{
-			return null;
-		}
-		return "RitualSeatOf".Translate(ideosString.Named("IDEOS")).Resolve();
-	}
-
-	private string GetIdeosString(List<Ideo> outIdeos = null)
-	{
-		tmpStringBuilder.Clear();
-		foreach (Ideo item in Find.IdeoManager.IdeosInViewOrder)
-		{
-			bool flag = false;
-			foreach (Precept item2 in item.PreceptsListForReading)
+			string ideosString = this.GetIdeosString(null);
+			if (string.IsNullOrEmpty(ideosString))
 			{
-				if (item2 is Precept_RitualSeat precept_RitualSeat && precept_RitualSeat.ThingDef == parent.def)
+				return null;
+			}
+			return "RitualSeatOf".Translate(ideosString.Named("IDEOS")).Resolve();
+		}
+
+		// Token: 0x060108BC RID: 67772 RVA: 0x004C5574 File Offset: 0x004C3774
+		private string GetIdeosString(List<Ideo> outIdeos = null)
+		{
+			CompRitualSeat.tmpStringBuilder.Clear();
+			foreach (Ideo ideo in Find.IdeoManager.IdeosInViewOrder)
+			{
+				bool flag = false;
+				foreach (Precept precept in ideo.PreceptsListForReading)
 				{
-					flag = true;
-					break;
+					Precept_RitualSeat precept_RitualSeat = precept as Precept_RitualSeat;
+					if (precept_RitualSeat != null && precept_RitualSeat.ThingDef == this.parent.def)
+					{
+						flag = true;
+						break;
+					}
+				}
+				if (flag)
+				{
+					if (outIdeos != null)
+					{
+						outIdeos.Add(ideo);
+					}
+					if (CompRitualSeat.tmpStringBuilder.Length > 0)
+					{
+						CompRitualSeat.tmpStringBuilder.Append(", ");
+					}
+					CompRitualSeat.tmpStringBuilder.Append(ideo.name.ApplyTag(ideo).Resolve());
 				}
 			}
-			if (flag)
-			{
-				outIdeos?.Add(item);
-				if (tmpStringBuilder.Length > 0)
-				{
-					tmpStringBuilder.Append(", ");
-				}
-				tmpStringBuilder.Append(item.name.ApplyTag(item).Resolve());
-			}
+			return CompRitualSeat.tmpStringBuilder.ToString();
 		}
-		return tmpStringBuilder.ToString();
-	}
 
-	public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
-	{
-		tmpIdeos.Clear();
-		string ideosString = GetIdeosString(tmpIdeos);
-		if (!string.IsNullOrEmpty(ideosString))
+		// Token: 0x060108BD RID: 67773 RVA: 0x004C5684 File Offset: 0x004C3884
+		public override IEnumerable<StatDrawEntry> SpecialDisplayStats()
 		{
-			Dialog_InfoCard.Hyperlink[] array = new Dialog_InfoCard.Hyperlink[tmpIdeos.Count];
+			CompRitualSeat.tmpIdeos.Clear();
+			string ideosString = this.GetIdeosString(CompRitualSeat.tmpIdeos);
+			if (string.IsNullOrEmpty(ideosString))
+			{
+				yield break;
+			}
+			Dialog_InfoCard.Hyperlink[] array = new Dialog_InfoCard.Hyperlink[CompRitualSeat.tmpIdeos.Count];
 			for (int i = 0; i < array.Length; i++)
 			{
-				array[i] = new Dialog_InfoCard.Hyperlink(tmpIdeos[i]);
+				array[i] = new Dialog_InfoCard.Hyperlink(CompRitualSeat.tmpIdeos[i]);
 			}
-			yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelatedToIdeos_Name".Translate(), ideosString, "Stat_Thing_RelatedToIdeos_Desc".Translate(), 1110, null, array);
+			yield return new StatDrawEntry(StatCategoryDefOf.BasicsImportant, "Stat_Thing_RelatedToIdeos_Name".Translate(), ideosString, "Stat_Thing_RelatedToIdeos_Desc".Translate(), 1110, null, array, false, false);
+			yield break;
 		}
+
+		// Token: 0x0400AC8D RID: 44173
+		private static StringBuilder tmpStringBuilder = new StringBuilder();
+
+		// Token: 0x0400AC8E RID: 44174
+		private static List<Ideo> tmpIdeos = new List<Ideo>();
 	}
 }

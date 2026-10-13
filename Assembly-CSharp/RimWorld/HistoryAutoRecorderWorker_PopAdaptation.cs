@@ -1,11 +1,15 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class HistoryAutoRecorderWorker_PopAdaptation : HistoryAutoRecorderWorker
+namespace RimWorld
 {
-	public override float PullRecord()
+	// Token: 0x02001B68 RID: 7016
+	public class HistoryAutoRecorderWorker_PopAdaptation : HistoryAutoRecorderWorker
 	{
-		return Find.StoryWatcher.watcherPopAdaptation.AdaptDays;
+		// Token: 0x06009CA8 RID: 40104 RVA: 0x002D72AB File Offset: 0x002D54AB
+		public override float PullRecord()
+		{
+			return Find.StoryWatcher.watcherPopAdaptation.AdaptDays;
+		}
 	}
 }

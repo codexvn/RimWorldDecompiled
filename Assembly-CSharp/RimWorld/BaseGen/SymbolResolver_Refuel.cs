@@ -1,34 +1,39 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public class SymbolResolver_Refuel : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	private static List<CompRefuelable> refuelables = new List<CompRefuelable>();
-
-	public override void Resolve(ResolveParams rp)
+	// Token: 0x02003973 RID: 14707
+	public class SymbolResolver_Refuel : SymbolResolver
 	{
-		Map map = BaseGen.globalSettings.map;
-		refuelables.Clear();
-		foreach (IntVec3 item in rp.rect)
+		// Token: 0x06014372 RID: 82802 RVA: 0x00607D5C File Offset: 0x00605F5C
+		public override void Resolve(ResolveParams rp)
 		{
-			List<Thing> thingList = item.GetThingList(map);
-			for (int i = 0; i < thingList.Count; i++)
+			Map map = BaseGen.globalSettings.map;
+			SymbolResolver_Refuel.refuelables.Clear();
+			foreach (IntVec3 c in rp.rect)
 			{
-				CompRefuelable compRefuelable = thingList[i].TryGetComp<CompRefuelable>();
-				if (compRefuelable != null && !refuelables.Contains(compRefuelable))
+				List<Thing> thingList = c.GetThingList(map);
+				for (int i = 0; i < thingList.Count; i++)
 				{
-					refuelables.Add(compRefuelable);
+					CompRefuelable compRefuelable = thingList[i].TryGetComp<CompRefuelable>();
+					if (compRefuelable != null && !SymbolResolver_Refuel.refuelables.Contains(compRefuelable))
+					{
+						SymbolResolver_Refuel.refuelables.Add(compRefuelable);
+					}
 				}
 			}
+			for (int j = 0; j < SymbolResolver_Refuel.refuelables.Count; j++)
+			{
+				float fuelCapacity = SymbolResolver_Refuel.refuelables[j].Props.fuelCapacity;
+				float amount = Rand.Range(fuelCapacity / 2f, fuelCapacity);
+				SymbolResolver_Refuel.refuelables[j].Refuel(amount);
+			}
+			SymbolResolver_Refuel.refuelables.Clear();
 		}
-		for (int j = 0; j < refuelables.Count; j++)
-		{
-			float fuelCapacity = refuelables[j].Props.fuelCapacity;
-			float amount = Rand.Range(fuelCapacity / 2f, fuelCapacity);
-			refuelables[j].Refuel(amount);
-		}
-		refuelables.Clear();
+
+		// Token: 0x0400DF63 RID: 57187
+		private static List<CompRefuelable> refuelables = new List<CompRefuelable>();
 	}
 }

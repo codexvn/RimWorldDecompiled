@@ -1,8 +1,10 @@
-using System;
+﻿using System;
 
-namespace Verse;
-
-[AttributeUsage(AttributeTargets.Class)]
-public class EditorReplaceableAttribute : Attribute
+namespace Verse
 {
+	// Token: 0x02000B5E RID: 2910
+	[AttributeUsage(AttributeTargets.Class)]
+	public class EditorReplaceableAttribute : Attribute
+	{
+	}
 }

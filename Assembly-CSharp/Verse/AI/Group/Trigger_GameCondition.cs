@@ -1,23 +1,29 @@
+﻿using System;
 using System.Collections.Generic;
 
-namespace Verse.AI.Group;
-
-public class Trigger_GameCondition : Trigger
+namespace Verse.AI.Group
 {
-	public List<GameConditionDef> gameConditions;
-
-	public override bool ActivateOn(Lord lord, TriggerSignal signal)
+	// Token: 0x020010E6 RID: 4326
+	public class Trigger_GameCondition : Trigger
 	{
-		if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 199 == 0)
+		// Token: 0x0600694E RID: 26958 RVA: 0x002130F4 File Offset: 0x002112F4
+		public override bool ActivateOn(Lord lord, TriggerSignal signal)
 		{
-			foreach (GameConditionDef gameCondition in gameConditions)
+			if (signal.type == TriggerSignalType.Tick && Find.TickManager.TicksGame % 199 == 0)
 			{
-				if (lord.Map.GameConditionManager.ConditionIsActive(gameCondition))
+				foreach (GameConditionDef def in this.gameConditions)
 				{
-					return true;
+					if (lord.Map.GameConditionManager.ConditionIsActive(def))
+					{
+						return true;
+					}
 				}
+				return false;
 			}
+			return false;
 		}
-		return false;
+
+		// Token: 0x04004A80 RID: 19072
+		public List<GameConditionDef> gameConditions;
 	}
 }

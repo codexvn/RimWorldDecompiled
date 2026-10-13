@@ -1,70 +1,97 @@
+﻿using System;
 using System.Collections.Generic;
 using RimWorld;
 
-namespace Verse.AI;
-
-public class MentalState_TargetedInsultingSpree : MentalState_InsultingSpree
+namespace Verse.AI
 {
-	private static List<Pawn> candidates = new List<Pawn>();
-
-	public override string InspectLine => string.Format(def.baseInspectLine, target.LabelShort);
-
-	protected override bool CanEndBeforeMaxDurationNow => insultedTargetAtLeastOnce;
-
-	public override void MentalStateTick(int delta)
+	// Token: 0x02000F6F RID: 3951
+	public class MentalState_TargetedInsultingSpree : MentalState_InsultingSpree
 	{
-		if (target != null && (!target.Spawned || !base.pawn.CanReach(target, PathEndMode.Touch, Danger.Deadly) || !target.Awake()))
+		// Token: 0x17000F73 RID: 3955
+		// (get) Token: 0x060061AD RID: 25005 RVA: 0x001EE9AC File Offset: 0x001ECBAC
+		public override string InspectLine
 		{
-			Pawn pawn = target;
-			if (!TryFindNewTarget())
+			get
 			{
-				RecoverFromState();
+				return string.Format(this.def.baseInspectLine, this.target.LabelShort);
+			}
+		}
+
+		// Token: 0x17000F74 RID: 3956
+		// (get) Token: 0x060061AE RID: 25006 RVA: 0x001EE9C9 File Offset: 0x001ECBC9
+		protected override bool CanEndBeforeMaxDurationNow
+		{
+			get
+			{
+				return this.insultedTargetAtLeastOnce;
+			}
+		}
+
+		// Token: 0x060061AF RID: 25007 RVA: 0x001EE9D4 File Offset: 0x001ECBD4
+		public override void MentalStateTick(int delta)
+		{
+			if (this.target != null && (!this.target.Spawned || !this.pawn.CanReach(this.target, PathEndMode.Touch, Danger.Deadly, false, false, TraverseMode.ByPawn) || !this.target.Awake()))
+			{
+				Pawn target = this.target;
+				if (!this.TryFindNewTarget())
+				{
+					base.RecoverFromState();
+					return;
+				}
+				Messages.Message("MessageTargetedInsultingSpreeChangedTarget".Translate(this.pawn.LabelShort, target.Label, this.target.Label, this.pawn.Named("PAWN"), target.Named("OLDTARGET"), this.target.Named("TARGET")).AdjustedFor(this.pawn, "PAWN", true), this.pawn, MessageTypeDefOf.NegativeEvent, true);
+				base.MentalStateTick(delta);
 				return;
 			}
-			Messages.Message("MessageTargetedInsultingSpreeChangedTarget".Translate(base.pawn.LabelShort, pawn.Label, target.Label, base.pawn.Named("PAWN"), pawn.Named("OLDTARGET"), target.Named("TARGET")).AdjustedFor(base.pawn), base.pawn, MessageTypeDefOf.NegativeEvent);
-			base.MentalStateTick(delta);
+			else
+			{
+				if (this.target == null || !InsultingSpreeMentalStateUtility.CanChaseAndInsult(this.pawn, this.target, false, false))
+				{
+					base.RecoverFromState();
+					return;
+				}
+				base.MentalStateTick(delta);
+				return;
+			}
 		}
-		else if (target == null || !InsultingSpreeMentalStateUtility.CanChaseAndInsult(base.pawn, target, skipReachabilityCheck: false, allowPrisoners: false))
-		{
-			RecoverFromState();
-		}
-		else
-		{
-			base.MentalStateTick(delta);
-		}
-	}
 
-	public override void PreStart()
-	{
-		base.PreStart();
-		TryFindNewTarget();
-	}
-
-	private bool TryFindNewTarget()
-	{
-		InsultingSpreeMentalStateUtility.GetInsultCandidatesFor(pawn, candidates, allowPrisoners: false);
-		bool result = candidates.TryRandomElement(out target);
-		candidates.Clear();
-		return result;
-	}
-
-	public override void PostEnd()
-	{
-		base.PostEnd();
-		if (target != null && PawnUtility.ShouldSendNotificationAbout(pawn))
+		// Token: 0x060061B0 RID: 25008 RVA: 0x001EEAFE File Offset: 0x001ECCFE
+		public override void PreStart()
 		{
-			Messages.Message("MessageNoLongerOnTargetedInsultingSpree".Translate(pawn.LabelShort, target.Label, pawn.Named("PAWN"), target.Named("TARGET")), pawn, MessageTypeDefOf.SituationResolved);
+			base.PreStart();
+			this.TryFindNewTarget();
 		}
-	}
 
-	public override TaggedString GetBeginLetterText()
-	{
-		if (target == null)
+		// Token: 0x060061B1 RID: 25009 RVA: 0x001EEB0D File Offset: 0x001ECD0D
+		private bool TryFindNewTarget()
 		{
-			Log.Error("No target. This should have been checked in this mental state's worker.");
-			return "";
+			InsultingSpreeMentalStateUtility.GetInsultCandidatesFor(this.pawn, MentalState_TargetedInsultingSpree.candidates, false);
+			bool result = MentalState_TargetedInsultingSpree.candidates.TryRandomElement(out this.target);
+			MentalState_TargetedInsultingSpree.candidates.Clear();
+			return result;
 		}
-		return def.beginLetter.Formatted(pawn.NameShortColored, target.NameShortColored, pawn.Named("PAWN"), target.Named("TARGET")).AdjustedFor(pawn).Resolve()
-			.CapitalizeFirst();
+
+		// Token: 0x060061B2 RID: 25010 RVA: 0x001EEB3C File Offset: 0x001ECD3C
+		public override void PostEnd()
+		{
+			base.PostEnd();
+			if (this.target != null && PawnUtility.ShouldSendNotificationAbout(this.pawn))
+			{
+				Messages.Message("MessageNoLongerOnTargetedInsultingSpree".Translate(this.pawn.LabelShort, this.target.Label, this.pawn.Named("PAWN"), this.target.Named("TARGET")), this.pawn, MessageTypeDefOf.SituationResolved, true);
+			}
+		}
+
+		// Token: 0x060061B3 RID: 25011 RVA: 0x001EEBCC File Offset: 0x001ECDCC
+		public override TaggedString GetBeginLetterText()
+		{
+			if (this.target == null)
+			{
+				Log.Error("No target. This should have been checked in this mental state's worker.");
+				return "";
+			}
+			return this.def.beginLetter.Formatted(this.pawn.NameShortColored, this.target.NameShortColored, this.pawn.Named("PAWN"), this.target.Named("TARGET")).AdjustedFor(this.pawn, "PAWN", true).Resolve().CapitalizeFirst();
+		}
+
+		// Token: 0x04004639 RID: 17977
+		private static List<Pawn> candidates = new List<Pawn>();
 	}
 }

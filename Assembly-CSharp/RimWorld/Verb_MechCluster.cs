@@ -1,31 +1,41 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class Verb_MechCluster : Verb_CastBase
+namespace RimWorld
 {
-	public const float Points = 2500f;
-
-	protected override bool TryCastShot()
+	// Token: 0x02003783 RID: 14211
+	public class Verb_MechCluster : Verb_CastBase
 	{
-		if (Faction.OfMechanoids == null)
+		// Token: 0x06013AFC RID: 80636 RVA: 0x005D9174 File Offset: 0x005D7374
+		protected override bool TryCastShot()
 		{
-			Messages.Message("MessageNoFactionForVerbMechCluster".Translate(), caster, MessageTypeDefOf.RejectInput, null, historical: false);
-			return false;
+			if (Faction.OfMechanoids == null)
+			{
+				Messages.Message("MessageNoFactionForVerbMechCluster".Translate(), this.caster, MessageTypeDefOf.RejectInput, null, false);
+				return false;
+			}
+			if (this.currentTarget.HasThing && this.currentTarget.Thing.Map != this.caster.Map)
+			{
+				return false;
+			}
+			MechClusterUtility.SpawnCluster(this.currentTarget.Cell, this.caster.Map, MechClusterGenerator.GenerateClusterSketch(2500f, this.caster.Map, true, true), true, false, null);
+			CompApparelReloadable reloadableCompSource = base.ReloadableCompSource;
+			if (reloadableCompSource != null)
+			{
+				reloadableCompSource.UsedOnce();
+			}
+			return true;
 		}
-		if (currentTarget.HasThing && currentTarget.Thing.Map != caster.Map)
-		{
-			return false;
-		}
-		MechClusterUtility.SpawnCluster(currentTarget.Cell, caster.Map, MechClusterGenerator.GenerateClusterSketch(2500f, caster.Map, startDormant: true, forceNoConditionCauser: true));
-		base.ReloadableCompSource?.UsedOnce();
-		return true;
-	}
 
-	public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
-	{
-		needLOSToCenter = false;
-		return 23f;
+		// Token: 0x06013AFD RID: 80637 RVA: 0x005D8A87 File Offset: 0x005D6C87
+		public override float HighlightFieldRadiusAroundTarget(out bool needLOSToCenter)
+		{
+			needLOSToCenter = false;
+			return 23f;
+		}
+
+		// Token: 0x0400DA08 RID: 55816
+		public const float Points = 2500f;
 	}
 }

@@ -1,10 +1,15 @@
-namespace Verse;
+﻿using System;
 
-public class CameraMapConfig_SmoothZoom : CameraMapConfig
+namespace Verse
 {
-	public CameraMapConfig_SmoothZoom()
+	// Token: 0x020001DB RID: 475
+	public class CameraMapConfig_SmoothZoom : CameraMapConfig
 	{
-		smoothZoom = true;
-		sizeRange.min = 8.2f;
+		// Token: 0x06000CEF RID: 3311 RVA: 0x0003D41C File Offset: 0x0003B61C
+		public CameraMapConfig_SmoothZoom()
+		{
+			this.smoothZoom = true;
+			this.sizeRange.min = 8.2f;
+		}
 	}
 }

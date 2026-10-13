@@ -1,15 +1,24 @@
-namespace RimWorld;
+﻿using System;
 
-public static class StoryDangerUtility
+namespace RimWorld
 {
-	public static float Scale(this StoryDanger d)
+	// Token: 0x02001E96 RID: 7830
+	public static class StoryDangerUtility
 	{
-		return d switch
+		// Token: 0x0600ADD4 RID: 44500 RVA: 0x00319323 File Offset: 0x00317523
+		public static float Scale(this StoryDanger d)
 		{
-			StoryDanger.None => 0f, 
-			StoryDanger.Low => 1f, 
-			StoryDanger.High => 2f, 
-			_ => 0f, 
-		};
+			switch (d)
+			{
+			case StoryDanger.None:
+				return 0f;
+			case StoryDanger.Low:
+				return 1f;
+			case StoryDanger.High:
+				return 2f;
+			default:
+				return 0f;
+			}
+		}
 	}
 }

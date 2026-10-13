@@ -1,35 +1,41 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld.BaseGen;
-
-public abstract class SymbolResolver_AncientComplex_Base : SymbolResolver
+namespace RimWorld.BaseGen
 {
-	protected abstract LayoutDef DefaultLayoutDef { get; }
-
-	public void ResolveComplex(ResolveParams rp)
+	// Token: 0x020038E8 RID: 14568
+	public abstract class SymbolResolver_AncientComplex_Base : SymbolResolver
 	{
-		if (rp.ancientLayoutStructureSketch == null)
+		// Token: 0x1700332A RID: 13098
+		// (get) Token: 0x060141A9 RID: 82345
+		protected abstract LayoutDef DefaultLayoutDef { get; }
+
+		// Token: 0x060141AA RID: 82346 RVA: 0x005FC2E0 File Offset: 0x005FA4E0
+		public void ResolveComplex(ResolveParams rp)
 		{
-			StructureGenParams parms = new StructureGenParams
+			if (rp.ancientLayoutStructureSketch == null)
 			{
-				size = new IntVec2(rp.rect.Width, rp.rect.Height)
-			};
-			rp.ancientLayoutStructureSketch = DefaultLayoutDef.Worker.GenerateStructureSketch(parms);
-		}
-		ResolveParams resolveParams = rp;
-		resolveParams.ancientLayoutStructureSketch = rp.ancientLayoutStructureSketch;
-		BaseGen.symbolStack.Push("ancientComplexSketch", resolveParams);
-		ResolveParams resolveParams2 = rp;
-		resolveParams2.floorDef = TerrainDefOf.AncientConcrete;
-		resolveParams2.allowBridgeOnAnyImpassableTerrain = true;
-		resolveParams2.floorOnlyIfTerrainSupports = false;
-		foreach (LayoutRoom room in rp.ancientLayoutStructureSketch.structureLayout.Rooms)
-		{
-			foreach (CellRect rect in room.rects)
+				StructureGenParams parms = new StructureGenParams
+				{
+					size = new IntVec2(rp.rect.Width, rp.rect.Height)
+				};
+				rp.ancientLayoutStructureSketch = this.DefaultLayoutDef.Worker.GenerateStructureSketch(parms);
+			}
+			ResolveParams resolveParams = rp;
+			resolveParams.ancientLayoutStructureSketch = rp.ancientLayoutStructureSketch;
+			BaseGen.symbolStack.Push("ancientComplexSketch", resolveParams, null);
+			ResolveParams resolveParams2 = rp;
+			resolveParams2.floorDef = TerrainDefOf.AncientConcrete;
+			resolveParams2.allowBridgeOnAnyImpassableTerrain = new bool?(true);
+			resolveParams2.floorOnlyIfTerrainSupports = new bool?(false);
+			foreach (LayoutRoom layoutRoom in rp.ancientLayoutStructureSketch.structureLayout.Rooms)
 			{
-				resolveParams2.rect = rect.MovedBy(rp.rect.Min);
-				BaseGen.symbolStack.Push("floor", resolveParams2);
-				BaseGen.symbolStack.Push("clear", resolveParams2);
+				foreach (CellRect cellRect in layoutRoom.rects)
+				{
+					resolveParams2.rect = cellRect.MovedBy(rp.rect.Min);
+					BaseGen.symbolStack.Push("floor", resolveParams2, null);
+					BaseGen.symbolStack.Push("clear", resolveParams2, null);
+				}
 			}
 		}
 	}

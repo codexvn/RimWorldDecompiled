@@ -1,18 +1,22 @@
+﻿using System;
 using Verse;
 
-namespace RimWorld;
-
-public class PlaceWorker_RequireNaturePsycaster : PlaceWorker
+namespace RimWorld
 {
-	public override bool IsBuildDesignatorVisible(BuildableDef def)
+	// Token: 0x02003816 RID: 14358
+	public class PlaceWorker_RequireNaturePsycaster : PlaceWorker
 	{
-		foreach (Pawn allMapsCaravansAndTravellingTransporters_Alive_Colonist in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists)
+		// Token: 0x06013DC9 RID: 81353 RVA: 0x005E5880 File Offset: 0x005E3A80
+		public override bool IsBuildDesignatorVisible(BuildableDef def)
 		{
-			if (MeditationFocusDefOf.Natural.CanPawnUse(allMapsCaravansAndTravellingTransporters_Alive_Colonist))
+			foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_Colonists)
 			{
-				return true;
+				if (MeditationFocusDefOf.Natural.CanPawnUse(p))
+				{
+					return true;
+				}
 			}
+			return false;
 		}
-		return false;
 	}
 }

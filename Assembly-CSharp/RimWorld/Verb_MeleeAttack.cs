@@ -1,320 +1,344 @@
-using System;
+﻿using System;
 using UnityEngine;
 using Verse;
 using Verse.Sound;
 
-namespace RimWorld;
-
-public abstract class Verb_MeleeAttack : Verb
+namespace RimWorld
 {
-	private const int TargetCooldown = 50;
-
-	protected override bool TryCastShot()
+	// Token: 0x02003785 RID: 14213
+	public abstract class Verb_MeleeAttack : Verb
 	{
-		Pawn casterPawn = CasterPawn;
-		if (!casterPawn.Spawned)
+		// Token: 0x06013B02 RID: 80642 RVA: 0x005D9304 File Offset: 0x005D7504
+		protected override bool TryCastShot()
 		{
-			return false;
-		}
-		if (casterPawn.stances.FullBodyBusy)
-		{
-			return false;
-		}
-		Thing thing = currentTarget.Thing;
-		if (!CanHitTarget(thing))
-		{
-			Log.Warning(casterPawn?.ToString() + " meleed " + thing?.ToString() + " from out of melee position.");
-		}
-		casterPawn.rotationTracker.Face(thing.DrawPos);
-		if (!IsTargetImmobile(currentTarget) && casterPawn.skills != null && (currentTarget.Pawn == null || !currentTarget.Pawn.IsColonyMech))
-		{
-			casterPawn.skills.Learn(SkillDefOf.Melee, 200f * verbProps.AdjustedFullCycleTime(this, casterPawn));
-		}
-		Pawn pawn = thing as Pawn;
-		if (pawn != null && !pawn.Dead && (casterPawn.MentalStateDef != MentalStateDefOf.SocialFighting || pawn.MentalStateDef != MentalStateDefOf.SocialFighting) && (casterPawn.story == null || !casterPawn.story.traits.DisableHostilityFrom(pawn)))
-		{
-			pawn.mindState.meleeThreat = casterPawn;
-			pawn.mindState.lastMeleeThreatHarmTick = Find.TickManager.TicksGame;
-		}
-		Map map = thing.Map;
-		Vector3 drawPos = thing.DrawPos;
-		SoundDef soundDef;
-		bool result;
-		if (Rand.Chance(GetNonMissChance(thing)))
-		{
-			if (!Rand.Chance(GetDodgeChance(thing)))
+			Pawn casterPawn = this.CasterPawn;
+			if (!casterPawn.Spawned)
 			{
-				soundDef = ((thing.def.category != ThingCategory.Building) ? SoundHitPawn() : SoundHitBuilding());
-				if (verbProps.impactMote != null)
+				return false;
+			}
+			if (casterPawn.stances.FullBodyBusy)
+			{
+				return false;
+			}
+			Thing thing = this.currentTarget.Thing;
+			if (!this.CanHitTarget(thing))
+			{
+				Pawn pawn = casterPawn;
+				string str = (pawn != null) ? pawn.ToString() : null;
+				string str2 = " meleed ";
+				Thing thing2 = thing;
+				Log.Warning(str + str2 + ((thing2 != null) ? thing2.ToString() : null) + " from out of melee position.");
+			}
+			casterPawn.rotationTracker.Face(thing.DrawPos);
+			if (!this.IsTargetImmobile(this.currentTarget) && casterPawn.skills != null && (this.currentTarget.Pawn == null || !this.currentTarget.Pawn.IsColonyMech))
+			{
+				casterPawn.skills.Learn(SkillDefOf.Melee, 200f * this.verbProps.AdjustedFullCycleTime(this, casterPawn), false, false);
+			}
+			Pawn pawn2 = thing as Pawn;
+			if (pawn2 != null && !pawn2.Dead && (casterPawn.MentalStateDef != MentalStateDefOf.SocialFighting || pawn2.MentalStateDef != MentalStateDefOf.SocialFighting) && (casterPawn.story == null || !casterPawn.story.traits.DisableHostilityFrom(pawn2)))
+			{
+				pawn2.mindState.meleeThreat = casterPawn;
+				pawn2.mindState.lastMeleeThreatHarmTick = Find.TickManager.TicksGame;
+			}
+			Map map = thing.Map;
+			Vector3 drawPos = thing.DrawPos;
+			SoundDef soundDef;
+			bool result;
+			if (Rand.Chance(this.GetNonMissChance(thing)))
+			{
+				if (!Rand.Chance(this.GetDodgeChance(thing)))
 				{
-					MoteMaker.MakeStaticMote(drawPos, map, verbProps.impactMote);
-				}
-				if (verbProps.impactFleck != null)
-				{
-					FleckMaker.Static(drawPos, map, verbProps.impactFleck);
-				}
-				BattleLogEntry_MeleeCombat battleLogEntry_MeleeCombat = CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesHit, alwaysShow: true);
-				result = true;
-				DamageWorker.DamageResult damageResult = ApplyMeleeDamageToTarget(currentTarget);
-				if (pawn != null && damageResult.totalDamageDealt > 0f)
-				{
-					ApplyMeleeSlaveSuppression(pawn, damageResult.totalDamageDealt);
-				}
-				if (damageResult.stunned && damageResult.parts.NullOrEmpty())
-				{
-					Find.BattleLog.RemoveEntry(battleLogEntry_MeleeCombat);
+					if (thing.def.category == ThingCategory.Building)
+					{
+						soundDef = this.SoundHitBuilding();
+					}
+					else
+					{
+						soundDef = this.SoundHitPawn();
+					}
+					if (this.verbProps.impactMote != null)
+					{
+						MoteMaker.MakeStaticMote(drawPos, map, this.verbProps.impactMote, 1f, false, 0f);
+					}
+					if (this.verbProps.impactFleck != null)
+					{
+						FleckMaker.Static(drawPos, map, this.verbProps.impactFleck, 1f);
+					}
+					BattleLogEntry_MeleeCombat battleLogEntry_MeleeCombat = this.CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesHit, true);
+					result = true;
+					DamageWorker.DamageResult damageResult = this.ApplyMeleeDamageToTarget(this.currentTarget);
+					if (pawn2 != null && damageResult.totalDamageDealt > 0f)
+					{
+						this.ApplyMeleeSlaveSuppression(pawn2, damageResult.totalDamageDealt);
+					}
+					if (damageResult.stunned && damageResult.parts.NullOrEmpty<BodyPartRecord>())
+					{
+						Find.BattleLog.RemoveEntry(battleLogEntry_MeleeCombat);
+					}
+					else
+					{
+						damageResult.AssociateWithLog(battleLogEntry_MeleeCombat);
+						if (damageResult.deflected)
+						{
+							battleLogEntry_MeleeCombat.RuleDef = this.maneuver.combatLogRulesDeflect;
+							battleLogEntry_MeleeCombat.alwaysShowInCompact = false;
+						}
+					}
 				}
 				else
 				{
-					damageResult.AssociateWithLog(battleLogEntry_MeleeCombat);
-					if (damageResult.deflected)
-					{
-						battleLogEntry_MeleeCombat.RuleDef = maneuver.combatLogRulesDeflect;
-						battleLogEntry_MeleeCombat.alwaysShowInCompact = false;
-					}
+					result = false;
+					soundDef = this.SoundDodge(thing);
+					MoteMaker.ThrowText(drawPos, map, "TextMote_Dodge".Translate(), 1.9f);
+					this.CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesDodge, false);
 				}
 			}
 			else
 			{
 				result = false;
-				soundDef = SoundDodge(thing);
-				MoteMaker.ThrowText(drawPos, map, "TextMote_Dodge".Translate(), 1.9f);
-				CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesDodge, alwaysShow: false);
+				soundDef = this.SoundMiss();
+				this.CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesMiss, false);
 			}
+			if (soundDef != null)
+			{
+				soundDef.PlayOneShot(new TargetInfo(thing.Position, map, false));
+			}
+			if (casterPawn.Spawned)
+			{
+				casterPawn.Drawer.Notify_MeleeAttackOn(thing);
+			}
+			if (pawn2 != null && !pawn2.Dead && pawn2.Spawned)
+			{
+				pawn2.stances.stagger.StaggerFor(95, 0.17f);
+			}
+			if (casterPawn.Spawned)
+			{
+				casterPawn.rotationTracker.FaceCell(thing.Position);
+			}
+			if (casterPawn.caller != null)
+			{
+				casterPawn.caller.Notify_DidMeleeAttack();
+			}
+			return result;
 		}
-		else
-		{
-			result = false;
-			soundDef = SoundMiss();
-			CreateCombatLog((ManeuverDef maneuver) => maneuver.combatLogRulesMiss, alwaysShow: false);
-		}
-		soundDef?.PlayOneShot(new TargetInfo(thing.Position, map));
-		if (casterPawn.Spawned)
-		{
-			casterPawn.Drawer.Notify_MeleeAttackOn(thing);
-		}
-		if (pawn != null && !pawn.Dead && pawn.Spawned)
-		{
-			pawn.stances.stagger.StaggerFor(95);
-		}
-		if (casterPawn.Spawned)
-		{
-			casterPawn.rotationTracker.FaceCell(thing.Position);
-		}
-		if (casterPawn.caller != null)
-		{
-			casterPawn.caller.Notify_DidMeleeAttack();
-		}
-		return result;
-	}
 
-	public BattleLogEntry_MeleeCombat CreateCombatLog(Func<ManeuverDef, RulePackDef> rulePackGetter, bool alwaysShow)
-	{
-		if (maneuver == null)
+		// Token: 0x06013B03 RID: 80643 RVA: 0x005D96BC File Offset: 0x005D78BC
+		public BattleLogEntry_MeleeCombat CreateCombatLog(Func<ManeuverDef, RulePackDef> rulePackGetter, bool alwaysShow)
 		{
-			return null;
+			if (this.maneuver == null)
+			{
+				return null;
+			}
+			if (this.tool == null)
+			{
+				return null;
+			}
+			BattleLogEntry_MeleeCombat battleLogEntry_MeleeCombat = new BattleLogEntry_MeleeCombat(rulePackGetter(this.maneuver), alwaysShow, this.CasterPawn, this.currentTarget.Thing, base.ImplementOwnerType, this.tool.labelUsedInLogging ? this.tool.label : "", (base.EquipmentSource == null) ? null : base.EquipmentSource.def, (base.HediffCompSource == null) ? null : base.HediffCompSource.Def, this.maneuver.logEntryDef);
+			Find.BattleLog.Add(battleLogEntry_MeleeCombat);
+			return battleLogEntry_MeleeCombat;
 		}
-		if (tool == null)
-		{
-			return null;
-		}
-		BattleLogEntry_MeleeCombat battleLogEntry_MeleeCombat = new BattleLogEntry_MeleeCombat(rulePackGetter(maneuver), alwaysShow, CasterPawn, currentTarget.Thing, base.ImplementOwnerType, tool.labelUsedInLogging ? tool.label : "", (base.EquipmentSource == null) ? null : base.EquipmentSource.def, (base.HediffCompSource == null) ? null : base.HediffCompSource.Def, maneuver.logEntryDef);
-		Find.BattleLog.Add(battleLogEntry_MeleeCombat);
-		return battleLogEntry_MeleeCombat;
-	}
 
-	private float GetNonMissChance(LocalTargetInfo target)
-	{
-		if (surpriseAttack)
+		// Token: 0x06013B04 RID: 80644 RVA: 0x005D976C File Offset: 0x005D796C
+		private float GetNonMissChance(LocalTargetInfo target)
 		{
-			return 1f;
-		}
-		if (IsTargetImmobile(target))
-		{
-			return 1f;
-		}
-		float num = CasterPawn.GetStatValue(StatDefOf.MeleeHitChance);
-		if (ModsConfig.IdeologyActive && target.HasThing)
-		{
-			if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
+			if (this.surpriseAttack)
 			{
-				num += caster.GetStatValue(StatDefOf.MeleeHitChanceOutdoorsLitOffset);
+				return 1f;
 			}
-			else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
+			if (this.IsTargetImmobile(target))
 			{
-				num += caster.GetStatValue(StatDefOf.MeleeHitChanceOutdoorsDarkOffset);
+				return 1f;
 			}
-			else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
+			float num = this.CasterPawn.GetStatValue(StatDefOf.MeleeHitChance, true, -1);
+			if (ModsConfig.IdeologyActive && target.HasThing)
 			{
-				num += caster.GetStatValue(StatDefOf.MeleeHitChanceIndoorsDarkOffset);
-			}
-			else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
-			{
-				num += caster.GetStatValue(StatDefOf.MeleeHitChanceIndoorsLitOffset);
-			}
-		}
-		return num;
-	}
-
-	private float GetDodgeChance(LocalTargetInfo target)
-	{
-		if (surpriseAttack)
-		{
-			return 0f;
-		}
-		if (IsTargetImmobile(target))
-		{
-			return 0f;
-		}
-		if (!(target.Thing is Pawn pawn))
-		{
-			return 0f;
-		}
-		if (pawn.stances.curStance is Stance_Busy { verb: not null } stance_Busy && !stance_Busy.verb.verbProps.IsMeleeAttack)
-		{
-			return 0f;
-		}
-		float num = pawn.GetStatValue(StatDefOf.MeleeDodgeChance);
-		if (ModsConfig.IdeologyActive)
-		{
-			if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
-			{
-				num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceOutdoorsLitOffset);
-			}
-			else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
-			{
-				num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceOutdoorsDarkOffset);
-			}
-			else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
-			{
-				num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceIndoorsDarkOffset);
-			}
-			else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
-			{
-				num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceIndoorsLitOffset);
-			}
-		}
-		return num;
-	}
-
-	private bool IsTargetImmobile(LocalTargetInfo target)
-	{
-		Thing thing = target.Thing;
-		Pawn pawn = thing as Pawn;
-		if (thing.def.category == ThingCategory.Pawn && !pawn.Downed)
-		{
-			return pawn.GetPosture() != PawnPosture.Standing;
-		}
-		return true;
-	}
-
-	protected abstract DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target);
-
-	private bool CanApplyMeleeSlaveSuppression(Pawn targetPawn)
-	{
-		if (CasterPawn != null && CasterPawn.IsColonist && !CasterPawn.IsSlave && targetPawn != null && targetPawn.IsSlaveOfColony && targetPawn.health.capacities.CanBeAwake)
-		{
-			return !SlaveRebellionUtility.IsRebelling(targetPawn);
-		}
-		return false;
-	}
-
-	private void ApplyMeleeSlaveSuppression(Pawn targetPawn, float damageDealt)
-	{
-		if (CanApplyMeleeSlaveSuppression(targetPawn))
-		{
-			SlaveRebellionUtility.IncrementMeleeSuppression(CasterPawn, targetPawn, damageDealt);
-		}
-	}
-
-	private SoundDef SoundHitPawn()
-	{
-		if (base.EquipmentSource != null && !base.EquipmentSource.def.meleeHitSound.NullOrUndefined())
-		{
-			return base.EquipmentSource.def.meleeHitSound;
-		}
-		if (tool != null && !tool.soundMeleeHit.NullOrUndefined())
-		{
-			return tool.soundMeleeHit;
-		}
-		if (base.EquipmentSource != null && base.EquipmentSource.Stuff != null)
-		{
-			if (verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp)
-			{
-				if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp.NullOrUndefined())
+				if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
 				{
-					return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp;
+					num += this.caster.GetStatValue(StatDefOf.MeleeHitChanceOutdoorsLitOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
+				{
+					num += this.caster.GetStatValue(StatDefOf.MeleeHitChanceOutdoorsDarkOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
+				{
+					num += this.caster.GetStatValue(StatDefOf.MeleeHitChanceIndoorsDarkOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
+				{
+					num += this.caster.GetStatValue(StatDefOf.MeleeHitChanceIndoorsLitOffset, true, -1);
 				}
 			}
-			else if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt.NullOrUndefined())
-			{
-				return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt;
-			}
+			return num;
 		}
-		if (CasterPawn != null && !CasterPawn.def.race.soundMeleeHitPawn.NullOrUndefined())
-		{
-			return CasterPawn.def.race.soundMeleeHitPawn;
-		}
-		return SoundDefOf.Pawn_Melee_Punch_HitPawn;
-	}
 
-	private SoundDef SoundHitBuilding()
-	{
-		if (currentTarget.Thing is Building building && !building.def.building.soundMeleeHitOverride.NullOrUndefined())
+		// Token: 0x06013B05 RID: 80645 RVA: 0x005D9854 File Offset: 0x005D7A54
+		private float GetDodgeChance(LocalTargetInfo target)
 		{
-			return building.def.building.soundMeleeHitOverride;
-		}
-		if (base.EquipmentSource != null && !base.EquipmentSource.def.meleeHitSound.NullOrUndefined())
-		{
-			return base.EquipmentSource.def.meleeHitSound;
-		}
-		if (tool != null && !tool.soundMeleeHit.NullOrUndefined())
-		{
-			return tool.soundMeleeHit;
-		}
-		if (base.EquipmentSource != null && base.EquipmentSource.Stuff != null)
-		{
-			if (verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp)
+			if (this.surpriseAttack)
 			{
-				if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp.NullOrUndefined())
+				return 0f;
+			}
+			if (this.IsTargetImmobile(target))
+			{
+				return 0f;
+			}
+			Pawn pawn = target.Thing as Pawn;
+			if (pawn == null)
+			{
+				return 0f;
+			}
+			Stance_Busy stance_Busy = pawn.stances.curStance as Stance_Busy;
+			if (stance_Busy != null && stance_Busy.verb != null && !stance_Busy.verb.verbProps.IsMeleeAttack)
+			{
+				return 0f;
+			}
+			float num = pawn.GetStatValue(StatDefOf.MeleeDodgeChance, true, -1);
+			if (ModsConfig.IdeologyActive)
+			{
+				if (DarknessCombatUtility.IsOutdoorsAndLit(target.Thing))
 				{
-					return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp;
+					num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceOutdoorsLitOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsOutdoorsAndDark(target.Thing))
+				{
+					num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceOutdoorsDarkOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsIndoorsAndDark(target.Thing))
+				{
+					num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceIndoorsDarkOffset, true, -1);
+				}
+				else if (DarknessCombatUtility.IsIndoorsAndLit(target.Thing))
+				{
+					num += pawn.GetStatValue(StatDefOf.MeleeDodgeChanceIndoorsLitOffset, true, -1);
 				}
 			}
-			else if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt.NullOrUndefined())
-			{
-				return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt;
-			}
+			return num;
 		}
-		if (CasterPawn != null && !CasterPawn.def.race.soundMeleeHitBuilding.NullOrUndefined())
-		{
-			return CasterPawn.def.race.soundMeleeHitBuilding;
-		}
-		return SoundDefOf.MeleeHit_Unarmed;
-	}
 
-	private SoundDef SoundMiss()
-	{
-		if (CasterPawn != null)
+		// Token: 0x06013B06 RID: 80646 RVA: 0x005D995C File Offset: 0x005D7B5C
+		private bool IsTargetImmobile(LocalTargetInfo target)
 		{
-			if (tool != null && !tool.soundMeleeMiss.NullOrUndefined())
-			{
-				return tool.soundMeleeMiss;
-			}
-			if (!CasterPawn.def.race.soundMeleeMiss.NullOrUndefined())
-			{
-				return CasterPawn.def.race.soundMeleeMiss;
-			}
+			Thing thing = target.Thing;
+			Pawn pawn = thing as Pawn;
+			return thing.def.category != ThingCategory.Pawn || pawn.Downed || pawn.GetPosture() > PawnPosture.Standing;
 		}
-		return SoundDefOf.Pawn_Melee_Punch_Miss;
-	}
 
-	private SoundDef SoundDodge(Thing target)
-	{
-		if (target.def.race != null && target.def.race.soundMeleeDodge != null)
+		// Token: 0x06013B07 RID: 80647
+		protected abstract DamageWorker.DamageResult ApplyMeleeDamageToTarget(LocalTargetInfo target);
+
+		// Token: 0x06013B08 RID: 80648 RVA: 0x005D9998 File Offset: 0x005D7B98
+		private bool CanApplyMeleeSlaveSuppression(Pawn targetPawn)
 		{
-			return target.def.race.soundMeleeDodge;
+			return this.CasterPawn != null && this.CasterPawn.IsColonist && !this.CasterPawn.IsSlave && targetPawn != null && targetPawn.IsSlaveOfColony && targetPawn.health.capacities.CanBeAwake && !SlaveRebellionUtility.IsRebelling(targetPawn);
 		}
-		return SoundMiss();
+
+		// Token: 0x06013B09 RID: 80649 RVA: 0x005D99EF File Offset: 0x005D7BEF
+		private void ApplyMeleeSlaveSuppression(Pawn targetPawn, float damageDealt)
+		{
+			if (this.CanApplyMeleeSlaveSuppression(targetPawn))
+			{
+				SlaveRebellionUtility.IncrementMeleeSuppression(this.CasterPawn, targetPawn, damageDealt);
+			}
+		}
+
+		// Token: 0x06013B0A RID: 80650 RVA: 0x005D9A08 File Offset: 0x005D7C08
+		private SoundDef SoundHitPawn()
+		{
+			if (base.EquipmentSource != null && !base.EquipmentSource.def.meleeHitSound.NullOrUndefined())
+			{
+				return base.EquipmentSource.def.meleeHitSound;
+			}
+			if (this.tool != null && !this.tool.soundMeleeHit.NullOrUndefined())
+			{
+				return this.tool.soundMeleeHit;
+			}
+			if (base.EquipmentSource != null && base.EquipmentSource.Stuff != null)
+			{
+				if (this.verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp)
+				{
+					if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp.NullOrUndefined())
+					{
+						return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp;
+					}
+				}
+				else if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt.NullOrUndefined())
+				{
+					return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt;
+				}
+			}
+			if (this.CasterPawn != null && !this.CasterPawn.def.race.soundMeleeHitPawn.NullOrUndefined())
+			{
+				return this.CasterPawn.def.race.soundMeleeHitPawn;
+			}
+			return SoundDefOf.Pawn_Melee_Punch_HitPawn;
+		}
+
+		// Token: 0x06013B0B RID: 80651 RVA: 0x005D9B40 File Offset: 0x005D7D40
+		private SoundDef SoundHitBuilding()
+		{
+			Building building = this.currentTarget.Thing as Building;
+			if (building != null && !building.def.building.soundMeleeHitOverride.NullOrUndefined())
+			{
+				return building.def.building.soundMeleeHitOverride;
+			}
+			if (base.EquipmentSource != null && !base.EquipmentSource.def.meleeHitSound.NullOrUndefined())
+			{
+				return base.EquipmentSource.def.meleeHitSound;
+			}
+			if (this.tool != null && !this.tool.soundMeleeHit.NullOrUndefined())
+			{
+				return this.tool.soundMeleeHit;
+			}
+			if (base.EquipmentSource != null && base.EquipmentSource.Stuff != null)
+			{
+				if (this.verbProps.meleeDamageDef.armorCategory == DamageArmorCategoryDefOf.Sharp)
+				{
+					if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp.NullOrUndefined())
+					{
+						return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitSharp;
+					}
+				}
+				else if (!base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt.NullOrUndefined())
+				{
+					return base.EquipmentSource.Stuff.stuffProps.soundMeleeHitBlunt;
+				}
+			}
+			if (this.CasterPawn != null && !this.CasterPawn.def.race.soundMeleeHitBuilding.NullOrUndefined())
+			{
+				return this.CasterPawn.def.race.soundMeleeHitBuilding;
+			}
+			return SoundDefOf.MeleeHit_Unarmed;
+		}
+
+		// Token: 0x06013B0C RID: 80652 RVA: 0x005D9CB4 File Offset: 0x005D7EB4
+		private SoundDef SoundMiss()
+		{
+			if (this.CasterPawn != null)
+			{
+				if (this.tool != null && !this.tool.soundMeleeMiss.NullOrUndefined())
+				{
+					return this.tool.soundMeleeMiss;
+				}
+				if (!this.CasterPawn.def.race.soundMeleeMiss.NullOrUndefined())
+				{
+					return this.CasterPawn.def.race.soundMeleeMiss;
+				}
+			}
+			return SoundDefOf.Pawn_Melee_Punch_Miss;
+		}
+
+		// Token: 0x06013B0D RID: 80653 RVA: 0x005D9D26 File Offset: 0x005D7F26
+		private SoundDef SoundDodge(Thing target)
+		{
+			if (target.def.race != null && target.def.race.soundMeleeDodge != null)
+			{
+				return target.def.race.soundMeleeDodge;
+			}
+			return this.SoundMiss();
+		}
+
+		// Token: 0x0400DA09 RID: 55817
+		private const int TargetCooldown = 50;
 	}
 }

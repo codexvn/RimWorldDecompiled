@@ -1,107 +1,121 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using RimWorld.QuestGen;
 using UnityEngine;
 using Verse;
 
-namespace RimWorld;
-
-public class RoyalTitlePermitWorker_CallLaborers : RoyalTitlePermitWorker_Targeted
+namespace RimWorld
 {
-	private Faction calledFaction;
-
-	public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
+	// Token: 0x020023D8 RID: 9176
+	public class RoyalTitlePermitWorker_CallLaborers : RoyalTitlePermitWorker_Targeted
 	{
-		if (!CanHitTarget(target))
+		// Token: 0x0600C6F4 RID: 50932 RVA: 0x0039F9B4 File Offset: 0x0039DBB4
+		public override bool ValidateTarget(LocalTargetInfo target, bool showMessages = true)
 		{
-			if (target.IsValid && showMessages)
+			if (!base.CanHitTarget(target))
 			{
-				Messages.Message(def.LabelCap + ": " + "AbilityCannotHitTarget".Translate(), MessageTypeDefOf.RejectInput);
+				if (target.IsValid && showMessages)
+				{
+					Messages.Message(this.def.LabelCap + ": " + "AbilityCannotHitTarget".Translate(), MessageTypeDefOf.RejectInput, true);
+				}
+				return false;
 			}
-			return false;
+			AcceptanceReport acceptanceReport = RoyalTitlePermitWorker_CallShuttle.ShuttleCanLandHere(target, this.map, null, null);
+			if (!acceptanceReport.Accepted)
+			{
+				Messages.Message(acceptanceReport.Reason, new LookTargets(target.Cell, this.map), MessageTypeDefOf.RejectInput, false);
+			}
+			return acceptanceReport.Accepted;
 		}
-		AcceptanceReport acceptanceReport = RoyalTitlePermitWorker_CallShuttle.ShuttleCanLandHere(target, map);
-		if (!acceptanceReport.Accepted)
+
+		// Token: 0x0600C6F5 RID: 50933 RVA: 0x0039FA56 File Offset: 0x0039DC56
+		public override void DrawHighlight(LocalTargetInfo target)
 		{
-			Messages.Message(acceptanceReport.Reason, new LookTargets(target.Cell, map), MessageTypeDefOf.RejectInput, historical: false);
+			GenDraw.DrawRadiusRing(this.caller.Position, base.RangeClamped, Color.white, null);
+			RoyalTitlePermitWorker_CallShuttle.DrawShuttleGhost(target, this.map, ThingDefOf.Shuttle, ThingDefOf.Shuttle.defaultPlacingRot);
 		}
-		return acceptanceReport.Accepted;
-	}
 
-	public override void DrawHighlight(LocalTargetInfo target)
-	{
-		GenDraw.DrawRadiusRing(caller.Position, base.RangeClamped, Color.white);
-		RoyalTitlePermitWorker_CallShuttle.DrawShuttleGhost(target, map, ThingDefOf.Shuttle, ThingDefOf.Shuttle.defaultPlacingRot);
-	}
-
-	public override void OrderForceTarget(LocalTargetInfo target)
-	{
-		CallLaborers(target.Cell);
-	}
-
-	public override void OnGUI(LocalTargetInfo target)
-	{
-		if (!target.IsValid || !RoyalTitlePermitWorker_CallShuttle.ShuttleCanLandHere(target, map).Accepted)
+		// Token: 0x0600C6F6 RID: 50934 RVA: 0x0039FA8F File Offset: 0x0039DC8F
+		public override void OrderForceTarget(LocalTargetInfo target)
 		{
-			GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
+			this.CallLaborers(target.Cell);
 		}
-	}
 
-	public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
-	{
-		if (AidDisabled_NewTemp(map, pawn, faction, out var reason))
+		// Token: 0x0600C6F7 RID: 50935 RVA: 0x0039FAA0 File Offset: 0x0039DCA0
+		public override void OnGUI(LocalTargetInfo target)
 		{
-			yield return new FloatMenuOption(def.LabelCap + ": " + reason, null);
+			if (!target.IsValid || !RoyalTitlePermitWorker_CallShuttle.ShuttleCanLandHere(target, this.map, null, null).Accepted)
+			{
+				GenUI.DrawMouseAttachment(TexCommand.CannotShoot);
+			}
+		}
+
+		// Token: 0x0600C6F8 RID: 50936 RVA: 0x0039FAE0 File Offset: 0x0039DCE0
+		public override IEnumerable<FloatMenuOption> GetRoyalAidOptions(Map map, Pawn pawn, Faction faction)
+		{
+			string t;
+			if (this.AidDisabled_NewTemp(map, pawn, faction, out t, true))
+			{
+				yield return new FloatMenuOption(this.def.LabelCap + ": " + t, null, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0);
+				yield break;
+			}
+			Action action = null;
+			string label = this.def.LabelCap + " (" + "CommandCallLaborersNumLaborers".Translate(this.def.royalAid.pawnCount) + "): ";
+			bool free;
+			if (base.FillAidOption(pawn, faction, ref label, out free))
+			{
+				action = delegate()
+				{
+					this.BeginCallLaborers(pawn, map, faction, free);
+				};
+			}
+			yield return new FloatMenuOption(label, action, faction.def.FactionIcon, faction.Color, MenuOptionPriority.Default, null, null, 0f, null, null, true, 0, HorizontalJustification.Left, false);
 			yield break;
 		}
-		Action action = null;
-		string description = def.LabelCap + " (" + "CommandCallLaborersNumLaborers".Translate(def.royalAid.pawnCount) + "): ";
-		if (FillAidOption(pawn, faction, ref description, out var free))
+
+		// Token: 0x0600C6F9 RID: 50937 RVA: 0x0039FB08 File Offset: 0x0039DD08
+		private void BeginCallLaborers(Pawn pawn, Map map, Faction faction, bool free)
 		{
-			action = delegate
+			if (faction.HostileTo(Faction.OfPlayer))
 			{
-				BeginCallLaborers(pawn, map, faction, free);
-			};
-		}
-		yield return new FloatMenuOption(description, action, faction.def.FactionIcon, faction.Color);
-	}
-
-	private void BeginCallLaborers(Pawn pawn, Map map, Faction faction, bool free)
-	{
-		if (!faction.HostileTo(Faction.OfPlayer))
-		{
-			targetingParameters = new TargetingParameters();
-			targetingParameters.canTargetLocations = true;
-			targetingParameters.canTargetSelf = false;
-			targetingParameters.canTargetPawns = false;
-			targetingParameters.canTargetFires = false;
-			targetingParameters.canTargetBuildings = true;
-			targetingParameters.canTargetItems = true;
-			caller = pawn;
-			base.map = map;
-			calledFaction = faction;
-			base.free = free;
+				return;
+			}
+			this.targetingParameters = new TargetingParameters();
+			this.targetingParameters.canTargetLocations = true;
+			this.targetingParameters.canTargetSelf = false;
+			this.targetingParameters.canTargetPawns = false;
+			this.targetingParameters.canTargetFires = false;
+			this.targetingParameters.canTargetBuildings = true;
+			this.targetingParameters.canTargetItems = true;
+			this.caller = pawn;
+			this.map = map;
+			this.calledFaction = faction;
+			this.free = free;
 			float rangeActual = base.RangeClamped;
-			targetingParameters.validator = (TargetInfo target) => (!(rangeActual > 0f) || !(target.Cell.DistanceTo(caller.Position) > rangeActual)) ? true : false;
-			Find.Targeter.BeginTargeting(this);
+			this.targetingParameters.validator = ((TargetInfo target) => rangeActual <= 0f || target.Cell.DistanceTo(this.caller.Position) <= rangeActual);
+			Find.Targeter.BeginTargeting(this, null, false, null, null, true);
 		}
-	}
 
-	private void CallLaborers(IntVec3 landingCell)
-	{
-		QuestScriptDef permit_CallLaborers = QuestScriptDefOf.Permit_CallLaborers;
-		Slate slate = new Slate();
-		slate.Set("map", map);
-		slate.Set("laborersCount", def.royalAid.pawnCount);
-		slate.Set("permitFaction", calledFaction);
-		slate.Set("laborersPawnKind", def.royalAid.pawnKindDef);
-		slate.Set("laborersDurationDays", def.royalAid.aidDurationDays);
-		slate.Set("landingCell", landingCell);
-		QuestUtility.GenerateQuestAndMakeAvailable(permit_CallLaborers, slate);
-		caller.royalty.GetPermit(def, calledFaction).Notify_Used();
-		if (!free)
+		// Token: 0x0600C6FA RID: 50938 RVA: 0x0039FBD4 File Offset: 0x0039DDD4
+		private void CallLaborers(IntVec3 landingCell)
 		{
-			caller.royalty.TryRemoveFavor(calledFaction, def.royalAid.favorCost);
+			QuestScriptDef permit_CallLaborers = QuestScriptDefOf.Permit_CallLaborers;
+			Slate slate = new Slate();
+			slate.Set<Map>("map", this.map, false);
+			slate.Set<int>("laborersCount", this.def.royalAid.pawnCount, false);
+			slate.Set<Faction>("permitFaction", this.calledFaction, false);
+			slate.Set<PawnKindDef>("laborersPawnKind", this.def.royalAid.pawnKindDef, false);
+			slate.Set<float>("laborersDurationDays", this.def.royalAid.aidDurationDays, false);
+			slate.Set<IntVec3>("landingCell", landingCell, false);
+			QuestUtility.GenerateQuestAndMakeAvailable(permit_CallLaborers, slate);
+			this.caller.royalty.GetPermit(this.def, this.calledFaction).Notify_Used();
+			if (!this.free)
+			{
+				this.caller.royalty.TryRemoveFavor(this.calledFaction, this.def.royalAid.favorCost);
+			}
 		}
+
+		// Token: 0x04008793 RID: 34707
+		private Faction calledFaction;
 	}
 }

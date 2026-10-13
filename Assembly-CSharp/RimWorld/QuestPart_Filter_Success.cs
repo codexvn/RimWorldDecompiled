@@ -1,13 +1,15 @@
-namespace RimWorld;
+﻿using System;
 
-public class QuestPart_Filter_Success : QuestPart_Filter
+namespace RimWorld
 {
-	protected override bool Pass(SignalArgs args)
+	// Token: 0x02001BBC RID: 7100
+	public class QuestPart_Filter_Success : QuestPart_Filter
 	{
-		if (args.TryGetArg("OUTCOME", out QuestEndOutcome arg))
+		// Token: 0x06009E0F RID: 40463 RVA: 0x002DBD80 File Offset: 0x002D9F80
+		protected override bool Pass(SignalArgs args)
 		{
-			return arg == QuestEndOutcome.Success;
+			QuestEndOutcome questEndOutcome;
+			return args.TryGetArg<QuestEndOutcome>("OUTCOME", out questEndOutcome) && questEndOutcome == QuestEndOutcome.Success;
 		}
-		return false;
 	}
 }

@@ -1,9 +1,14 @@
-namespace RimWorld;
+﻿using System;
 
-public class RitualObligationTrigger_MemberCorpseDestroyedProperties : RitualObligationTriggerProperties
+namespace RimWorld
 {
-	public RitualObligationTrigger_MemberCorpseDestroyedProperties()
+	// Token: 0x02002723 RID: 10019
+	public class RitualObligationTrigger_MemberCorpseDestroyedProperties : RitualObligationTriggerProperties
 	{
-		triggerClass = typeof(RitualObligationTrigger_MemberCorpseDestroyed);
+		// Token: 0x0600DBF4 RID: 56308 RVA: 0x0040CFA3 File Offset: 0x0040B1A3
+		public RitualObligationTrigger_MemberCorpseDestroyedProperties()
+		{
+			this.triggerClass = typeof(RitualObligationTrigger_MemberCorpseDestroyed);
+		}
 	}
 }

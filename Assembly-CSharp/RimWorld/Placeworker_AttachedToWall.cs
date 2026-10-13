@@ -1,54 +1,59 @@
+﻿using System;
 using System.Collections.Generic;
 using Verse;
 
-namespace RimWorld;
-
-public class Placeworker_AttachedToWall : PlaceWorker
+namespace RimWorld
 {
-	public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
+	// Token: 0x020037E6 RID: 14310
+	public class Placeworker_AttachedToWall : PlaceWorker
 	{
-		List<Thing> thingList = loc.GetThingList(map);
-		for (int i = 0; i < thingList.Count; i++)
+		// Token: 0x06013D4A RID: 81226 RVA: 0x005E37D4 File Offset: 0x005E19D4
+		public override AcceptanceReport AllowsPlacing(BuildableDef checkingDef, IntVec3 loc, Rot4 rot, Map map, Thing thingToIgnore = null, Thing thing = null)
 		{
-			Thing thing2 = thingList[i];
-			ThingDef thingDef = GenConstruct.BuiltDefOf(thing2.def) as ThingDef;
-			if (thingDef?.building != null)
+			List<Thing> thingList = loc.GetThingList(map);
+			for (int i = 0; i < thingList.Count; i++)
 			{
-				if (thingDef.Fillage == FillCategory.Full)
+				Thing thing2 = thingList[i];
+				ThingDef thingDef = GenConstruct.BuiltDefOf(thing2.def) as ThingDef;
+				if (((thingDef != null) ? thingDef.building : null) != null)
 				{
-					return false;
-				}
-				if (thingDef.building.isAttachment && thing2.Rotation == rot)
-				{
-					return "SomethingPlacedOnThisWall".Translate();
+					if (thingDef.Fillage == FillCategory.Full)
+					{
+						return false;
+					}
+					if (thingDef.building.isAttachment && thing2.Rotation == rot)
+					{
+						return "SomethingPlacedOnThisWall".Translate();
+					}
 				}
 			}
-		}
-		IntVec3 c = loc + GenAdj.CardinalDirections[rot.AsInt];
-		if (!c.InBounds(map))
-		{
-			return false;
-		}
-		thingList = c.GetThingList(map);
-		bool flag = false;
-		for (int j = 0; j < thingList.Count; j++)
-		{
-			if (GenConstruct.BuiltDefOf(thingList[j].def) is ThingDef { building: not null } thingDef2)
+			IntVec3 c = loc + GenAdj.CardinalDirections[rot.AsInt];
+			if (!c.InBounds(map))
 			{
-				if (!thingDef2.building.supportsWallAttachments)
+				return false;
+			}
+			thingList = c.GetThingList(map);
+			bool flag = false;
+			for (int j = 0; j < thingList.Count; j++)
+			{
+				ThingDef thingDef2 = GenConstruct.BuiltDefOf(thingList[j].def) as ThingDef;
+				if (thingDef2 != null && thingDef2.building != null)
 				{
-					flag = true;
-				}
-				else if (thingDef2.Fillage == FillCategory.Full)
-				{
-					return true;
+					if (!thingDef2.building.supportsWallAttachments)
+					{
+						flag = true;
+					}
+					else if (thingDef2.Fillage == FillCategory.Full)
+					{
+						return true;
+					}
 				}
 			}
+			if (flag)
+			{
+				return "CannotSupportAttachment".Translate();
+			}
+			return "MustPlaceOnWall".Translate();
 		}
-		if (flag)
-		{
-			return "CannotSupportAttachment".Translate();
-		}
-		return "MustPlaceOnWall".Translate();
 	}
 }

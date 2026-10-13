@@ -1,16 +1,20 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class JoyGiver_InteractBuildingInteractionCell : JoyGiver_InteractBuilding
+namespace RimWorld
 {
-	protected override Job TryGivePlayJob(Pawn pawn, Thing t)
+	// Token: 0x020014DB RID: 5339
+	public class JoyGiver_InteractBuildingInteractionCell : JoyGiver_InteractBuilding
 	{
-		if (t.InteractionCell.Standable(t.Map) && !t.IsForbidden(pawn) && !t.InteractionCell.IsForbidden(pawn) && !pawn.Map.pawnDestinationReservationManager.IsReserved(t.InteractionCell) && pawn.CanReserveSittableOrSpot(t.InteractionCell))
+		// Token: 0x06007F8F RID: 32655 RVA: 0x00266340 File Offset: 0x00264540
+		protected override Job TryGivePlayJob(Pawn pawn, Thing t)
 		{
-			return JobMaker.MakeJob(def.jobDef, t, t.InteractionCell);
+			if (t.InteractionCell.Standable(t.Map) && !t.IsForbidden(pawn) && !t.InteractionCell.IsForbidden(pawn) && !pawn.Map.pawnDestinationReservationManager.IsReserved(t.InteractionCell) && pawn.CanReserveSittableOrSpot(t.InteractionCell, false))
+			{
+				return JobMaker.MakeJob(this.def.jobDef, t, t.InteractionCell);
+			}
+			return null;
 		}
-		return null;
 	}
 }

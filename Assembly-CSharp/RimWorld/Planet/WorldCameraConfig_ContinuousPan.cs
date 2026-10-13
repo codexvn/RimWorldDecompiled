@@ -1,12 +1,17 @@
-namespace RimWorld.Planet;
+﻿using System;
 
-public class WorldCameraConfig_ContinuousPan : WorldCameraConfig
+namespace RimWorld.Planet
 {
-	public WorldCameraConfig_ContinuousPan()
+	// Token: 0x02003C62 RID: 15458
+	public class WorldCameraConfig_ContinuousPan : WorldCameraConfig
 	{
-		dollyRateKeys = 34f;
-		dollyRateScreenEdge = 17.85f;
-		camRotationDecayFactor = 1f;
-		rotationSpeedScale = 0.15f;
+		// Token: 0x06014FEA RID: 85994 RVA: 0x00648FC0 File Offset: 0x006471C0
+		public WorldCameraConfig_ContinuousPan()
+		{
+			this.dollyRateKeys = 34f;
+			this.dollyRateScreenEdge = 17.85f;
+			this.camRotationDecayFactor = 1f;
+			this.rotationSpeedScale = 0.15f;
+		}
 	}
 }

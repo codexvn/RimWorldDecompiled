@@ -1,21 +1,27 @@
+﻿using System;
 using Verse;
 using Verse.AI;
 
-namespace RimWorld;
-
-public class ThinkNode_ConditionalPawnKind : ThinkNode_Conditional
+namespace RimWorld
 {
-	public PawnKindDef pawnKind;
-
-	public override ThinkNode DeepCopy(bool resolve = true)
+	// Token: 0x020017BD RID: 6077
+	public class ThinkNode_ConditionalPawnKind : ThinkNode_Conditional
 	{
-		ThinkNode_ConditionalPawnKind obj = (ThinkNode_ConditionalPawnKind)base.DeepCopy(resolve);
-		obj.pawnKind = pawnKind;
-		return obj;
-	}
+		// Token: 0x06008DCA RID: 36298 RVA: 0x002A1360 File Offset: 0x0029F560
+		public override ThinkNode DeepCopy(bool resolve = true)
+		{
+			ThinkNode_ConditionalPawnKind thinkNode_ConditionalPawnKind = (ThinkNode_ConditionalPawnKind)base.DeepCopy(resolve);
+			thinkNode_ConditionalPawnKind.pawnKind = this.pawnKind;
+			return thinkNode_ConditionalPawnKind;
+		}
 
-	protected override bool Satisfied(Pawn pawn)
-	{
-		return pawn.kindDef == pawnKind;
+		// Token: 0x06008DCB RID: 36299 RVA: 0x002A137A File Offset: 0x0029F57A
+		protected override bool Satisfied(Pawn pawn)
+		{
+			return pawn.kindDef == this.pawnKind;
+		}
+
+		// Token: 0x04005BD5 RID: 23509
+		public PawnKindDef pawnKind;
 	}
 }
